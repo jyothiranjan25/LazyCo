@@ -279,6 +279,12 @@
         </dependency>
         <!-- /MapStruct dependencies -->
 
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.22</version>
+        </dependency>
+
         <!-- Json dependencies -->
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
