@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg ref="hikariConfig" />
+    </bean>
+
+    <!--
+        IMPORTANT: Do NOT set 'jdbcUrl', 'username', or 'password' here.
+        Doing so will force the application to connect to the Postgres database
+        instead of the intended database(sample_db), configured via the DataSource.
+        Always rely on 'dataSourceClassName' and 'dataSourceProperties' for the correct connection.
+    -->
+
+    <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+        <property name="poolName" value="springHikariCP" />
+
+        <property name="dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource" />
+        <property name="dataSourceProperties">
+            <props>
+                <prop key="url">${application.datasource.url}</prop>
+                <prop key="user">${application.datasource.username}</prop>
+                <prop key="password">${application.datasource.password}</prop>
+            </props>
+        </property>
+
+        <property name="connectionTimeout" value="${application.datasource.hikari.connection-timeout}"/>
+        <property name="idleTimeout" value="${application.datasource.hikari.idle-timeout}"/>
+        <property name="maxLifetime" value="${application.datasource.hikari.maximum-lifetime}"/>
+        <property name="keepaliveTime" value="${application.datasource.hikari.keepalive-time}"/>
+
+        <property name="maximumPoolSize" value="${application.datasource.hikari.maximum-pool-size}"/>
+        <property name="minimumIdle" value="${application.datasource.hikari.minimum-idle}"/>
+
+        <property name="validationTimeout" value="${application.datasource.hikari.validation-timeout}"/>
+        <property name="leakDetectionThreshold" value="${application.datasource.hikari.leak-detection-threshold}"/>
+    </bean>
+</beans>

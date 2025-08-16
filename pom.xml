@@ -376,6 +376,9 @@
                 <directory>src/main/applicationTexts</directory>
             </resource>
             <resource>
+                <directory>src/main/conf</directory>
+            </resource>
+            <resource>
                 <directory>src/main/dataResources</directory>
             </resource>
             <resource>
