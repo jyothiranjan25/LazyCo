@@ -162,7 +162,6 @@ public class DatabaseConfig {
         properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "50");
         properties.put(AvailableSettings.ORDER_INSERTS, "true");
         properties.put(AvailableSettings.ORDER_UPDATES, "true");
-        properties.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
         properties.put(AvailableSettings.AUTOCOMMIT, "false");
         properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
@@ -183,9 +182,9 @@ public class DatabaseConfig {
         properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
         properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
 
-        // Naming strategy
+        // Naming strategy for better readability
         properties.put(AvailableSettings.PHYSICAL_NAMING_STRATEGY,
-                "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
+                "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
         // Connection isolation level
         properties.put(AvailableSettings.ISOLATION, "READ_COMMITTED");
