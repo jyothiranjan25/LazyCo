@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.databaseconf.schema;
+package com.example.lazyco.schema.database;
 
 import lombok.NoArgsConstructor;
 

@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public abstract class AbstractDTO<D> implements Serializable,Cloneable {
+
     protected Long id;
     private List<D> objectsList;
     private Integer pageSize;

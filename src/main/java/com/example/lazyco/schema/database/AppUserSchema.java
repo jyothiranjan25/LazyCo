@@ -1,10 +1,14 @@
-package com.example.lazyco.backend.core.databaseconf.schema;
+package com.example.lazyco.schema.database;
 
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public final class AppUserSchema extends AbstractBaseSchema {
+
+    // Table name
     public static final String TABLE_NAME = "app_user";
+
+    // Column names
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
