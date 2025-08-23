@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.usermanagment.appuser;
+package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import com.example.lazyco.backend.core.abstracts.AbstractDTO;
 import lombok.Getter;

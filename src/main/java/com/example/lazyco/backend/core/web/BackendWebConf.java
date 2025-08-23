@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.web;
 
 import com.example.lazyco.backend.core.databaseconf.DatabaseConfig;
+import com.example.lazyco.backend.schema.PackageSchema;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -18,7 +19,7 @@ import java.util.List;
 @EnableAsync(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @Import({DatabaseConfig.class})
-@ComponentScan(basePackages = {"com.example.lazyco.backend"})
+@ComponentScan(basePackages = {PackageSchema.BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:application.properties")})
 public class BackendWebConf {}
 

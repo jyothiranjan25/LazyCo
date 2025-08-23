@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.databaseconf;
 
+import com.example.lazyco.backend.schema.PackageSchema;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.cfg.AvailableSettings;
@@ -79,6 +80,16 @@ public class DatabaseConfig {
     @Value("${hibernate.cache_region_factory_class}")
     private String hibernateCacheRegionFactory;
 
+    // Audit settings
+    @Value("${hibernate.envers.enabled:false}")
+    private boolean hibernateEnversEnabled;
+
+    @Value("${hibernate.envers.store_data_at_delete:true}")
+    private boolean hibernateEnversStoreDataAtDelete;
+
+    @Value("${hibernate.envers.revision_on_collection_change:true}")
+    private boolean hibernateEnversRevisionOnCollectionChange;
+
     @Bean
     @Primary
     public DataSource dataSource() {
@@ -130,7 +141,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan("com.example.lazyco.backend");
+        em.setPackagesToScan(PackageSchema.BACKEND_PACKAGE);
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(true);
         vendorAdapter.setShowSql(showSql);
@@ -163,7 +174,6 @@ public class DatabaseConfig {
         properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "50");
         properties.put(AvailableSettings.ORDER_INSERTS, "true");
         properties.put(AvailableSettings.ORDER_UPDATES, "true");
-        properties.put(AvailableSettings.AUTOCOMMIT, "false");
         properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
         // Second level cache - enabled for high concurrency
@@ -180,6 +190,7 @@ public class DatabaseConfig {
         properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);
 
         // JPA compliance and transaction management
+        properties.put(AvailableSettings.AUTOCOMMIT, "false");
         properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
         properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
 
@@ -193,6 +204,13 @@ public class DatabaseConfig {
         // Additional performance optimizations
         properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
         properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
+
+        // Hibernate Envers settings
+        properties.put("org.hibernate.envers.Audited", "true");
+        properties.put("org.hibernate.envers.audit_table_suffix", "_AUD");
+        properties.put("hibernate.integration.envers.enabled", hibernateEnversEnabled);
+        properties.put("org.hibernate.envers.store_data_at_delete", hibernateEnversStoreDataAtDelete);
+        properties.put("org.hibernate.envers.revision_on_collection_change", hibernateEnversRevisionOnCollectionChange);
 
         return properties;
     }

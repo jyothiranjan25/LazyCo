@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.abstracts;
 
-import com.example.lazyco.schema.database.AbstractModelBaseSchema;
+import com.example.lazyco.backend.schema.database.AbstractModelBaseSchema;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
