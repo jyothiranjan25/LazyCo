@@ -129,13 +129,13 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
+        em.setPackagesToScan("com.example.lazyco.backend");
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(true);
         vendorAdapter.setShowSql(showSql);
         em.setJpaVendorAdapter(vendorAdapter);
 
         em.setJpaProperties(hibernateProperties());
-        em.setPersistenceUnitName("default");
 
         return em;
     }
