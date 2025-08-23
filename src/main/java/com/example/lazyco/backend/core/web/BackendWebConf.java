@@ -20,13 +20,5 @@ import java.util.List;
 @Import({DatabaseConfig.class})
 @ComponentScan(basePackages = {"com.example.lazyco.backend"})
 @PropertySources({@PropertySource("classpath:application.properties")})
-public class BackendWebConf {
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer properties = new PropertySourcesPlaceholderConfigurer();
-        properties.setIgnoreUnresolvablePlaceholders(true);
-        return properties;
-    }
-}
+public class BackendWebConf {}
 

@@ -4,6 +4,7 @@ import com.example.lazyco.backend.core.databaseconf.schema.AbstractBaseSchema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class AbstractBase implements Serializable {
+public abstract class AbstractBase implements Serializable,Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "hilo_generator")
@@ -26,11 +27,9 @@ public abstract class AbstractBase implements Serializable {
     @Column(name = AbstractBaseSchema.ID)
     private Long id;
 
-    @CreationTimestamp
     @Column(name = AbstractBaseSchema.CREATED_AT)
     private Date createAt;
 
-    @UpdateTimestamp
     @Column(name = AbstractBaseSchema.UPDATED_AT)
     private Date updateAt;
 
@@ -39,4 +38,15 @@ public abstract class AbstractBase implements Serializable {
 
     @Column(name = AbstractBaseSchema.UPDATED_BY)
     private String updatedBy;
+
+    @Override
+    public Object clone() {
+        try {
+            Object o1 = super.clone();
+            // SerializationUtils.clone performs a deep clone
+            return SerializationUtils.clone(this);
+        }catch (Exception e){
+            return null;
+        }
+    }
 }

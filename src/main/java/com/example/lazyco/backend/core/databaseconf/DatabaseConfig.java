@@ -60,6 +60,7 @@ public class DatabaseConfig {
     @Value("${hikari.keepaliveTime:300000}")
     private int keepaliveTime;
 
+    // Hibernate settings
     @Value("${hibernate.dialect}")
     private String hibernateDialect;
 
