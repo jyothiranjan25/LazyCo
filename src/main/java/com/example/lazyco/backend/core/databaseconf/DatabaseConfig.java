@@ -105,6 +105,10 @@ public class DatabaseConfig {
         config.addDataSourceProperty("reWriteBatchedInserts", "true");
         config.addDataSourceProperty("stringtype", "unspecified");
         config.addDataSourceProperty("prepareThreshold", "1");
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
         config.addDataSourceProperty("preparedStatementCacheQueries", "256");
         config.addDataSourceProperty("preparedStatementCacheSizeMiB", "5");
         config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
@@ -159,6 +163,8 @@ public class DatabaseConfig {
         properties.put(AvailableSettings.ORDER_INSERTS, "true");
         properties.put(AvailableSettings.ORDER_UPDATES, "true");
         properties.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
+        properties.put(AvailableSettings.AUTOCOMMIT, "false");
+        properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
         // Second level cache - enabled for high concurrency
         properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
