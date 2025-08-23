@@ -1,9 +1,7 @@
 package com.example.lazyco.backend.core.abstracts;
 
 import com.example.lazyco.backend.core.databaseconf.schema.AbstractBaseSchema;
-import com.example.lazyco.backend.core.databaseconf.schema.AppUserSchema;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +21,7 @@ public abstract class AbstractBase implements Serializable {
             pkColumnName = "sequence_name",
             valueColumnName = "next_hi",
             allocationSize = 1)
+    @Column(name = AbstractBaseSchema.ID)
     private Long id;
 
     @Column(name = AbstractBaseSchema.CREATED_AT)

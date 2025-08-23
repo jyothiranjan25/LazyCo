@@ -3,7 +3,6 @@ package com.example.lazyco.backend.entities.usermanagment.appuser;
 import com.example.lazyco.backend.core.abstracts.AbstractModelBase;
 import com.example.lazyco.backend.core.databaseconf.schema.AppUserSchema;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
