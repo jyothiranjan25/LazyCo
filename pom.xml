@@ -400,7 +400,7 @@
         <finalName>LazyCo</finalName>
         <resources>
             <resource>
-                <directory>src/main/applicationTexts</directory>
+                <directory>src/main/applicationText</directory>
             </resource>
             <resource>
                 <directory>src/main/conf</directory>
