@@ -44,11 +44,14 @@ public class CustomMessage {
     }
 
     private String setTranslateValueFromCode(String code) {
-        String message = ApplicationText.get(code, ApplicationText.Language.EN);
+        String language = System.getProperty("user.language");
+        ApplicationText.Language lang = ApplicationText.Language.fromString(language);
+
+        String message = ApplicationText.get(code, lang);
         if (message == null || message.trim().isEmpty()) {
             return code;
         } else {
-                return message;
+            return message;
         }
     }
 
@@ -74,3 +77,4 @@ public class CustomMessage {
         }
     }
 }
+

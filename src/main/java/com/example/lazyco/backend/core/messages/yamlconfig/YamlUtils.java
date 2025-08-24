@@ -6,12 +6,39 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class YamlUtils {
+
+    private static final Map<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
+
     public static String getValueForKey(String key, String filePath) {
-        Yaml yaml = new Yaml();
+        Map<String, Object> yamlMap = cache.computeIfAbsent(filePath, fp -> {
+            try (InputStream inputStream = YamlUtils.class.getClassLoader().getResourceAsStream(fp)) {
+                if (inputStream == null) {
+                    ApplicationLogger.error("YAML file not found: " + fp, YamlUtils.class);
+                    return Map.of();
+                }
+                return new Yaml().load(inputStream);
+            } catch (Exception e) {
+                ApplicationLogger.error(e, YamlUtils.class);
+                return Map.of();
+            }
+        });
+
+        if (yamlMap == null || yamlMap.isEmpty()) {
+            return key; // fallback
+        }
+
+        return getValue(yamlMap, key);
+    }
+
+    public static String getValueForKey(String key, String filePath, ApplicationText.Language language) {
         try (InputStream inputStream = YamlUtils.class.getClassLoader().getResourceAsStream(filePath)) {
-            Map<String, Object> yamlMap = yaml.load(inputStream);
+            Map<String, Object> yamlMap = new Yaml().load(inputStream);
+            if (yamlMap == null || yamlMap.isEmpty()) {
+                return key; // fallback
+            }
             return getValue(yamlMap, key);
         } catch (IOException e) {
             ApplicationLogger.error(e, e.getClass());
@@ -34,10 +61,6 @@ public class YamlUtils {
         }
 
         Object finalValue = currentMap.get(keys[keys.length - 1]);
-        if (finalValue instanceof String) {
-            return (String) finalValue;
-        } else {
-            return key;
-        }
+        return (finalValue instanceof String) ? (String) finalValue : key;
     }
 }
