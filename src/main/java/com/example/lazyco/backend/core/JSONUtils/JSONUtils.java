@@ -6,159 +6,276 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Utility class for JSON operations including validation, parsing, and cleaning. Provides methods
+ * to work with JSONObject and JSONArray instances.
+ */
 public class JSONUtils {
+
+  /**
+   * Validates if a string represents a valid JSON object.
+   *
+   * @param parameter the string to validate
+   * @return true if the string is a valid JSON object, false otherwise
+   */
   public static boolean isValidJSONObject(String parameter) {
+    if (parameter == null || parameter.trim().isEmpty()) {
+      return false;
+    }
     try {
       new JSONObject(parameter);
-    } catch (JSONException e1) {
+      return true;
+    } catch (JSONException e) {
       return false;
     }
-    return true;
   }
 
+  /**
+   * Validates if a string represents a valid JSON array.
+   *
+   * @param parameter the string to validate
+   * @return true if the string is a valid JSON array, false otherwise
+   */
   public static boolean isValidJSONArray(String parameter) {
+    if (parameter == null || parameter.trim().isEmpty()) {
+      return false;
+    }
     try {
       new JSONArray(parameter);
-    } catch (JSONException e1) {
+      return true;
+    } catch (JSONException e) {
       return false;
     }
-    return true;
   }
 
+  /**
+   * Adds a parameter to a JSON object, automatically parsing the value if it's valid JSON.
+   *
+   * @param jsonObject the target JSON object
+   * @param key the key to add
+   * @param value the value to add (will be parsed if it's valid JSON)
+   * @throws IllegalArgumentException if jsonObject or key is null
+   */
   public static void addParameterToJson(JSONObject jsonObject, String key, String value) {
-    if (isValidJSONObject(value)) {
-      jsonObject.put(key, new JSONObject(value));
-    } else if (isValidJSONArray(value)) {
-      jsonObject.put(key, new JSONArray(value));
+    if (jsonObject == null) {
+      throw new IllegalArgumentException("JSONObject cannot be null");
+    }
+    if (key == null) {
+      throw new IllegalArgumentException("Key cannot be null");
+    }
+
+    if (value == null) {
+      jsonObject.put(key, JSONObject.NULL);
+      return;
+    }
+
+    String trimmedValue = value.trim();
+    if (isValidJSONObject(trimmedValue)) {
+      jsonObject.put(key, new JSONObject(trimmedValue));
+    } else if (isValidJSONArray(trimmedValue)) {
+      jsonObject.put(key, new JSONArray(trimmedValue));
     } else {
       jsonObject.put(key, value);
     }
   }
 
-  public static boolean isValidJSON(String parameter) {
-    return isValidJSONObject(parameter) || isValidJSONArray(parameter);
-  }
-
-  public static boolean isValidJSON(Object parameter) {
-    return parameter instanceof JSONObject
-        || (parameter instanceof String
-            && (isValidJSONObject((String) parameter) || isValidJSONArray((String) parameter)));
-  }
-
-  public static JSONObject removeNumbersAndRef(JSONObject jsonObject) {
-    try {
-      for (String key : jsonObject.keySet()) {
-        Object value = jsonObject.get(key);
-
-        if (value instanceof JSONArray array) {
-          for (int i = array.length() - 1; i >= 0; i--) {
-            Object element = array.get(i);
-            if (element instanceof Integer) {
-              array.remove(i); // Remove numeric elements
-            } else if (element instanceof JSONObject) {
-              removeNumbersAndReferences((JSONObject) element); // Recursively clean nested objects
-            }
-          }
-        } else if (value instanceof JSONObject) {
-          removeNumbersAndReferences((JSONObject) value); // Recursively clean nested objects
-        }
-      }
-    } catch (Exception e) {
-      ApplicationLogger.debug(e);
+  /**
+   * Removes integer values and empty/null elements from a JSON object and its nested structures.
+   * This method creates a deep copy to avoid modifying the original object.
+   *
+   * @param jsonObject the JSON object to clean
+   * @return a new cleaned JSON object, or null if input is null
+   */
+  public static JSONObject removeNumbersAndReferences(JSONObject jsonObject) {
+    if (jsonObject == null) {
+      return null;
     }
-    return jsonObject;
+
+    try {
+      // Create a deep copy to avoid modifying the original
+      JSONObject copy = new JSONObject(jsonObject.toString());
+      JSONObject cleaned = removeIntegersFromObject(copy);
+      return removeEmptyAndNulls(cleaned);
+    } catch (Exception e) {
+      ApplicationLogger.debug("Error cleaning JSON object: " + e.getMessage(), e);
+      return jsonObject; // Return original if cleaning fails
+    }
   }
 
-  public static JSONObject removeEmptyAndNulls(JSONObject jsonObject) {
+  /**
+   * Removes integer values from a JSON object recursively.
+   *
+   * @param jsonObject the JSON object to process
+   * @return the processed JSON object
+   */
+  private static JSONObject removeIntegersFromObject(JSONObject jsonObject) {
+    if (jsonObject == null) {
+      return null;
+    }
+
     try {
       Iterator<String> keys = jsonObject.keys();
       while (keys.hasNext()) {
         String key = keys.next();
         Object value = jsonObject.get(key);
 
-        if (value instanceof JSONObject) {
-          JSONObject cleanedObj = removeEmptyAndNulls((JSONObject) value);
-          if (cleanedObj.isEmpty()) {
-            keys.remove(); // remove empty object
-          } else {
-            jsonObject.put(key, cleanedObj);
-          }
-        } else if (value instanceof JSONArray array) {
-          JSONArray cleanedArray = new JSONArray();
-          for (int i = 0; i < array.length(); i++) {
-            Object element = array.get(i);
-            if (element instanceof JSONObject) {
-              JSONObject cleanedElement = removeEmptyAndNulls((JSONObject) element);
-              if (!cleanedElement.isEmpty()) {
-                cleanedArray.put(cleanedElement);
-              }
-            } else if (element instanceof JSONArray) {
-              JSONArray cleanedNestedArray = cleanArray((JSONArray) element);
-              if (!cleanedNestedArray.isEmpty()) {
-                cleanedArray.put(cleanedNestedArray);
-              }
-            } else if (element != null
-                && element != JSONObject.NULL
-                && !(element instanceof String && ((String) element).isEmpty())) {
-              cleanedArray.put(element);
-            }
-          }
-          if (cleanedArray.isEmpty()) {
-            keys.remove(); // remove key if array is empty after cleaning
-          } else {
-            jsonObject.put(key, cleanedArray);
-          }
-        } else if (value == null
-            || value == JSONObject.NULL
-            || (value instanceof String && ("null".equals(value) || ((String) value).isEmpty()))) {
-          keys.remove(); // remove null or empty string
+        if (value instanceof JSONArray) {
+          JSONArray cleanedArray = removeIntegersFromArray((JSONArray) value);
+          jsonObject.put(key, cleanedArray);
+        } else if (value instanceof JSONObject) {
+          removeIntegersFromObject((JSONObject) value);
         }
       }
     } catch (Exception e) {
-      ApplicationLogger.debug(e.getMessage(), e.getClass());
+      ApplicationLogger.debug("Error removing integers from JSON object: " + e.getMessage(), e);
     }
     return jsonObject;
   }
 
-  private static JSONArray cleanArray(JSONArray array) {
+  /**
+   * Removes integer values from a JSON array.
+   *
+   * @param array the JSON array to process
+   * @return a new JSON array without integer values
+   */
+  private static JSONArray removeIntegersFromArray(JSONArray array) {
+    if (array == null) {
+      return new JSONArray();
+    }
+
     JSONArray cleanedArray = new JSONArray();
     for (int i = 0; i < array.length(); i++) {
-      Object element = array.get(i);
-      if (element instanceof JSONObject) {
-        JSONObject cleanedElement = removeEmptyAndNulls((JSONObject) element);
-        if (!cleanedElement.isEmpty()) {
-          cleanedArray.put(cleanedElement);
+      try {
+        Object element = array.get(i);
+        if (element instanceof Integer) {
+          // Skip integer elements
+          continue;
+        } else if (element instanceof JSONObject) {
+          cleanedArray.put(removeIntegersFromObject((JSONObject) element));
+        } else if (element instanceof JSONArray) {
+          cleanedArray.put(removeIntegersFromArray((JSONArray) element));
+        } else {
+          cleanedArray.put(element);
         }
-      } else if (element instanceof JSONArray) {
-        JSONArray nestedCleaned = cleanArray((JSONArray) element);
-        if (!nestedCleaned.isEmpty()) {
-          cleanedArray.put(nestedCleaned);
-        }
-      } else if (element != null && !(element instanceof String && ((String) element).isEmpty())) {
-        cleanedArray.put(element);
+      } catch (Exception e) {
+        ApplicationLogger.debug(
+            "Error processing array element at index " + i + ": " + e.getMessage(), e);
       }
     }
     return cleanedArray;
   }
 
-  public static JSONObject removeNumbersAndReferences(JSONObject jsonObject) {
-    JSONObject object = removeNumbersAndRef(jsonObject);
-    return removeEmptyAndNulls(object);
+  /**
+   * Removes empty objects, arrays, and null values from a JSON object recursively.
+   *
+   * @param jsonObject the JSON object to clean
+   * @return the cleaned JSON object, or null if input is null
+   */
+  public static JSONObject removeEmptyAndNulls(JSONObject jsonObject) {
+    if (jsonObject == null) {
+      return null;
+    }
+
+    try {
+      Iterator<String> keys = jsonObject.keys();
+      while (keys.hasNext()) {
+        String key = keys.next();
+        Object value = jsonObject.get(key);
+
+        if (shouldRemoveValue(value)) {
+          keys.remove();
+        } else if (value instanceof JSONObject) {
+          JSONObject cleanedObj = removeEmptyAndNulls((JSONObject) value);
+          if (cleanedObj == null || cleanedObj.isEmpty()) {
+            keys.remove();
+          } else {
+            jsonObject.put(key, cleanedObj);
+          }
+        } else if (value instanceof JSONArray) {
+          JSONArray cleanedArray = cleanArray((JSONArray) value);
+          if (cleanedArray.isEmpty()) {
+            keys.remove();
+          } else {
+            jsonObject.put(key, cleanedArray);
+          }
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.debug("Error removing empty and null values: " + e.getMessage(), e);
+    }
+    return jsonObject;
   }
 
+  /**
+   * Determines if a value should be removed (null, empty string, or "null" string).
+   *
+   * @param value the value to check
+   * @return true if the value should be removed
+   */
+  private static boolean shouldRemoveValue(Object value) {
+    return value == null
+        || value == JSONObject.NULL
+        || (value instanceof String && (((String) value).isEmpty() || "null".equals(value)));
+  }
+
+  /**
+   * Cleans a JSON array by removing empty and null values recursively.
+   *
+   * @param array the JSON array to clean
+   * @return a new cleaned JSON array
+   */
+  private static JSONArray cleanArray(JSONArray array) {
+    if (array == null) {
+      return new JSONArray();
+    }
+
+    JSONArray cleanedArray = new JSONArray();
+    for (int i = 0; i < array.length(); i++) {
+      try {
+        Object element = array.get(i);
+
+        if (shouldRemoveValue(element)) {
+          continue; // Skip null/empty values
+        } else if (element instanceof JSONObject) {
+          JSONObject cleanedElement = removeEmptyAndNulls((JSONObject) element);
+          if (cleanedElement != null && !cleanedElement.isEmpty()) {
+            cleanedArray.put(cleanedElement);
+          }
+        } else if (element instanceof JSONArray) {
+          JSONArray nestedCleaned = cleanArray((JSONArray) element);
+          if (!nestedCleaned.isEmpty()) {
+            cleanedArray.put(nestedCleaned);
+          }
+        } else {
+          cleanedArray.put(element);
+        }
+      } catch (Exception e) {
+        ApplicationLogger.debug(
+            "Error cleaning array element at index " + i + ": " + e.getMessage(), e);
+      }
+    }
+    return cleanedArray;
+  }
+
+  /**
+   * Removes numbers and references from a JSON string.
+   *
+   * @param jsonString the JSON string to process
+   * @return the cleaned JSON string, or the original string if processing fails
+   * @throws IllegalArgumentException if jsonString is null
+   */
   public static String removeNumbersAndReferences(String jsonString) {
-    JSONObject jsonObject = new JSONObject(jsonString);
-    JSONObject cleanedJsonObject = removeNumbersAndReferences(jsonObject);
-    return cleanedJsonObject.toString();
-  }
+    if (jsonString == null) {
+      throw new IllegalArgumentException("JSON string cannot be null");
+    }
 
-  public static String removeNumbersAndReferences(Object jsonObject) {
-    if (jsonObject instanceof JSONObject) {
-      return removeNumbersAndReferences(jsonObject.toString());
-    } else if (jsonObject instanceof String) {
-      return removeNumbersAndReferences((String) jsonObject);
-    } else {
-      throw new IllegalArgumentException("Invalid JSON object provided");
+    try {
+      JSONObject jsonObject = new JSONObject(jsonString);
+      JSONObject cleanedJsonObject = removeNumbersAndReferences(jsonObject);
+      return cleanedJsonObject != null ? cleanedJsonObject.toString() : jsonString;
+    } catch (JSONException e) {
+      ApplicationLogger.debug("Invalid JSON string provided: " + e.getMessage(), e);
+      return jsonString; // Return original if not valid JSON
     }
   }
 }

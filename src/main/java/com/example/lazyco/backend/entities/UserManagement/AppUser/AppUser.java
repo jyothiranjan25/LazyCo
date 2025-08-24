@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
-import com.example.lazyco.backend.core.AbstractClasses.AbstractModelBase;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
 import com.example.lazyco.backend.schema.database.AppUserSchema;
 import jakarta.persistence.*;
 import lombok.Getter;

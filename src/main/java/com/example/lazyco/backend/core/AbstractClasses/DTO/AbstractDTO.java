@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.AbstractClasses;
+package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
 import java.io.Serializable;
 import java.util.Date;

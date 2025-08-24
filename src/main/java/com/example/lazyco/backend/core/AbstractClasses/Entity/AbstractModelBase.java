@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.AbstractClasses;
+package com.example.lazyco.backend.core.AbstractClasses.Entity;
 
 import com.example.lazyco.backend.schema.database.AbstractModelBaseSchema;
 import jakarta.persistence.Column;

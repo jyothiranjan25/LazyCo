@@ -11,13 +11,20 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ * Utility class for parsing and formatting dates from various string formats. Handles multiple date
+ * formats, timezone conversions, and epoch timestamps.
+ */
 public class DateParser {
 
   private static final ZoneId SYSTEM_TIMEZONE = ZoneId.systemDefault();
 
   /**
-   * Deserialize date string to Date object using multiple format attempts Converts to system
-   * timezone Also handles epoch/Unix timestamps (milliseconds and seconds)
+   * Deserialize date string to Date object using multiple format attempts. Converts to system
+   * timezone and handles epoch/Unix timestamps (milliseconds and seconds).
+   *
+   * @param dateString the date string to parse
+   * @return the parsed Date object, or null if parsing fails
    */
   public static Date deserializeDate(String dateString) {
     if (dateString == null || dateString.trim().isEmpty()) {
@@ -59,7 +66,12 @@ public class DateParser {
     return tryParseWithTimeAPI(dateString);
   }
 
-  /** Deserialize time string to Time object */
+  /**
+   * Deserialize time string to Time object.
+   *
+   * @param timeString the time string to parse
+   * @return the parsed Time object, or null if parsing fails
+   */
   public static Time deserializeTime(String timeString) {
     if (timeString == null || timeString.trim().isEmpty()) {
       return null;
@@ -92,8 +104,37 @@ public class DateParser {
     return null;
   }
 
-  /** Convert date to system timezone if it was parsed from a different timezone */
+  /**
+   * Get current system timezone.
+   *
+   * @return the system's default timezone
+   */
+  public static ZoneId getSystemTimezone() {
+    return SYSTEM_TIMEZONE;
+  }
+
+  /**
+   * Parse timestamp from long value (milliseconds).
+   *
+   * @param timestampMillis timestamp in milliseconds since epoch
+   * @return the Date object representing the timestamp
+   */
+  public static Date parseTimestamp(long timestampMillis) {
+    return new Date(timestampMillis);
+  }
+
+  /**
+   * Convert date to system timezone if it was parsed from a different timezone.
+   *
+   * @param date the date to convert
+   * @param originalString the original date string (used to detect timezone info)
+   * @return the converted date in system timezone
+   */
   private static Date convertToSystemTimezone(Date date, String originalString) {
+    if (date == null || originalString == null) {
+      return date;
+    }
+
     try {
       // If the original string contains timezone info, convert to system timezone
       if (originalString.matches(".*[+-]\\d{2}:?\\d{2}$") || originalString.endsWith("Z")) {
@@ -110,8 +151,17 @@ public class DateParser {
     return date;
   }
 
-  /** Fallback parsing using Java 8 Time API */
+  /**
+   * Fallback parsing using Java 8 Time API for additional date format support.
+   *
+   * @param dateString the date string to parse
+   * @return the parsed Date object, or null if all attempts fail
+   */
   private static Date tryParseWithTimeAPI(String dateString) {
+    if (dateString == null || dateString.trim().isEmpty()) {
+      return null;
+    }
+
     // Common additional patterns
     String[] additionalPatterns = {
       "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
@@ -137,7 +187,7 @@ public class DateParser {
           LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
           return Date.from(localDateTime.atZone(SYSTEM_TIMEZONE).toInstant());
         } else {
-          // Date only
+          // Date only - add default time
           LocalDateTime localDateTime =
               LocalDateTime.parse(
                   dateString + " 00:00:00", DateTimeFormatter.ofPattern(pattern + " HH:mm:ss"));
@@ -151,34 +201,12 @@ public class DateParser {
     return null; // All parsing attempts failed
   }
 
-  /** Format Date to system timezone string */
-  public static String formatDateToSystem(Date date) {
-    if (date == null) {
-      return null;
-    }
-
-    SimpleDateFormat sdf =
-        new SimpleDateFormat(DateTimeFormatEnum.yyyy_MM_dd_T_HH_mm_ssXXX.getValue());
-    sdf.setTimeZone(TimeZone.getTimeZone(SYSTEM_TIMEZONE));
-    return sdf.format(date);
-  }
-
-  /** Format Time to string */
-  public static String formatTime(Time time) {
-    if (time == null) {
-      return null;
-    }
-
-    SimpleDateFormat sdf = new SimpleDateFormat(DateTimeFormatEnum.HH_mm_ss.getValue());
-    return sdf.format(time);
-  }
-
-  /** Get current system timezone */
-  public static ZoneId getSystemTimezone() {
-    return SYSTEM_TIMEZONE;
-  }
-
-  /** Check if string is a numeric timestamp */
+  /**
+   * Check if string represents a numeric timestamp.
+   *
+   * @param input the string to check
+   * @return true if the string is a numeric timestamp
+   */
   private static boolean isNumericTimestamp(String input) {
     if (input == null || input.isEmpty()) {
       return false;
@@ -188,10 +216,19 @@ public class DateParser {
     return input.matches("^-?\\d+$");
   }
 
-  /** Parse timestamp (handles both milliseconds and seconds since epoch) */
+  /**
+   * Parse timestamp from string (handles both milliseconds and seconds since epoch).
+   *
+   * @param timestampString the timestamp string to parse
+   * @return the parsed Date object, or null if parsing fails
+   */
   private static Date parseTimestamp(String timestampString) {
+    if (timestampString == null || timestampString.trim().isEmpty()) {
+      return null;
+    }
+
     try {
-      long timestamp = Long.parseLong(timestampString);
+      long timestamp = Long.parseLong(timestampString.trim());
 
       // Determine if it's milliseconds or seconds based on the value
       // Timestamps in seconds are typically 10 digits (until year 2286)
@@ -207,25 +244,5 @@ public class DateParser {
     } catch (NumberFormatException e) {
       return null;
     }
-  }
-
-  /** Parse timestamp from long value (milliseconds) */
-  public static Date parseTimestamp(long timestampMillis) {
-    return new Date(timestampMillis);
-  }
-
-  /** Parse timestamp from long value (seconds) */
-  public static Date parseTimestampSeconds(long timestampSeconds) {
-    return new Date(timestampSeconds * 1000);
-  }
-
-  /** Convert Date to timestamp in milliseconds */
-  public static long dateToTimestamp(Date date) {
-    return date != null ? date.getTime() : 0;
-  }
-
-  /** Convert Date to timestamp in seconds */
-  public static long dateToTimestampSeconds(Date date) {
-    return date != null ? date.getTime() / 1000 : 0;
   }
 }

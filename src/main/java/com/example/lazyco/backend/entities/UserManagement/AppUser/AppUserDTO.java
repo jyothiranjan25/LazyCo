@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
-import com.example.lazyco.backend.core.AbstractClasses.AbstractDTO;
+import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import lombok.Getter;
 import lombok.Setter;
 
