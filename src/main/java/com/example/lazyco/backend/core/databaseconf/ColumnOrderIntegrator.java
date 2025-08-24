@@ -1,23 +1,17 @@
 package com.example.lazyco.backend.core.databaseconf;
 
+import com.example.lazyco.backend.core.logger.ApplicationLogger;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.mapping.*;
-import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 import java.util.*;
 import java.util.Collection;
 import java.util.List;
 
 public class ColumnOrderIntegrator implements Integrator {
-
-    @Override
-    public void disintegrate(SessionFactoryImplementor sessionFactoryImplementor,
-                             SessionFactoryServiceRegistry sessionFactoryServiceRegistry) {
-        // No implementation needed for disintegration
-    }
 
     @Override
     public void integrate(Metadata metadata,
@@ -73,9 +67,9 @@ public class ColumnOrderIntegrator implements Integrator {
 
         } catch (Exception e) {
             // Log the error but don't fail the application startup
-            System.err.println("Warning: Could not reorder columns for table " +
+            ApplicationLogger.error("Could not reorder columns for table " +
                     (table.getName() != null ? table.getName() : "unknown") +
-                    ": " + e.getMessage());
+                    ": " + e.getMessage(), e);
         }
     }
 

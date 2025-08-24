@@ -9,14 +9,14 @@ public class ApplicationText {
     // add switch case to get file by language
     private static String getFileByLanguage(Language language) {
         return switch (language) {
-            case EN, ES -> "application_text_" + language.name().toLowerCase() + ".yaml";
+            case ES,FR,DE -> "application_text_" + language.name().toLowerCase() + ".yaml";
             default -> "application_text.yaml";
         };
     }
 
 
     public enum Language {
-        EN, ES;
+        EN, ES, FR, DE;
 
         public static Language fromString(String value) {
             for (Language lang : values()) {
@@ -24,7 +24,7 @@ public class ApplicationText {
                     return lang;
                 }
             }
-            return EN; // fallback default
+            return EN; // Default to English if no match found
         }
     }
 }
