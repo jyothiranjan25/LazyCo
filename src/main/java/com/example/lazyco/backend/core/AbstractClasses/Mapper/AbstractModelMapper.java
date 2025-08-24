@@ -18,27 +18,20 @@ public class AbstractModelMapper {
     protected ModelMapper modelMapper;
 
     public AbstractModelMapper() {
-        this.modelMapper = new ModelMapper();
-        this.modelMapper
-                .getConfiguration()
-                .setAmbiguityIgnored(true)
-                .setMatchingStrategy(MatchingStrategies.STRICT)
-                .setPropertyCondition(context -> true);
+        this(false);
     }
 
     public AbstractModelMapper(boolean skipNull) {
-        this();
-        this.modelMapper
-                .getConfiguration()
+        this.modelMapper = new ModelMapper();
+        this.modelMapper.getConfiguration()
+                .setAmbiguityIgnored(true)
+                .setMatchingStrategy(MatchingStrategies.STRICT)
                 .setSkipNullEnabled(skipNull)
-                .setPropertyCondition(
-                        (MappingContext<Object, Object> context) -> {
-                            Object source = context.getSource();
-                            if (skipNull) {
-                                return source != null && (!(source instanceof String str) || !str.trim().isEmpty());
-                            }
-                            return true;
-                        });
+                .setPropertyCondition((MappingContext<Object, Object> context) -> {
+                    if (!skipNull) return true;
+                    Object source = context.getSource();
+                    return source != null && (!(source instanceof String str) || !str.trim().isEmpty());
+                });
     }
 
     public <D, T> D map(T source, Class<D> destinationClass) {
