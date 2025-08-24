@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.GosnConf;
 
+import com.example.lazyco.backend.core.DateUtils.DateParser;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 
@@ -36,9 +38,9 @@ public class GsonSingleton {
                     gsonBuilder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
                     gsonBuilder.setExclusionStrategies(new ExcludeHiddenFieldsStrategy());
 
-//                    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
+                    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
                     gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
-//                    gsonBuilder.registerTypeAdapter(Time.class, new TimeDeserializer());
+                    gsonBuilder.registerTypeAdapter(Time.class, new TimeDeserializer());
                     gsonBuilder.registerTypeAdapter(Time.class, new TimeSerializer());
                     gsonBuilder.registerTypeAdapter(String.class, new StringDeserializer());
                     gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
@@ -53,7 +55,7 @@ public class GsonSingleton {
         GsonBuilder gsonBuilder = new GsonBuilder();
         // Register custom serializers
         gsonBuilder.setPrettyPrinting();
-//        gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
+        gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
         gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
         gsonBuilder.registerTypeAdapterFactory(new LenientTypeAdapterFactory());
         return gsonBuilder.create();
@@ -105,20 +107,42 @@ public class GsonSingleton {
         }
     }
 
-//    private static class DateDeserializer implements JsonDeserializer<Date> {
-//
-//        @Override
-//        public Date deserialize(
-//                JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
-//                throws JsonParseException {
-//            String dateString = jsonElement.getAsString();
-//            return DateParser.deserializeDate(dateString);
-//        }
-//    }
+    private static class DateDeserializer implements JsonDeserializer<Date> {
+
+        @Override
+        public Date deserialize(
+                JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
+                throws JsonParseException {
+
+            if (jsonElement.isJsonPrimitive()) {
+                JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+
+                if (primitive.isNumber()) {
+                    // Handle numeric timestamps
+                    long timestamp = primitive.getAsLong();
+                    return DateParser.parseTimestamp(timestamp);
+                } else if (primitive.isString()) {
+                    // Handle string dates
+                    String dateString = primitive.getAsString();
+                    Date result = DateParser.deserializeDate(dateString);
+                    if (result == null) {
+                        throw new JsonParseException("Unable to parse date: " + dateString);
+                    }
+                    return result;
+                }
+            }
+
+            throw new JsonParseException("Invalid date format: " + jsonElement);
+        }
+    }
 
     private static class DateSerializer implements JsonSerializer<Date> {
         private final ThreadLocal<DateFormat> dateFormat =
-                ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                ThreadLocal.withInitial(() -> {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+                    sdf.setTimeZone(TimeZone.getTimeZone(DateParser.getSystemTimezone()));
+                    return sdf;
+                });
 
         @Override
         public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
@@ -138,15 +162,35 @@ public class GsonSingleton {
         }
     }
 
-//    private static class TimeDeserializer implements JsonDeserializer<Time> {
-//        @Override
-//        public Time deserialize(
-//                JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
-//                throws JsonParseException {
-//            String timeString = jsonElement.getAsString();
-//            return DateParser.deserializeTime(timeString);
-//        }
-//    }
+    private static class TimeDeserializer implements JsonDeserializer<Time> {
+        @Override
+        public Time deserialize(
+                JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
+                throws JsonParseException {
+
+            if (jsonElement.isJsonPrimitive()) {
+                JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+
+                if (primitive.isNumber()) {
+                    // Handle numeric timestamps for time
+                    long timestamp = primitive.getAsLong();
+                    // For Time, we typically want just the time portion
+                    Date date = DateParser.parseTimestamp(timestamp);
+                    return new Time(date.getTime());
+                } else if (primitive.isString()) {
+                    // Handle string time
+                    String timeString = primitive.getAsString();
+                    Time result = DateParser.deserializeTime(timeString);
+                    if (result == null) {
+                        throw new JsonParseException("Unable to parse time: " + timeString);
+                    }
+                    return result;
+                }
+            }
+
+            throw new JsonParseException("Invalid time format: " + jsonElement);
+        }
+    }
 
     private static class StringSerializer implements JsonSerializer<String> {
         @Override
