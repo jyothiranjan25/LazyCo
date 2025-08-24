@@ -13,6 +13,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<SimpleResponseDTO> handleUncheckedException(Throwable e) {
         ApplicationLogger.error(e, e.getClass());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new SimpleResponseDTO());
+        SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
+        simpleResponseDTO.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(simpleResponseDTO);
     }
 }
