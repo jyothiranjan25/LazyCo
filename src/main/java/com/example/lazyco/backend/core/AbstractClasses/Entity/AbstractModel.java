@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.AbstractClasses.Entity;
 
+import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.schema.database.AbstractBaseSchema;
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.SerializationUtils;
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(AbstractModelListener.class)
 public abstract class AbstractModel implements Serializable, Cloneable {
 
   @Id
@@ -38,6 +40,9 @@ public abstract class AbstractModel implements Serializable, Cloneable {
 
   @Transient
   private boolean skipMapping;
+
+  @Transient
+  private AbstractDTO dto;
 
   @Override
   public Object clone() {

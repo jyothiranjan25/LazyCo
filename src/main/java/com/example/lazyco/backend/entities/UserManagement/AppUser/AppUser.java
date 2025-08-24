@@ -31,6 +31,7 @@ import org.hibernate.envers.Audited;
           name = "uk_app_user_email",
           columnNames = {AppUserSchema.EMAIL})
     })
+@EntityListeners(AppUserListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppUser extends AbstractModelBase {
 
