@@ -11,7 +11,7 @@ import org.apache.commons.lang3.SerializationUtils;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class AbstractBase implements Serializable, Cloneable {
+public abstract class AbstractModel implements Serializable, Cloneable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.TABLE, generator = "hilo_generator")
@@ -35,6 +35,9 @@ public abstract class AbstractBase implements Serializable, Cloneable {
 
   @Column(name = AbstractBaseSchema.UPDATED_BY)
   private String updatedBy;
+
+  @Transient
+  private boolean skipMapping;
 
   @Override
   public Object clone() {

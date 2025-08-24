@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class AbstractModelBase extends AbstractBase {
+public abstract class AbstractModelBase extends AbstractModel {
 
   @Column(name = AbstractModelBaseSchema.USER_GROUP)
   private String userGroup;
