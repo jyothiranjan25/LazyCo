@@ -1,0 +1,3 @@
+COMMON_MODULES:
+  APPLICATION_ERROR: "An error occurred while processing your application. Please try again later."
+  CUSTOM_MESSAGE : '"%1$s"'
