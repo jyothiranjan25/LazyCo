@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.logger;
+package com.example.lazyco.backend.core.Logger;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

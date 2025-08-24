@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.utils;
+package com.example.lazyco.backend.core.Utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

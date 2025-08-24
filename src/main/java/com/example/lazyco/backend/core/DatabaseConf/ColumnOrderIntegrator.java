@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.databaseconf;
+package com.example.lazyco.backend.core.DatabaseConf;
 
-import com.example.lazyco.backend.core.logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;

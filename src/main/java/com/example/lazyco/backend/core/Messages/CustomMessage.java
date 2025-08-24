@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.messages;
+package com.example.lazyco.backend.core.Messages;
 
-import com.example.lazyco.backend.core.messages.yamlconfig.ApplicationText;
+import com.example.lazyco.backend.core.Messages.YamlConfig.ApplicationText;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

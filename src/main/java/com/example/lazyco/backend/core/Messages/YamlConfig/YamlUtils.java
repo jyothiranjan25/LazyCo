@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.messages.yamlconfig;
+package com.example.lazyco.backend.core.Messages.YamlConfig;
 
-import com.example.lazyco.backend.core.logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;

@@ -1,17 +1,11 @@
-package com.example.lazyco.backend.core.web;
+package com.example.lazyco.backend.core.WebMVC;
 
-import com.example.lazyco.backend.core.databaseconf.DatabaseConfig;
+import com.example.lazyco.backend.core.DatabaseConf.DatabaseConfig;
 import com.example.lazyco.backend.schema.PackageSchema;
 import org.springframework.context.annotation.*;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @EnableWebMvc
 @Configuration

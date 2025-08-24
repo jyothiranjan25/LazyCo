@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.databaseconf;
+package com.example.lazyco.backend.core.DatabaseConf;
 
 import com.example.lazyco.backend.schema.PackageSchema;
 import com.zaxxer.hikari.HikariConfig;

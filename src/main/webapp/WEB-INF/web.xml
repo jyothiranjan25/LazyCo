@@ -15,7 +15,7 @@
         </init-param>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>com.example.lazyco.backend.core.web.BackendWebConf</param-value>
+            <param-value>com.example.lazyco.backend.core.WebMVC.BackendWebConf</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
         <!-- multipart configurations -->

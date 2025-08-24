@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.exception;
+package com.example.lazyco.backend.core.Exceptions;
 
-import com.example.lazyco.backend.core.logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

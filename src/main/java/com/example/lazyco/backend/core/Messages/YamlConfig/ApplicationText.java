@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.messages.yamlconfig;
+package com.example.lazyco.backend.core.Messages.YamlConfig;
 
 public class ApplicationText {
     public static String get(String key, Language language) {
