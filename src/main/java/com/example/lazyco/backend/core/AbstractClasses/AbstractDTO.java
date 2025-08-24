@@ -23,12 +23,13 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   @Override
   public Object clone() {
+    Object o1 = null;
     try {
-      Object o1 = super.clone();
+      o1 = super.clone();
       // SerializationUtils.clone performs a deep clone
       return SerializationUtils.clone(this);
     } catch (Exception e) {
-      return null;
+      return o1;
     }
   }
 }
