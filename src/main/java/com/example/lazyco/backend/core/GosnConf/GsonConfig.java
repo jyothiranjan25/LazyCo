@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class GsonConfig {
-    @Bean
-    public Gson gson() {
-        return GsonSingleton.getInstance();
-    }
+  @Bean
+  public Gson gson() {
+    return GsonSingleton.getInstance();
+  }
 }

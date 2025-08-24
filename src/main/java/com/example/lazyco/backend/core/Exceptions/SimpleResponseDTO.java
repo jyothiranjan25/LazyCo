@@ -7,10 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SimpleResponseDTO extends AbstractDTO<SimpleResponseDTO> {
-    private String message;
+  private String message;
 
-    @Override
-    public String toString() {
-        return "SimpleResponseDTO [message=" + message + "]";
-    }
+  @Override
+  public String toString() {
+    return "SimpleResponseDTO [message=" + message + "]";
+  }
 }

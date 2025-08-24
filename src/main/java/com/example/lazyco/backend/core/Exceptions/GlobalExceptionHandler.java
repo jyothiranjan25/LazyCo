@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // handle all unexpected errors/ exceptions will be handled here
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<SimpleResponseDTO> handleUncheckedException(Throwable e) {
-        ApplicationLogger.error(e, e.getClass());
-        SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
-        simpleResponseDTO.setMessage(e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(simpleResponseDTO);
-    }
+  // handle all unexpected errors/ exceptions will be handled here
+  @ExceptionHandler(Throwable.class)
+  public ResponseEntity<SimpleResponseDTO> handleUncheckedException(Throwable e) {
+    ApplicationLogger.error(e, e.getClass());
+    SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
+    simpleResponseDTO.setMessage(e.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(simpleResponseDTO);
+  }
 }

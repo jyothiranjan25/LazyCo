@@ -3,6 +3,8 @@ package com.example.lazyco.backend.core.DatabaseConf;
 import com.example.lazyco.backend.schema.PackageSchema;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.Properties;
+import javax.sql.DataSource;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,204 +16,204 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
-import java.util.Properties;
-
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
 
-    @Value("${db.driverClassName}")
-    private String driverClassName;
+  @Value("${db.driverClassName}")
+  private String driverClassName;
 
-    @Value("${db.url}")
-    private String jdbcUrl;
+  @Value("${db.url}")
+  private String jdbcUrl;
 
-    @Value("${db.username}")
-    private String username;
+  @Value("${db.username}")
+  private String username;
 
-    @Value("${db.password}")
-    private String password;
+  @Value("${db.password}")
+  private String password;
 
-    // HikariCP settings optimized for high concurrency
-    @Value("${hikari.maximumPoolSize:100}")
-    private int maximumPoolSize;
+  // HikariCP settings optimized for high concurrency
+  @Value("${hikari.maximumPoolSize:100}")
+  private int maximumPoolSize;
 
-    @Value("${hikari.minimumIdle:20}")
-    private int minimumIdle;
+  @Value("${hikari.minimumIdle:20}")
+  private int minimumIdle;
 
-    @Value("${hikari.connectionTimeout:60000}")
-    private int connectionTimeout;
+  @Value("${hikari.connectionTimeout:60000}")
+  private int connectionTimeout;
 
-    @Value("${hikari.idleTimeout:900000}")
-    private int idleTimeout;
+  @Value("${hikari.idleTimeout:900000}")
+  private int idleTimeout;
 
-    @Value("${hikari.maxLifetime:1800000}")
-    private int maximumLifetime;
+  @Value("${hikari.maxLifetime:1800000}")
+  private int maximumLifetime;
 
-    @Value("${hikari.leakDetectionThreshold:60000}")
-    private int leakDetectionThreshold;
+  @Value("${hikari.leakDetectionThreshold:60000}")
+  private int leakDetectionThreshold;
 
-    @Value("${hikari.validationTimeout:10000}")
-    private int validationTimeout;
+  @Value("${hikari.validationTimeout:10000}")
+  private int validationTimeout;
 
-    @Value("${hikari.initializationFailTimeout:30000}")
-    private int initializationFailTimeout;
+  @Value("${hikari.initializationFailTimeout:30000}")
+  private int initializationFailTimeout;
 
-    @Value("${hikari.keepaliveTime:300000}")
-    private int keepaliveTime;
+  @Value("${hikari.keepaliveTime:300000}")
+  private int keepaliveTime;
 
-    // Hibernate settings
-    @Value("${hibernate.dialect}")
-    private String hibernateDialect;
+  // Hibernate settings
+  @Value("${hibernate.dialect}")
+  private String hibernateDialect;
 
-    @Value("${hibernate.show_sql:false}")
-    private boolean showSql;
+  @Value("${hibernate.show_sql:false}")
+  private boolean showSql;
 
-    @Value("${hibernate.hbm2ddl.auto:validate}")
-    private String hibernateHbm2ddlAuto;
+  @Value("${hibernate.hbm2ddl.auto:validate}")
+  private String hibernateHbm2ddlAuto;
 
-    @Value("${hibernate.use_second_level_cache:false}")
-    private boolean useSecondLevelCache;
+  @Value("${hibernate.use_second_level_cache:false}")
+  private boolean useSecondLevelCache;
 
-    @Value("${hibernate.use_query_cache:false}")
-    private boolean useQueryCache;
+  @Value("${hibernate.use_query_cache:false}")
+  private boolean useQueryCache;
 
-    @Value("${hibernate.cache_region_factory_class}")
-    private String hibernateCacheRegionFactory;
+  @Value("${hibernate.cache_region_factory_class}")
+  private String hibernateCacheRegionFactory;
 
-    // Audit settings
-    @Value("${hibernate.envers.enabled:false}")
-    private boolean hibernateEnversEnabled;
+  // Audit settings
+  @Value("${hibernate.envers.enabled:false}")
+  private boolean hibernateEnversEnabled;
 
-    @Value("${hibernate.envers.store_data_at_delete:true}")
-    private boolean hibernateEnversStoreDataAtDelete;
+  @Value("${hibernate.envers.store_data_at_delete:true}")
+  private boolean hibernateEnversStoreDataAtDelete;
 
-    @Value("${hibernate.envers.revision_on_collection_change:true}")
-    private boolean hibernateEnversRevisionOnCollectionChange;
+  @Value("${hibernate.envers.revision_on_collection_change:true}")
+  private boolean hibernateEnversRevisionOnCollectionChange;
 
-    @Bean
-    @Primary
-    public DataSource dataSource() {
-        HikariConfig config = new HikariConfig();
-        config.setDriverClassName(driverClassName);
-        config.setJdbcUrl(jdbcUrl);
-        config.setUsername(username);
-        config.setPassword(password);
+  @Bean
+  @Primary
+  public DataSource dataSource() {
+    HikariConfig config = new HikariConfig();
+    config.setDriverClassName(driverClassName);
+    config.setJdbcUrl(jdbcUrl);
+    config.setUsername(username);
+    config.setPassword(password);
 
-        // Connection pool settings optimized for 300-400 concurrent users
-        config.setMaximumPoolSize(maximumPoolSize);
-        config.setMinimumIdle(minimumIdle);
-        config.setConnectionTimeout(connectionTimeout);
-        config.setIdleTimeout(idleTimeout);
-        config.setMaxLifetime(maximumLifetime);
-        config.setLeakDetectionThreshold(leakDetectionThreshold);
-        config.setValidationTimeout(validationTimeout);
-        config.setInitializationFailTimeout(initializationFailTimeout);
-        config.setKeepaliveTime(keepaliveTime);
+    // Connection pool settings optimized for 300-400 concurrent users
+    config.setMaximumPoolSize(maximumPoolSize);
+    config.setMinimumIdle(minimumIdle);
+    config.setConnectionTimeout(connectionTimeout);
+    config.setIdleTimeout(idleTimeout);
+    config.setMaxLifetime(maximumLifetime);
+    config.setLeakDetectionThreshold(leakDetectionThreshold);
+    config.setValidationTimeout(validationTimeout);
+    config.setInitializationFailTimeout(initializationFailTimeout);
+    config.setKeepaliveTime(keepaliveTime);
 
-        // Performance optimizations for PostgreSQL
-        config.setConnectionTestQuery("SELECT 1");
+    // Performance optimizations for PostgreSQL
+    config.setConnectionTestQuery("SELECT 1");
 
-        // PostgreSQL specific optimizations
-        config.addDataSourceProperty("reWriteBatchedInserts", "true");
-        config.addDataSourceProperty("stringtype", "unspecified");
-        config.addDataSourceProperty("prepareThreshold", "1");
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("useServerPrepStmts", "true");
-        config.addDataSourceProperty("useLocalSessionState", "true");
-        config.addDataSourceProperty("rewriteBatchedStatements", "true");
-        config.addDataSourceProperty("preparedStatementCacheQueries", "256");
-        config.addDataSourceProperty("preparedStatementCacheSizeMiB", "5");
-        config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
-        config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
+    // PostgreSQL specific optimizations
+    config.addDataSourceProperty("reWriteBatchedInserts", "true");
+    config.addDataSourceProperty("stringtype", "unspecified");
+    config.addDataSourceProperty("prepareThreshold", "1");
+    config.addDataSourceProperty("cachePrepStmts", "true");
+    config.addDataSourceProperty("useServerPrepStmts", "true");
+    config.addDataSourceProperty("useLocalSessionState", "true");
+    config.addDataSourceProperty("rewriteBatchedStatements", "true");
+    config.addDataSourceProperty("preparedStatementCacheQueries", "256");
+    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "5");
+    config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
+    config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
 
-        // Connection management
-        config.addDataSourceProperty("tcpKeepAlive", "true");
-        config.addDataSourceProperty("socketTimeout", "0");
+    // Connection management
+    config.addDataSourceProperty("tcpKeepAlive", "true");
+    config.addDataSourceProperty("socketTimeout", "0");
 
-        // Pool name for monitoring
-        config.setPoolName("HikariPool-HighConcurrency");
+    // Pool name for monitoring
+    config.setPoolName("HikariPool-HighConcurrency");
 
-        return new HikariDataSource(config);
-    }
+    return new HikariDataSource(config);
+  }
 
-    @Bean
-    @Primary
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan(PackageSchema.BACKEND_PACKAGE);
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(true);
-        vendorAdapter.setShowSql(showSql);
-        em.setJpaVendorAdapter(vendorAdapter);
+  @Bean
+  @Primary
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+    em.setDataSource(dataSource());
+    em.setPackagesToScan(PackageSchema.BACKEND_PACKAGE);
+    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    vendorAdapter.setGenerateDdl(true);
+    vendorAdapter.setShowSql(showSql);
+    em.setJpaVendorAdapter(vendorAdapter);
 
-        em.setJpaProperties(hibernateProperties());
+    em.setJpaProperties(hibernateProperties());
 
-        return em;
-    }
+    return em;
+  }
 
-    @Bean
-    @Primary
-    public PlatformTransactionManager transactionManager() {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-        transactionManager.setDefaultTimeout(30); // 30 seconds timeout
-        return transactionManager;
-    }
+  @Bean
+  @Primary
+  public PlatformTransactionManager transactionManager() {
+    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+    transactionManager.setDefaultTimeout(30); // 30 seconds timeout
+    return transactionManager;
+  }
 
-    private Properties hibernateProperties() {
-        Properties properties = new Properties();
+  private Properties hibernateProperties() {
+    Properties properties = new Properties();
 
-        // Database dialect
-        properties.put(AvailableSettings.DIALECT, hibernateDialect);
+    // Database dialect
+    properties.put(AvailableSettings.DIALECT, hibernateDialect);
 
-        // Connection provider - let Spring manage this
-        properties.put(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true");
+    // Connection provider - let Spring manage this
+    properties.put(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true");
 
-        // Performance settings for high concurrency
-        properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "50");
-        properties.put(AvailableSettings.ORDER_INSERTS, "true");
-        properties.put(AvailableSettings.ORDER_UPDATES, "true");
-        properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
+    // Performance settings for high concurrency
+    properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "50");
+    properties.put(AvailableSettings.ORDER_INSERTS, "true");
+    properties.put(AvailableSettings.ORDER_UPDATES, "true");
+    properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
-        // Second level cache - enabled for high concurrency
-        properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
-        properties.put(AvailableSettings.USE_QUERY_CACHE, useQueryCache);
-        properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
+    // Second level cache - enabled for high concurrency
+    properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
+    properties.put(AvailableSettings.USE_QUERY_CACHE, useQueryCache);
+    properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
 
-        // Statistics and logging (optimized for production)
-        properties.put(AvailableSettings.GENERATE_STATISTICS, "false");
-        properties.put(AvailableSettings.SHOW_SQL, showSql);
-        properties.put(AvailableSettings.FORMAT_SQL, "false");
+    // Statistics and logging (optimized for production)
+    properties.put(AvailableSettings.GENERATE_STATISTICS, "false");
+    properties.put(AvailableSettings.SHOW_SQL, showSql);
+    properties.put(AvailableSettings.FORMAT_SQL, "false");
 
-        // Schema management
-        properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);
+    // Schema management
+    properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);
 
-        // JPA compliance and transaction management
-        properties.put(AvailableSettings.AUTOCOMMIT, "false");
-        properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
-        properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
+    // JPA compliance and transaction management
+    properties.put(AvailableSettings.AUTOCOMMIT, "false");
+    properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
+    properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
 
-        // Naming strategy for better readability
-        properties.put(AvailableSettings.PHYSICAL_NAMING_STRATEGY,
-                "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
+    // Naming strategy for better readability
+    properties.put(
+        AvailableSettings.PHYSICAL_NAMING_STRATEGY,
+        "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
-        // Connection isolation level
-        properties.put(AvailableSettings.ISOLATION, "READ_COMMITTED");
+    // Connection isolation level
+    properties.put(AvailableSettings.ISOLATION, "READ_COMMITTED");
 
-        // Additional performance optimizations
-        properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
-        properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
+    // Additional performance optimizations
+    properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
+    properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
 
-        // Hibernate Envers settings
-        properties.put("org.hibernate.envers.Audited", "true");
-        properties.put("org.hibernate.envers.audit_table_suffix", "_AUD");
-        properties.put("hibernate.integration.envers.enabled", hibernateEnversEnabled);
-        properties.put("org.hibernate.envers.store_data_at_delete", hibernateEnversStoreDataAtDelete);
-        properties.put("org.hibernate.envers.revision_on_collection_change", hibernateEnversRevisionOnCollectionChange);
+    // Hibernate Envers settings
+    properties.put("org.hibernate.envers.Audited", "true");
+    properties.put("org.hibernate.envers.audit_table_suffix", "_AUD");
+    properties.put("hibernate.integration.envers.enabled", hibernateEnversEnabled);
+    properties.put("org.hibernate.envers.store_data_at_delete", hibernateEnversStoreDataAtDelete);
+    properties.put(
+        "org.hibernate.envers.revision_on_collection_change",
+        hibernateEnversRevisionOnCollectionChange);
 
-        return properties;
-    }
+    return properties;
+  }
 }
