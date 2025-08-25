@@ -34,6 +34,7 @@ public class GsonSingleton {
 
           // Register custom serializers
           gsonBuilder.setPrettyPrinting();
+//          gsonBuilder.serializeNulls();
           gsonBuilder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
           gsonBuilder.setExclusionStrategies(new ExcludeHiddenFieldsStrategy());
 

@@ -109,6 +109,9 @@ public class DatabaseConfig {
     config.setInitializationFailTimeout(initializationFailTimeout);
     config.setKeepaliveTime(keepaliveTime);
 
+    // Disable autoCommit to match Hibernate's transaction management
+    config.setAutoCommit(false);
+
     // Performance optimizations for PostgreSQL
     config.setConnectionTestQuery("SELECT 1");
 

@@ -15,12 +15,12 @@ public class AbstractModelListener {
             }
         }
         source.setCreatedBy("DEFAULT");
-        source.setCreateAt(new Date());
+        source.setCreatedAt(new Date());
     }
 
     @PreUpdate
     public void preUpdate(AbstractModel source) {
         source.setUpdatedBy("DEFAULT");
-        source.setUpdateAt(new Date());
+        source.setUpdatedAt(new Date());
     }
 }

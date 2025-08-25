@@ -27,10 +27,10 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   private Long id;
 
   @Column(name = AbstractBaseSchema.CREATED_AT)
-  private Date createAt;
+  private Date createdAt;
 
   @Column(name = AbstractBaseSchema.UPDATED_AT)
-  private Date updateAt;
+  private Date updatedAt;
 
   @Column(name = AbstractBaseSchema.CREATED_BY)
   private String createdBy;

@@ -35,14 +35,16 @@ public class AppUserService {
     @Transactional
     public AppUserDTO update(AppUserDTO appUserDTO) {
         AppUser appUser = appUserRepository.findById(appUserDTO.getId()).orElseThrow();
-        appUser =  appUserMapper.map(appUserDTO);
+        appUser =  appUserMapper.map(appUserDTO, appUser);
+        appUser = appUserRepository.save(appUser);
         return appUserMapper.map(appUser);
     }
 
     @Transactional
     public AppUserDTO delete(AppUserDTO appUserDTO) {
         AppUser appUser = appUserRepository.findById(appUserDTO.getId()).orElseThrow();
-        appUserRepository.delete(appUser);
-        return appUserDTO;
+        AppUserDTO appUserDTO1 = appUserMapper.map(appUser);
+        appUserRepository.deleteById(appUserDTO1.getId());
+        return appUserDTO1;
     }
 }

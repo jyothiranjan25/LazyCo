@@ -3,6 +3,8 @@ package com.example.lazyco.backend.core.AbstractClasses.DTO;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -16,9 +18,15 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Integer pageSize;
   private Integer pageOffset;
   private Long totalRecords;
+  @Expose
+  private String userGroup;
+  @Expose
   private Date createdAt;
+    @Expose
   private String createdBy;
+    @Expose
   private Date updatedAt;
+    @Expose
   private String updatedBy;
 
   @Override
