@@ -2,19 +2,16 @@ package com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponent
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-import com.example.lazyco.backend.core.AbstractClasses.Service.IAbstractService;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
-  IAbstractService<D> service;
-  BiConsumer<D, AbstractService<D, ?>> postException;
+  AbstractService<D,?> service;
 
-  public ServiceOperationTemplate(
-      IAbstractService<D> service, BiConsumer<D, AbstractService<D, ?>> postException) {
-    this.postException = postException;
+  public ServiceOperationTemplate(AbstractService<D,?> service) {
     this.service = service;
   }
 
@@ -29,7 +26,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       // Process all objects but track errors for atomic rollback
       for (D object : dto.getObjectsList()) {
         try {
-          D result = template(object);
+          D result = execute(object);
           successList.add(result);
         } catch (Throwable t) {
           hasErrors = true;
@@ -52,13 +49,13 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
               + errorList.size()
               + " errors occurred.");
       // Rollback successful operations
-      postException.accept(dto, (AbstractService<D, ?>) service);
+      service.markRollback(dto);
     }
     return dto;
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(
       ServiceOperationTemplate<D> serviceOperationTemplate, D dto) {
-    return serviceOperationTemplate.execute(dto);
+    return serviceOperationTemplate.template(dto);
   }
 }

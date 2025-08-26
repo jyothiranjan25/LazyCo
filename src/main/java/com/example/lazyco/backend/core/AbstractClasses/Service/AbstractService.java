@@ -7,7 +7,14 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.util.List;
+
+@Service
+@Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
     implements IAbstractService<D> {
 
@@ -30,7 +37,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Override
   public D create(D dto) {
     return executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this, null) {
+        new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToCreate) {
             return executeCreate(dtoToCreate);
@@ -53,7 +60,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
-    E createdEntity = abstractJpaRepository.save(entityToCreate);
+    E createdEntity = abstractJpaRepository.saveAndFlush(entityToCreate);
 
     // Retrieve the created entity to ensure all fields are populated
     createdEntity = getEntityById(createdEntity.getId());
@@ -78,7 +85,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Override
   public D update(D dto) {
     return executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this, null) {
+        new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
             return executeUpdate(dtoToUpdate);
@@ -112,7 +119,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preUpdate(dtoToUpdate, existingEntity, existingEntityClone);
 
     // Save the updated entity
-    E updatedEntity = abstractJpaRepository.save(existingEntityClone);
+    E updatedEntity = abstractJpaRepository.saveAndFlush(existingEntityClone);
 
     // Retrieve the updated entity to ensure all fields are populated
     updatedEntity = getEntityById(updatedEntity.getId());
@@ -145,7 +152,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Override
   public D delete(D dto) {
     return executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this, null) {
+        new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
             return executeDelete(dtoToDelete);
@@ -171,6 +178,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Delete the entity
     abstractJpaRepository.delete(existingEntity);
+    abstractJpaRepository.flush();
 
     // Post-delete hook
     postDelete(dtoToDelete, existingEntity);
@@ -188,6 +196,32 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Hook called after the entity is deleted
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
 
-  // Hook called to rollback successful operations in case of atomic failure
-  protected void rollbackOperation(D dtoToRollback) {}
+  // Hook to mark the current transaction for rollback
+  public void markRollback(D dto) {
+      // Tell Spring to roll back this transaction without throwing
+      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+  }
+
+
+    @Override
+    public D getSingle(D filter) {
+        return null;
+    }
+
+    @Override
+    public D getById(Long id) {
+        return null;
+    }
+
+    @Override
+    public Long getCount(D filter) {
+        return 0L;
+    }
+
+    @Override
+    public List<D> get(D dto) {
+      E entity = abstractMapper.map(dto);
+      D mappedDto = abstractMapper.map(entity);
+      return List.of(mappedDto);
+    }
 }

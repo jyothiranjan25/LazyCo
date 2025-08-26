@@ -1,49 +1,24 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import java.util.List;
+
+import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
+import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
+import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Primary
 @Service
-public class AppUserService {
+public class AppUserService extends AbstractService<AppUserDTO, AppUser> {
 
-  private final AppUserRepository appUserRepository;
-  private final AppUserMapper appUserMapper;
+    protected AppUserService(AppUserMapper appUserMapper, AppUserRepository appUserRepository) {
+        super(appUserMapper, appUserRepository);
+    }
 
-  public AppUserService(AppUserRepository appUserRepository, AppUserMapper appUserMapper) {
-    this.appUserRepository = appUserRepository;
-    this.appUserMapper = appUserMapper;
-  }
+    @Override
+    protected void validateBeforeCreateOrUpdate(AppUserDTO dtoToCheck) {
 
-  @Transactional(readOnly = true)
-  public AppUserDTO get(AppUserDTO appUserDTO) {
-    AppUser appUser = appUserMapper.map(appUserDTO);
-    List<AppUser> appUsers = appUserRepository.findAll();
-    List<AppUserDTO> appUserDTOs = appUserMapper.map(appUsers);
-    appUserDTO.setObjectsList(appUserDTOs);
-    return appUserDTO;
-  }
-
-  @Transactional
-  public AppUserDTO create(AppUserDTO appUserDTO) {
-    AppUser appUser = appUserMapper.map(appUserDTO);
-    appUser = appUserRepository.save(appUser);
-    return appUserMapper.map(appUser);
-  }
-
-  @Transactional
-  public AppUserDTO update(AppUserDTO appUserDTO) {
-    AppUser appUser = appUserRepository.findById(appUserDTO.getId()).orElseThrow();
-    appUser = appUserMapper.mapDTOToEntity(appUserDTO, appUser);
-    appUser = appUserRepository.save(appUser);
-    return appUserMapper.map(appUser);
-  }
-
-  @Transactional
-  public AppUserDTO delete(AppUserDTO appUserDTO) {
-    AppUser appUser = appUserRepository.findById(appUserDTO.getId()).orElseThrow();
-    AppUserDTO appUserDTO1 = appUserMapper.map(appUser);
-    appUserRepository.deleteById(appUserDTO1.getId());
-    return appUserDTO1;
-  }
+    }
 }
