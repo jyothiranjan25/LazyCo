@@ -2,7 +2,6 @@ package com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponent
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 
 import java.util.ArrayList;
 import java.util.List;

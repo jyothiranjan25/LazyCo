@@ -7,14 +7,11 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.List;
 
-@Service
-@Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
     implements IAbstractService<D> {
 
@@ -35,6 +32,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
+  @Transactional
   public D create(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -83,6 +81,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
+  @Transactional
   public D update(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -150,6 +149,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
+  @Transactional
   public D delete(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -204,24 +204,29 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
 
     @Override
+    @Transactional(readOnly = true)
     public D getSingle(D filter) {
         return null;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public D getById(Long id) {
         return null;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long getCount(D filter) {
         return 0L;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<D> get(D dto) {
       E entity = abstractMapper.map(dto);
       D mappedDto = abstractMapper.map(entity);
       return List.of(mappedDto);
     }
 }
+
