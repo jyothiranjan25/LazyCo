@@ -38,11 +38,9 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   @Column(name = AbstractBaseSchema.UPDATED_BY)
   private String updatedBy;
 
-  @Transient
-  private boolean skipMapping;
+  @Transient private boolean skipMapping;
 
-  @Transient
-  private AbstractDTO dto;
+  @Transient private AbstractDTO dto;
 
   @Override
   public Object clone() {

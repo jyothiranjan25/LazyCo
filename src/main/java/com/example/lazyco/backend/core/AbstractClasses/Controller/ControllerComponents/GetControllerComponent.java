@@ -2,23 +2,28 @@ package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerCom
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.GetServiceComponent;
-import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.UpdateServiceComponent;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 public class GetControllerComponent<D extends AbstractDTO<D>> {
 
-    private final GetServiceComponent<D> getServiceComponent;
+  private final GetServiceComponent<D> getServiceComponent;
 
-    public GetControllerComponent(GetServiceComponent<D> getServiceComponent) {
-        this.getServiceComponent = getServiceComponent;
-    }
+  public GetControllerComponent(GetServiceComponent<D> getServiceComponent) {
+    this.getServiceComponent = getServiceComponent;
+  }
 
-    public ResponseEntity<D> execute(D t) {
-        return (new ControllerTemplate<D>() {
-            @Override
-            D execute(D t) {
-                return getServiceComponent.get(t);
+  public ResponseEntity<D> execute(D t) {
+    return (new ControllerTemplate<D>() {
+          @Override
+          D execute(D t) {
+            List<D> list = getServiceComponent.get(t);
+            if (!list.isEmpty()) {
+              t.setObjectsList(list);
             }
-        }).template(t);
-    }
+            return t;
+          }
+        })
+        .template(t);
+  }
 }

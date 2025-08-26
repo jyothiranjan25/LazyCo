@@ -1,10 +1,9 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
+import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
-import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -14,20 +13,27 @@ import org.apache.commons.lang3.SerializationUtils;
 public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   protected Long id;
+
+  // List of objects for bulk operations
   private List<D> objectsList;
+
+  // Pagination fields
   private Integer pageSize;
   private Integer pageOffset;
   private Long totalRecords;
-  @Expose
-  private String userGroup;
-  @Expose
-  private Date createdAt;
-    @Expose
-  private String createdBy;
-    @Expose
-  private Date updatedAt;
-    @Expose
-  private String updatedBy;
+
+  // Audit fields
+  @Expose private String userGroup;
+  @Expose private Date createdAt;
+  @Expose private String createdBy;
+  @Expose private Date updatedAt;
+  @Expose private String updatedBy;
+
+  // This field is used to indicate if the operation should be atomic or not
+  private Boolean isAtomicOperation;
+
+  // This field is used to indicate if the operation was successful or not
+  private String errorMessage;
 
   @Override
   public Object clone() {
