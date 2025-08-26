@@ -2,15 +2,14 @@ package com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponent
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
-  AbstractService<D,?> service;
+  AbstractService<D, ?> service;
 
-  public ServiceOperationTemplate(AbstractService<D,?> service) {
+  public ServiceOperationTemplate(AbstractService<D, ?> service) {
     this.service = service;
   }
 
@@ -29,7 +28,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           successList.add(result);
         } catch (Throwable t) {
           hasErrors = true;
-          object.setErrorMessage(t.getMessage());
+          object.setErrorMessage("Something went wrong");
           errorList.add(object);
         }
       }
@@ -41,14 +40,14 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       dto = execute(dto);
     }
     if (hasErrors && (dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation())) {
-        dto.setErrorMessage(
-                "Atomic operation failed. Rolled back "
-                        + successList.size()
-                        + " successful operations. "
-                        + errorList.size()
-                        + " errors occurred.");
-        // Rollback successful operations
-        service.markRollback(dto);
+      dto.setErrorMessage(
+          "Atomic operation failed. Rolled back "
+              + successList.size()
+              + " successful operations. "
+              + errorList.size()
+              + " errors occurred.");
+      // Rollback successful operations
+      service.markRollback(dto);
     }
     return dto;
   }

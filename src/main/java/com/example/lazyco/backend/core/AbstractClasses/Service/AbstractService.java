@@ -7,10 +7,9 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import java.util.List;
 
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
@@ -34,18 +33,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   @Override
   public D create(D dto) {
-          return executeServiceOperationTemplate(
-                  new ServiceOperationTemplate<D>(this) {
-                      @Override
-                      public D execute(D dtoToCreate) {
-                          return executeCreateTransactional(dtoToCreate);
-                      }
-                  },
-                  dto);
+    return executeServiceOperationTemplate(
+        new ServiceOperationTemplate<D>(this) {
+          @Override
+          public D execute(D dtoToCreate) {
+            return executeCreateTransactional(dtoToCreate);
+          }
+        },
+        dto);
   }
 
   public D executeCreateTransactional(D dto) {
-      return executeCreate(dto);
+    return executeCreate(dto);
   }
 
   private D executeCreate(D dtoToCreate) {
@@ -198,37 +197,35 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Hook called after the entity is deleted
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
 
-    // Hook to mark the current transaction for rollback
-    public void markRollback(D dto) {
-        // Tell Spring to roll back this transaction without throwing
-        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-    }
+  // Hook to mark the current transaction for rollback
+  public void markRollback(D dto) {
+    // Tell Spring to roll back this transaction without throwing
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+  }
 
+  @Override
+  @Transactional(readOnly = true)
+  public D getSingle(D filter) {
+    return null;
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public D getSingle(D filter) {
-        return null;
-    }
+  @Override
+  @Transactional(readOnly = true)
+  public D getById(Long id) {
+    return null;
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public D getById(Long id) {
-        return null;
-    }
+  @Override
+  @Transactional(readOnly = true)
+  public Long getCount(D filter) {
+    return 0L;
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Long getCount(D filter) {
-        return 0L;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<D> get(D dto) {
-      E entity = abstractMapper.map(dto);
-      D mappedDto = abstractMapper.map(entity);
-      return List.of(mappedDto);
-    }
+  @Override
+  @Transactional(readOnly = true)
+  public List<D> get(D dto) {
+    E entity = abstractMapper.map(dto);
+    D mappedDto = abstractMapper.map(entity);
+    return List.of(mappedDto);
+  }
 }
-
