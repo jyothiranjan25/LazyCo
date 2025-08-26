@@ -41,14 +41,14 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       dto = execute(dto);
     }
     if (hasErrors && (dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation())) {
-      dto.setErrorMessage(
-          "Atomic operation failed. Rolled back "
-              + successList.size()
-              + " successful operations. "
-              + errorList.size()
-              + " errors occurred.");
-      // Rollback successful operations
-      service.markRollback(dto);
+        dto.setErrorMessage(
+                "Atomic operation failed. Rolled back "
+                        + successList.size()
+                        + " successful operations. "
+                        + errorList.size()
+                        + " errors occurred.");
+        // Rollback successful operations
+        service.markRollback(dto);
     }
     return dto;
   }

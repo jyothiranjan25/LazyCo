@@ -12,6 +12,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.List;
 
+@Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
     implements IAbstractService<D> {
 
@@ -32,16 +33,19 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
-  @Transactional
   public D create(D dto) {
-    return executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this) {
-          @Override
-          public D execute(D dtoToCreate) {
-            return executeCreate(dtoToCreate);
-          }
-        },
-        dto);
+          return executeServiceOperationTemplate(
+                  new ServiceOperationTemplate<D>(this) {
+                      @Override
+                      public D execute(D dtoToCreate) {
+                          return executeCreateTransactional(dtoToCreate);
+                      }
+                  },
+                  dto);
+  }
+
+  public D executeCreateTransactional(D dto) {
+      return executeCreate(dto);
   }
 
   private D executeCreate(D dtoToCreate) {
@@ -81,7 +85,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
-  @Transactional
   public D update(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -149,7 +152,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   @Override
-  @Transactional
   public D delete(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -196,11 +198,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Hook called after the entity is deleted
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
 
-  // Hook to mark the current transaction for rollback
-  public void markRollback(D dto) {
-      // Tell Spring to roll back this transaction without throwing
-      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-  }
+    // Hook to mark the current transaction for rollback
+    public void markRollback(D dto) {
+        // Tell Spring to roll back this transaction without throwing
+        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    }
 
 
     @Override
