@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -42,9 +44,20 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // This field is used to indicate if the operation should be atomic or not
   private Boolean isAtomicOperation;
-
-  // This field is used to indicate if the operation was successful or not
   private String errorMessage;
+
+  // filtering fields
+  @Expose(serialize = false, deserialize = false)
+  private List<Long> idsIn;
+
+  @Expose(serialize = false, deserialize = false)
+  private List<Long> idsNotIn;
+
+  @Expose(serialize = false, deserialize = false)
+  private Map<String, List<String>> stringIn;
+
+  @Expose(serialize = false, deserialize = false)
+  private Map<String, List<String>> stringNotIn;
 
   @Override
   public Object clone() {

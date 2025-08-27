@@ -42,7 +42,9 @@ public abstract class AbstractModel implements Serializable, Cloneable {
 
   @Transient private boolean skipMapping;
 
-  @Transient private AbstractDTO dto;
+  @Transient
+  @SuppressWarnings("rawtypes")
+  private AbstractDTO dto;
 
   @Override
   public Object clone() {

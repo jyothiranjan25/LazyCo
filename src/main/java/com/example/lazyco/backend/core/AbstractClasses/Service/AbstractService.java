@@ -2,6 +2,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 
 import static com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate.executeServiceOperationTemplate;
 
+import com.example.lazyco.backend.core.AbstractClasses.DAO.IAbstractDAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
@@ -25,11 +26,17 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
+  private IAbstractDAO<D,E> abstractDAO;
 
   protected AbstractService(
       AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
     this.abstractMapper = abstractMapper;
     this.abstractJpaRepository = abstractJpaRepository;
+  }
+
+  @Autowired
+  private void injectDependencies(IAbstractDAO<D,E> abstractDAO) {
+    this.abstractDAO = abstractDAO;
   }
 
   // Do not call this method directly, use the template method instead
