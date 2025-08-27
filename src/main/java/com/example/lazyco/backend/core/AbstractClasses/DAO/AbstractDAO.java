@@ -64,7 +64,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     return mapper.map(resultList);
   }
 
-  protected CriteriaBuilderWrapper getCriteriaBuilderWrapper(Session session, D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters, Class<?> resultClass) {
+  protected CriteriaBuilderWrapper getCriteriaBuilderWrapper(
+      Session session,
+      D filter,
+      BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters,
+      Class<?> resultClass) {
     Class<E> entityClass = getEntityClass(filter);
     resultClass = resultClass == null ? entityClass : resultClass;
     HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
