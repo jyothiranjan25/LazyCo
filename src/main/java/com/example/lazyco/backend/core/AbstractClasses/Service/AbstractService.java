@@ -34,6 +34,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   @Getter private final Class<D> dtoClass;
 
+  protected AbstractService(
+      AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
+    this.abstractMapper = abstractMapper;
+    this.abstractJpaRepository = abstractJpaRepository;
+    dtoClass = this.calculateDTOClass();
+  }
+
+  @Autowired
+  private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
+    this.abstractDAO = abstractDAO;
+  }
+
   @SuppressWarnings("unchecked")
   private Class<D> calculateDTOClass() {
     Type superClass = getClass().getGenericSuperclass();
@@ -48,20 +60,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     throw new IllegalArgumentException("Could not determine DTO class");
   }
 
-  protected AbstractService(
-      AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
-    this.abstractMapper = abstractMapper;
-    this.abstractJpaRepository = abstractJpaRepository;
-    dtoClass = this.calculateDTOClass();
-  }
-
-  @Autowired
-  private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
-    this.abstractDAO = abstractDAO;
-  }
-
   // Do not call this method directly, use the template method instead
-  @Override
   public D create(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -97,7 +96,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E createdEntity = abstractJpaRepository.saveAndFlush(entityToCreate);
 
     // Retrieve the created entity to ensure all fields are populated
-    createdEntity = assertEntityById(createdEntity.getId());
+    createdEntity = assertEntityByIdPost(createdEntity.getId());
 
     // Post-create hook
     postCreate(dtoToCreate, createdEntity);
@@ -116,7 +115,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void postCreate(D dtoToCreate, E createdEntity) {}
 
   // Do not call this method directly, use the template method instead
-  @Override
   public D update(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -148,7 +146,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     validateBeforeCreateOrUpdate(dtoToUpdate);
 
     // Retrieve existing entity
-    E existingEntity = getEntityById(dtoToUpdate.getId());
+    E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
 
     // Create a clone of the existing entity to apply updates
     @SuppressWarnings("unchecked")
@@ -164,7 +162,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E updatedEntity = abstractJpaRepository.saveAndFlush(existingEntityClone);
 
     // Retrieve the updated entity to ensure all fields are populated
-    updatedEntity = assertEntityById(updatedEntity.getId());
+    updatedEntity = assertEntityByIdPost(updatedEntity.getId());
 
     // Post-update hook
     postUpdate(dtoToUpdate, existingEntity, updatedEntity);
@@ -191,7 +189,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void validateBeforeCreateOrUpdate(D dtoToCheck) {}
 
   // Do not call this method directly, use the template method instead
-  @Override
   public D delete(D dto) {
     return executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
@@ -220,7 +217,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // Retrieve existing entity
-    E existingEntity = getEntityById(dtoToDelete.getId());
+    E existingEntity = assertEntityByIdPre(dtoToDelete.getId());
 
     // Pre-delete hook
     preDelete(dtoToDelete, existingEntity);
@@ -251,7 +248,14 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }
 
-  protected List<D> fetchDTORecords(D filter) {
+  // Get count of entity records matching the filter
+  @Transactional(readOnly = true)
+  public Long getCount(D filter) {
+    return abstractDAO.getCount(filter, this::addEntityFilters);
+  }
+
+  // Fetch DTO records matching the filter
+  private List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
     List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
     return modifyGetResult(result, filter);
@@ -265,24 +269,25 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Hook to add additional entity-level filters
   protected void addEntityFilters(CriteriaBuilderWrapper cbw, D filter) {}
 
+  // Hook to modify the result list after fetching records
   protected List<D> modifyGetResult(List<D> result, D filter) {
     return result;
   }
 
-  @Override
+  // Retrieve multiple DTOs matching the filter
   @Transactional(readOnly = true)
   public List<D> get(D dto) {
     return fetchDTORecords(dto);
   }
 
-  @Override
+  // Retrieve a single DTO matching the filter, or null if none found
   @Transactional(readOnly = true)
   public D getSingle(D filter) {
-    List<D> results = fetchDTORecords(filter);
+    List<D> results = get(filter);
     return results.isEmpty() ? null : results.get(0);
   }
 
-  @Override
+  // Retrieve a single DTO by its ID
   @Transactional(readOnly = true)
   public D getById(Long id) {
     try {
@@ -294,29 +299,39 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public Long getCount(D filter) {
-    return abstractDAO.getCount(filter, this::addEntityFilters);
-  }
-
-  protected List<E> fetchEntityRecords(D filter) {
+  // Fetch entity records matching the filter
+  private List<E> fetchEntityRecords(D filter) {
     return abstractDAO.get(filter, this::addEntityFilters);
   }
 
+  // Retrieve multiple entities matching the filter
   @Transactional(readOnly = true)
   public List<E> getEntities(D dto) {
     return fetchEntityRecords(dto);
   }
 
+  // Retrieve a single entity matching the filter, or null if none found
   @Transactional(readOnly = true)
   public E getSingleEntity(D filter) {
     List<E> results = getEntities(filter);
     return results.isEmpty() ? null : results.get(0);
   }
 
+  // Retrieve a single entity by its ID
   @Transactional(readOnly = true)
   public E getEntityById(Long id) {
+    try {
+      D filter = dtoClass.getDeclaredConstructor().newInstance();
+      filter.setId(id);
+      return getSingleEntity(filter);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not create instance of DTO class", e);
+    }
+  }
+
+  // Asserts that an entity with the given ID exists, throws if not found
+  // Uses pre-fetching via DAO to ensure filters and RBAC are applied
+  private E assertEntityByIdPre(Long id) {
     try {
       D filter = dtoClass.getDeclaredConstructor().newInstance();
       filter.setId(id);
@@ -328,7 +343,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
   }
 
-  private E assertEntityById(Long id) {
+  // Asserts that an entity with the given ID exists, throws if not found
+  // Uses direct repository access to ensure the entity is freshly loaded
+  private E assertEntityByIdPost(Long id) {
     return abstractJpaRepository
         .findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
