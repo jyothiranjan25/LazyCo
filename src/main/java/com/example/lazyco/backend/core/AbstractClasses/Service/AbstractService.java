@@ -8,6 +8,9 @@ import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpa
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -17,6 +20,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
+
+  @Autowired
+  @Lazy
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  private AbstractService<D, E> self;
 
   protected AbstractService(
       AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
@@ -37,7 +45,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToCreate) {
-            return executeCreateTransactional(dtoToCreate);
+            return self.executeCreateTransactional(dtoToCreate);
           }
         },
         dto);
@@ -89,7 +97,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
-            return executeUpdateTransactional(dtoToUpdate);
+            return self.executeUpdateTransactional(dtoToUpdate);
           }
         },
         dto);
@@ -160,7 +168,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
-            return executeDeleteTransactional(dtoToDelete);
+            return self.executeDeleteTransactional(dtoToDelete);
           }
         },
         dto);

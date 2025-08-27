@@ -24,7 +24,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       // Process all objects but track errors for atomic rollback
       for (D object : dto.getObjectsList()) {
         try {
-          D result = execute(object);
+          D result = template(object);
           successList.add(result);
         } catch (Throwable t) {
           hasErrors = true;
