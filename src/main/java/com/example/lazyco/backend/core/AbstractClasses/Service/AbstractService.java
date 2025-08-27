@@ -16,7 +16,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
-    implements IAbstractService<D> {
+    implements IAbstractService<D,E> {
 
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
@@ -32,7 +32,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     this.abstractJpaRepository = abstractJpaRepository;
   }
 
-  private E getEntityById(Long id) {
+  public E getEntityById(Long id) {
     return abstractJpaRepository
         .findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
