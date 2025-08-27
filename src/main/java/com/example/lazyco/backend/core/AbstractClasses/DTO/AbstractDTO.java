@@ -20,14 +20,25 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   // Pagination fields
   private Integer pageSize;
   private Integer pageOffset;
+
+  @Expose(deserialize = false)
   private Long totalRecords;
 
   // Audit fields
-  @Expose private String userGroup;
-  @Expose private Date createdAt;
-  @Expose private String createdBy;
-  @Expose private Date updatedAt;
-  @Expose private String updatedBy;
+  @Expose(serialize = false,deserialize = false)
+  private String userGroup;
+
+  @Expose(serialize = false,deserialize = false)
+  private Date createdAt;
+
+  @Expose(serialize = false,deserialize = false)
+  private String createdBy;
+
+  @Expose(serialize = false,deserialize = false)
+  private Date updatedAt;
+
+  @Expose(serialize = false,deserialize = false)
+  private String updatedBy;
 
   // This field is used to indicate if the operation should be atomic or not
   private Boolean isAtomicOperation;

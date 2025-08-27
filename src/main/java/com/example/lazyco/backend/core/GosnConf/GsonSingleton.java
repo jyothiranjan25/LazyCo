@@ -36,7 +36,8 @@ public class GsonSingleton {
           gsonBuilder.setPrettyPrinting();
           //          gsonBuilder.serializeNulls();
           gsonBuilder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
-          gsonBuilder.setExclusionStrategies(new ExcludeHiddenFieldsStrategy());
+          gsonBuilder.addSerializationExclusionStrategy(new SerializationExclusionStrategy());
+          gsonBuilder.addDeserializationExclusionStrategy(new DeserializationExclusionStrategy());
 
           gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
           gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
@@ -94,12 +95,26 @@ public class GsonSingleton {
     return getGson().fromJson(jsonObject.toString(), classOfT);
   }
 
-  private static class ExcludeHiddenFieldsStrategy implements ExclusionStrategy {
+  private static class SerializationExclusionStrategy implements ExclusionStrategy {
 
     @Override
     public boolean shouldSkipField(FieldAttributes f) {
       Expose expose = f.getAnnotation(Expose.class);
       return expose != null && !expose.serialize();
+    }
+
+    @Override
+    public boolean shouldSkipClass(Class<?> clazz) {
+      return false;
+    }
+  }
+
+  private static class DeserializationExclusionStrategy implements ExclusionStrategy {
+
+    @Override
+    public boolean shouldSkipField(FieldAttributes f) {
+      Expose expose = f.getAnnotation(Expose.class);
+      return expose != null && !expose.deserialize();
     }
 
     @Override

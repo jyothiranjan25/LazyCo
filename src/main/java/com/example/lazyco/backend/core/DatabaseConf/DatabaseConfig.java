@@ -159,7 +159,7 @@ public class DatabaseConfig {
   public PlatformTransactionManager transactionManager() {
     JpaTransactionManager transactionManager = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-//    transactionManager.setDefaultTimeout(30); // 30 seconds timeout
+    //    transactionManager.setDefaultTimeout(30); // 30 seconds timeout
     return transactionManager;
   }
 

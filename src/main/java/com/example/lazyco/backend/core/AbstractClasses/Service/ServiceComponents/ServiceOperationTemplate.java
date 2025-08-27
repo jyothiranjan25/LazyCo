@@ -2,6 +2,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponent
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           hasErrors = true;
           object.setErrorMessage("Something went wrong");
           errorList.add(object);
+          ApplicationLogger.error(t.getMessage(), t);
         }
       }
       resultList.addAll(successList);

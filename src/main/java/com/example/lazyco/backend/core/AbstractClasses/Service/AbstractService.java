@@ -8,9 +8,9 @@ import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpa
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -45,12 +45,15 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToCreate) {
-            return self.executeCreateTransactional(dtoToCreate);
+            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              return self.executeCreateTransactional(dtoToCreate);
+            else return executeCreate(dtoToCreate);
           }
         },
         dto);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeCreateTransactional(D dto) {
     return executeCreate(dto);
   }
@@ -97,12 +100,15 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
-            return self.executeUpdateTransactional(dtoToUpdate);
+            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              return self.executeUpdateTransactional(dtoToUpdate);
+            else return executeUpdate(dtoToUpdate);
           }
         },
         dto);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeUpdateTransactional(D dto) {
     return executeUpdate(dto);
   }
@@ -168,12 +174,15 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
-            return self.executeDeleteTransactional(dtoToDelete);
+            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              return self.executeDeleteTransactional(dtoToDelete);
+            else return executeDelete(dtoToDelete);
           }
         },
         dto);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeDeleteTransactional(D dto) {
     return executeDelete(dto);
   }
@@ -239,9 +248,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   @Override
   @Transactional(readOnly = true)
-  public List<D> get(D dto) {
-    E entity = abstractMapper.map(dto);
-    D mappedDto = abstractMapper.map(entity);
-    return List.of(mappedDto);
+  public D get(D dto) {
+    List<E> entities = abstractJpaRepository.findAll();
+    List<D> dtos = abstractMapper.map(entities);
+    dto.setObjectsList(dtos);
+    return dto;
   }
 }
