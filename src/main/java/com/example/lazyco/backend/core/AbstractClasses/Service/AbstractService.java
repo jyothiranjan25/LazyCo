@@ -89,10 +89,14 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
-            return executeUpdate(dtoToUpdate);
+            return executeUpdateTransactional(dtoToUpdate);
           }
         },
         dto);
+  }
+
+  public D executeUpdateTransactional(D dto) {
+    return executeUpdate(dto);
   }
 
   private D executeUpdate(D dtoToUpdate) {
@@ -156,10 +160,14 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
-            return executeDelete(dtoToDelete);
+            return executeDeleteTransactional(dtoToDelete);
           }
         },
         dto);
+  }
+
+  public D executeDeleteTransactional(D dto) {
+    return executeDelete(dto);
   }
 
   private D executeDelete(D dtoToDelete) {
