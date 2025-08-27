@@ -97,7 +97,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E createdEntity = abstractJpaRepository.saveAndFlush(entityToCreate);
 
     // Retrieve the created entity to ensure all fields are populated
-    createdEntity = getEntityById(createdEntity.getId());
+    createdEntity = assertEntityById(createdEntity.getId());
 
     // Post-create hook
     postCreate(dtoToCreate, createdEntity);
@@ -164,7 +164,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E updatedEntity = abstractJpaRepository.saveAndFlush(existingEntityClone);
 
     // Retrieve the updated entity to ensure all fields are populated
-    updatedEntity = getEntityById(updatedEntity.getId());
+    updatedEntity = assertEntityById(updatedEntity.getId());
 
     // Post-update hook
     postUpdate(dtoToUpdate, existingEntity, updatedEntity);
@@ -251,13 +251,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }
 
-  private E getEntityById(Long id) {
-    return abstractJpaRepository
-        .findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
-  }
-
-  protected List<D> fetchRecords(D filter) {
+  protected List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
     List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
     return modifyGetResult(result, filter);
@@ -278,24 +272,65 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Override
   @Transactional(readOnly = true)
   public List<D> get(D dto) {
-    return fetchRecords(dto);
+    return fetchDTORecords(dto);
   }
 
   @Override
   @Transactional(readOnly = true)
   public D getSingle(D filter) {
-    return null;
+    List<D> results = fetchDTORecords(filter);
+    return results.isEmpty() ? null : results.get(0);
   }
 
   @Override
   @Transactional(readOnly = true)
   public D getById(Long id) {
-    return null;
+    try {
+      D filter = dtoClass.getDeclaredConstructor().newInstance();
+      filter.setId(id);
+      return getSingle(filter);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not create instance of DTO class", e);
+    }
   }
 
   @Override
   @Transactional(readOnly = true)
   public Long getCount(D filter) {
-    return 0L;
+    return abstractDAO.getCount(filter, this::addEntityFilters);
+  }
+
+  protected List<E> fetchEntityRecords(D filter) {
+    return abstractDAO.get(filter, this::addEntityFilters);
+  }
+
+  @Transactional(readOnly = true)
+  public List<E> getEntities(D dto) {
+    return fetchEntityRecords(dto);
+  }
+
+  @Transactional(readOnly = true)
+  public E getSingleEntity(D filter) {
+    List<E> results = getEntities(filter);
+    return results.isEmpty() ? null : results.get(0);
+  }
+
+  @Transactional(readOnly = true)
+  public E getEntityById(Long id) {
+    try {
+      D filter = dtoClass.getDeclaredConstructor().newInstance();
+      filter.setId(id);
+      E result = getSingleEntity(filter);
+      if (result == null) throw new IllegalArgumentException("Entity with id " + id + " not found");
+      return result;
+    } catch (Exception e) {
+      throw new RuntimeException("Could not create instance of DTO class", e);
+    }
+  }
+
+  private E assertEntityById(Long id) {
+    return abstractJpaRepository
+        .findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
   }
 }

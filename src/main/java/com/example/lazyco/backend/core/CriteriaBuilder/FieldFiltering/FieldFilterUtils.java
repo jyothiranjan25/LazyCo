@@ -2,15 +2,18 @@ package com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public class FieldFilterUtils {
 
   private static void addSingleFieldFilter(
@@ -42,7 +45,7 @@ public class FieldFilterUtils {
       }
     } catch (Throwable t) {
       // Ignore - field may not be accessible or other reflection issues
-      t.printStackTrace();
+      ApplicationLogger.error(t.getMessage(), t);
     }
   }
 
@@ -257,12 +260,8 @@ public class FieldFilterUtils {
   }
 
   public static List<Field> getAllFields(Class<?> clazz) {
-    List<Field> fields = new ArrayList<>();
-
     // Get fields from the current class
-    for (Field field : clazz.getDeclaredFields()) {
-      fields.add(field);
-    }
+    List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
 
     // Get fields from superclasses recursively
     if (clazz.getSuperclass() != null) {
