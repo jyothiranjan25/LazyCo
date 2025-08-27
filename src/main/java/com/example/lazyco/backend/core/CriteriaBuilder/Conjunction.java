@@ -4,12 +4,12 @@ import jakarta.persistence.criteria.Predicate;
 
 public class Conjunction extends JunctionBuilder {
 
-    public Conjunction(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-        super(criteriaBuilderWrapper);
-    }
+  public Conjunction(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    super(criteriaBuilderWrapper);
+  }
 
-    public Predicate build() {
-        return criteriaBuilderWrapper.getAndPredicate(
-                predicates.toArray(new Predicate[predicates.size()]));
-    }
+  public Predicate build() {
+    return criteriaBuilderWrapper.getAndPredicate(
+        predicates.toArray(new Predicate[predicates.size()]));
+  }
 }
