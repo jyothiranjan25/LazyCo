@@ -25,19 +25,19 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Long totalRecords;
 
   // Audit fields
-  @Expose(serialize = false,deserialize = false)
+  @Expose(serialize = false, deserialize = false)
   private String userGroup;
 
-  @Expose(serialize = false,deserialize = false)
+  @Expose(serialize = false, deserialize = false)
   private Date createdAt;
 
-  @Expose(serialize = false,deserialize = false)
+  @Expose(serialize = false, deserialize = false)
   private String createdBy;
 
-  @Expose(serialize = false,deserialize = false)
+  @Expose(serialize = false, deserialize = false)
   private Date updatedAt;
 
-  @Expose(serialize = false,deserialize = false)
+  @Expose(serialize = false, deserialize = false)
   private String updatedBy;
 
   // This field is used to indicate if the operation should be atomic or not

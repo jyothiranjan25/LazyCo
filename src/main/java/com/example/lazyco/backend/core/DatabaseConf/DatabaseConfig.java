@@ -20,6 +20,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfig {
 
+  // ==============================
+  // Database connection settings
+  // ==============================
+
   @Value("${db.driverClassName}")
   private String driverClassName;
 
@@ -32,33 +36,40 @@ public class DatabaseConfig {
   @Value("${db.password}")
   private String password;
 
-  // HikariCP settings optimized for high concurrency
-  @Value("${hikari.maximumPoolSize:100}")
+  // ==============================
+  // HikariCP connection pool settings
+  // ==============================
+
+  @Value("${hikari.maximumPoolSize:50}")
   private int maximumPoolSize;
 
-  @Value("${hikari.minimumIdle:20}")
+  @Value("${hikari.minimumIdle:10}")
   private int minimumIdle;
 
-  @Value("${hikari.connectionTimeout:60000}")
+  @Value("${hikari.connectionTimeout:30000}")
   private int connectionTimeout;
 
-  @Value("${hikari.idleTimeout:900000}")
+  @Value("${hikari.idleTimeout:600000}")
   private int idleTimeout;
 
   @Value("${hikari.maxLifetime:1800000}")
   private int maximumLifetime;
 
+  @Value("${hikari.validationTimeout:5000}")
+  private int validationTimeout;
+
   @Value("${hikari.leakDetectionThreshold:60000}")
   private int leakDetectionThreshold;
-
-  @Value("${hikari.validationTimeout:10000}")
-  private int validationTimeout;
 
   @Value("${hikari.initializationFailTimeout:30000}")
   private int initializationFailTimeout;
 
   @Value("${hikari.keepaliveTime:300000}")
   private int keepaliveTime;
+
+  // ==============================
+  // Hibernate settings
+  // ==============================
 
   // Hibernate settings
   @Value("${hibernate.dialect}")
@@ -79,78 +90,112 @@ public class DatabaseConfig {
   @Value("${hibernate.cache_region_factory_class}")
   private String hibernateCacheRegionFactory;
 
-  // Audit settings
+  // ==============================
+  // Hibernate Envers (audit) settings
+  // ==============================
   @Value("${hibernate.envers.enabled:false}")
   private boolean hibernateEnversEnabled;
 
-  @Value("${hibernate.envers.store_data_at_delete:true}")
+  @Value("${hibernate.envers.store_data_at_delete:false}")
   private boolean hibernateEnversStoreDataAtDelete;
 
-  @Value("${hibernate.envers.revision_on_collection_change:true}")
+  @Value("${hibernate.envers.revision_on_collection_change:false}")
   private boolean hibernateEnversRevisionOnCollectionChange;
+
+  // ==============================
+  // Transaction settings
+  // ==============================
+
+  @Value("${spring.transaction.default-timeout:30}")
+  private int defaultTransactionTimeout;
+
+  @Value("${spring.transaction.rollback-on-commit-failure:true}")
+  private boolean rollbackOnCommitFailure;
 
   @Bean
   @Primary
   public DataSource dataSource() {
     HikariConfig config = new HikariConfig();
+
+    // JDBC driver class (e.g., org.postgresql.Driver)
     config.setDriverClassName(driverClassName);
+    // Database connection URL
     config.setJdbcUrl(jdbcUrl);
+    // Database username
     config.setUsername(username);
+    // Database password
     config.setPassword(password);
 
-    // Connection pool settings optimized for 300-400 concurrent users
+    // Max number of active connections in the pool
     config.setMaximumPoolSize(maximumPoolSize);
+    // Minimum number of idle connections to keep ready
     config.setMinimumIdle(minimumIdle);
+    // How long to wait for a free connection before throwing error (ms)
     config.setConnectionTimeout(connectionTimeout);
+    // Time a connection can sit idle before being closed (ms)
     config.setIdleTimeout(idleTimeout);
+    // Maximum lifetime of a connection before being retired (ms)
     config.setMaxLifetime(maximumLifetime);
+    // Log warning if a connection is not closed within this time (ms)
     config.setLeakDetectionThreshold(leakDetectionThreshold);
+    // Max time to wait for a connection validation (ms)
     config.setValidationTimeout(validationTimeout);
+    // Fail fast timeout if DB cannot be reached at startup (ms)
     config.setInitializationFailTimeout(initializationFailTimeout);
+    // Interval at which keepalive queries are sent (ms)
     config.setKeepaliveTime(keepaliveTime);
 
-    // Disable autoCommit to match Hibernate's transaction management
+    // Disable auto-commit, Hibernate manages transactions
     config.setAutoCommit(false);
-
-    // Performance optimizations for PostgreSQL
+    // Custom pool name (useful for monitoring/metrics)
+    config.setPoolName("HikariPool-HighConcurrency");
+    // Lightweight validation query for checking connections
     config.setConnectionTestQuery("SELECT 1");
 
-    // PostgreSQL specific optimizations
+    // --- PostgreSQL-specific optimizations ---
+    // Rewrite multi-row inserts into a single batch insert
     config.addDataSourceProperty("reWriteBatchedInserts", "true");
+    // Allow flexible string type handling (fixes type issues)
     config.addDataSourceProperty("stringtype", "unspecified");
+    // Use server-side prepared statements after 1 execution
     config.addDataSourceProperty("prepareThreshold", "1");
+    // Enable client-side prepared statement caching
     config.addDataSourceProperty("cachePrepStmts", "true");
+    // Use server-side prepared statements
     config.addDataSourceProperty("useServerPrepStmts", "true");
+    // Track session state locally (reduces network round trips)
     config.addDataSourceProperty("useLocalSessionState", "true");
+    // Rewrite batched statements into a single request
     config.addDataSourceProperty("rewriteBatchedStatements", "true");
-    config.addDataSourceProperty("preparedStatementCacheQueries", "256");
-    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "5");
+    // Max number of prepared statements to cache
+    config.addDataSourceProperty("preparedStatementCacheQueries", "1024");
+    // Memory size allocated for prepared statement cache
+    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "10");
+    // Cache size for database metadata fields
     config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
+    // Memory size allocated for metadata cache
     config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
-
-    // Connection management
+    // Enable TCP keep-alive to detect dead connections
     config.addDataSourceProperty("tcpKeepAlive", "true");
+    // Disable socket timeout (0 = infinite)
     config.addDataSourceProperty("socketTimeout", "0");
-
-    // Pool name for monitoring
-    config.setPoolName("HikariPool-HighConcurrency");
-
-    return new HikariDataSource(config);
+    // Fetch 1000 rows per round trip when streaming large results
+    config.addDataSourceProperty("defaultRowFetchSize", "1000");
+    return new HikariDataSource(config); // Build and return the fully configured DataSource
   }
 
   @Bean
   @Primary
   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    vendorAdapter.setGenerateDdl(true); // Let Hibernate generate DDL
+    vendorAdapter.setShowSql(showSql); // Show SQL in logs based on config
+
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(dataSource());
     em.setPackagesToScan(PackageSchema.BACKEND_PACKAGE);
-    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    vendorAdapter.setGenerateDdl(true);
-    vendorAdapter.setShowSql(showSql);
     em.setJpaVendorAdapter(vendorAdapter);
-
     em.setJpaProperties(hibernateProperties());
-
     return em;
   }
 
@@ -159,60 +204,75 @@ public class DatabaseConfig {
   public PlatformTransactionManager transactionManager() {
     JpaTransactionManager transactionManager = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-    //    transactionManager.setDefaultTimeout(30); // 30 seconds timeout
+    // Transaction timeout in seconds
+    transactionManager.setDefaultTimeout(defaultTransactionTimeout);
+    // Rollback if commit fails
+    transactionManager.setRollbackOnCommitFailure(rollbackOnCommitFailure);
     return transactionManager;
   }
 
   private Properties hibernateProperties() {
     Properties properties = new Properties();
 
-    // Database dialect
+    // Dialect for SQL generation (e.g., PostgreSQLDialect, MySQLDialect, etc.)
     properties.put(AvailableSettings.DIALECT, hibernateDialect);
-
-    // Connection provider - let Spring manage this
+    // Disable auto-commit handling by Hibernate (let Spring/JPA manage it)
     properties.put(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true");
-
-    // Performance settings for high concurrency
-    properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "50");
+    // Number of statements to batch before execution
+    properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "100");
+    // Optimize insert batching by ordering inserts by entity
     properties.put(AvailableSettings.ORDER_INSERTS, "true");
+    // Optimize update batching by ordering updates by entity
     properties.put(AvailableSettings.ORDER_UPDATES, "true");
+    // Store timestamps consistently in UTC
     properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
-    // Second level cache - enabled for high concurrency
+    // Enable/disable second-level cache
     properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
+    // Enable/disable query cache
     properties.put(AvailableSettings.USE_QUERY_CACHE, useQueryCache);
+    // Cache region factory class implementation
     properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
 
-    // Statistics and logging (optimized for production)
+    // Disable runtime statistics collection (expensive in production)
     properties.put(AvailableSettings.GENERATE_STATISTICS, "false");
+    // Log SQL statements if enabled
     properties.put(AvailableSettings.SHOW_SQL, showSql);
+    // Don’t pretty-print SQL (faster logging, smaller output)
     properties.put(AvailableSettings.FORMAT_SQL, "false");
 
-    // Schema management
+    // Strategy for schema generation/validation (validate, update, create, create-drop)
     properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);
 
-    // JPA compliance and transaction management
+    // Disable Hibernate autocommit — handled by Spring Tx manager
     properties.put(AvailableSettings.AUTOCOMMIT, "false");
+    // Ensure JPA transaction behavior is strictly followed
     properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
+    // Delay connection acquisition until needed, keep until transaction end
     properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
 
-    // Naming strategy for better readability
+    // Convert camelCase entity names → snake_case table/column names
     properties.put(
         AvailableSettings.PHYSICAL_NAMING_STRATEGY,
         "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
-    // Connection isolation level
+    // Transaction isolation level (READ_COMMITTED recommended for PostgreSQL)
     properties.put(AvailableSettings.ISOLATION, "READ_COMMITTED");
 
-    // Additional performance optimizations
+    // Avoid redundant cache puts when entity already cached
     properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
+    // Use structured format for cache entries (better debuggability)
     properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
 
-    // Hibernate Envers settings
+    // Enable Envers auditing (tracks entity changes)
     properties.put("org.hibernate.envers.Audited", "true");
+    // Suffix for audit tables
     properties.put("org.hibernate.envers.audit_table_suffix", "_AUD");
+    // Enabling/Disabling Envers integration
     properties.put("hibernate.integration.envers.enabled", hibernateEnversEnabled);
+    // Store entity data in audit table at deletion time
     properties.put("org.hibernate.envers.store_data_at_delete", hibernateEnversStoreDataAtDelete);
+    // Create new revision if only a collection (e.g., list/Set) changes
     properties.put(
         "org.hibernate.envers.revision_on_collection_change",
         hibernateEnversRevisionOnCollectionChange);
