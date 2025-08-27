@@ -26,6 +26,8 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   @Column(name = AbstractBaseSchema.ID)
   private Long id;
 
+  @Version private Long version; // for optimistic locking safety
+
   @Column(name = AbstractBaseSchema.CREATED_AT)
   private Date createdAt;
 

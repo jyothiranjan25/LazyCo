@@ -16,12 +16,12 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
-    implements IAbstractService<D,E> {
+    implements IAbstractService<D, E> {
 
-    @Autowired
-    @Lazy
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    private AbstractService<D, E> self;
+  @Autowired
+  @Lazy
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  private AbstractService<D, E> self;
 
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
@@ -223,9 +223,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   private E getEntityById(Long id) {
-      return abstractJpaRepository
-              .findById(id)
-              .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
+    return abstractJpaRepository
+        .findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
   }
 
   @Override

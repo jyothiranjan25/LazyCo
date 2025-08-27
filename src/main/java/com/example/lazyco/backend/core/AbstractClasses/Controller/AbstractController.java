@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 public abstract class AbstractController<D extends AbstractDTO<D>> {
 
-  protected IAbstractService<D,?> abstractService;
+  protected IAbstractService<D, ?> abstractService;
 
   private final GetControllerComponent<D> readControllerComponent;
 
@@ -24,7 +24,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
 
   private final DeleteControllerComponent<D> deleteControllerComponent;
 
-  public AbstractController(IAbstractService<D,?> abstractService) {
+  public AbstractController(IAbstractService<D, ?> abstractService) {
     this.abstractService = abstractService;
     this.readControllerComponent = new GetControllerComponent<>(abstractService);
     this.createControllerComponent = new CreateControllerComponent<>(abstractService);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(APP_USER_API)
 public class AppUserController extends AbstractController<AppUserDTO> {
 
-  public AppUserController(IAbstractService<AppUserDTO,?> abstractService) {
+  public AppUserController(IAbstractService<AppUserDTO, ?> abstractService) {
     super(abstractService);
   }
 }
