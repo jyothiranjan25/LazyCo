@@ -304,8 +304,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Retrieve multiple entities matching the filter
   @Transactional(readOnly = true)
-  public List<E> getEntities(D dto) {
-    return fetchEntityRecords(dto);
+  public List<E> getEntities(D filters) {
+    return fetchEntityRecords(filters);
   }
 
   // Retrieve a single entity matching the filter, or null if none found
