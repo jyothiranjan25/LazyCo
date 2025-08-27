@@ -1,8 +1,9 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
-import com.example.lazyco.backend.schema.database.AppUserSchema;
+import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -18,35 +19,37 @@ import org.hibernate.envers.Audited;
 @DynamicUpdate
 @DynamicInsert
 @Table(
-    name = AppUserSchema.TABLE_NAME,
+    name = "app_user",
+    comment = "Table storing application user details",
     indexes = {
-      @Index(name = "idx_app_user_user_id", columnList = AppUserSchema.USER_ID),
-      @Index(name = "idx_app_user_email", columnList = AppUserSchema.EMAIL),
+      @Index(name = "idx_app_user_user_id", columnList = "user_id"),
+      @Index(name = "idx_app_user_email", columnList = "email"),
     },
     uniqueConstraints = {
-      @UniqueConstraint(
-          name = "uk_app_user_user_id",
-          columnNames = {AppUserSchema.USER_ID}),
+      @UniqueConstraint(name = "uk_app_user_user_id", columnNames = "user_id"),
       @UniqueConstraint(
           name = "uk_app_user_email",
-          columnNames = {AppUserSchema.EMAIL})
+          columnNames = {"email"})
     })
 @EntityListeners(AppUserListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppUser extends AbstractModelBase {
 
-  @Column(name = AppUserSchema.USER_ID)
+  @Column(name = "user_id", nullable = false, length = 50, comment = "Unique user identifier")
   private String userId;
 
-  @Column(name = AppUserSchema.PASSWORD)
+  @Column(name = "password", nullable = false, comment = "Hashed user password")
   private String password;
 
-  @Column(name = AppUserSchema.EMAIL)
+  @Column(name = "email", nullable = false, length = 100, comment = "User email address")
   private String email;
 
-  @Column(name = AppUserSchema.FIRST_NAME)
+  @Column(name = "first_name", length = 50, comment = "User first name")
   private String firstName;
 
-  @Column(name = AppUserSchema.LAST_NAME)
+  @Column(name = "last_name", length = 50, comment = "User last name")
   private String lastName;
+
+  @Enumerated(EnumType.STRING)
+  private List<CRUDEnums> permissions;
 }

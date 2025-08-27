@@ -26,7 +26,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
-  private IAbstractDAO<D,E> abstractDAO;
+  private IAbstractDAO<D, E> abstractDAO;
 
   protected AbstractService(
       AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
@@ -35,7 +35,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   @Autowired
-  private void injectDependencies(IAbstractDAO<D,E> abstractDAO) {
+  private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
     this.abstractDAO = abstractDAO;
   }
 
@@ -86,13 +86,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before creation
-  protected final void updateDtoBeforeCreate(D dtoToCreate) {}
+  protected void updateDtoBeforeCreate(D dtoToCreate) {}
 
   // Hook called before the entity is persisted
-  protected final void preCreate(D dtoToCreate, E entityToCreate) {}
+  protected void preCreate(D dtoToCreate, E entityToCreate) {}
 
   // Hook called after the entity is persisted
-  protected final void postCreate(D dtoToCreate, E createdEntity) {}
+  protected void postCreate(D dtoToCreate, E createdEntity) {}
 
   // Do not call this method directly, use the template method instead
   @Override
@@ -130,6 +130,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E existingEntity = getEntityById(dtoToUpdate.getId());
 
     // Create a clone of the existing entity to apply updates
+    @SuppressWarnings("unchecked")
     E existingEntityClone = (E) existingEntity.clone(); // Create a copy for pre-update
 
     // Apply updates from DTO to the cloned entity
@@ -166,7 +167,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void postUpdate(D dtoToUpdate, E entityBeforeUpdate, E updatedEntity) {}
 
   // Hook to validate DTO before create or update
-  protected abstract void validateBeforeCreateOrUpdate(D dtoToCheck);
+  protected void validateBeforeCreateOrUpdate(D dtoToCheck) {}
 
   // Do not call this method directly, use the template method instead
   @Override

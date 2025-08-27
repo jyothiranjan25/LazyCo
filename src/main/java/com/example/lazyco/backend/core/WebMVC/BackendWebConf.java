@@ -1,8 +1,9 @@
 package com.example.lazyco.backend.core.WebMVC;
 
+import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
+
 import com.example.lazyco.backend.core.DatabaseConf.DatabaseConfig;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsArgumentResolver;
-import com.example.lazyco.backend.schema.PackageSchema;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAsync(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @Import({DatabaseConfig.class})
-@EnableJpaRepositories(basePackages = {PackageSchema.BACKEND_PACKAGE})
-@ComponentScan(basePackages = {PackageSchema.BACKEND_PACKAGE})
+@EnableJpaRepositories(basePackages = {BACKEND_PACKAGE})
+@ComponentScan(basePackages = {BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:application.properties")})
 public class BackendWebConf implements WebMvcConfigurer {
 

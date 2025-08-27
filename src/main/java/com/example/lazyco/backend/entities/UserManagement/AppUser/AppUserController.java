@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
-import static com.example.lazyco.backend.schema.api.APISchema.APP_USER_API;
+import static com.example.lazyco.backend.core.Utils.APISchema.APP_USER_API;
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.backend.core.AbstractClasses.Service.IAbstractService;

@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.AbstractClasses.Entity;
 
-import com.example.lazyco.backend.schema.database.AbstractModelBaseSchema;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -11,6 +10,6 @@ import lombok.Setter;
 @MappedSuperclass
 public abstract class AbstractModelBase extends AbstractModel {
 
-  @Column(name = AbstractModelBaseSchema.USER_GROUP)
+  @Column(name = "user_group")
   private String userGroup;
 }

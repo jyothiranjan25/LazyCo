@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.DatabaseConf;
 
-import com.example.lazyco.backend.schema.PackageSchema;
+import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
@@ -190,7 +191,7 @@ public class DatabaseConfig {
 
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(dataSource());
-    em.setPackagesToScan(PackageSchema.BACKEND_PACKAGE);
+    em.setPackagesToScan(BACKEND_PACKAGE);
     em.setJpaVendorAdapter(vendorAdapter);
     em.setJpaProperties(hibernateProperties());
     return em;
