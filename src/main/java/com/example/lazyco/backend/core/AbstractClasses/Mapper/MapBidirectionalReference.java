@@ -1,11 +1,11 @@
 package com.example.lazyco.backend.core.AbstractClasses.Mapper;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.mapstruct.BeforeMapping;
 
-public interface MapBidirectionalReference<D extends AbstractDTO<D>, E extends AbstractModelBase> {
+public interface MapBidirectionalReference<D extends AbstractDTO<D>, E extends AbstractModel> {
 
   D map(E m);
 

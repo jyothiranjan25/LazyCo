@@ -1,12 +1,12 @@
 package com.example.lazyco.backend.core.AbstractClasses.Mapper;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import java.util.List;
 import java.util.Set;
 import org.mapstruct.*;
 
-public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModelBase>
+public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModel>
     extends MapBidirectionalReference<D, E> {
 
   D map(E entity);

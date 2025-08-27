@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 import static com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate.executeServiceOperationTemplate;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Transactional
-public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
+public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractService<D, E> {
 
   @Autowired
