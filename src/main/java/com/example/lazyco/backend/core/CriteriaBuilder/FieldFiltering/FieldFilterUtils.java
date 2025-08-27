@@ -216,7 +216,7 @@ public class FieldFilterUtils {
     // Get field name for fallback
     String fieldName = getSerializedFieldName(field);
     // Check for @FieldPath annotation
-    FieldPath fieldPath = field.getAnnotation(FieldPath.class);
+    InternalFilterableField fieldPath = field.getAnnotation(InternalFilterableField.class);
     if (fieldPath != null) {
       fullyQualifiedPath = fieldPath.fullyQualifiedPath();
       if (!fieldPath.aliasPath().isEmpty()) {

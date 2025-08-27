@@ -8,12 +8,10 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
-
+import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-
-import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -34,22 +32,21 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   private final AbstractJpaRepository<E> abstractJpaRepository;
   private IAbstractDAO<D, E> abstractDAO;
 
-  @Getter
-  private final Class<D> dtoClass;
+  @Getter private final Class<D> dtoClass;
 
-    @SuppressWarnings("unchecked")
-    private Class<D> calculateDTOClass() {
-        Type superClass = getClass().getGenericSuperclass();
-        if (superClass instanceof ParameterizedType parameterizedType) {
-            Type type = parameterizedType.getActualTypeArguments()[0];
-            if (type instanceof Class) {
-                return (Class<D>) type;
-            } else if (type instanceof ParameterizedType) {
-                return (Class<D>) ((ParameterizedType) type).getRawType();
-            }
-        }
-        throw new IllegalArgumentException("Could not determine DTO class");
+  @SuppressWarnings("unchecked")
+  private Class<D> calculateDTOClass() {
+    Type superClass = getClass().getGenericSuperclass();
+    if (superClass instanceof ParameterizedType parameterizedType) {
+      Type type = parameterizedType.getActualTypeArguments()[0];
+      if (type instanceof Class) {
+        return (Class<D>) type;
+      } else if (type instanceof ParameterizedType) {
+        return (Class<D>) ((ParameterizedType) type).getRawType();
+      }
     }
+    throw new IllegalArgumentException("Could not determine DTO class");
+  }
 
   protected AbstractService(
       AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
@@ -260,29 +257,29 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
   }
 
-    protected List<D> fetchRecords(D filter) {
-        filter = updateFilterBeforeGet(filter);
-        List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
-        return modifyGetResult(result, filter);
-    }
+  protected List<D> fetchRecords(D filter) {
+    filter = updateFilterBeforeGet(filter);
+    List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
+    return modifyGetResult(result, filter);
+  }
 
-    // Hook to modify the filter before fetching records
-    protected D updateFilterBeforeGet(D filter) {
-        return filter;
-    }
+  // Hook to modify the filter before fetching records
+  protected D updateFilterBeforeGet(D filter) {
+    return filter;
+  }
 
-    // Hook to add additional entity-level filters
-    protected void addEntityFilters(CriteriaBuilderWrapper cbw, D filter) {}
+  // Hook to add additional entity-level filters
+  protected void addEntityFilters(CriteriaBuilderWrapper cbw, D filter) {}
 
-    protected List<D> modifyGetResult(List<D> result, D filter) {
-        return result;
-    }
+  protected List<D> modifyGetResult(List<D> result, D filter) {
+    return result;
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<D> get(D dto) {
-        return fetchRecords(dto);
-    }
+  @Override
+  @Transactional(readOnly = true)
+  public List<D> get(D dto) {
+    return fetchRecords(dto);
+  }
 
   @Override
   @Transactional(readOnly = true)

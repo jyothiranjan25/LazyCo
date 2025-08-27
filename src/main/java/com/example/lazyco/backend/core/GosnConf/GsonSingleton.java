@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.GosnConf;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 
 import com.example.lazyco.backend.core.DateUtils.DateParser;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
@@ -14,8 +15,6 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -39,12 +38,8 @@ public class GsonSingleton {
           gsonBuilder.addSerializationExclusionStrategy(new SerializationExclusionStrategy());
           gsonBuilder.addDeserializationExclusionStrategy(new DeserializationExclusionStrategy());
 
-          gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
-          gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
-          gsonBuilder.registerTypeAdapter(Time.class, new TimeDeserializer());
-          gsonBuilder.registerTypeAdapter(Time.class, new TimeSerializer());
-          gsonBuilder.registerTypeAdapter(String.class, new StringDeserializer());
-          gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
+          registerTypeAdapter(gsonBuilder);
+
           instance = gsonBuilder.create();
         }
       }
@@ -52,13 +47,23 @@ public class GsonSingleton {
     return instance;
   }
 
+  private static void registerTypeAdapter(GsonBuilder gsonBuilder) {
+    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
+    gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
+    gsonBuilder.registerTypeAdapter(Time.class, new TimeDeserializer());
+    gsonBuilder.registerTypeAdapter(Time.class, new TimeSerializer());
+    gsonBuilder.registerTypeAdapter(String.class, new StringDeserializer());
+    gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
+    gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberDeserializer());
+    gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberSerializer());
+  }
+
   public static Gson getGson() {
     // Create Gson instance with custom serializer
     GsonBuilder gsonBuilder = new GsonBuilder();
     // Register custom serializers
     gsonBuilder.setPrettyPrinting();
-    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
-    gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
+    registerTypeAdapter(gsonBuilder);
     gsonBuilder.registerTypeAdapterFactory(new LenientTypeAdapterFactory());
     return gsonBuilder.create();
   }
@@ -230,49 +235,6 @@ public class GsonSingleton {
     }
   }
 
-  private static class MapStringSerializer implements JsonSerializer<Map<String, String>> {
-    @Override
-    public JsonElement serialize(
-        Map<String, String> src, Type typeOfSrc, JsonSerializationContext context) {
-      JsonObject jsonObject = new JsonObject();
-      for (Map.Entry<String, String> entry : src.entrySet()) {
-        jsonObject.addProperty(entry.getKey(), entry.getValue());
-      }
-      return jsonObject;
-    }
-  }
-
-  private static class MapStringDeserializer implements JsonDeserializer<Map<String, String>> {
-    @Override
-    public Map<String, String> deserialize(
-        JsonElement json, Type typeOfT, JsonDeserializationContext context)
-        throws JsonParseException {
-      Map<String, String> result = new HashMap<>();
-      JsonObject jsonObject = json.getAsJsonObject();
-
-      for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-        JsonElement element = entry.getValue();
-        if (element.isJsonPrimitive()) {
-          String value = element.getAsString().trim(); // Trim the value
-          result.put(entry.getKey(), value);
-        } else if (element.isJsonObject()) {
-          // Recursively process nested JSON objects
-          Map<String, String> nestedResult = deserialize(element, typeOfT, context);
-          result.putAll(nestedResult);
-        } else if (element.isJsonArray()) {
-          // Process JSON arrays
-          for (JsonElement arrayElement : element.getAsJsonArray()) {
-            if (arrayElement.isJsonObject()) {
-              Map<String, String> nestedResult = deserialize(arrayElement, typeOfT, context);
-              result.putAll(nestedResult);
-            }
-          }
-        }
-      }
-      return result;
-    }
-  }
-
   private static class LenientTypeAdapterFactory implements TypeAdapterFactory {
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
@@ -294,6 +256,49 @@ public class GsonSingleton {
           }
         }
       };
+    }
+  }
+
+  public static class LenientNumberSerializer implements JsonSerializer<Number> {
+    @Override
+    public JsonElement serialize(
+        Number number, Type type, JsonSerializationContext jsonSerializationContext) {
+      if (number == null) {
+        return null; // JSON null
+      }
+      return new JsonPrimitive(number);
+    }
+  }
+
+  private static class LenientNumberDeserializer implements JsonDeserializer<Number> {
+
+    @Override
+    public Number deserialize(
+        JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
+        throws JsonParseException {
+      if (jsonElement == null || jsonElement.isJsonNull()) return null;
+
+      String str = jsonElement.getAsString().trim();
+      if (str.isEmpty()) return null;
+
+      try {
+        if (type == Integer.class || type == int.class) {
+          return Integer.parseInt(str);
+        } else if (type == Long.class || type == long.class) {
+          return Long.parseLong(str);
+        } else if (type == Double.class || type == double.class) {
+          return Double.parseDouble(str);
+        } else if (type == Float.class || type == float.class) {
+          return Float.parseFloat(str);
+        } else if (type == Short.class || type == short.class) {
+          return Short.parseShort(str);
+        } else if (type == Byte.class || type == byte.class) {
+          return Byte.parseByte(str);
+        }
+      } catch (NumberFormatException e) {
+        ApplicationLogger.error(e.getMessage(), e);
+      }
+      return null;
     }
   }
 }

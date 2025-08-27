@@ -72,11 +72,11 @@ public class QueryParamsArgumentResolver implements HandlerMethodArgumentResolve
 
     } catch (JsonSyntaxException e) {
       // Log the error and return a default instance
-      ApplicationLogger.error("Failed to deserialize query parameters: " + e.getMessage());
+      ApplicationLogger.error("Failed to deserialize query parameters", e);
       return createDefaultInstance(parameter.getParameterType());
     } catch (Exception e) {
       // Handle any other unexpected errors
-      ApplicationLogger.error("Failed to deserialize query parameters: " + e.getMessage());
+      ApplicationLogger.error("Failed to deserialize query parameters", e);
       return createDefaultInstance(parameter.getParameterType());
     }
   }
@@ -106,6 +106,9 @@ public class QueryParamsArgumentResolver implements HandlerMethodArgumentResolve
         String parameter = request.getParameter(key);
         if (parameter != null) {
           parameter = parameter.trim();
+          if (parameter.isEmpty()) {
+            parameter = null; // Convert empty strings to null
+          }
         }
 
         JSONUtils.addParameterToJson(paramMap, key, parameter);
