@@ -18,24 +18,18 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModelBase>
     implements IAbstractService<D,E> {
 
+    @Autowired
+    @Lazy
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private AbstractService<D, E> self;
+
   private final AbstractMapper<D, E> abstractMapper;
   private final AbstractJpaRepository<E> abstractJpaRepository;
-
-  @Autowired
-  @Lazy
-  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-  private AbstractService<D, E> self;
 
   protected AbstractService(
       AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
     this.abstractMapper = abstractMapper;
     this.abstractJpaRepository = abstractJpaRepository;
-  }
-
-  public E getEntityById(Long id) {
-    return abstractJpaRepository
-        .findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
   }
 
   // Do not call this method directly, use the template method instead
@@ -85,13 +79,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before creation
-  protected void updateDtoBeforeCreate(D dtoToCreate) {}
+  protected final void updateDtoBeforeCreate(D dtoToCreate) {}
 
   // Hook called before the entity is persisted
-  protected void preCreate(D dtoToCreate, E entityToCreate) {}
+  protected final void preCreate(D dtoToCreate, E entityToCreate) {}
 
   // Hook called after the entity is persisted
-  protected void postCreate(D dtoToCreate, E createdEntity) {}
+  protected final void postCreate(D dtoToCreate, E createdEntity) {}
 
   // Do not call this method directly, use the template method instead
   @Override
@@ -226,6 +220,12 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   public void markRollback(D dto) {
     // Tell Spring to roll back this transaction without throwing
     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+  }
+
+  private E getEntityById(Long id) {
+      return abstractJpaRepository
+              .findById(id)
+              .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
   }
 
   @Override
