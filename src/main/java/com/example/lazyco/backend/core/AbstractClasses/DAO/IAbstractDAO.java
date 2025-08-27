@@ -8,9 +8,9 @@ import java.util.function.BiConsumer;
 
 public interface IAbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel> {
 
-  List<E> getEntities(D filter, BiConsumer<?, D> addEntityFilters);
+  List<E> get(D filter, BiConsumer<?, D> addEntityFilters);
 
-  List<D> getDTOs(D filter, AbstractMapper<D, E> mapper, BiConsumer<?, D> addEntityFilters);
+  List<D> get(D filter, AbstractMapper<D, E> mapper, BiConsumer<?, D> addEntityFilters);
 
   Long getCount(D filter, BiConsumer<?, D> addEntityFilters);
 }

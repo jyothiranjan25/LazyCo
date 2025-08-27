@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractDAO<D, E> {
 
-  public List<E> getEntities(D filter, BiConsumer<?, D> addEntityFilters) {
+  public List<E> get(D filter, BiConsumer<?, D> addEntityFilters) {
     return List.of();
   }
 
-  public List<D> getDTOs(D filter, AbstractMapper<D, E> mapper, BiConsumer<?, D> addEntityFilters) {
+  public List<D> get(D filter, AbstractMapper<D, E> mapper, BiConsumer<?, D> addEntityFilters) {
     return List.of();
   }
 
