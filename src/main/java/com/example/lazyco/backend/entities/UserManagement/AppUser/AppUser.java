@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelBase;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import jakarta.persistence.*;
 import java.util.List;
@@ -33,7 +33,7 @@ import org.hibernate.envers.Audited;
     })
 @EntityListeners(AppUserListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class AppUser extends AbstractModelBase {
+public class AppUser extends AbstractRBACModel {
 
   @Column(name = "user_id", nullable = false, length = 50, comment = "Unique user identifier")
   private String userId;

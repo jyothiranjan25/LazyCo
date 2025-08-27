@@ -8,7 +8,7 @@ public class AbstractModelListener {
 
   @PrePersist
   public void prePersist(AbstractModel source) {
-    if (source instanceof AbstractModelBase modelBase) {
+    if (source instanceof AbstractRBACModel modelBase) {
       if (modelBase.getUserGroup() == null) {
         modelBase.setUserGroup("DEFAULT");
       }
