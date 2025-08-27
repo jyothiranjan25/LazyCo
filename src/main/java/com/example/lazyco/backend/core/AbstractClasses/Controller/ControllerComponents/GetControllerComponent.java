@@ -4,6 +4,8 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.GetServiceComponent;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public class GetControllerComponent<D extends AbstractDTO<D>> {
 
   private final GetServiceComponent<D> getServiceComponent;
@@ -16,7 +18,9 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
     return (new ControllerTemplate<D>() {
           @Override
           D execute(D t) {
-            return getServiceComponent.get(t);
+              List<D> result = getServiceComponent.get(t);
+              t.setObjectsList(result);
+            return t;
           }
         })
         .template(t);

@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<SimpleResponseDTO> handleUncheckedException(Throwable e) {
     ApplicationLogger.error(e, e.getClass());
     SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
-    simpleResponseDTO.setMessage(e.getMessage());
+    simpleResponseDTO.setMessage("An unexpected error occurred.");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(simpleResponseDTO);
   }
 }

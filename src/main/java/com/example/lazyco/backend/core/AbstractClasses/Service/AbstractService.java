@@ -248,10 +248,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   @Override
   @Transactional(readOnly = true)
-  public D get(D dto) {
+  public List<D> get(D dto) {
     List<E> entities = abstractJpaRepository.findAll();
-    List<D> dtos = abstractMapper.map(entities);
-    dto.setObjectsList(dtos);
-    return dto;
+    return abstractMapper.map(entities);
   }
 }
