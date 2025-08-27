@@ -1,7 +1,5 @@
 package com.example.lazyco.backend.core.AbstractClasses.Service;
 
-import static com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate.executeServiceOperationTemplate;
-
 import com.example.lazyco.backend.core.AbstractClasses.DAO.IAbstractDAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
@@ -62,7 +60,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    return executeServiceOperationTemplate(
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToCreate) {
@@ -116,7 +114,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
-    return executeServiceOperationTemplate(
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
@@ -190,7 +188,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
-    return executeServiceOperationTemplate(
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
