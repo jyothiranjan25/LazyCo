@@ -109,9 +109,6 @@ public class DatabaseConfig {
   @Value("${spring.transaction.default-timeout:30}")
   private int defaultTransactionTimeout;
 
-  @Value("${spring.transaction.rollback-on-commit-failure:true}")
-  private boolean rollbackOnCommitFailure;
-
   @Bean
   @Primary
   public DataSource dataSource() {
@@ -206,8 +203,6 @@ public class DatabaseConfig {
     transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
     // Transaction timeout in seconds
     transactionManager.setDefaultTimeout(defaultTransactionTimeout);
-    // Rollback if commit fails
-    transactionManager.setRollbackOnCommitFailure(rollbackOnCommitFailure);
     return transactionManager;
   }
 
