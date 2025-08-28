@@ -12,6 +12,4 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser> {
     super(appUserMapper, appUserRepository);
   }
 
-  @Override
-  protected void validateBeforeCreateOrUpdate(AppUserDTO dtoToCheck) {}
 }

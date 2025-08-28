@@ -216,8 +216,8 @@ public class CriteriaBuilderWrapper {
   /**
    * this is for comparing two columns in the table
    *
-   * @param column1
-   * @param column2
+   * @param column1 column1
+   * @param column2 column2
    */
   public void greaterThan(String column1, String column2) {
     finalPredicate =

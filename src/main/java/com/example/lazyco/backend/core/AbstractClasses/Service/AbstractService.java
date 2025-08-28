@@ -5,7 +5,6 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ServiceOperationTemplate;
 import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -66,20 +65,32 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
           public D execute(D dtoToCreate) {
             if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
               return self.executeCreateTransactional(dtoToCreate);
-            else return executeCreate(dtoToCreate);
+            else return executeCreateNestedTransactional(dtoToCreate);
           }
         },
         dto);
   }
 
+  // Execute create in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeCreateTransactional(D dto) {
     return executeCreate(dto);
   }
 
+  // Execute create in the current transaction
+  public D executeCreateNestedTransactional(D dto) {
+    return executeCreate(dto);
+  }
+
+  // Core create logic
   private D executeCreate(D dtoToCreate) {
     // Hook for subclasses to modify dto before creation
     updateDtoBeforeCreate(dtoToCreate);
+
+    // Validate that the DTO is not null
+    if (dtoToCreate == null) {
+      throw new IllegalArgumentException("DTO cannot be null for create operation");
+    }
 
     // validate before update
     validateBeforeCreateOrUpdate(dtoToCreate);
@@ -126,17 +137,24 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         dto);
   }
 
+  // Execute update in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeUpdateTransactional(D dto) {
     return executeUpdate(dto);
   }
 
+  // Execute update in the current transaction
+  public D executeUpdateNestedTransactional(D dto) {
+    return executeUpdate(dto);
+  }
+
+  // Core update logic
   private D executeUpdate(D dtoToUpdate) {
     // Hook for subclasses to modify dto before update
     updateDtoBeforeUpdate(dtoToUpdate);
 
     // Validate that the DTO has an ID
-    if (dtoToUpdate.getId() == null) {
+    if (dtoToUpdate == null || dtoToUpdate.getId() == null) {
       throw new IllegalArgumentException("DTO id cannot be null for update operation");
     }
 
@@ -200,17 +218,24 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         dto);
   }
 
+  // Execute delete in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeDeleteTransactional(D dto) {
     return executeDelete(dto);
   }
 
+  // Execute delete in the current transaction
+  public D executeDeleteNestedTransactional(D dto) {
+      return executeDelete(dto);
+  }
+
+  // Core delete logic
   private D executeDelete(D dtoToDelete) {
     // Hook for subclasses to modify dto before deletion
     updateDtoBeforeDelete(dtoToDelete);
 
     // Validate that the DTO has an ID
-    if (dtoToDelete.getId() == null) {
+    if (dtoToDelete ==null || dtoToDelete.getId() == null) {
       throw new IllegalArgumentException("DTO id cannot be null for delete operation");
     }
 
