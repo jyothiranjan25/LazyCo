@@ -11,5 +11,4 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser> {
   protected AppUserService(AppUserMapper appUserMapper, AppUserRepository appUserRepository) {
     super(appUserMapper, appUserRepository);
   }
-
 }

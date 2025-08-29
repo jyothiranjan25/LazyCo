@@ -54,7 +54,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         return (Class<D>) ((ParameterizedType) type).getRawType();
       }
     }
-    throw new IllegalArgumentException("Could not determine DTO class");
+    throw new IllegalStateException("Cannot determine DTO class");
   }
 
   // Do not call this method directly, use the template method instead
@@ -63,21 +63,30 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToCreate) {
-            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              return self.executeCreateTransactional(dtoToCreate);
-            else return executeCreateNestedTransactional(dtoToCreate);
+            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              // Atomic mode: use nested transaction
+              return self.executeCreateNestedTransactional(dtoToCreate);
+            else
+              // Non-atomic mode: use independent transactions
+              return self.executeCreateNewTransactional(dtoToCreate);
           }
         },
         dto);
   }
 
-  // Execute create in a new transaction
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  // Execute create in the current transaction
   public D executeCreateTransactional(D dto) {
     return executeCreate(dto);
   }
 
-  // Execute create in the current transaction
+  // Execute create in a new transaction
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public D executeCreateNewTransactional(D dto) {
+    return executeCreate(dto);
+  }
+
+  // Execute create in a nested transaction (saves a savepoint)
+  @Transactional(propagation = Propagation.NESTED)
   public D executeCreateNestedTransactional(D dto) {
     return executeCreate(dto);
   }
@@ -129,21 +138,30 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToUpdate) {
-            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              return self.executeUpdateTransactional(dtoToUpdate);
-            else return executeUpdate(dtoToUpdate);
+            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              // Atomic mode: use nested transaction
+              return self.executeUpdateNestedTransactional(dtoToUpdate);
+            else
+              // Non-atomic mode: use independent transactions
+              return self.executeUpdateNewTransactional(dtoToUpdate);
           }
         },
         dto);
   }
 
-  // Execute update in a new transaction
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  // Execute update in the current transaction
   public D executeUpdateTransactional(D dto) {
     return executeUpdate(dto);
   }
 
-  // Execute update in the current transaction
+  // Execute update in a new transaction
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public D executeUpdateNewTransactional(D dto) {
+    return executeUpdate(dto);
+  }
+
+  // Execute update in a nested transaction (saves a savepoint)
+  @Transactional(propagation = Propagation.NESTED)
   public D executeUpdateNestedTransactional(D dto) {
     return executeUpdate(dto);
   }
@@ -210,23 +228,32 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
-            if (!Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              return self.executeDeleteTransactional(dtoToDelete);
-            else return executeDelete(dtoToDelete);
+              if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+                  // Atomic mode: use nested transaction
+                  return self.executeDeleteNestedTransactional(dtoToDelete);
+              else
+                  // Non-atomic mode: use independent transactions
+                  return self.executeDeleteNewTransactional(dtoToDelete);
           }
         },
         dto);
   }
 
-  // Execute delete in a new transaction
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  // Execute delete in the current transaction
   public D executeDeleteTransactional(D dto) {
     return executeDelete(dto);
   }
 
-  // Execute delete in the current transaction
+  // Execute delete in a new transaction
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public D executeDeleteNewTransactional(D dto) {
+    return executeDelete(dto);
+  }
+
+  // Execute delete in a nested transaction (saves a savepoint)
+  @Transactional(propagation = Propagation.NESTED)
   public D executeDeleteNestedTransactional(D dto) {
-      return executeDelete(dto);
+    return executeDelete(dto);
   }
 
   // Core delete logic
@@ -235,7 +262,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     updateDtoBeforeDelete(dtoToDelete);
 
     // Validate that the DTO has an ID
-    if (dtoToDelete ==null || dtoToDelete.getId() == null) {
+    if (dtoToDelete == null || dtoToDelete.getId() == null) {
       throw new IllegalArgumentException("DTO id cannot be null for delete operation");
     }
 
@@ -313,12 +340,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Retrieve a single DTO by its ID
   @Transactional(readOnly = true)
   public D getById(Long id) {
+      if (id == null) {
+          throw new IllegalArgumentException("ID cannot be null");
+      }
     try {
-      D filter = dtoClass.getDeclaredConstructor().newInstance();
-      filter.setId(id);
-      return getSingle(filter);
+      D criteria = createFilterDto();
+        criteria.setId(id);
+      return getSingle(criteria);
     } catch (Exception e) {
-      throw new RuntimeException("Could not create instance of DTO class", e);
+        throw new IllegalStateException(
+                "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
     }
   }
 
@@ -343,26 +374,39 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Retrieve a single entity by its ID
   @Transactional(readOnly = true)
   public E getEntityById(Long id) {
-    try {
-      D filter = dtoClass.getDeclaredConstructor().newInstance();
-      filter.setId(id);
-      return getSingleEntity(filter);
-    } catch (Exception e) {
-      throw new RuntimeException("Could not create instance of DTO class", e);
+    if (id == null) {
+      throw new IllegalArgumentException("ID cannot be null");
     }
+    try {
+      D criteria = createFilterDto();
+      criteria.setId(id);
+      return getSingleEntity(criteria);
+    } catch (Exception e) {
+      throw new IllegalStateException(
+          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
+    }
+  }
+
+  // Utility method to create a new instance of the filter DTO
+  private D createFilterDto() throws ReflectiveOperationException {
+    return dtoClass.getDeclaredConstructor().newInstance();
   }
 
   // Asserts that an entity with the given ID exists, throws if not found
   // Uses pre-fetching via DAO to ensure filters and RBAC are applied
   private E assertEntityByIdPre(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("ID cannot be null");
+    }
     try {
-      D filter = dtoClass.getDeclaredConstructor().newInstance();
-      filter.setId(id);
-      E result = getSingleEntity(filter);
+      D criteria = createFilterDto();
+      criteria.setId(id);
+      E result = getSingleEntity(criteria);
       if (result == null) throw new IllegalArgumentException("Entity with id " + id + " not found");
       return result;
     } catch (Exception e) {
-      throw new RuntimeException("Could not create instance of DTO class", e);
+      throw new IllegalStateException(
+          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
     }
   }
 

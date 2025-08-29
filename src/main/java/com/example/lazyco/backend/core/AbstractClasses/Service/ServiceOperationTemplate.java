@@ -40,16 +40,20 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       // Single object processing
       dto = execute(dto);
     }
-    if (hasErrors && (dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation())) {
+    if (hasErrors) {
       dto.setErrorMessage(
           "Atomic operation failed. Rolled back "
               + successList.size()
               + " successful operations. "
               + errorList.size()
               + " errors occurred.");
-      // Rollback successful operations
+    }
+
+    // Rollback if atomic operation and errors occurred
+    if (hasErrors && dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation()) {
       service.markRollback(dto);
     }
+
     return dto;
   }
 
