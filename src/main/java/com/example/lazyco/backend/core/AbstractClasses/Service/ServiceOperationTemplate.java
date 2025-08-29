@@ -2,8 +2,10 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
@@ -53,8 +55,28 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     if (hasErrors && dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation()) {
       service.markRollback(dto);
     }
-
     return dto;
+  }
+
+  private static final int MAX_RETRIES = 3;
+
+  private D executeWithRetry(D dto) {
+    int attempts = 0;
+    while (true) {
+      try {
+        // Create a clone of the DTO to avoid modifying the original during retries
+        @SuppressWarnings("unchecked")
+        D cloneDto = (D) dto.clone();
+        // Attempt to execute the operation
+        return execute(cloneDto);
+      } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
+        attempts++;
+        if (attempts >= MAX_RETRIES) {
+          throw e; // fail after max retries
+        }
+        ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
+      }
+    }
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(

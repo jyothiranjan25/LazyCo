@@ -228,12 +228,12 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoToDelete) {
-              if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-                  // Atomic mode: use nested transaction
-                  return self.executeDeleteNestedTransactional(dtoToDelete);
-              else
-                  // Non-atomic mode: use independent transactions
-                  return self.executeDeleteNewTransactional(dtoToDelete);
+            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
+              // Atomic mode: use nested transaction
+              return self.executeDeleteNestedTransactional(dtoToDelete);
+            else
+              // Non-atomic mode: use independent transactions
+              return self.executeDeleteNewTransactional(dtoToDelete);
           }
         },
         dto);
@@ -340,16 +340,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Retrieve a single DTO by its ID
   @Transactional(readOnly = true)
   public D getById(Long id) {
-      if (id == null) {
-          throw new IllegalArgumentException("ID cannot be null");
-      }
+    if (id == null) {
+      throw new IllegalArgumentException("ID cannot be null");
+    }
     try {
       D criteria = createFilterDto();
-        criteria.setId(id);
+      criteria.setId(id);
       return getSingle(criteria);
     } catch (Exception e) {
-        throw new IllegalStateException(
-                "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
+      throw new IllegalStateException(
+          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
     }
   }
 
