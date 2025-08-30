@@ -1,18 +1,17 @@
 package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerComponents;
 
-import static com.example.lazyco.backend.core.Utils.ResponseUtils.*;
-
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import org.springframework.http.ResponseEntity;
 
 public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
 
-  public ResponseEntity<D> template(D t) {
-    t = execute(t);
+  public ResponseEntity<D> template(D incomingRequestDTO) {
+    incomingRequestDTO = execute(incomingRequestDTO);
     if (isPostRequest()) {
-      return sendResponseByCode(201, t);
+      return ResponseUtils.sendResponse(201, incomingRequestDTO);
     } else {
-      return sendResponse(t);
+      return ResponseUtils.sendResponse(incomingRequestDTO);
     }
   }
 

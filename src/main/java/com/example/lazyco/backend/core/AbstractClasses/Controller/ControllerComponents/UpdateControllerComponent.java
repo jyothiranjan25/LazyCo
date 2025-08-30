@@ -12,13 +12,13 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
     this.updateServiceComponent = updateServiceComponent;
   }
 
-  public ResponseEntity<D> execute(D t) {
+  public ResponseEntity<D> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>() {
           @Override
           D execute(D t) {
             return updateServiceComponent.update(t);
           }
         })
-        .template(t);
+        .template(incomingRequestDTO);
   }
 }

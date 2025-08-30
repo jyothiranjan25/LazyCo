@@ -15,21 +15,20 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     this.service = service;
   }
 
-  public abstract D execute(D dto);
+  public abstract D execute(D incomingDTO);
 
-  public D template(D dto) {
-    boolean hasErrors = false;
+  public D template(D incomingDTO) {
     List<D> resultList = new ArrayList<>();
     List<D> successList = new ArrayList<>();
     List<D> errorList = new ArrayList<>();
-    if (dto.getObjectsList() != null && !dto.getObjectsList().isEmpty()) {
+    if (incomingDTO.getObjectsList() != null && !incomingDTO.getObjectsList().isEmpty()) {
       // Process all objects but track errors for atomic rollback
-      for (D object : dto.getObjectsList()) {
+      for (D object : incomingDTO.getObjectsList()) {
         try {
-          D result = template(object);
+          D result = executeOptimisticLockWithRetry(object);
           successList.add(result);
         } catch (Throwable t) {
-          hasErrors = true;
+          incomingDTO.setHasError(true);
           object.setErrorMessage("Something went wrong");
           errorList.add(object);
           ApplicationLogger.error(t.getMessage(), t);
@@ -37,13 +36,15 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       }
       resultList.addAll(successList);
       resultList.addAll(errorList);
-      dto.setObjectsList(resultList);
+      incomingDTO.setObjectsList(resultList);
     } else {
       // Single object processing
-      dto = execute(dto);
+      incomingDTO = executeOptimisticLockWithRetry(incomingDTO);
     }
-    if (hasErrors) {
-      dto.setErrorMessage(
+
+    // Set the error Message to DTO
+    if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
+      incomingDTO.setErrorMessage(
           "Atomic operation failed. Rolled back "
               + successList.size()
               + " successful operations. "
@@ -52,15 +53,16 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     }
 
     // Rollback if atomic operation and errors occurred
-    if (hasErrors && dto.getIsAtomicOperation() != null && dto.getIsAtomicOperation()) {
-      service.markRollback(dto);
+    if (Boolean.TRUE.equals(incomingDTO.getHasError())
+        && Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
+      service.markRollback(incomingDTO);
     }
-    return dto;
+    return incomingDTO;
   }
 
   private static final int MAX_RETRIES = 3;
 
-  private D executeWithRetry(D dto) {
+  private D executeOptimisticLockWithRetry(D dto) {
     int attempts = 0;
     while (true) {
       try {
@@ -80,7 +82,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(
-      ServiceOperationTemplate<D> serviceOperationTemplate, D dto) {
-    return serviceOperationTemplate.template(dto);
+      ServiceOperationTemplate<D> serviceOperationTemplate, D incomingDTO) {
+    return serviceOperationTemplate.template(incomingDTO);
   }
 }

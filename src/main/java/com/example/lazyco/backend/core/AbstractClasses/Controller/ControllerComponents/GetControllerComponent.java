@@ -13,7 +13,7 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
     this.getServiceComponent = getServiceComponent;
   }
 
-  public ResponseEntity<D> execute(D t) {
+  public ResponseEntity<D> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>() {
           @Override
           D execute(D t) {
@@ -22,6 +22,6 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
             return t;
           }
         })
-        .template(t);
+        .template(incomingRequestDTO);
   }
 }

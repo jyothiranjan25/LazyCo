@@ -7,6 +7,7 @@ import com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerComp
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Service.IAbstractService;
 import com.example.lazyco.backend.core.Utils.CRUDEnums;
+import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParams;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
     if (!restrictCRUDAction().contains(CRUDEnums.DELETE)) {
       return deleteControllerComponent.execute(t);
     }
-    return ResponseEntity.status(403).body("Action not allowed");
+    return ResponseUtils.sendResponse(403, "Action not allowed");
   }
 
   protected List<CRUDEnums> restrictCRUDAction() {

@@ -12,13 +12,13 @@ public class DeleteControllerComponent<D extends AbstractDTO<D>> {
     this.deleteServiceComponent = deleteServiceComponent;
   }
 
-  public ResponseEntity<D> execute(D t) {
+  public ResponseEntity<D> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>() {
           @Override
-          D execute(D t) {
-            return deleteServiceComponent.delete(t);
+          D execute(D requestDTO) {
+            return deleteServiceComponent.delete(requestDTO);
           }
         })
-        .template(t);
+        .template(incomingRequestDTO);
   }
 }

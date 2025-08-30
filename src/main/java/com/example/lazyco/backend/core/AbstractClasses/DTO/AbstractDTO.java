@@ -43,6 +43,11 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // This field is used to indicate if the operation should be atomic or not
   private Boolean isAtomicOperation;
+
+  @Expose(serialize = false, deserialize = false)
+  private Boolean hasError;
+
+  @Expose(deserialize = false)
   private String errorMessage;
 
   // filtering fields
