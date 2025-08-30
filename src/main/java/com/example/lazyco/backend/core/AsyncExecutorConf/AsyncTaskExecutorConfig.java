@@ -17,20 +17,29 @@ import java.util.concurrent.*;
 @Configuration
 public class AsyncTaskExecutorConfig implements AsyncConfigurer, DisposableBean {
 
-    @Value("${task.executor.core-pool-size:2}")
+    @Value("${spring.task.execution.pool.core-size:2}")
     private int corePoolSize;
 
-    @Value("${task.executor.max-pool-size:10}")
+    @Value("${spring.task.execution.pool.max-size:5}")
     private int maxPoolSize;
 
-    @Value("${task.executor.queue-capacity:100}")
+    @Value("${spring.task.execution.pool.queue-capacity:10}")
     private int queueCapacity;
 
-    @Value("${task.executor.keep-alive-seconds:30}")
+    @Value("${spring.task.execution.keep-alive-seconds:30}")
     private int keepAliveSeconds;
 
-    @Value("${task.executor.shutdown-timeout-in-minutes:3}")
+    @Value("${spring.task.execution.thread-name-prefix:AsyncExecutor-}")
+    private String threadNamePrefix;
+
+    @Value("${spring.task.execution.await-termination:true}")
+    private boolean waitForTasksToCompleteOnShutdown;
+
+    @Value("${spring.task.execution.shutdown-timeout-in-minutes:3}")
     private int shutdownTimeoutInMinutes;
+
+    @Value("${spring.task.execution.allow-core-thread-timeout:true}")
+    private boolean allowCoreThreadTimeOut;
 
     private ThreadPoolTaskExecutor executor;
 
@@ -40,16 +49,20 @@ public class AsyncTaskExecutorConfig implements AsyncConfigurer, DisposableBean 
         executor.setMaxPoolSize(maxPoolSize); // Can grow up to 10 threads
         executor.setQueueCapacity(queueCapacity); // Queue before creating new threads
         executor.setKeepAliveSeconds(keepAliveSeconds); // Idle threads live for the 30s
-        executor.setThreadNamePrefix("AsyncExecutor-"); // Thread name prefix
-        executor.setWaitForTasksToCompleteOnShutdown(true); // Wait for tasks to complete on shutdown
+        executor.setThreadNamePrefix(threadNamePrefix); // Thread name prefix
+        executor.setWaitForTasksToCompleteOnShutdown(waitForTasksToCompleteOnShutdown); // Wait for tasks to complete on shutdown
+
         int shutdownTimeout = (int) Duration.ofMinutes(shutdownTimeoutInMinutes).toSeconds();
         executor.setAwaitTerminationSeconds(shutdownTimeout); // Wait for tasks to complete
+
         executor.setTaskDecorator(new SecurityContextTaskDecorator());
         executor.setRejectedExecutionHandler(
                 new ThreadPoolExecutor.CallerRunsPolicy()); // Handle rejected tasks
+
         executor.initialize(); // Initialize the executor then add timeout
         // Enable core thread timeout (very important)
-        executor.getThreadPoolExecutor().allowCoreThreadTimeOut(true);
+        executor.getThreadPoolExecutor().allowCoreThreadTimeOut(allowCoreThreadTimeOut);
+
         return executor;
     }
 
