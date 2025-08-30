@@ -1,4 +1,8 @@
 COMMON_MODULES:
+  CUSTOM_MESSAGE : "%1$s"
   APPLICATION_ERROR: "An error occurred while processing your application. Please try again later."
-  CUSTOM_MESSAGE : '"%1$s"'
+  ATOMIC_OPERATION_ERROR: "Atomic operation failed. Rolled back %1$s successful operations. %2$s errors occurred."
+  OBJECT_REQUIRED: "The required object is missing."
+  OBJECT_NOT_FOUND: "The requested object was not found."
+  ID_REQUIRED: "The ID is required."
 

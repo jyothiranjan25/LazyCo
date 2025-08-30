@@ -1,7 +1,10 @@
 package com.example.lazyco.backend.core.AbstractClasses.Service;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.core.Exceptions.CommonMessage;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Messages.CustomMessage;
 import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +30,15 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
         try {
           D result = executeOptimisticLockWithRetry(object);
           successList.add(result);
+        } catch (ExceptionWrapper e) {
+          incomingDTO.setHasError(true);
+          object.setErrorMessage(e.getMessage());
+          errorList.add(object);
+          ApplicationLogger.error(e.getMessage(), e);
         } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          object.setErrorMessage("Something went wrong");
+          object.setErrorMessage(
+              CustomMessage.getMessageString(CommonMessage.ATOMIC_OPERATION_ERROR));
           errorList.add(object);
           ApplicationLogger.error(t.getMessage(), t);
         }
@@ -45,11 +54,8 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     // Set the error Message to DTO
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
       incomingDTO.setErrorMessage(
-          "Atomic operation failed. Rolled back "
-              + successList.size()
-              + " successful operations. "
-              + errorList.size()
-              + " errors occurred.");
+          CustomMessage.getMessageString(
+              CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
     }
 
     // Rollback if atomic operation and errors occurred

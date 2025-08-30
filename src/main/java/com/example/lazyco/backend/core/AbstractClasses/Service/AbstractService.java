@@ -6,6 +6,9 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
+import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
+import com.example.lazyco.backend.core.Exceptions.CommonMessage;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -54,7 +57,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         return (Class<D>) ((ParameterizedType) type).getRawType();
       }
     }
-    throw new IllegalStateException("Cannot determine DTO class");
+    throw new ExceptionWrapper("Unable to determine DTO class");
   }
 
   // Do not call this method directly, use the template method instead
@@ -98,7 +101,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO is not null
     if (dtoToCreate == null) {
-      throw new IllegalArgumentException("DTO cannot be null for create operation");
+      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
     }
 
     // validate before update
@@ -173,7 +176,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO has an ID
     if (dtoToUpdate == null || dtoToUpdate.getId() == null) {
-      throw new IllegalArgumentException("DTO id cannot be null for update operation");
+      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
     }
 
     // validate before update
@@ -263,7 +266,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO has an ID
     if (dtoToDelete == null || dtoToDelete.getId() == null) {
-      throw new IllegalArgumentException("DTO id cannot be null for delete operation");
+      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
     }
 
     // Retrieve existing entity
@@ -341,15 +344,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Transactional(readOnly = true)
   public D getById(Long id) {
     if (id == null) {
-      throw new IllegalArgumentException("ID cannot be null");
+      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       return getSingle(criteria);
+    } catch (ApplicationExemption e) {
+      throw e;
     } catch (Exception e) {
-      throw new IllegalStateException(
-          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
+      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
     }
   }
 
@@ -375,15 +379,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Transactional(readOnly = true)
   public E getEntityById(Long id) {
     if (id == null) {
-      throw new IllegalArgumentException("ID cannot be null");
+      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       return getSingleEntity(criteria);
+    } catch (ApplicationExemption e) {
+      throw e;
     } catch (Exception e) {
-      throw new IllegalStateException(
-          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
+      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
     }
   }
 
@@ -396,17 +401,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Uses pre-fetching via DAO to ensure filters and RBAC are applied
   private E assertEntityByIdPre(Long id) {
     if (id == null) {
-      throw new IllegalArgumentException("ID cannot be null");
+      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       E result = getSingleEntity(criteria);
-      if (result == null) throw new IllegalArgumentException("Entity with id " + id + " not found");
+      if (result == null) throw new ApplicationExemption(CommonMessage.OBJECT_NOT_FOUND);
       return result;
+    } catch (ApplicationExemption e) {
+      throw e;
     } catch (Exception e) {
-      throw new IllegalStateException(
-          "Failed to create filter DTO for " + dtoClass.getSimpleName(), e);
+      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
     }
   }
 
@@ -415,6 +421,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   private E assertEntityByIdPost(Long id) {
     return abstractJpaRepository
         .findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Entity with id " + id + " not found"));
+        .orElseThrow(() -> new ApplicationExemption(CommonMessage.OBJECT_NOT_FOUND));
   }
 }
