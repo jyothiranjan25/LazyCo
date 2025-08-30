@@ -204,6 +204,8 @@ public class DatabaseConfig {
     transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
     // Transaction timeout in seconds
     transactionManager.setDefaultTimeout(defaultTransactionTimeout);
+    // Enable nested transaction support (savepoints)
+    transactionManager.setNestedTransactionAllowed(true);
     return transactionManager;
   }
 
@@ -222,6 +224,9 @@ public class DatabaseConfig {
     properties.put(AvailableSettings.ORDER_UPDATES, "true");
     // Store timestamps consistently in UTC
     properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
+
+    // Enable savepoint support for nested transactions
+    properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
 
     // Enable/disable second-level cache
     properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
