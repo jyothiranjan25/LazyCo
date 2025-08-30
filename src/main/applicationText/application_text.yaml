@@ -1,8 +1,9 @@
 COMMON_MODULES:
   CUSTOM_MESSAGE : "%1$s"
-  APPLICATION_ERROR: "An error occurred while processing your application. Please try again later."
+  APPLICATION_ERROR: "An error occurred while processing your request. Please try again later."
   ATOMIC_OPERATION_ERROR: "Atomic operation failed. Rolled back %1$s successful operations. %2$s errors occurred."
+  NON_ATOMIC_OPERATION_ERROR: "Operation encountered %1$s errors. %2$s successful operations were completed."
   OBJECT_REQUIRED: "The required object is missing."
   OBJECT_NOT_FOUND: "The requested object was not found."
   ID_REQUIRED: "The ID is required."
-
+  INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."

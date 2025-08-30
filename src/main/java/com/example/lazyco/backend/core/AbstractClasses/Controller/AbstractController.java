@@ -10,6 +10,7 @@ import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParams;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
     if (!restrictCRUDAction().contains(CRUDEnums.GET)) {
       return readControllerComponent.execute(t);
     }
-    return ResponseEntity.status(403).body("Action not allowed");
+    return ResponseUtils.sendResponse(HttpStatus.FORBIDDEN, "Action not allowed");
   }
 
   @PostMapping
@@ -46,7 +47,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
     if (!restrictCRUDAction().contains(CRUDEnums.POST)) {
       return createControllerComponent.execute(t);
     }
-    return ResponseEntity.status(403).body("Action not allowed");
+    return ResponseUtils.sendResponse(HttpStatus.FORBIDDEN, "Action not allowed");
   }
 
   @PatchMapping
@@ -54,7 +55,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
     if (!restrictCRUDAction().contains(CRUDEnums.PATCH)) {
       return updateControllerComponent.execute(t);
     }
-    return ResponseEntity.status(403).body("Action not allowed");
+    return ResponseUtils.sendResponse(HttpStatus.FORBIDDEN, "Action not allowed");
   }
 
   @DeleteMapping
@@ -62,7 +63,7 @@ public abstract class AbstractController<D extends AbstractDTO<D>> {
     if (!restrictCRUDAction().contains(CRUDEnums.DELETE)) {
       return deleteControllerComponent.execute(t);
     }
-    return ResponseUtils.sendResponse(403, "Action not allowed");
+    return ResponseUtils.sendResponse(HttpStatus.FORBIDDEN, "Action not allowed");
   }
 
   protected List<CRUDEnums> restrictCRUDAction() {

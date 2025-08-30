@@ -9,6 +9,7 @@ import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -407,9 +408,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
       D criteria = createFilterDto();
       criteria.setId(id);
       E result = getSingleEntity(criteria);
-      if (result == null) throw new ApplicationExemption(CommonMessage.OBJECT_NOT_FOUND);
+      if (result == null) throw new ResourceNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND);
       return result;
-    } catch (ApplicationExemption e) {
+    } catch (ApplicationExemption | ResourceNotFoundExemption e) {
       throw e;
     } catch (Exception e) {
       throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
@@ -421,6 +422,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   private E assertEntityByIdPost(Long id) {
     return abstractJpaRepository
         .findById(id)
-        .orElseThrow(() -> new ApplicationExemption(CommonMessage.OBJECT_NOT_FOUND));
+        .orElseThrow(() -> new ResourceNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND));
   }
 }

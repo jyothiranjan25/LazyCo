@@ -8,6 +8,7 @@ import com.example.lazyco.backend.core.Messages.CustomMessage;
 import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
@@ -37,8 +38,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           ApplicationLogger.error(e.getMessage(), e);
         } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          object.setErrorMessage(
-              CustomMessage.getMessageString(CommonMessage.ATOMIC_OPERATION_ERROR));
+          object.setErrorMessage(CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR));
           errorList.add(object);
           ApplicationLogger.error(t.getMessage(), t);
         }
@@ -51,18 +51,20 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       incomingDTO = executeOptimisticLockWithRetry(incomingDTO);
     }
 
-    // Set the error Message to DTO
+      // Rollback if atomic operation and errors occurred
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
-      incomingDTO.setErrorMessage(
-          CustomMessage.getMessageString(
-              CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
+      if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
+        service.markRollback(incomingDTO);
+        incomingDTO.setErrorMessage(
+            CustomMessage.getMessageString(
+                CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
+      } else {
+        incomingDTO.setErrorMessage(
+            CustomMessage.getMessageString(
+                CommonMessage.NON_ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
+      }
     }
 
-    // Rollback if atomic operation and errors occurred
-    if (Boolean.TRUE.equals(incomingDTO.getHasError())
-        && Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-      service.markRollback(incomingDTO);
-    }
     return incomingDTO;
   }
 
@@ -80,7 +82,9 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
         attempts++;
         if (attempts >= MAX_RETRIES) {
-          throw e; // fail after max retries
+          throw new ExceptionWrapper(
+              HttpStatusCode.valueOf(503),
+              CommonMessage.INTERNET_IS_SLOW); // fail after max retries
         }
         ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
       }
