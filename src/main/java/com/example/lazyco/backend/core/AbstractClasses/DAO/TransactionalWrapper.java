@@ -73,13 +73,21 @@ public class TransactionalWrapper {
     }
   }
 
-  /** Check if a transaction is currently active. */
+  /**
+   * Checks if there is an active transaction in the current thread.
+   * This utility method can be used for debugging or conditional logic.
+   * @return true if a transaction is currently active, false otherwise
+   */
   public static boolean isTransactionActive() {
     return TransactionSynchronizationManager.isSynchronizationActive()
         && TransactionSynchronizationManager.isActualTransactionActive();
   }
 
-  /** Check if a session is currently open and bound to the current thread. */
+  /**
+   * Checks if a Hibernate session is available in the current thread.
+   * This utility method can be used for debugging or conditional logic.
+   * @return true if a session is available, false otherwise
+   */
   public static boolean isSessionAvailable() {
     try {
       Session session = getCurrentSession();

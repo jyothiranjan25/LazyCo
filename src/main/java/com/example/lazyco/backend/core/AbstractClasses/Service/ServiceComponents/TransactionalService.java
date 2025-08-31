@@ -23,30 +23,81 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
  */
 public interface TransactionalService<D extends AbstractDTO<D>> {
 
-  // Required Transaction
+  /**
+   * Execute create operation with transaction boundary.
+   * Implement this method in concrete service classes to define create logic.
+   * @param dto The DTO containing data to create
+   * @return The created DTO with populated fields
+   */
   D executeCreateTransactional(D dto);
 
-  // Requires New Transaction
+  /**
+   * Execute create operation with a new transaction.
+   * Implement this method in concrete service classes to define create logic
+   * that must not be affected by existing transactions.
+   * @param dto The DTO containing data to create
+   * @return The created DTO with populated fields
+   */
   D executeCreateNewTransactional(D dto);
 
-  // Nested Transaction
+  /**
+   * Execute create operation within a nested transaction.
+   * Implement this method in concrete service classes to define create logic
+   * that can be rolled back independently.
+   * @param dto The DTO containing data to create
+   * @return The created DTO with populated fields
+   */
   D executeCreateNestedTransactional(D dto);
 
-  // Required Transaction
+  /**
+   * Execute update operation with transaction boundary.
+   * Implement this method in concrete service classes to define update logic.
+   * @param dto The DTO containing data to update
+   * @return The updated DTO
+   */
   D executeUpdateTransactional(D dto);
 
-  // Requires New Transaction
+  /**
+   * Execute update operation with a new transaction.
+   * Implement this method in concrete service classes to define update logic
+   * that must not be affected by existing transactions.
+   * @param dto The DTO containing data to update
+   * @return The updated DTO
+   */
   D executeUpdateNewTransactional(D dto);
 
-  // Nested Transaction
+  /**
+   * Execute update operation within a nested transaction.
+   * Implement this method in concrete service classes to define update logic
+   * that can be rolled back independently.
+   * @param dto The DTO containing data to update
+   * @return The updated DTO
+   */
   D executeUpdateNestedTransactional(D dto);
 
-  // Required Transaction
+  /**
+   * Execute delete operation with transaction boundary.
+   * Implement this method in concrete service classes to define delete logic.
+   * @param dto The DTO containing data to delete
+   * @return The deleted DTO
+   */
   D executeDeleteTransactional(D dto);
 
-  // Requires New Transaction
+  /**
+   * Execute delete operation with a new transaction.
+   * Implement this method in concrete service classes to define delete logic
+   * that must not be affected by existing transactions.
+   * @param dto The DTO containing data to delete
+   * @return The deleted DTO
+   */
   D executeDeleteNewTransactional(D dto);
 
-  // Nested Transaction
+  /**
+   * Execute delete operation within a nested transaction.
+   * Implement this method in concrete service classes to define delete logic
+   * that can be rolled back independently.
+   * @param dto The DTO containing data to delete
+   * @return The deleted DTO
+   */
   D executeDeleteNestedTransactional(D dto);
 }
