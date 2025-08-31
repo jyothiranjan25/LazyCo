@@ -14,17 +14,16 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel> extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
+public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
+    extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
 
   public List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
     Session session = getCurrentSession();

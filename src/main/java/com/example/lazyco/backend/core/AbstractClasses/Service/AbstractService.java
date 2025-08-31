@@ -9,12 +9,17 @@ import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import jakarta.persistence.OptimisticLockException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.Function;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -58,19 +63,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    return ServiceOperationTemplate.executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this) {
-          @Override
-          public D execute(D dtoToCreate) {
-            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              // Atomic mode: use nested transaction
-              return self.executeCreateTransactional(dtoToCreate);
-            else
-              // Non-atomic mode: use independent transactions
-              return self.executeCreateNewTransactional(dtoToCreate);
-          }
-        },
-        dto);
+    return executeWithTemplate(
+        dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
   }
 
   // Execute create in the current transaction
@@ -135,19 +129,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
-    return ServiceOperationTemplate.executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this) {
-          @Override
-          public D execute(D dtoToUpdate) {
-            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              // Atomic mode: use nested transaction
-              return self.executeUpdateTransactional(dtoToUpdate);
-            else
-              // Non-atomic mode: use independent transactions
-              return self.executeUpdateNewTransactional(dtoToUpdate);
-          }
-        },
-        dto);
+    return executeWithTemplate(
+        dto, self::executeUpdateNestedTransactional, self::executeUpdateNewTransactional);
   }
 
   // Execute update in the current transaction
@@ -227,19 +210,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
-    return ServiceOperationTemplate.executeServiceOperationTemplate(
-        new ServiceOperationTemplate<D>(this) {
-          @Override
-          public D execute(D dtoToDelete) {
-            if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
-              // Atomic mode: use nested transaction
-              return self.executeDeleteTransactional(dtoToDelete);
-            else
-              // Non-atomic mode: use independent transactions
-              return self.executeDeleteNewTransactional(dtoToDelete);
-          }
-        },
-        dto);
+    return executeWithTemplate(
+        dto, self::executeDeleteNestedTransactional, self::executeDeleteNewTransactional);
   }
 
   // Execute delete in the current transaction
@@ -419,5 +391,44 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Uses direct repository access to ensure the entity is freshly loaded
   private E assertEntityByIdPost(Class<E> clazz, Long id) {
     return abstractDAO.findById(clazz, id);
+  }
+
+  // Template method to execute operations with choice of atomic or non-atomic execution
+  private D executeWithTemplate(
+      D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
+        new ServiceOperationTemplate<D>(this) {
+          @Override
+          public D execute(D dtoInput) {
+            Function<D, D> operation =
+                Boolean.TRUE.equals(dto.getIsAtomicOperation())
+                    ? atomicOperation
+                    : nonAtomicOperation;
+
+            return self.executeOptimisticLockWithRetry(operation, dtoInput);
+          }
+        },
+        dto);
+  }
+
+  // Retry logic for operations that may encounter optimistic locking conflicts
+  private static final int MAX_RETRIES = 3;
+
+  @Transactional(propagation = Propagation.NESTED)
+  public D executeOptimisticLockWithRetry(Function<D, D> operation, D dto) {
+    int attempts = 0;
+    while (true) {
+      try {
+        return operation.apply(dto);
+      } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
+        attempts++;
+        if (attempts >= MAX_RETRIES) {
+          throw new ExceptionWrapper(
+              HttpStatusCode.valueOf(503),
+              CommonMessage.INTERNET_IS_SLOW); // fail after max retries
+        }
+        ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
+      }
+    }
   }
 }

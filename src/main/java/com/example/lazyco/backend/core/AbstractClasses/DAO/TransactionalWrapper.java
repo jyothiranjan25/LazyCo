@@ -16,7 +16,7 @@ public class TransactionalWrapper {
   private static SessionFactory sessionFactory;
 
   @Autowired
-  public void setSessionFactoryObject(SessionFactory sessionFactory) {
+  public void injectDependence(SessionFactory sessionFactory) {
     TransactionalWrapper.sessionFactory = sessionFactory;
   }
 

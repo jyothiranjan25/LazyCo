@@ -207,7 +207,6 @@
         <Logger name="DebugLogger" level="debug" additivity="false">
             <AppenderRef ref="AllLogsFile" />
             <AppenderRef ref="AppDebugFile" />
-            <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Logger for WarnLogger -->
@@ -231,7 +230,6 @@
         <Logger name="TraceLogger" level="trace" additivity="false">
             <AppenderRef ref="AllLogsFile" />
             <AppenderRef ref="AppTraceFile" />
-            <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Performance Logger for method execution times -->

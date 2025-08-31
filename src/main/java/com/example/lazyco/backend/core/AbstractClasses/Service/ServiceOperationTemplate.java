@@ -5,11 +5,8 @@ import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
-import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
@@ -29,7 +26,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       // Process all objects but track errors for atomic rollback
       for (D object : incomingDTO.getObjectsList()) {
         try {
-          D result = executeOptimisticLockWithRetry(object);
+          D result = execute(object);
           successList.add(result);
         } catch (ExceptionWrapper e) {
           incomingDTO.setHasError(true);
@@ -38,7 +35,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           ApplicationLogger.error(e.getMessage(), e);
         } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          object.setErrorMessage(CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR));
+          object.setErrorMessage(resolveExceptionMessage(t));
           errorList.add(object);
           ApplicationLogger.error(t.getMessage(), t);
         }
@@ -48,7 +45,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       incomingDTO.setObjectsList(resultList);
     } else {
       // Single object processing
-      incomingDTO = executeOptimisticLockWithRetry(incomingDTO);
+      incomingDTO = execute(incomingDTO);
     }
 
     // Rollback if atomic operation and errors occurred
@@ -68,27 +65,23 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     return incomingDTO;
   }
 
-  private static final int MAX_RETRIES = 3;
-
-  private D executeOptimisticLockWithRetry(D dto) {
-    int attempts = 0;
-    while (true) {
-      try {
-        // Create a clone of the DTO to avoid modifying the original during retries
-        @SuppressWarnings("unchecked")
-        D cloneDto = (D) dto.clone();
-        // Attempt to execute the operation
-        return execute(cloneDto);
-      } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
-        attempts++;
-        if (attempts >= MAX_RETRIES) {
-          throw new ExceptionWrapper(
-              HttpStatusCode.valueOf(503),
-              CommonMessage.INTERNET_IS_SLOW); // fail after max retries
-        }
-        ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
-      }
+  private String resolveExceptionMessage(Throwable e) {
+    Throwable root = e.getCause();
+    while (root.getCause() != null) {
+      root = root.getCause();
     }
+
+    String defaultMessage = CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
+
+    if (root instanceof org.postgresql.util.PSQLException psqlEx) {
+      String detail = psqlEx.getServerErrorMessage().getDetail();
+      if (detail != null) {
+        defaultMessage = detail.replaceFirst("Key \\([^)]*\\)=\\((.*?)\\)", "$1");
+      }
+    } else if (root instanceof org.hibernate.PropertyValueException hibernateEx) {
+      defaultMessage = "Field '" + hibernateEx.getPropertyName() + "' cannot be null.";
+    }
+    return defaultMessage;
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(

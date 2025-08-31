@@ -5,7 +5,6 @@ import org.hibernate.Session;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional(propagation = Propagation.NESTED)
 public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<E> {
 
   public E save(E entity) {

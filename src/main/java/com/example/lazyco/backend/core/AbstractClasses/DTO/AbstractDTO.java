@@ -15,6 +15,9 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   protected Long id;
 
+  @Expose(serialize = false, deserialize = false)
+  private Long version;
+
   // List of objects for bulk operations
   private List<D> objectsList;
 
