@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
-    implements IAbstractDAO<D, E> {
+    extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
 
   @Autowired private SessionFactory sessionFactory;
 

@@ -15,12 +15,18 @@ public class ExceptionWrapper extends RuntimeException {
   @Getter private final HttpStatus httpStatus;
   @Getter private final HttpStatusCode httpStatusCode;
   @Getter private final CustomMessage customMessage;
+  @Getter private Exception exception;
 
   public ExceptionWrapper(String message) {
+    this(message, null);
+  }
+
+  public ExceptionWrapper(String message, Exception e) {
     super(message);
     this.customMessage = new CustomMessage(message);
     this.httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
     this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    this.exception = e;
   }
 
   public ExceptionWrapper(MessageCodes code) {

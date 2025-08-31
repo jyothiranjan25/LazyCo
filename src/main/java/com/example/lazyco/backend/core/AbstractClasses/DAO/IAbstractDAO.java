@@ -7,7 +7,8 @@ import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public interface IAbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel> {
+public interface IAbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
+    extends IPersistenceDAO<E> {
 
   List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters);
 
