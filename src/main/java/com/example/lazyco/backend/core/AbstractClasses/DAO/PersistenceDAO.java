@@ -2,11 +2,9 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import org.hibernate.Session;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
 @Transactional(propagation = Propagation.NESTED)
 public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<E> {
 

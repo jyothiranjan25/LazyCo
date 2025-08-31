@@ -24,13 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
-    extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
-
-  @Autowired private SessionFactory sessionFactory;
+public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel> extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
 
   public List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = sessionFactory.getCurrentSession();
+    Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
     Query<E> query = session.createQuery(criteriaBuilderWrapper.getQuery());
@@ -42,7 +39,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       D filter,
       AbstractMapper<D, E> mapper,
       BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = sessionFactory.getCurrentSession();
+    Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
 
@@ -100,7 +97,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   @Override
   public Long getCount(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = sessionFactory.getCurrentSession();
+    Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, Long.class);
     criteriaBuilderWrapper.removeOrderBy(); // Order by cannot be present in count query
@@ -228,7 +225,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   public List getAbstractFilteredResult(
       AbstractDTO filter, Class<? extends AbstractModel> entityClass) {
-    Session session = sessionFactory.getCurrentSession();
+    Session session = getCurrentSession();
     try {
       HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<?> criteriaQuery = builder.createQuery(entityClass);

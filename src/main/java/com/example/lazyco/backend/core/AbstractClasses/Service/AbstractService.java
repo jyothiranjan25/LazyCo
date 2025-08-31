@@ -13,7 +13,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,16 +23,9 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractService<D, E> {
 
-  @Autowired
-  @Lazy
-  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   private AbstractService<D, E> self;
-
-  @Autowired private SessionFactory sessionFactory;
-
   private final AbstractMapper<D, E> abstractMapper;
   private IAbstractDAO<D, E> abstractDAO;
-
   @Getter private final Class<D> dtoClass;
 
   protected AbstractService(AbstractMapper<D, E> abstractMapper) {
@@ -42,8 +34,12 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   @Autowired
-  private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
+  private void injectDependencies(
+      IAbstractDAO<D, E> abstractDAO,
+      @Lazy @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+          AbstractService<D, E> self) {
     this.abstractDAO = abstractDAO;
+    this.self = self;
   }
 
   @SuppressWarnings("unchecked")
@@ -68,7 +64,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
           public D execute(D dtoToCreate) {
             if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
               // Atomic mode: use nested transaction
-              return self.executeCreateNestedTransactional(dtoToCreate);
+              return self.executeCreateTransactional(dtoToCreate);
             else
               // Non-atomic mode: use independent transactions
               return self.executeCreateNewTransactional(dtoToCreate);
@@ -114,8 +110,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
-    sessionFactory.getCurrentSession().persist(entityToCreate);
-    sessionFactory.getCurrentSession().flush();
+    entityToCreate = abstractDAO.save(entityToCreate);
 
     // Retrieve the created entity to ensure all fields are populated
     @SuppressWarnings("unchecked")
@@ -199,8 +194,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preUpdate(dtoToUpdate, existingEntity, existingEntityClone);
 
     // Save the updated entity
-    E updatedEntity = (E) sessionFactory.getCurrentSession().merge(existingEntityClone);
-    sessionFactory.getCurrentSession().flush();
+    E updatedEntity = abstractDAO.update(existingEntityClone);
 
     // Retrieve the updated entity to ensure all fields are populated
     @SuppressWarnings("unchecked")
@@ -282,8 +276,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preDelete(dtoToDelete, existingEntity);
 
     // Delete the entity
-    sessionFactory.getCurrentSession().remove(existingEntity);
-    sessionFactory.getCurrentSession().flush();
+    existingEntity = abstractDAO.delete(existingEntity);
 
     // Post-delete hook
     postDelete(dtoToDelete, existingEntity);
@@ -425,6 +418,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Asserts that an entity with the given ID exists, throws if not found
   // Uses direct repository access to ensure the entity is freshly loaded
   private E assertEntityByIdPost(Class<E> clazz, Long id) {
-    return sessionFactory.getCurrentSession().find(clazz, id);
+    return abstractDAO.findById(clazz, id);
   }
 }
