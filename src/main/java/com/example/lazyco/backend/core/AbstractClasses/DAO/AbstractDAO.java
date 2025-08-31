@@ -8,16 +8,16 @@ import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractDAO<D, E> {
 
-  @PersistenceContext private EntityManager entityManager;
+  @Autowired private SessionFactory sessionFactory;
 
   public List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = entityManager.unwrap(Session.class);
+    Session session = sessionFactory.getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
     Query<E> query = session.createQuery(criteriaBuilderWrapper.getQuery());
@@ -42,7 +42,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       D filter,
       AbstractMapper<D, E> mapper,
       BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = entityManager.unwrap(Session.class);
+    Session session = sessionFactory.getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
 
@@ -100,7 +100,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   @Override
   public Long getCount(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
-    Session session = entityManager.unwrap(Session.class);
+    Session session = sessionFactory.getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, Long.class);
     criteriaBuilderWrapper.removeOrderBy(); // Order by cannot be present in count query
@@ -228,7 +228,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   public List getAbstractFilteredResult(
       AbstractDTO filter, Class<? extends AbstractModel> entityClass) {
-    Session session = entityManager.unwrap(Session.class);
+    Session session = sessionFactory.getCurrentSession();
     try {
       HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
       CriteriaQuery<?> criteriaQuery = builder.createQuery(entityClass);

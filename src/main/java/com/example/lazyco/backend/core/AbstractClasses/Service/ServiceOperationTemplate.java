@@ -51,7 +51,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       incomingDTO = executeOptimisticLockWithRetry(incomingDTO);
     }
 
-      // Rollback if atomic operation and errors occurred
+    // Rollback if atomic operation and errors occurred
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
       if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
         service.markRollback(incomingDTO);

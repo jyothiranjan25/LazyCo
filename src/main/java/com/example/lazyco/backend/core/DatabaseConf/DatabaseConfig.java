@@ -6,15 +6,14 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
@@ -184,28 +183,21 @@ public class DatabaseConfig {
 
   @Bean
   @Primary
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    vendorAdapter.setGenerateDdl(true); // Let Hibernate generate DDL
-    vendorAdapter.setShowSql(showSql); // Show SQL in logs based on config
-
-    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-    em.setDataSource(dataSource());
-    em.setPackagesToScan(BACKEND_PACKAGE);
-    em.setJpaVendorAdapter(vendorAdapter);
-    em.setJpaProperties(hibernateProperties());
-    return em;
+  public LocalSessionFactoryBean sessionFactory() {
+    LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+    sessionFactory.setDataSource(dataSource());
+    sessionFactory.setPackagesToScan(BACKEND_PACKAGE);
+    sessionFactory.setHibernateProperties(hibernateProperties());
+    return sessionFactory;
   }
 
   @Bean
   @Primary
-  public PlatformTransactionManager transactionManager() {
-    JpaTransactionManager transactionManager = new JpaTransactionManager();
-    transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-    // Transaction timeout in seconds
+  public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
+    HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+    transactionManager.setSessionFactory(sessionFactory);
     transactionManager.setDefaultTimeout(defaultTransactionTimeout);
-    // Enable nested transaction support (savepoints)
-    transactionManager.setNestedTransactionAllowed(true);
+    transactionManager.setNestedTransactionAllowed(true); // savepoints
     return transactionManager;
   }
 

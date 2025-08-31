@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -27,7 +26,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAsync(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @Import({DatabaseConfig.class})
-@EnableJpaRepositories(basePackages = {BACKEND_PACKAGE})
 @ComponentScan(basePackages = {BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:application.properties")})
 public class BackendWebConf implements WebMvcConfigurer {

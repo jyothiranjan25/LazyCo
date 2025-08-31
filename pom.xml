@@ -15,12 +15,12 @@
         <maven.compiler.target>22</maven.compiler.target>
         <maven.compiler.source>22</maven.compiler.source>
         <!-- Spring Framework dependencies -->
-        <springframework.version>6.2.7</springframework.version>
-        <springframework.data.version>2025.0.0</springframework.data.version>
-        <springframework.security.version>6.4.4</springframework.security.version>
-        <springframework.batch.version>5.1.2</springframework.batch.version>
+        <springframework.version>6.2.10</springframework.version>
+        <springframework.data.version>2025.0.3</springframework.data.version>
+        <springframework.security.version>6.5.3</springframework.security.version>
+        <springframework.batch.version>5.2.2</springframework.batch.version>
         <!-- /Spring Framework dependencies -->
-        <hibernate.orm.version>7.0.10.Final</hibernate.orm.version>
+        <hibernate.orm.version>7.1.0.Final</hibernate.orm.version>
         <lombok.version>1.18.36</lombok.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <fasterxml.jackson.version>2.17.2</fasterxml.jackson.version>

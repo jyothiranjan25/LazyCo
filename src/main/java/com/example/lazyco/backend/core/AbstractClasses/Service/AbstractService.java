@@ -3,7 +3,6 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 import com.example.lazyco.backend.core.AbstractClasses.DAO.IAbstractDAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.backend.core.AbstractClasses.JpaRepository.AbstractJpaRepository;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
@@ -14,6 +13,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,16 +29,15 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   private AbstractService<D, E> self;
 
+  @Autowired private SessionFactory sessionFactory;
+
   private final AbstractMapper<D, E> abstractMapper;
-  private final AbstractJpaRepository<E> abstractJpaRepository;
   private IAbstractDAO<D, E> abstractDAO;
 
   @Getter private final Class<D> dtoClass;
 
-  protected AbstractService(
-      AbstractMapper<D, E> abstractMapper, AbstractJpaRepository<E> abstractJpaRepository) {
+  protected AbstractService(AbstractMapper<D, E> abstractMapper) {
     this.abstractMapper = abstractMapper;
-    this.abstractJpaRepository = abstractJpaRepository;
     dtoClass = this.calculateDTOClass();
   }
 
@@ -115,10 +114,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
-    E createdEntity = abstractJpaRepository.saveAndFlush(entityToCreate);
+    sessionFactory.getCurrentSession().persist(entityToCreate);
+    sessionFactory.getCurrentSession().flush();
 
     // Retrieve the created entity to ensure all fields are populated
-    createdEntity = assertEntityByIdPost(createdEntity.getId());
+    @SuppressWarnings("unchecked")
+    E createdEntity =
+        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), entityToCreate.getId());
 
     // Post-create hook
     postCreate(dtoToCreate, createdEntity);
@@ -144,7 +146,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
           public D execute(D dtoToUpdate) {
             if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
               // Atomic mode: use nested transaction
-              return self.executeUpdateNestedTransactional(dtoToUpdate);
+              return self.executeUpdateTransactional(dtoToUpdate);
             else
               // Non-atomic mode: use independent transactions
               return self.executeUpdateNewTransactional(dtoToUpdate);
@@ -197,16 +199,19 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preUpdate(dtoToUpdate, existingEntity, existingEntityClone);
 
     // Save the updated entity
-    E updatedEntity = abstractJpaRepository.saveAndFlush(existingEntityClone);
+    E updatedEntity = (E) sessionFactory.getCurrentSession().merge(existingEntityClone);
+    sessionFactory.getCurrentSession().flush();
 
     // Retrieve the updated entity to ensure all fields are populated
-    updatedEntity = assertEntityByIdPost(updatedEntity.getId());
+    @SuppressWarnings("unchecked")
+    E updatedEntityClean =
+        assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
 
     // Post-update hook
-    postUpdate(dtoToUpdate, existingEntity, updatedEntity);
+    postUpdate(dtoToUpdate, existingEntity, updatedEntityClean);
 
     // Map back to DTO and return
-    return abstractMapper.map(updatedEntity);
+    return abstractMapper.map(updatedEntityClean);
   }
 
   // Hooks called to modify the DTO before update
@@ -234,7 +239,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
           public D execute(D dtoToDelete) {
             if (Boolean.TRUE.equals(dto.getIsAtomicOperation()))
               // Atomic mode: use nested transaction
-              return self.executeDeleteNestedTransactional(dtoToDelete);
+              return self.executeDeleteTransactional(dtoToDelete);
             else
               // Non-atomic mode: use independent transactions
               return self.executeDeleteNewTransactional(dtoToDelete);
@@ -277,8 +282,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preDelete(dtoToDelete, existingEntity);
 
     // Delete the entity
-    abstractJpaRepository.delete(existingEntity);
-    abstractJpaRepository.flush();
+    sessionFactory.getCurrentSession().remove(existingEntity);
+    sessionFactory.getCurrentSession().flush();
 
     // Post-delete hook
     postDelete(dtoToDelete, existingEntity);
@@ -419,9 +424,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Asserts that an entity with the given ID exists, throws if not found
   // Uses direct repository access to ensure the entity is freshly loaded
-  private E assertEntityByIdPost(Long id) {
-    return abstractJpaRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND));
+  private E assertEntityByIdPost(Class<E> clazz, Long id) {
+    return sessionFactory.getCurrentSession().find(clazz, id);
   }
 }
