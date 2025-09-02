@@ -44,7 +44,7 @@ public class AppUser extends AbstractRBACModel {
   @Column(name = "email", nullable = false, length = 100, comment = "User email address")
   private String email;
 
-  @Column(name = "first_name", length = 50, comment = "User first name")
+  @Column(name = "first_name", nullable = false, length = 50, comment = "User first name")
   private String firstName;
 
   @Column(name = "last_name", length = 50, comment = "User last name")

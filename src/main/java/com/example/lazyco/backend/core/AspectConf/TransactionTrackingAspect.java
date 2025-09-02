@@ -12,8 +12,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class TransactionTrackingAspect {
 
-  @Around(
-      "@within(org.springframework.transaction.annotation.Transactional) || @annotation(org.springframework.transaction.annotation.Transactional)")
+  @Around("@within(org.springframework.transaction.annotation.Transactional)")
   public Object trackTransaction(ProceedingJoinPoint joinPoint) throws Throwable {
     Object result = null;
 

@@ -2,18 +2,28 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import org.hibernate.Session;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+@Repository
 public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<E> {
+
+  @Autowired private SessionFactory sessionFactory;
 
   public E save(E entity) {
     try {
       getCurrentSession().persist(entity);
-      flush();
+      //      getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      getCurrentSession().clear();
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
       throw e;
     }
   }
@@ -21,10 +31,13 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E update(E entity) {
     try {
       getCurrentSession().merge(entity);
-      flush();
+      //      getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      getCurrentSession().clear();
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
       throw e;
     }
   }
@@ -32,23 +45,36 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E delete(E entity) {
     try {
       getCurrentSession().remove(entity);
-      flush();
+      //      getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      getCurrentSession().clear();
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
       throw e;
     }
   }
 
-  public Session getCurrentSession() {
-    return TransactionalWrapper.getCurrentSession();
-  }
-
-  public void flush() {
-    TransactionalWrapper.flush();
-  }
-
   public E findById(Class<E> clazz, Long id) {
     return getCurrentSession().find(clazz, id);
+  }
+
+  // Get the current Hibernate session
+  public Session getCurrentSession() {
+    return sessionFactory.getCurrentSession();
+  }
+
+  // Check if the current transaction is nested
+  public boolean isNestedTransaction() {
+    if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+      return false;
+    }
+    // Get the current transaction status bound to this thread
+    var status = TransactionAspectSupport.currentTransactionStatus();
+    if (status instanceof DefaultTransactionStatus defaultStatus) {
+      return defaultStatus.hasSavepoint(); // true if NESTED
+    }
+    return false;
   }
 }

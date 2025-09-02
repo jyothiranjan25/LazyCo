@@ -25,18 +25,20 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     if (incomingDTO.getObjectsList() != null && !incomingDTO.getObjectsList().isEmpty()) {
       // Process all objects but track errors for atomic rollback
       for (D object : incomingDTO.getObjectsList()) {
+        // deep clone to avoid side effects
+        D objectToProcess = (D) object.clone();
         try {
-          D result = execute(object);
+          D result = execute(objectToProcess);
           successList.add(result);
         } catch (ExceptionWrapper e) {
           incomingDTO.setHasError(true);
-          object.setErrorMessage(e.getMessage());
-          errorList.add(object);
+          objectToProcess.setErrorMessage(e.getMessage());
+          errorList.add(objectToProcess);
           ApplicationLogger.error(e.getMessage(), e);
         } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          object.setErrorMessage(resolveExceptionMessage(t));
-          errorList.add(object);
+          objectToProcess.setErrorMessage(resolveExceptionMessage(t));
+          errorList.add(objectToProcess);
           ApplicationLogger.error(t.getMessage(), t);
         }
       }
@@ -51,14 +53,14 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     // Rollback if atomic operation and errors occurred
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
       if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-        service.markRollback(incomingDTO);
         incomingDTO.setErrorMessage(
             CustomMessage.getMessageString(
                 CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
+        service.markRollback(incomingDTO);
       } else {
         incomingDTO.setErrorMessage(
             CustomMessage.getMessageString(
-                CommonMessage.NON_ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
+                CommonMessage.NON_ATOMIC_OPERATION_ERROR, errorList.size(), successList.size()));
       }
     }
 
@@ -66,19 +68,18 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
   }
 
   private String resolveExceptionMessage(Throwable e) {
-    Throwable root = e.getCause();
-    while (root.getCause() != null) {
-      root = root.getCause();
+    while (e.getCause() != null) {
+      e = e.getCause();
     }
 
     String defaultMessage = CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
 
-    if (root instanceof org.postgresql.util.PSQLException psqlEx) {
+    if (e instanceof org.postgresql.util.PSQLException psqlEx) {
       String detail = psqlEx.getServerErrorMessage().getDetail();
       if (detail != null) {
         defaultMessage = detail.replaceFirst("Key \\([^)]*\\)=\\((.*?)\\)", "$1");
       }
-    } else if (root instanceof org.hibernate.PropertyValueException hibernateEx) {
+    } else if (e instanceof org.hibernate.PropertyValueException hibernateEx) {
       defaultMessage = "Field '" + hibernateEx.getPropertyName() + "' cannot be null.";
     }
     return defaultMessage;

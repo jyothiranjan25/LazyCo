@@ -220,6 +220,13 @@ public class DatabaseConfig {
     // Enable savepoint support for nested transactions
     properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
 
+    // Use Spring-managed session context
+    properties.put(
+        AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS,
+        "org.springframework.orm.hibernate5.SpringSessionContext");
+    // Disallow updates outside of a transaction
+    properties.put(AvailableSettings.ALLOW_UPDATE_OUTSIDE_TRANSACTION, "false");
+
     // Enable/disable second-level cache
     properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);
     // Enable/disable query cache
@@ -240,7 +247,9 @@ public class DatabaseConfig {
     // Disable Hibernate autocommit — handled by Spring Tx manager
     properties.put(AvailableSettings.AUTOCOMMIT, "false");
     // Ensure JPA transaction behavior is strictly followed
-    properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "true");
+    properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "false");
+    // Allow Hibernate to handle transaction coordination with Spring
+    properties.put(AvailableSettings.PREFER_USER_TRANSACTION, "false");
     // Delay connection acquisition until needed, keep until transaction end
     properties.put(AvailableSettings.CONNECTION_HANDLING, "delayed_acquisition_and_hold");
 
@@ -269,6 +278,11 @@ public class DatabaseConfig {
     properties.put(
         "org.hibernate.envers.revision_on_collection_change",
         hibernateEnversRevisionOnCollectionChange);
+
+    if (showSql) {
+      properties.put(AvailableSettings.USE_SQL_COMMENTS, "true");
+      properties.put(AvailableSettings.LOG_SLOW_QUERY, "5000"); // Log queries > 5 seconds
+    }
 
     return properties;
   }

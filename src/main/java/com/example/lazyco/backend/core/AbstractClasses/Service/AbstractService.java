@@ -63,8 +63,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    return executeWithTemplate(
-        dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
+    return executeWithTemplate(dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
   }
 
   // Execute create in the current transaction
@@ -130,7 +129,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
     return executeWithTemplate(
-        dto, self::executeUpdateNestedTransactional, self::executeUpdateNewTransactional);
+        dto, self::executeUpdateNewTransactional, self::executeUpdateNestedTransactional);
   }
 
   // Execute update in the current transaction
@@ -211,7 +210,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
     return executeWithTemplate(
-        dto, self::executeDeleteNestedTransactional, self::executeDeleteNewTransactional);
+        dto, self::executeDeleteNewTransactional, self::executeDeleteNestedTransactional);
   }
 
   // Execute delete in the current transaction
@@ -265,12 +264,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Hook called after the entity is deleted
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
-
-  // Hook to mark the current transaction for rollback
-  public void markRollback(D dto) {
-    // Tell Spring to roll back this transaction without throwing
-    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-  }
 
   // Get count of entity records matching the filter
   @Transactional(readOnly = true)
@@ -394,8 +387,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Template method to execute operations with choice of atomic or non-atomic execution
-  private D executeWithTemplate(
-      D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
+  private D executeWithTemplate(D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
     return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
@@ -430,5 +422,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
       }
     }
+  }
+
+  // Hook to mark the current transaction for rollback without throwing an exception
+  public void markRollback(D dto) {
+    // Tell Spring to roll back this transaction without throwing
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }
 }
