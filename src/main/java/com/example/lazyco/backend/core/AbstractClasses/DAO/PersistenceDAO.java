@@ -17,10 +17,10 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E save(E entity) {
     try {
       getCurrentSession().persist(entity);
-      //      getCurrentSession().flush();
+      //            getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
         getCurrentSession().clear();
       }
@@ -34,7 +34,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
       //      getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
         getCurrentSession().clear();
       }
@@ -48,7 +48,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
       //      getCurrentSession().flush();
       return entity;
     } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
         getCurrentSession().clear();
       }

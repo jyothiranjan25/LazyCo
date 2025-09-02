@@ -63,7 +63,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    return executeWithTemplate(dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
+    return executeWithTemplate(
+        dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
   }
 
   // Execute create in the current transaction
@@ -387,7 +388,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Template method to execute operations with choice of atomic or non-atomic execution
-  private D executeWithTemplate(D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
+  private D executeWithTemplate(
+      D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
     return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
