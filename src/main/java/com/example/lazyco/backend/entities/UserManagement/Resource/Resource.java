@@ -1,4 +1,20 @@
-package com.example.lazyco.backend.entities.UserManagement.Resources;
+package com.example.lazyco.backend.entities.UserManagement.Resource;
 
-public class Resource {
+import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentRBACModel;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Getter
+@Setter
+@Document("resource")
+public class Resource extends AbstractDocumentRBACModel {
+
+    private String name;
+
+    private String description;
+
+    private String url;
+
+    private String type;
 }

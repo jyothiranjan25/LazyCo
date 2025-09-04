@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerComponents;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.UpdateServiceComponent;
+import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.UpdateServiceComponent;
 import org.springframework.http.ResponseEntity;
 
 public class UpdateControllerComponent<D extends AbstractDTO<D>> {

@@ -1,10 +1,11 @@
-package com.example.lazyco.backend.core.AbstractClasses.Service;
+package com.example.lazyco.backend.core.AbstractClasses.ServiceDocument;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,20 +51,6 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       incomingDTO = execute(incomingDTO);
     }
 
-    // Rollback if atomic operation and errors occurred
-    if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
-      if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-        incomingDTO.setErrorMessage(
-            CustomMessage.getMessageString(
-                CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
-        service.markRollback(incomingDTO);
-      } else {
-        incomingDTO.setErrorMessage(
-            CustomMessage.getMessageString(
-                CommonMessage.NON_ATOMIC_OPERATION_ERROR, errorList.size(), successList.size()));
-      }
-    }
-
     return incomingDTO;
   }
 
@@ -82,6 +69,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     } else if (e instanceof org.hibernate.PropertyValueException hibernateEx) {
       defaultMessage = "Field '" + hibernateEx.getPropertyName() + "' cannot be null.";
     }
+
     return defaultMessage;
   }
 

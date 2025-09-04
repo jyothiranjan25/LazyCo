@@ -1,8 +1,8 @@
-package com.example.lazyco.backend.core.AbstractClasses.DAO;
+package com.example.lazyco.backend.core.AbstractClasses.DAODocument;
 
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
 
-public interface IPersistenceDAO<E extends AbstractModel> {
+public interface IPersistenceDocumentDAO<E extends AbstractDocumentModel> {
 
   E save(E entity);
 
@@ -10,5 +10,5 @@ public interface IPersistenceDAO<E extends AbstractModel> {
 
   E delete(E entity);
 
-  E findById(Class<E> clazz, Long id);
+  E findById(Class<E> clazz, String id);
 }

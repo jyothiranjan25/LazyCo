@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-public class PostgresDatabaseConfig {
+public class PostgresConfig {
 
   // ==============================
   // Database connection settings

@@ -28,7 +28,11 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractService<D, E> {
 
+  @Lazy
+  @Autowired
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   private AbstractService<D, E> self;
+
   private final AbstractMapper<D, E> abstractMapper;
   private IAbstractDAO<D, E> abstractDAO;
   @Getter private final Class<D> dtoClass;
@@ -39,12 +43,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   @Autowired
-  private void injectDependencies(
-      IAbstractDAO<D, E> abstractDAO,
-      @Lazy @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-          AbstractService<D, E> self) {
+  private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
     this.abstractDAO = abstractDAO;
-    this.self = self;
   }
 
   @SuppressWarnings("unchecked")

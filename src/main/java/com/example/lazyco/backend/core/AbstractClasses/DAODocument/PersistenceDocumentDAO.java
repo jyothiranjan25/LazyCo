@@ -1,80 +1,34 @@
-package com.example.lazyco.backend.core.AbstractClasses.DAO;
+package com.example.lazyco.backend.core.AbstractClasses.DAODocument;
 
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Repository
-public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<E> {
+public class PersistenceDocumentDAO<E extends AbstractDocumentModel>
+    implements IPersistenceDocumentDAO<E> {
 
-  @Autowired private SessionFactory sessionFactory;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
   public E save(E entity) {
-    try {
-      getCurrentSession().persist(entity);
-      //            getCurrentSession().flush();
-      return entity;
-    } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
-      if (isNestedTransaction()) {
-        getCurrentSession().clear();
-      }
-      throw e;
-    }
+      return mongoTemplate.insert(entity);
   }
 
+  @Override
   public E update(E entity) {
-    try {
-      getCurrentSession().merge(entity);
-      //      getCurrentSession().flush();
-      return entity;
-    } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
-      if (isNestedTransaction()) {
-        getCurrentSession().clear();
-      }
-      throw e;
-    }
+    return mongoTemplate.save(entity);
   }
 
+  @Override
   public E delete(E entity) {
-    try {
-      getCurrentSession().remove(entity);
-      //      getCurrentSession().flush();
-      return entity;
-    } catch (Exception e) {
-      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
-      if (isNestedTransaction()) {
-        getCurrentSession().clear();
-      }
-      throw e;
-    }
+    mongoTemplate.remove(entity);
+    return entity;
   }
 
-  public E findById(Class<E> clazz, Long id) {
-    return getCurrentSession().find(clazz, id);
-  }
-
-  // Get the current Hibernate session
-  public Session getCurrentSession() {
-    return sessionFactory.getCurrentSession();
-  }
-
-  // Check if the current transaction is nested
-  public boolean isNestedTransaction() {
-    if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-      return false;
-    }
-    // Get the current transaction status bound to this thread
-    var status = TransactionAspectSupport.currentTransactionStatus();
-    if (status instanceof DefaultTransactionStatus defaultStatus) {
-      return defaultStatus.hasSavepoint(); // true if NESTED
-    }
-    return false;
+  @Override
+  public E findById(Class<E> clazz, String id) {
+    return mongoTemplate.findById(id, clazz);
   }
 }

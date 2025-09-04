@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.AbstractClasses.Entity;
+package com.example.lazyco.backend.core.AbstractClasses.EntityDocument;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import jakarta.persistence.*;

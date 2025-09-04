@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerComponents;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.GetServiceComponent;
+import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.GetServiceComponent;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
