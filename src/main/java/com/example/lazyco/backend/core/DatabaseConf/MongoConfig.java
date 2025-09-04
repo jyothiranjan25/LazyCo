@@ -7,7 +7,10 @@ import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
@@ -49,8 +52,18 @@ public class MongoConfig {
     return MongoClients.create(uri);
   }
 
+    @Bean
+    public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
+        return new SimpleMongoClientDatabaseFactory(mongoClient, mongoDatabase);
+    }
+
   @Bean
-  public MongoTemplate mongoTemplate(MongoClient mongoClient) {
-    return new MongoTemplate(mongoClient, mongoDatabase);
+  public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
+    return new MongoTemplate(mongoDatabaseFactory);
   }
+
+    @Bean
+    public MongoTransactionManager mongoTransactionManager(MongoDatabaseFactory mongoDatabaseFactory) {
+        return new MongoTransactionManager(mongoDatabaseFactory);
+    }
 }
