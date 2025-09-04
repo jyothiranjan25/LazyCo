@@ -1,10 +1,8 @@
-package com.example.lazyco.backend.core.AbstractClasses.ServiceDocument;
+package com.example.lazyco.backend.core.AbstractDocumentClasses.ServiceDocument;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
+import com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument.AbstractDocumentModel;
 import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.ICRUDService;
-import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.TransactionalService;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.AbstractClasses.DAODocument;
+package com.example.lazyco.backend.core.AbstractDocumentClasses.DAODocument;
 
-import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
+import com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument.AbstractDocumentModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.Resource;
 
-import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentRBACModel;
+import com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument.AbstractDocumentRBACModel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.AbstractClasses.EntityDocument;
+package com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument;
 
 import java.util.Date;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;

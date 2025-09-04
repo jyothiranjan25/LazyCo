@@ -1,7 +1,7 @@
-package com.example.lazyco.backend.core.AbstractClasses.MapperDocument;
+package com.example.lazyco.backend.core.AbstractDocumentClasses.MapperDocument;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
+import com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument.AbstractDocumentModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.NullMappingProvider;
 import java.util.List;
 import java.util.Set;

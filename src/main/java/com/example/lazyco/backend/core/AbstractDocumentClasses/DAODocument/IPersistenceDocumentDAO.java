@@ -1,6 +1,6 @@
-package com.example.lazyco.backend.core.AbstractClasses.DAODocument;
+package com.example.lazyco.backend.core.AbstractDocumentClasses.DAODocument;
 
-import com.example.lazyco.backend.core.AbstractClasses.EntityDocument.AbstractDocumentModel;
+import com.example.lazyco.backend.core.AbstractDocumentClasses.EntityDocument.AbstractDocumentModel;
 
 public interface IPersistenceDocumentDAO<E extends AbstractDocumentModel> {
 
