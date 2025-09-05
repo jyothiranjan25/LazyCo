@@ -6,7 +6,7 @@ import com.example.lazyco.backend.core.AbstractDocClasses.ServiceComponents.ICRU
 import java.util.List;
 
 public interface IAbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
-    extends ICRUDService<D>{
+    extends ICRUDService<D> {
 
   List<E> getEntities(D filters);
 

@@ -52,18 +52,19 @@ public class MongoConfig {
     return MongoClients.create(uri);
   }
 
-    @Bean
-    public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
-        return new SimpleMongoClientDatabaseFactory(mongoClient, mongoDatabase);
-    }
+  @Bean
+  public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
+    return new SimpleMongoClientDatabaseFactory(mongoClient, mongoDatabase);
+  }
 
   @Bean
   public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
     return new MongoTemplate(mongoDatabaseFactory);
   }
 
-    @Bean
-    public MongoTransactionManager mongoTransactionManager(MongoDatabaseFactory mongoDatabaseFactory) {
-        return new MongoTransactionManager(mongoDatabaseFactory);
-    }
+  @Bean
+  public MongoTransactionManager mongoTransactionManager(
+      MongoDatabaseFactory mongoDatabaseFactory) {
+    return new MongoTransactionManager(mongoDatabaseFactory);
+  }
 }

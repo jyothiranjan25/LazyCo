@@ -1,11 +1,11 @@
 package com.example.lazyco.backend.core.AbstractDocClasses.Controller;
 
-import com.example.lazyco.backend.core.AbstractDocClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractDocClasses.Service.IAbstractService;
 import com.example.lazyco.backend.core.AbstractDocClasses.Controller.ControllerComponents.CreateControllerComponent;
 import com.example.lazyco.backend.core.AbstractDocClasses.Controller.ControllerComponents.DeleteControllerComponent;
 import com.example.lazyco.backend.core.AbstractDocClasses.Controller.ControllerComponents.GetControllerComponent;
 import com.example.lazyco.backend.core.AbstractDocClasses.Controller.ControllerComponents.UpdateControllerComponent;
+import com.example.lazyco.backend.core.AbstractDocClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.core.AbstractDocClasses.Service.IAbstractService;
 import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParams;

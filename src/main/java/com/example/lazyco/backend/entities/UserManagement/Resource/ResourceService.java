@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceService extends AbstractService<ResourceDTO, Resource> {
-    protected ResourceService(ResourceMapper resourceMapper) {
-        super(resourceMapper);
-    }
+  protected ResourceService(ResourceMapper resourceMapper) {
+    super(resourceMapper);
+  }
 }

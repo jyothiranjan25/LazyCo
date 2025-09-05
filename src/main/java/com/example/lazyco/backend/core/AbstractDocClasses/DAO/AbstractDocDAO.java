@@ -8,5 +8,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class AbstractDocDAO<D extends AbstractDTO<D>, E extends AbstractModel> extends PersistenceDocDAO<E> implements IAbstractDocDAO<D, E> {
-}
+public class AbstractDocDAO<D extends AbstractDTO<D>, E extends AbstractModel>
+    extends PersistenceDocDAO<E> implements IAbstractDocDAO<D, E> {}

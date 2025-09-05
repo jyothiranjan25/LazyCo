@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.core.AbstractDocClasses.Controller.ControllerComponents;
 
 import com.example.lazyco.backend.core.AbstractDocClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +10,13 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
   public ResponseEntity<D> template(D incomingRequestDTO) {
     incomingRequestDTO = execute(incomingRequestDTO);
     if (isPostRequest()) {
-      return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(incomingRequestDTO);
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(incomingRequestDTO);
     } else {
-      return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(incomingRequestDTO);
+      return ResponseEntity.status(HttpStatus.OK)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(incomingRequestDTO);
     }
   }
 

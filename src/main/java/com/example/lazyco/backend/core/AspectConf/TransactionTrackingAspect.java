@@ -12,8 +12,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class TransactionTrackingAspect {
 
-    @Around("@annotation(org.springframework.transaction.annotation.Transactional(value=\"transactionManager\")) && " +
-            "!@annotation(org.springframework.transaction.annotation.Transactional(value=\"mongoTransactionManager\"))")
+  @Around(
+      "@annotation(org.springframework.transaction.annotation.Transactional(value=\"transactionManager\")) && "
+          + "!@annotation(org.springframework.transaction.annotation.Transactional(value=\"mongoTransactionManager\"))")
   public Object trackTransaction(ProceedingJoinPoint joinPoint) throws Throwable {
     Object result = null;
 

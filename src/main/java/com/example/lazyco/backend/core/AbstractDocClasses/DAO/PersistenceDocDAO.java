@@ -10,24 +10,24 @@ public class PersistenceDocDAO<E extends AbstractModel> implements IPersistenceD
 
   @Autowired private MongoTemplate mongoTemplate;
 
-    @Override
-    public E save(E entity) {
-        return mongoTemplate.save(entity);
-    }
+  @Override
+  public E save(E entity) {
+    return mongoTemplate.save(entity);
+  }
 
-    @Override
-    public E update(E entity) {
-        return mongoTemplate.save(entity);
-    }
+  @Override
+  public E update(E entity) {
+    return mongoTemplate.save(entity);
+  }
 
-    @Override
-    public E delete(E entity) {
-        mongoTemplate.remove(entity);
-        return entity;
-    }
+  @Override
+  public E delete(E entity) {
+    mongoTemplate.remove(entity);
+    return entity;
+  }
 
-    @Override
-    public E findById(Class<E> clazz, String id) {
-        return mongoTemplate.findById(id, clazz);
-    }
+  @Override
+  public E findById(Class<E> clazz, String id) {
+    return mongoTemplate.findById(id, clazz);
+  }
 }

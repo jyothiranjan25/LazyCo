@@ -1,7 +1,5 @@
 package com.example.lazyco.backend.core.AbstractDocClasses.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 

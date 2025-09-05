@@ -12,8 +12,7 @@ import org.apache.commons.lang3.SerializationUtils;
 @Setter
 public abstract class AbstractModel implements Serializable, Cloneable {
 
-  @Id
-  private String id;
+  @Id private String id;
 
   @Version private Long version;
 

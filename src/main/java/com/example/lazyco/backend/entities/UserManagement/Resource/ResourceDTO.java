@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResourceDTO extends AbstractDTO<ResourceDTO> {
-    private String name;
-    private String description;
-    private String url;
-    private String type;
+  private String name;
+  private String description;
+  private String url;
+  private String type;
 }
