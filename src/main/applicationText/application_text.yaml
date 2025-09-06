@@ -7,3 +7,4 @@ COMMON_MODULES:
   OBJECT_NOT_FOUND: "The requested object was not found."
   ID_REQUIRED: "The ID is required."
   INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
+  FIELD_MISSING : "The field '%1$s' is missing."

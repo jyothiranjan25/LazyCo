@@ -9,8 +9,6 @@ import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
-import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import jakarta.persistence.OptimisticLockException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -18,8 +16,6 @@ import java.util.function.Function;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -398,32 +394,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
                 Boolean.TRUE.equals(dto.getIsAtomicOperation())
                     ? atomicOperation
                     : nonAtomicOperation;
-
-            return self.executeOptimisticLockWithRetry(operation, dtoInput);
+            return operation.apply(dtoInput);
           }
         },
         dto);
-  }
-
-  // Retry logic for operations that may encounter optimistic locking conflicts
-  private static final int MAX_RETRIES = 3;
-
-  @Transactional(propagation = Propagation.NESTED)
-  public D executeOptimisticLockWithRetry(Function<D, D> operation, D dto) {
-    int attempts = 0;
-    while (true) {
-      try {
-        return operation.apply(dto);
-      } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
-        attempts++;
-        if (attempts >= MAX_RETRIES) {
-          throw new ExceptionWrapper(
-              HttpStatusCode.valueOf(503),
-              CommonMessage.INTERNET_IS_SLOW); // fail after max retries
-        }
-        ApplicationLogger.warn("Optimistic lock conflict, retrying... attempt " + attempts);
-      }
-    }
   }
 
   // Hook to mark the current transaction for rollback without throwing an exception

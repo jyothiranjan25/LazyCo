@@ -1,9 +1,8 @@
 package com.example.lazyco.backend.core.AbstractDocClasses.Entity;
 
-import java.util.Date;
-
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import java.util.Date;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.data.mongodb.core.mapping.event.BeforeSaveEvent;
@@ -29,13 +28,13 @@ public class AbstractModelListener extends AbstractMongoEventListener<AbstractMo
     }
   }
 
-    @Override
-    public void onBeforeSave(BeforeSaveEvent<AbstractModel> event) {
-        AbstractModel source = event.getSource();
-        if (source instanceof AbstractRBACModel modelBase) {
-            if (modelBase.getUserGroup() == null) {
-               throw new ExceptionWrapper(CommonMessage.APPLICATION_ERROR);
-            }
-        }
+  @Override
+  public void onBeforeSave(BeforeSaveEvent<AbstractModel> event) {
+    AbstractModel source = event.getSource();
+    if (source instanceof AbstractRBACModel modelBase) {
+      if (modelBase.getUserGroup() == null) {
+        throw new ExceptionWrapper(CommonMessage.APPLICATION_ERROR);
+      }
     }
+  }
 }

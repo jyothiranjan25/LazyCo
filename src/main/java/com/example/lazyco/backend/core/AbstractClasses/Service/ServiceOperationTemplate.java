@@ -5,8 +5,12 @@ import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
+import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.PropertyValueException;
+import org.postgresql.util.PSQLException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
@@ -74,13 +78,18 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
     String defaultMessage = CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
 
-    if (e instanceof org.postgresql.util.PSQLException psqlEx) {
+    if (e instanceof PSQLException psqlEx) {
       String detail = psqlEx.getServerErrorMessage().getDetail();
       if (detail != null) {
         defaultMessage = detail.replaceFirst("Key \\([^)]*\\)=\\((.*?)\\)", "$1");
       }
-    } else if (e instanceof org.hibernate.PropertyValueException hibernateEx) {
-      defaultMessage = "Field '" + hibernateEx.getPropertyName() + "' cannot be null.";
+    } else if (e instanceof PropertyValueException hibernateEx) {
+      defaultMessage =
+          CustomMessage.getMessageString(
+              CommonMessage.FIELD_MISSING, hibernateEx.getPropertyName());
+    } else if (e instanceof OptimisticLockException
+        || e instanceof ObjectOptimisticLockingFailureException) {
+      defaultMessage = CustomMessage.getMessageString(CommonMessage.INTERNET_IS_SLOW);
     }
     return defaultMessage;
   }
