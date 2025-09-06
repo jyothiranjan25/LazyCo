@@ -15,9 +15,6 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   protected String id;
 
-  @Expose(serialize = false, deserialize = false)
-  private Long version;
-
   // List of objects for bulk operations
   private List<D> objectsList;
 
@@ -49,6 +46,9 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   @Expose(deserialize = false)
   private String errorMessage;
+
+  @Expose(deserialize = false)
+  private Boolean isAtomicOperation;
 
   // filtering fields
   @Expose(serialize = false, deserialize = false)

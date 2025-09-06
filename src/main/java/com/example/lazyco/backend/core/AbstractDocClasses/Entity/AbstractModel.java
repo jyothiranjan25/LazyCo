@@ -14,8 +14,6 @@ public abstract class AbstractModel implements Serializable, Cloneable {
 
   @Id private String id;
 
-  @Version private Long version;
-
   private Date createdAt;
 
   private Date updatedAt;

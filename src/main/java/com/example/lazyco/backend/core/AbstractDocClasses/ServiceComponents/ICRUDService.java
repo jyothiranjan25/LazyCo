@@ -10,7 +10,7 @@ public interface ICRUDService<D extends AbstractDTO<D>>
 
   D getSingle(D filter);
 
-  D getById(Long id);
+  D getById(String id);
 
   Long getCount(D filter);
 }
