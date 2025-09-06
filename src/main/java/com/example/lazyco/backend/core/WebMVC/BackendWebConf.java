@@ -15,6 +15,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -23,9 +24,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 @Configuration
 @EnableScheduling
+@Import({PostgresConfig.class})
 @EnableAsync(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@Import({PostgresConfig.class})
+@EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(basePackages = {BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:application.properties")})
 public class BackendWebConf implements WebMvcConfigurer {

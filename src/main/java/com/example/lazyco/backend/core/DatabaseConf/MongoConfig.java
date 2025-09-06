@@ -1,7 +1,5 @@
 package com.example.lazyco.backend.core.DatabaseConf;
 
-import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
-
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,10 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = BACKEND_PACKAGE, considerNestedRepositories = true)
 public class MongoConfig {
 
   @Value("${mongodb.username:}")
@@ -42,7 +38,7 @@ public class MongoConfig {
       uri =
           String.format("mongodb://%s:%s@%s:%d/%s", username, password, host, port, mongoDatabase);
       if (authSource != null && !authSource.isEmpty()) {
-        uri += "?authSource=" + authSource;
+        uri += "&authSource=" + authSource;
       }
     } else {
       // Unauthenticated connection

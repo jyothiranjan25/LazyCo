@@ -11,7 +11,6 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableTransactionManagement(proxyTargetClass = true)
 public class TransactionManagerConfig {
 
   // ==============================
@@ -31,13 +30,8 @@ public class TransactionManagerConfig {
     return transactionManager;
   }
 
-  @Bean
-  public MongoTransactionManager mongoTransactionManager(
-      MongoDatabaseFactory mongoDatabaseFactory) {
-    MongoTransactionManager transactionManager = new MongoTransactionManager();
-    transactionManager.setDatabaseFactory(mongoDatabaseFactory);
-    transactionManager.setDefaultTimeout(defaultTransactionTimeout);
-    transactionManager.setNestedTransactionAllowed(true); // savepoints
-    return transactionManager;
+  @Bean(name = "mongoTransactionManager")
+  public MongoTransactionManager mongoTransactionManager(MongoDatabaseFactory mongoDatabaseFactory) {
+      return new MongoTransactionManager(mongoDatabaseFactory);
   }
 }
