@@ -61,10 +61,4 @@ public class MongoConfig {
   public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
     return new MongoTemplate(mongoDatabaseFactory);
   }
-
-  @Bean
-  public MongoTransactionManager mongoTransactionManager(
-      MongoDatabaseFactory mongoDatabaseFactory) {
-    return new MongoTransactionManager(mongoDatabaseFactory);
-  }
 }

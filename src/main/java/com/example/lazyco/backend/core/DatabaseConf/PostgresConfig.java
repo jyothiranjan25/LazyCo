@@ -102,13 +102,6 @@ public class PostgresConfig {
   @Value("${hibernate.envers.revision_on_collection_change:false}")
   private boolean hibernateEnversRevisionOnCollectionChange;
 
-  // ==============================
-  // Transaction settings
-  // ==============================
-
-  @Value("${spring.transaction.default-timeout:30}")
-  private int defaultTransactionTimeout;
-
   @Bean
   @Primary
   public DataSource dataSource() {
@@ -189,16 +182,6 @@ public class PostgresConfig {
     sessionFactory.setPackagesToScan(BACKEND_PACKAGE);
     sessionFactory.setHibernateProperties(hibernateProperties());
     return sessionFactory;
-  }
-
-  @Bean
-  @Primary
-  public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
-    HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-    transactionManager.setSessionFactory(sessionFactory);
-    transactionManager.setDefaultTimeout(defaultTransactionTimeout);
-    transactionManager.setNestedTransactionAllowed(true); // savepoints
-    return transactionManager;
   }
 
   private Properties hibernateProperties() {
