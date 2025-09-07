@@ -7,4 +7,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface InternalFilterableField {}
+public @interface FieldPath {
+    String aliasPath() default "";
+
+    String fullyQualifiedPath() default "";
+}
