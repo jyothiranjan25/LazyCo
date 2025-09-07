@@ -47,7 +47,6 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(deserialize = false)
   private String errorMessage;
 
-  @Expose(deserialize = false)
   private Boolean isAtomicOperation;
 
   // filtering fields
