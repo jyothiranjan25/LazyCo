@@ -20,16 +20,16 @@ public class PostgresConfig {
   // Database connection settings
   // ==============================
 
-  @Value("${db.driverClassName}")
+  @Value("${db.driverClassName:}")
   private String driverClassName;
 
-  @Value("${db.url}")
+  @Value("${db.url:}")
   private String jdbcUrl;
 
-  @Value("${db.username}")
+  @Value("${db.username:}")
   private String username;
 
-  @Value("${db.password}")
+  @Value("${db.password:}")
   private String password;
 
   // ==============================
@@ -68,7 +68,7 @@ public class PostgresConfig {
   // ==============================
 
   // Hibernate settings
-  @Value("${hibernate.dialect}")
+  @Value("${hibernate.dialect:}")
   private String hibernateDialect;
 
   @Value("${hibernate.show_sql:false}")
@@ -83,7 +83,7 @@ public class PostgresConfig {
   @Value("${hibernate.use_query_cache:false}")
   private boolean useQueryCache;
 
-  @Value("${hibernate.cache_region_factory_class}")
+  @Value("${hibernate.cache_region_factory_class:}")
   private String hibernateCacheRegionFactory;
 
   // ==============================
@@ -101,6 +101,41 @@ public class PostgresConfig {
   @Bean
   @Primary
   public DataSource dataSource() {
+    HikariConfig config = getHikariConfig();
+
+    // --- PostgreSQL-specific optimizations ---
+    // Rewrite multi-row inserts into a single batch insert
+    config.addDataSourceProperty("reWriteBatchedInserts", "true");
+    // Allow flexible string type handling (fixes type issues)
+    config.addDataSourceProperty("stringtype", "unspecified");
+    // Use server-side prepared statements after 1 execution
+    config.addDataSourceProperty("prepareThreshold", "1");
+    // Enable client-side prepared statement caching
+    config.addDataSourceProperty("cachePrepStmts", "true");
+    // Use server-side prepared statements
+    config.addDataSourceProperty("useServerPrepStmts", "true");
+    // Track session state locally (reduces network round trips)
+    config.addDataSourceProperty("useLocalSessionState", "true");
+    // Rewrite batched statements into a single request
+    config.addDataSourceProperty("rewriteBatchedStatements", "true");
+    // Max number of prepared statements to cache
+    config.addDataSourceProperty("preparedStatementCacheQueries", "1024");
+    // Memory size allocated for prepared statement cache
+    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "10");
+    // Cache size for database metadata fields
+    config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
+    // Memory size allocated for metadata cache
+    config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
+    // Enable TCP keep-alive to detect dead connections
+    config.addDataSourceProperty("tcpKeepAlive", "true");
+    // Disable socket timeout (0 = infinite)
+    config.addDataSourceProperty("socketTimeout", "0");
+    // Fetch 1000 rows per round trip when streaming large results
+    config.addDataSourceProperty("defaultRowFetchSize", "1000");
+    return new HikariDataSource(config); // Build and return the fully configured DataSource
+  }
+
+  private HikariConfig getHikariConfig() {
     HikariConfig config = new HikariConfig();
 
     // JDBC driver class (e.g., org.postgresql.Driver)
@@ -137,37 +172,7 @@ public class PostgresConfig {
     config.setPoolName("HikariPool-HighConcurrency");
     // Lightweight validation query for checking connections
     config.setConnectionTestQuery("SELECT 1");
-
-    // --- PostgreSQL-specific optimizations ---
-    // Rewrite multi-row inserts into a single batch insert
-    config.addDataSourceProperty("reWriteBatchedInserts", "true");
-    // Allow flexible string type handling (fixes type issues)
-    config.addDataSourceProperty("stringtype", "unspecified");
-    // Use server-side prepared statements after 1 execution
-    config.addDataSourceProperty("prepareThreshold", "1");
-    // Enable client-side prepared statement caching
-    config.addDataSourceProperty("cachePrepStmts", "true");
-    // Use server-side prepared statements
-    config.addDataSourceProperty("useServerPrepStmts", "true");
-    // Track session state locally (reduces network round trips)
-    config.addDataSourceProperty("useLocalSessionState", "true");
-    // Rewrite batched statements into a single request
-    config.addDataSourceProperty("rewriteBatchedStatements", "true");
-    // Max number of prepared statements to cache
-    config.addDataSourceProperty("preparedStatementCacheQueries", "1024");
-    // Memory size allocated for prepared statement cache
-    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "10");
-    // Cache size for database metadata fields
-    config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
-    // Memory size allocated for metadata cache
-    config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
-    // Enable TCP keep-alive to detect dead connections
-    config.addDataSourceProperty("tcpKeepAlive", "true");
-    // Disable socket timeout (0 = infinite)
-    config.addDataSourceProperty("socketTimeout", "0");
-    // Fetch 1000 rows per round trip when streaming large results
-    config.addDataSourceProperty("defaultRowFetchSize", "1000");
-    return new HikariDataSource(config); // Build and return the fully configured DataSource
+    return config;
   }
 
   @Bean
@@ -259,7 +264,7 @@ public class PostgresConfig {
         hibernateEnversRevisionOnCollectionChange);
 
     if (showSql) {
-      properties.put(AvailableSettings.USE_SQL_COMMENTS, "true");
+      properties.put(AvailableSettings.USE_SQL_COMMENTS, "true"); // Add comments to SQL for easier debugging
       properties.put(AvailableSettings.LOG_SLOW_QUERY, "5000"); // Log queries > 5 seconds
     }
 

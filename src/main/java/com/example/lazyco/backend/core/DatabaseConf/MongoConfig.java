@@ -1,7 +1,11 @@
 package com.example.lazyco.backend.core.DatabaseConf;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,30 +25,44 @@ public class MongoConfig {
   @Value("${mongodb.authSource:}")
   private String authSource;
 
-  @Value("${mongodb.host:}")
+  @Value("${mongodb.host:localhost}")
   private String host;
 
-  @Value("${mongodb.port:}")
+  @Value("${mongodb.port:27017}")
   private int port;
 
-  @Value("${mongodb.database:}")
+  @Value("${mongodb.database:test}")
   private String mongoDatabase;
 
   @Bean
   public MongoClient mongoClient() {
     String uri;
-    if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
+    if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
       // Authenticated connection
       uri =
           String.format("mongodb://%s:%s@%s:%d/%s", username, password, host, port, mongoDatabase);
-      if (authSource != null && !authSource.isEmpty()) {
-        uri += "&authSource=" + authSource;
+      if (StringUtils.isNotBlank(authSource)) {
+        uri += "/?authSource=" + authSource;
       }
     } else {
       // Unauthenticated connection
       uri = String.format("mongodb://%s:%d/%s", host, port, mongoDatabase);
     }
-    return MongoClients.create(uri);
+
+    ConnectionString connectionString = new ConnectionString(uri);
+
+    MongoClientSettings settings =
+        MongoClientSettings.builder()
+            .applyConnectionString(connectionString)
+            .applyToSocketSettings(
+                builder ->
+                    builder.connectTimeout(3, TimeUnit.SECONDS)) // fail fast if not reachable
+            .applyToClusterSettings(
+                builder ->
+                    builder.serverSelectionTimeout(3, TimeUnit.SECONDS)) // server selection timeout
+            .build();
+
+    return MongoClients.create(settings);
   }
 
   @Bean
