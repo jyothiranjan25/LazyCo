@@ -1,0 +1,22 @@
+package com.example.lazyco.backend.core.Exceptions;
+
+import com.example.lazyco.backend.core.Messages.MessageCodes;
+import lombok.Getter;
+
+@Getter
+public enum CommonMessage implements MessageCodes {
+  CUSTOM_MESSAGE("COMMON_MODULES.CUSTOM_MESSAGE"),
+  FIELD_MISSING("COMMON_MODULES.FIELD_MISSING"),
+  APPLICATION_ERROR("COMMON_MODULES.APPLICATION_ERROR"),
+  ATOMIC_OPERATION_ERROR("COMMON_MODULES.ATOMIC_OPERATION_ERROR"),
+  NON_ATOMIC_OPERATION_ERROR("COMMON_MODULES.NON_ATOMIC_OPERATION_ERROR"),
+  OBJECT_REQUIRED("COMMON_MODULES.OBJECT_REQUIRED"),
+  OBJECT_NOT_FOUND("COMMON_MODULES.OBJECT_NOT_FOUND"),
+  ID_REQUIRED("COMMON_MODULES.ID_REQUIRED"),
+  INTERNET_IS_SLOW("COMMON_MODULES.INTERNET_IS_SLOW");
+  private final String value;
+
+  CommonMessage(String value) {
+    this.value = value;
+  }
+}
