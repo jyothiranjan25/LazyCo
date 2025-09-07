@@ -12,6 +12,7 @@ import com.example.lazyco.backend.core.MongoCriteriaBuilder.MongoCriteriaBuilder
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -249,9 +250,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Fetch DTO records matching the filter
-  private List<D> fetchDTORecords(D filter) {
+  private List<D> fetchDTORecords(
+      D filter, BiConsumer<MongoCriteriaBuilderWrapper, D> additionalFilters) {
     filter = updateFilterBeforeGet(filter);
-    List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
+    List<D> result = abstractDAO.get(filter, abstractMapper, additionalFilters);
     return modifyGetResult(result, filter);
   }
 
@@ -271,7 +273,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Retrieve multiple DTOs matching the filter
   @Transactional(value = "mongoTransactionManager", readOnly = true)
   public List<D> get(D dto) {
-    return fetchDTORecords(dto);
+    return fetchDTORecords(dto, this::addEntityFilters);
+  }
+
+  // Retrieve multiple DTOs matching the filter
+  @Transactional(value = "mongoTransactionManager", readOnly = true)
+  public List<D> get(D dto, BiConsumer<MongoCriteriaBuilderWrapper, D> additionalFilters) {
+    return fetchDTORecords(dto, additionalFilters);
   }
 
   // Retrieve a single DTO matching the filter, or null if none found
@@ -299,14 +307,21 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Fetch entity records matching the filter
-  private List<E> fetchEntityRecords(D filter) {
-    return abstractDAO.get(filter, this::addEntityFilters);
+  private List<E> fetchEntityRecords(
+      D filter, BiConsumer<MongoCriteriaBuilderWrapper, D> additionalFilters) {
+    return abstractDAO.get(filter, additionalFilters);
   }
 
   // Retrieve multiple entities matching the filter
   @Transactional(value = "mongoTransactionManager", readOnly = true)
   public List<E> getEntities(D filters) {
-    return fetchEntityRecords(filters);
+    return fetchEntityRecords(filters, this::addEntityFilters);
+  }
+
+  @Transactional(value = "mongoTransactionManager", readOnly = true)
+  public List<E> getEntities(
+      D filters, BiConsumer<MongoCriteriaBuilderWrapper, D> additionalFilters) {
+    return fetchEntityRecords(filters, additionalFilters);
   }
 
   // Retrieve a single entity matching the filter, or null if none found
