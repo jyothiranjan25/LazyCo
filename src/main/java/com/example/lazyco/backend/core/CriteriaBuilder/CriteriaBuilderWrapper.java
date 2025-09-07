@@ -341,47 +341,126 @@ public class CriteriaBuilderWrapper {
   }
 
   // -------------------------------
-    // Search criteria (fluent)
-    // -------------------------------
+  // Search criteria (fluent)
+  // -------------------------------
 
-    public Predicate getSearchCriteria(String key, String keyWord) {
-        return getSearchCriteria(getExpression(key), keyWord);
+  public Predicate getSearchCriteria(String key, String keyWord) {
+    return getSearchCriteria(getExpression(key), keyWord);
+  }
+
+  public Predicate getSearchCriteria(Path<String> path, String keyWord) {
+    return getOrPredicate(
+        getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
+  }
+
+  // -------------------------------
+  // Query configuration
+  // -------------------------------
+
+  public void setDistinct(boolean distinct) {
+    this.isDistinct = distinct;
+    query.select(root).distinct(isDistinct);
+  }
+
+  public void groupBy(String... fieldPaths) {
+    List<Expression<?>> expressions = new ArrayList<>();
+    for (String fieldPath : fieldPaths) {
+      expressions.add(getExpression(fieldPath));
     }
+    query.groupBy(expressions);
+  }
 
-    public Predicate getSearchCriteria(Path<String> path, String keyWord) {
-        return getOrPredicate(getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
+  public void orderBy(String... fieldPaths) {
+    orderBy(OrderBy.ASC, fieldPaths);
+  }
+
+  public void orderBy(OrderBy asc, String... fieldPaths) {
+    List<Order> orders = new ArrayList<>();
+    for (String fieldPath : fieldPaths) {
+      Order order;
+      Expression<?> expression = getExpression(fieldPath);
+      if (OrderBy.ASC.equals(asc)) {
+        order = criteriaBuilder.asc(expression);
+      } else {
+        order = criteriaBuilder.desc(expression);
+      }
+      orders.add(order);
     }
+    query.orderBy(orders);
+  }
 
-    // -------------------------------
-    // Query configuration
-    // -------------------------------
+  public void orderByCriteria(String... fieldPaths) {
+    List<Order> orders = new ArrayList<>();
 
-    public void setDistinct(boolean distinct) {
-      this.isDistinct = distinct;
-      query.select(root).distinct(isDistinct);
-    }
+    for (String fieldPath : fieldPaths) {
+      // Default direction is ASC
+      OrderBy direction = OrderBy.ASC;
+      String cleanField = fieldPath;
 
-    public void groupBy(String... fieldPaths) {
-        List<Expression<?>> expressions = new ArrayList<>();
-        for (String fieldPath : fieldPaths) {
-            expressions.add(getExpression(fieldPath));
+      // Check if fieldPath contains ':asc' or ':desc'
+      if (fieldPath.contains(":")) {
+        String[] parts = fieldPath.split(":");
+        cleanField = parts[0];
+        if (parts.length > 1) {
+          try {
+            direction = OrderBy.valueOf(parts[1].trim().toUpperCase());
+          } catch (Exception ignored) {
+          }
         }
-        query.groupBy(expressions);
+      }
+
+      Order order;
+      Expression<?> expression = getExpression(cleanField);
+      if (OrderBy.ASC.equals(direction)) {
+        order = criteriaBuilder.asc(expression);
+      } else {
+        order = criteriaBuilder.desc(expression);
+      }
+      orders.add(order);
     }
 
-    public void removeOrderBy() {
-        query.orderBy();
+    query.orderBy(orders);
+  }
+
+  public void removeOrderBy() {
+    query.orderBy();
+  }
+
+  public void addProjection(String... fieldPaths) {
+    List<Expression<?>> expressions = new ArrayList<>();
+    for (String fieldPath : fieldPaths) {
+      expressions.add(getExpression(fieldPath));
     }
+    query.multiselect(expressions);
+  }
 
-    public void addProjection(Expression<?>... expressions) {
-        query.multiselect(expressions);
+  // -------------------------------
+  // Helper methods
+  // -------------------------------
+
+  public Path getExpression(String aliasPath) {
+    String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
+    return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
+  }
+
+  public String getFullyQualifiedPath(String aliasPath) {
+    int propertyIndex = aliasPath.lastIndexOf('.') + 1;
+    String property = aliasPath.substring(propertyIndex);
+    String fullyQualifiedPath;
+    if (propertyIndex == 0) {
+      fullyQualifiedPath = property;
+    } else {
+      String parentAlias = aliasPath.substring(0, propertyIndex - 1);
+      fullyQualifiedPath = aliasToFullyQualifiedPathMap.get(parentAlias) + "." + property;
     }
+    return fullyQualifiedPath;
+  }
 
-    // -------------------------------
-    // Helper methods
-    // -------------------------------
+  // -------------------------------
+  // Join methods
+  // -------------------------------
 
-    public void join(String property) {
+  public void join(String property) {
     join(property, property);
   }
 
@@ -420,19 +499,6 @@ public class CriteriaBuilderWrapper {
     joinMap.put(alias, join);
   }
 
-  public String getFullyQualifiedPath(String aliasPath) {
-    int propertyIndex = aliasPath.lastIndexOf('.') + 1;
-    String property = aliasPath.substring(propertyIndex);
-    String fullyQualifiedPath;
-    if (propertyIndex == 0) {
-      fullyQualifiedPath = property;
-    } else {
-      String parentAlias = aliasPath.substring(0, propertyIndex - 1);
-      fullyQualifiedPath = aliasToFullyQualifiedPathMap.get(parentAlias) + "." + property;
-    }
-    return fullyQualifiedPath;
-  }
-
   public void registerAlias(String aliasPath, String alias) {
     String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
     aliasToFullyQualifiedPathMap.put(alias, fullyQualifiedPath);
@@ -446,10 +512,5 @@ public class CriteriaBuilderWrapper {
 
   public void fetch(String fetchProperty) {
     root.fetch(fetchProperty);
-  }
-
-  public Path getExpression(String aliasPath) {
-    String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
-    return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
   }
 }
