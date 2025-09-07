@@ -51,10 +51,10 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // filtering fields
   @Expose(serialize = false, deserialize = false)
-  private List<Long> idsIn;
+  private List<String> idsIn;
 
   @Expose(serialize = false, deserialize = false)
-  private List<Long> idsNotIn;
+  private List<String> idsNotIn;
 
   @Expose(serialize = false, deserialize = false)
   private Map<String, List<String>> stringIn;

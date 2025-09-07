@@ -50,13 +50,6 @@ public class MongoCriteriaBuilderWrapper {
     return Criteria.where(getFieldPath(key)).is(value);
   }
 
-  public void propertyEq(String field1, String field2) {
-    // MongoDB doesn't have direct field-to-field comparison in basic queries
-    // This would typically require aggregation pipeline
-    throw new UnsupportedOperationException(
-        "Property-to-property comparison requires aggregation pipeline");
-  }
-
   public void equalIgnoreCase(String key, Object value) {
     if (value instanceof String) {
       finalCriteria =
@@ -70,11 +63,6 @@ public class MongoCriteriaBuilderWrapper {
 
   public void notEqual(String key, Object value) {
     finalCriteria = finalCriteria.and(getFieldPath(key)).ne(value);
-  }
-
-  public void notEqualProperty(String field1, String field2) {
-    throw new UnsupportedOperationException(
-        "Property-to-property comparison requires aggregation pipeline");
   }
 
   public void notEqualIgnoreCase(String key, Object value) {
@@ -97,22 +85,12 @@ public class MongoCriteriaBuilderWrapper {
     finalCriteria = finalCriteria.and(getFieldPath(key)).gt(value);
   }
 
-  public void greaterThan(String field1, String field2) {
-    throw new UnsupportedOperationException(
-        "Field-to-field comparison requires aggregation pipeline");
-  }
-
   public Criteria getGtPredicate(String key, Object value) {
     return Criteria.where(getFieldPath(key)).gt(value);
   }
 
   public void lt(String key, Object value) {
     finalCriteria = finalCriteria.and(getFieldPath(key)).lt(value);
-  }
-
-  public void lessThan(String field1, String field2) {
-    throw new UnsupportedOperationException(
-        "Field-to-field comparison requires aggregation pipeline");
   }
 
   public Criteria getLtPredicate(String key, Object value) {
@@ -123,22 +101,12 @@ public class MongoCriteriaBuilderWrapper {
     finalCriteria = finalCriteria.and(getFieldPath(key)).gte(value);
   }
 
-  public void greaterThenOrEqual(String field1, String field2) {
-    throw new UnsupportedOperationException(
-        "Field-to-field comparison requires aggregation pipeline");
-  }
-
   public Criteria getGePredicate(String key, Object value) {
     return Criteria.where(getFieldPath(key)).gte(value);
   }
 
   public void le(String key, Object value) {
     finalCriteria = finalCriteria.and(getFieldPath(key)).lte(value);
-  }
-
-  public void lessThenOrEqual(String field1, String field2) {
-    throw new UnsupportedOperationException(
-        "Field-to-field comparison requires aggregation pipeline");
   }
 
   public Criteria getLePredicate(String key, Object value) {
@@ -259,11 +227,6 @@ public class MongoCriteriaBuilderWrapper {
   // -------------------------------
   // Query configuration
   // -------------------------------
-
-  public void groupBy(String... fieldPaths) {
-    // MongoDB grouping is done through aggregation pipeline
-    throw new UnsupportedOperationException("Group by requires aggregation pipeline");
-  }
 
   public void orderBy(String... fieldPaths) {
     orderBy(OrderBy.ASC, fieldPaths);

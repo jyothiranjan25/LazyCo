@@ -13,8 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Setter
 public abstract class AbstractModel implements Serializable, Cloneable {
 
-  @Id
-  private String id;
+  @Id private String id;
 
   @Field("created_at")
   private Date createdAt;

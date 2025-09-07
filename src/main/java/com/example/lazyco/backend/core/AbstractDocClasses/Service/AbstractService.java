@@ -4,17 +4,15 @@ import com.example.lazyco.backend.core.AbstractDocClasses.DAO.IAbstractDocDAO;
 import com.example.lazyco.backend.core.AbstractDocClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractDocClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractDocClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
+import com.example.lazyco.backend.core.MongoCriteriaBuilder.MongoCriteriaBuilderWrapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
-
-import com.example.lazyco.backend.core.MongoCriteriaBuilder.MongoCriteriaBuilderWrapper;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -253,7 +251,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Fetch DTO records matching the filter
   private List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
-    List<D> result = abstractDAO.get(filter,abstractMapper, this::addEntityFilters);
+    List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
     return modifyGetResult(result, filter);
   }
 

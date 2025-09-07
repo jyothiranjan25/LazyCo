@@ -16,6 +16,13 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class FieldFilterUtils {
 
+  public static void addInternalFieldFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    Class<?> filterClass = criteriaBuilderWrapper.getFilter().getClass();
+    for (Field field : getAllFields(filterClass)) {
+      addSingleFieldFilter(criteriaBuilderWrapper, field);
+    }
+  }
+
   private static void addSingleFieldFilter(
       CriteriaBuilderWrapper criteriaBuilderWrapper, Field field) {
     if (!field.isAnnotationPresent(InternalFilterableField.class)) {
@@ -148,13 +155,6 @@ public class FieldFilterUtils {
         // Default to equals for unknown operators
         criteriaBuilderWrapper.eq(fieldPath, value);
         break;
-    }
-  }
-
-  public static void addInternalFieldFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    Class<?> filterClass = criteriaBuilderWrapper.getFilter().getClass();
-    for (Field field : getAllFields(filterClass)) {
-      addSingleFieldFilter(criteriaBuilderWrapper, field);
     }
   }
 
