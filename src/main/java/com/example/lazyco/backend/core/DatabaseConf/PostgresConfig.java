@@ -264,7 +264,8 @@ public class PostgresConfig {
         hibernateEnversRevisionOnCollectionChange);
 
     if (showSql) {
-      properties.put(AvailableSettings.USE_SQL_COMMENTS, "true"); // Add comments to SQL for easier debugging
+      properties.put(
+          AvailableSettings.USE_SQL_COMMENTS, "true"); // Add comments to SQL for easier debugging
       properties.put(AvailableSettings.LOG_SLOW_QUERY, "5000"); // Log queries > 5 seconds
     }
 

@@ -13,11 +13,9 @@ import lombok.Setter;
 @FilteredEntity(type = AppUser.class)
 public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
-  @InternalFilterableField
-  private String userId;
+  @InternalFilterableField private String userId;
 
-  @InternalFilterableField
-  private String password;
+  @InternalFilterableField private String password;
 
   @InternalFilterableField private String email;
 

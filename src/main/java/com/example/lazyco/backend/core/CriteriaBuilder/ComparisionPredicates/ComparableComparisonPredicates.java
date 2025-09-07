@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ComparableComparisonPredicates implements ComparisonPredicates {
 
   public Predicate getGePredicate(
