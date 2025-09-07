@@ -99,7 +99,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, Long.class);
-    criteriaBuilderWrapper.removeOrderBy(); // Order by cannot be present in count query
+    criteriaBuilderWrapper.clearOrderBy(); // Order by cannot be present in count query
     criteriaBuilderWrapper
         .getQuery()
         .select(

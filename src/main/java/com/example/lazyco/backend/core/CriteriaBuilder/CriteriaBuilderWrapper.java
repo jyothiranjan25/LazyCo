@@ -289,7 +289,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public void isNotNull(Path<?> path) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getIsNullPredicate(path));
+    finalPredicate = criteriaBuilder.and(finalPredicate, getIsNotNullPredicate(path));
   }
 
   public Predicate getIsNotNullPredicate(String key) {
@@ -422,7 +422,7 @@ public class CriteriaBuilderWrapper {
     query.orderBy(orders);
   }
 
-  public void removeOrderBy() {
+  public void clearOrderBy() {
     query.orderBy();
   }
 
@@ -474,43 +474,68 @@ public class CriteriaBuilderWrapper {
 
   public void join(String property, String alias, JoinType joinType) {
     String[] props = property.split("\\.");
-    // property must have at most 2 components. Previous alias and current property name/just
-    // current
-    // property name
-    if (props.length == 0 || props.length > 2) {
-      throw new RuntimeException("Invalid property for join: " + property);
-    }
+    From<?, ?> from = root;
+    StringBuilder fqPath = new StringBuilder();
 
-    if (props.length == 1) {
-      makeJoin(root, property, alias, joinType);
-    } else {
-      String prevAlias = props[0];
-      String currentProperty = props[1];
-      Join previousJoin = joinMap.get(prevAlias);
-      if (previousJoin == null) {
-        throw new RuntimeException("Previous join not found for alias: " + prevAlias);
+    for (int i = 0; i < props.length; i++) {
+      String prop = props[i];
+      fqPath.append(prop);
+      String fqPathStr = fqPath.toString();
+
+      Join join = joinMap.get(fqPathStr);
+      if (join == null) {
+        join = from.join(prop, joinType);
+        joinMap.put(fqPathStr, join);
       }
-      makeJoin(previousJoin, currentProperty, alias, joinType);
+      from = join;
+
+      if (i < props.length - 1) {
+        fqPath.append(".");
+      }
     }
+
+    aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
+    fullyQualifiedPathToJoinTypeMap.put(fqPath.toString(), joinType);
   }
 
-  private void makeJoin(From from, String propertyName, String alias, JoinType joinType) {
-    Join join = from.join(propertyName, joinType);
-    joinMap.put(alias, join);
-  }
-
-  public void registerAlias(String aliasPath, String alias) {
-    String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
-    aliasToFullyQualifiedPathMap.put(alias, fullyQualifiedPath);
-  }
-
-  public void registerAlias(String aliasPath, String alias, JoinType joinType) {
-    String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
-    aliasToFullyQualifiedPathMap.put(alias, fullyQualifiedPath);
-    fullyQualifiedPathToJoinTypeMap.put(fullyQualifiedPath, joinType);
-  }
+  // -------------------------------
+  // Join Fetch methods
+  // -------------------------------
 
   public void fetch(String fetchProperty) {
-    root.fetch(fetchProperty);
+    fetch(fetchProperty, fetchProperty);
+  }
+
+  public void fetch(String fetchProperty, String alias) {
+    joinFetch(fetchProperty, alias, JoinType.LEFT);
+  }
+
+  public void fetch(String fetchProperty, JoinType joinType) {
+    joinFetch(fetchProperty, fetchProperty, joinType);
+  }
+
+  public void joinFetch(String property, String alias, JoinType joinType) {
+    String[] props = property.split("\\.");
+    From<?, ?> from = root;
+    StringBuilder fqPath = new StringBuilder();
+
+    for (int i = 0; i < props.length; i++) {
+      String prop = props[i];
+      fqPath.append(prop);
+      String fqPathStr = fqPath.toString();
+
+      Fetch fetch = from.fetch(prop, joinType);
+      Join join = (Join) fetch;
+      joinMap.put(fqPathStr, join);
+
+      from = join;
+
+      if (i < props.length - 1) {
+        fqPath.append(".");
+      }
+    }
+
+    aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
+    fullyQualifiedPathToJoinTypeMap.put(fqPath.toString(), joinType);
   }
 }
