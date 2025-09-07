@@ -340,7 +340,48 @@ public class CriteriaBuilderWrapper {
     return criteriaBuilder.or(predicates);
   }
 
-  public void join(String property) {
+  // -------------------------------
+    // Search criteria (fluent)
+    // -------------------------------
+
+    public Predicate getSearchCriteria(String key, String keyWord) {
+        return getSearchCriteria(getExpression(key), keyWord);
+    }
+
+    public Predicate getSearchCriteria(Path<String> path, String keyWord) {
+        return getOrPredicate(getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
+    }
+
+    // -------------------------------
+    // Query configuration
+    // -------------------------------
+
+    public void setDistinct(boolean distinct) {
+      this.isDistinct = distinct;
+      query.select(root).distinct(isDistinct);
+    }
+
+    public void groupBy(String... fieldPaths) {
+        List<Expression<?>> expressions = new ArrayList<>();
+        for (String fieldPath : fieldPaths) {
+            expressions.add(getExpression(fieldPath));
+        }
+        query.groupBy(expressions);
+    }
+
+    public void removeOrderBy() {
+        query.orderBy();
+    }
+
+    public void addProjection(Expression<?>... expressions) {
+        query.multiselect(expressions);
+    }
+
+    // -------------------------------
+    // Helper methods
+    // -------------------------------
+
+    public void join(String property) {
     join(property, property);
   }
 
@@ -410,38 +451,5 @@ public class CriteriaBuilderWrapper {
   public Path getExpression(String aliasPath) {
     String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
     return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
-  }
-
-  public Predicate getSearchCriteria(String key, String keyWord) {
-    return getSearchCriteria(getExpression(key), keyWord);
-  }
-
-  public Predicate getSearchCriteria(Path<String> path, String keyWord) {
-    return criteriaBuilder.or(
-        getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
-  }
-
-  public void removeOrderBy() {
-    query.orderBy();
-  }
-
-  public void setDistinct() {
-    query.select(root).distinct(isDistinct);
-  }
-
-  public void addProjection(Expression<?>... expressions) {
-    query.multiselect(expressions);
-  }
-
-  public void groupBy(List<String> fieldPaths) {
-    List<Expression<?>> expressions = new ArrayList<>();
-    for (String fieldPath : fieldPaths) {
-      expressions.add(getExpression(fieldPath));
-    }
-    query.groupBy(expressions);
-  }
-
-  public void groupBy(String fieldPath) {
-    groupBy(List.of(fieldPath));
   }
 }
