@@ -17,216 +17,132 @@ public class MongoCriteriaBuilderWrapper {
 
   private Query query;
   private AbstractDTO filter;
-  private Criteria finalCriteria;
+  private List<Criteria> criteriaList = new ArrayList<>();
   private Map<String, String> aliasToPathMap = new HashMap<>();
   private boolean isDistinct = true;
 
   public MongoCriteriaBuilderWrapper(AbstractDTO filter) {
     this.query = new Query();
     this.filter = filter;
-    this.finalCriteria = new Criteria();
   }
 
   public Query getFinalQuery() {
-    if (!finalCriteria.getCriteriaObject().isEmpty()) {
-      query.addCriteria(finalCriteria);
+    if (!criteriaList.isEmpty()) {
+      Criteria combined = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
+      query.addCriteria(combined);
     }
     return query;
   }
 
-  private MongoCriteriaBuilderWrapper addCriteria(Criteria criteria) {
-    this.finalCriteria = this.finalCriteria.andOperator(criteria);
-    return this;
+  private void addCriteria(Criteria criteria) {
+    this.criteriaList.add(criteria);
+  }
+
+  private Criteria getCriteria(String key) {
+    return Criteria.where(getFieldPath(key));
   }
 
   // -------------------------------
   // Common predicate methods (fluent)
   // -------------------------------
   public void eq(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).is(value);
-  }
-
-  public Criteria getEqualPredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).is(value);
+    addCriteria(getCriteria(key).is(value));
   }
 
   public void equalIgnoreCase(String key, Object value) {
     if (value instanceof String) {
-      finalCriteria =
-          finalCriteria
-              .and(getFieldPath(key))
-              .regex("^" + Pattern.quote(value.toString()) + "$", "i");
+      addCriteria(getCriteria(key).regex("^" + Pattern.quote(value.toString()) + "$", "i"));
     } else {
       eq(key, value);
     }
   }
 
   public void notEqual(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).ne(value);
+    addCriteria(getCriteria(key).ne(value));
   }
 
   public void notEqualIgnoreCase(String key, Object value) {
     if (value instanceof String) {
-      finalCriteria =
-          finalCriteria
-              .and(getFieldPath(key))
-              .not()
-              .regex("^" + Pattern.quote(value.toString()) + "$", "i");
+      addCriteria(getCriteria(key).not().regex("^" + Pattern.quote(value.toString()) + "$", "i"));
     } else {
       notEqual(key, value);
     }
   }
 
-  public Criteria getNotEqualPredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).ne(value);
-  }
-
   public void gt(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).gt(value);
-  }
-
-  public Criteria getGtPredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).gt(value);
+    addCriteria(getCriteria(key).gt(value));
   }
 
   public void lt(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).lt(value);
-  }
-
-  public Criteria getLtPredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).lt(value);
+    addCriteria(getCriteria(key).lt(value));
   }
 
   public void ge(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).gte(value);
-  }
-
-  public Criteria getGePredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).gte(value);
+    addCriteria(getCriteria(key).gte(value));
   }
 
   public void le(String key, Object value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).lte(value);
-  }
-
-  public Criteria getLePredicate(String key, Object value) {
-    return Criteria.where(getFieldPath(key)).lte(value);
+    addCriteria(getCriteria(key).lte(value));
   }
 
   public void in(String key, List value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).in(value);
+    addCriteria(getCriteria(key).in(value));
   }
 
   public void in(String key, Collection<?> value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).in(value);
-  }
-
-  public Criteria getInPredicate(String key, List value) {
-    return Criteria.where(getFieldPath(key)).in(value);
-  }
-
-  public Criteria getInPredicate(String key, Collection<?> value) {
-    return Criteria.where(getFieldPath(key)).in(value);
+    addCriteria(getCriteria(key).in(value));
   }
 
   public void notIn(String key, List value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).nin(value);
+    addCriteria(getCriteria(key).nin(value));
   }
 
   public void notIn(String key, Collection<?> value) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).nin(value);
-  }
-
-  public Criteria getNotInPredicate(String key, List value) {
-    return Criteria.where(getFieldPath(key)).nin(value);
-  }
-
-  public Criteria getNotInPredicate(String key, Collection<?> value) {
-    return Criteria.where(getFieldPath(key)).nin(value);
+    addCriteria(getCriteria(key).nin(value));
   }
 
   public void like(String key, String value) {
     // Convert SQL LIKE pattern to MongoDB regex
     String regexPattern = value.replace("%", ".*").replace("_", ".");
-    finalCriteria = finalCriteria.and(getFieldPath(key)).regex(regexPattern);
-  }
-
-  public Criteria getLikePredicate(String key, String value) {
-    String regexPattern = value.replace("%", ".*").replace("_", ".");
-    return Criteria.where(getFieldPath(key)).regex(regexPattern);
+    addCriteria(getCriteria(key).regex(regexPattern));
   }
 
   public void iLike(String key, String value) {
-    // Case-insensitive LIKE
     String regexPattern = value.replace("%", ".*").replace("_", ".");
-    finalCriteria = finalCriteria.and(getFieldPath(key)).regex(regexPattern, "i");
-  }
-
-  public Criteria getILikePredicate(String key, String value) {
-    String regexPattern = value.replace("%", ".*").replace("_", ".");
-    return Criteria.where(getFieldPath(key)).regex(regexPattern, "i");
+    addCriteria(getCriteria(key).regex(regexPattern, "i"));
   }
 
   public void isNull(String key) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).isNull();
-  }
-
-  public Criteria getIsNullPredicate(String key) {
-    return Criteria.where(getFieldPath(key)).isNull();
+    addCriteria(getCriteria(key).is(null));
   }
 
   public void isNotNull(String key) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).ne(null);
-  }
-
-  public Criteria getIsNotNullPredicate(String key) {
-    return Criteria.where(getFieldPath(key)).ne(null);
+    addCriteria(getCriteria(key).ne(null));
   }
 
   public void isEmpty(String key) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).size(0);
-  }
-
-  public Criteria getIsEmptyPredicate(String key) {
-    return Criteria.where(getFieldPath(key)).size(0);
+    addCriteria(getCriteria(key).size(0));
   }
 
   public void between(String key, Object from, Object to) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).gte(from).lte(to);
+    addCriteria(getCriteria(key).gte(from).lte(to));
   }
 
-  public Criteria getBetweenPredicate(String key, Object from, Object to) {
-    return Criteria.where(getFieldPath(key)).gte(from).lte(to);
+  public void and(Criteria... criteria) {
+    addCriteria(new Criteria().andOperator(criteria));
   }
 
-  public void and(Criteria... criterias) {
-    finalCriteria = finalCriteria.andOperator(criterias);
+  public Criteria getAndPredicate(Criteria... criteria) {
+    return new Criteria().andOperator(criteria);
   }
 
-  public Criteria getAndPredicate(Criteria... criterias) {
-    return new Criteria().andOperator(criterias);
+  public void or(Criteria... criteria) {
+    addCriteria(new Criteria().orOperator(criteria));
   }
 
-  public void or(Criteria... criterias) {
-    finalCriteria = finalCriteria.orOperator(criterias);
+  public Criteria getOrPredicate(Criteria... criteria) {
+   return new Criteria().orOperator(criteria);
   }
-
-  public Criteria getOrPredicate(Criteria... criterias) {
-    return new Criteria().orOperator(criterias);
-  }
-
-  // -------------------------------
-  // Search criteria (fluent)
-  // -------------------------------
-
-  public Criteria getSearchCriteria(String key, String keyWord) {
-    return getOrPredicate(
-        getLikePredicate(key, keyWord + "%"), getLikePredicate(key, "% " + keyWord + "%"));
-  }
-
-  // -------------------------------
-  // Query configuration
-  // -------------------------------
 
   public void orderBy(String... fieldPaths) {
     orderBy(OrderBy.ASC, fieldPaths);
@@ -309,47 +225,35 @@ public class MongoCriteriaBuilderWrapper {
   }
 
   // -------------------------------
-  // Pagination
-  // -------------------------------
-
-  public void skip(long skip) {
-    query.skip(skip);
-  }
-
-  public void limit(int limit) {
-    query.limit(limit);
-  }
-
-  // -------------------------------
   // MongoDB specific methods
   // -------------------------------
 
   public void regex(String key, String pattern) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).regex(pattern);
+    addCriteria(getCriteria(key).regex(pattern));
   }
 
   public void regex(String key, String pattern, String options) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).regex(pattern, options);
+    addCriteria(getCriteria(key).regex(pattern, options));
   }
 
   public void exists(String key, boolean exists) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).exists(exists);
+    addCriteria(getCriteria(key).exists(exists));
   }
 
   public void size(String key, int size) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).size(size);
+    addCriteria(getCriteria(key).size(size));
   }
 
   public void type(String key, int type) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).type(type);
+    addCriteria(getCriteria(key).type(type));
   }
 
   public void elemMatch(String key, Criteria criteria) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).elemMatch(criteria);
+    addCriteria(getCriteria(key).elemMatch(criteria));
   }
 
   public void all(String key, Collection<?> values) {
-    finalCriteria = finalCriteria.and(getFieldPath(key)).all(values);
+    addCriteria(getCriteria(key).all(values));
   }
 
   // -------------------------------

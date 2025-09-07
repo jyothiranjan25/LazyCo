@@ -217,7 +217,7 @@ public class FieldFilterUtils {
     String fullyQualifiedPath = "";
 
     // Get field name for fallback
-    String fieldName = getSerializedFieldName(field);
+    String fieldName = getKeyNameForField(field);
     // Check for @FieldPath annotation
     FieldPath fieldPath = field.getAnnotation(FieldPath.class);
     if (fieldPath != null) {
@@ -243,20 +243,6 @@ public class FieldFilterUtils {
 
       return getPathNode(criteriaBuilderWrapper, resolvedPath);
     }
-  }
-
-  /**
-   * Gets the serialized name for a field, preferring @SerializedName annotation over the Java field
-   * name
-   */
-  private static String getSerializedFieldName(Field field) {
-    // Check for @SerializedName annotation first
-    if (field.isAnnotationPresent(SerializedName.class)) {
-      return field.getAnnotation(SerializedName.class).value();
-    }
-
-    // Fall back to Java field name
-    return field.getName();
   }
 
   public static List<Field> getAllFields(Class<?> clazz) {
