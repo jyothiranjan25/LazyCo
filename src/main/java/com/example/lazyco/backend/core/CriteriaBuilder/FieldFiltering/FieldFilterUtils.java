@@ -25,7 +25,7 @@ public class FieldFilterUtils {
       field.setAccessible(true);
 
       Object value = field.get(criteriaBuilderWrapper.getFilter());
-      // if value is absent, skip that field
+      // if value is absent or empty collection, skip
       if (value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty())) {
         return;
       }
