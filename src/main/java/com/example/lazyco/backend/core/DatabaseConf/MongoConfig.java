@@ -59,7 +59,9 @@ public class MongoConfig {
                     builder.connectTimeout(3, TimeUnit.SECONDS)) // fail fast if not reachable
             .applyToClusterSettings(
                 builder ->
-                    builder.serverSelectionTimeout(3, TimeUnit.SECONDS)) // server selection timeout
+                    builder.serverSelectionTimeout(10, TimeUnit.SECONDS)) // server selection timeout
+                .retryWrites(true)
+                .retryReads(true)
             .build();
 
     return MongoClients.create(settings);
