@@ -13,6 +13,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
+
+import com.example.lazyco.backend.core.MongoCriteriaBuilder.MongoCriteriaBuilderWrapper;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -245,13 +247,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Get count of entity records matching the filter
   @Transactional(readOnly = true)
   public Long getCount(D filter) {
-    return 0L;
+    return abstractDAO.getCount(filter, this::addEntityFilters);
   }
 
   // Fetch DTO records matching the filter
   private List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
-    List<D> result = List.of();
+    List<D> result = abstractDAO.get(filter,abstractMapper, this::addEntityFilters);
     return modifyGetResult(result, filter);
   }
 
@@ -261,7 +263,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook to add additional entity-level filters
-  protected void addEntityFilters(CriteriaBuilderWrapper cbw, D filter) {}
+  protected void addEntityFilters(MongoCriteriaBuilderWrapper cbw, D filter) {}
 
   // Hook to modify the result list after fetching records
   protected List<D> modifyGetResult(List<D> result, D filter) {
@@ -300,7 +302,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Fetch entity records matching the filter
   private List<E> fetchEntityRecords(D filter) {
-    return List.of();
+    return abstractDAO.get(filter, this::addEntityFilters);
   }
 
   // Retrieve multiple entities matching the filter

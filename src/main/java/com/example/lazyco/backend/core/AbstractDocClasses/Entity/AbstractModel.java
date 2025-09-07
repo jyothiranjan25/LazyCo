@@ -7,19 +7,25 @@ import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Getter
 @Setter
 public abstract class AbstractModel implements Serializable, Cloneable {
 
-  @Id private String id;
+  @Id
+  private String id;
 
+  @Field("created_at")
   private Date createdAt;
 
+  @Field("updated_at")
   private Date updatedAt;
 
+  @Field("created_by")
   private String createdBy;
 
+  @Field("updated_by")
   private String updatedBy;
 
   @Transient

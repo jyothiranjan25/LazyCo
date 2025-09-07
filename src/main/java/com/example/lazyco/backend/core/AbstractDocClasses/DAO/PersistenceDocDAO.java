@@ -30,4 +30,8 @@ public class PersistenceDocDAO<E extends AbstractModel> implements IPersistenceD
   public E findById(Class<E> clazz, String id) {
     return mongoTemplate.findById(id, clazz);
   }
+
+  public MongoTemplate getMongoTemplate() {
+    return mongoTemplate;
+  }
 }
