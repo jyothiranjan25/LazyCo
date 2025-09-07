@@ -142,7 +142,7 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(key, value));
   }
 
-  public void lesserThan(String column1, String column2) {
+  public void lessThan(String column1, String column2) {
     finalPredicate =
         criteriaBuilder.and(
             finalPredicate, getLtPredicate(getExpression(column1), getExpression(column2)));
@@ -186,7 +186,7 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(key, value));
   }
 
-  public void lesserThenOrEqual(String column1, String column2) {
+  public void lessThenOrEqual(String column1, String column2) {
     finalPredicate =
         criteriaBuilder.and(
             finalPredicate, getLePredicate(getExpression(column1), getExpression(column2)));
