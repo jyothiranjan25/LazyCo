@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.Utils;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.core.Exceptions.SimpleResponseDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,11 @@ public class ResponseUtils {
   }
 
   public static ResponseEntity<?> sendResponse(HttpStatusCode httpStatusCode, String message) {
-    return ResponseEntity.status(httpStatusCode).body(message);
+    SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
+    simpleResponseDTO.setMessage(message);
+    return ResponseEntity.status(httpStatusCode)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(simpleResponseDTO);
   }
 
   public static <T extends AbstractDTO<T>> ResponseEntity<T> sendResponse(T abstractDTO) {

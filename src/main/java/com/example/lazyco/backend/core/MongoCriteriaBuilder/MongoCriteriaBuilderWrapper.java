@@ -141,7 +141,7 @@ public class MongoCriteriaBuilderWrapper {
   }
 
   public Criteria getOrPredicate(Criteria... criteria) {
-   return new Criteria().orOperator(criteria);
+    return new Criteria().orOperator(criteria);
   }
 
   public void orderBy(String... fieldPaths) {

@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.AbstractDocClasses.Service;
 import com.example.lazyco.backend.core.AbstractDocClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Exceptions.ResolveException;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
 import java.util.ArrayList;
@@ -31,15 +32,15 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           D result = execute(objectToProcess);
           successList.add(result);
         } catch (ExceptionWrapper e) {
-          incomingDTO.setHasError(true);
-          objectToProcess.setErrorMessage(e.getMessage());
-          errorList.add(objectToProcess);
           ApplicationLogger.error(e.getMessage(), e);
-        } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          objectToProcess.setErrorMessage(resolveExceptionMessage(t));
+          objectToProcess.setMessage(e.getMessage());
           errorList.add(objectToProcess);
+        } catch (Throwable t) {
           ApplicationLogger.error(t.getMessage(), t);
+          incomingDTO.setHasError(true);
+          objectToProcess.setMessage(ResolveException.resolveExceptionMessage(t));
+          errorList.add(objectToProcess);
         }
       }
       resultList.addAll(successList);
@@ -53,25 +54,18 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     // Rollback if atomic operation and errors occurred
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
       if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-        incomingDTO.setErrorMessage(
+        incomingDTO.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
         service.markRollback(incomingDTO);
       } else {
-        incomingDTO.setErrorMessage(
+        incomingDTO.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.NON_ATOMIC_OPERATION_ERROR, errorList.size(), successList.size()));
       }
     }
 
     return incomingDTO;
-  }
-
-  private String resolveExceptionMessage(Throwable e) {
-    while (e.getCause() != null) {
-      e = e.getCause();
-    }
-    return CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(

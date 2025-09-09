@@ -18,6 +18,8 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   // List of objects for bulk operations
   private List<D> objectsList;
 
+  private String ApiAction;
+
   // Pagination fields
   private Integer pageSize;
   private Integer pageOffset;
@@ -45,7 +47,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Boolean hasError;
 
   @Expose(deserialize = false)
-  private String errorMessage;
+  private String message;
 
   private Boolean isAtomicOperation;
 

@@ -18,6 +18,8 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private Long version;
 
+  private String ApiAction;
+
   // List of objects for bulk operations
   private List<D> objectsList;
 
@@ -51,7 +53,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Boolean hasError;
 
   @Expose(deserialize = false)
-  private String errorMessage;
+  private String message;
 
   // filtering fields
   @Expose(serialize = false, deserialize = false)

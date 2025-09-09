@@ -11,11 +11,8 @@ import lombok.Setter;
 @FilteredEntity(type = Resource.class)
 public class ResourceDTO extends AbstractDTO<ResourceDTO> {
 
-    @InternalFilterableField
-  private String name;
-    @InternalFilterableField
-  private String description;
-    @InternalFilterableField
-  private String url;
+  @InternalFilterableField private String name;
+  @InternalFilterableField private String description;
+  @InternalFilterableField private String url;
   private String type;
 }

@@ -19,7 +19,8 @@ public class FieldFilterUtils {
     }
   }
 
-  private static void addSingleFieldFilter(MongoCriteriaBuilderWrapper criteriaWrapper, Field field) {
+  private static void addSingleFieldFilter(
+      MongoCriteriaBuilderWrapper criteriaWrapper, Field field) {
     if (!field.isAnnotationPresent(InternalFilterableField.class)) {
       return;
     }
