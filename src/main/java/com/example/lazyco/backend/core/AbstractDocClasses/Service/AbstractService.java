@@ -130,6 +130,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Execute update in a new transaction
+  @Transactional(value = "mongoTransactionManager", propagation = Propagation.REQUIRES_NEW)
   public D executeUpdateNewTransactional(D dto) {
     return executeUpdate(dto);
   }
@@ -204,6 +205,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Execute delete in a new transaction
+  @Transactional(value = "mongoTransactionManager", propagation = Propagation.REQUIRES_NEW)
   public D executeDeleteNewTransactional(D dto) {
     return executeDelete(dto);
   }
@@ -244,7 +246,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
 
   // Get count of entity records matching the filter
-  @Transactional(readOnly = true)
+  @Transactional(value = "mongoTransactionManager",readOnly = true)
   public Long getCount(D filter) {
     return abstractDAO.getCount(filter, this::addEntityFilters);
   }
