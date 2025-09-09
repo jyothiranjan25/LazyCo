@@ -126,7 +126,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
     return executeWithTemplate(
-        dto, self::executeUpdateNewTransactional, self::executeUpdateNestedTransactional);
+        dto, self::executeUpdateNestedTransactional, self::executeUpdateNewTransactional);
   }
 
   // Execute update in the current transaction
@@ -207,7 +207,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
     return executeWithTemplate(
-        dto, self::executeDeleteNewTransactional, self::executeDeleteNestedTransactional);
+        dto, self::executeDeleteNestedTransactional, self::executeDeleteNewTransactional);
   }
 
   // Execute delete in the current transaction
