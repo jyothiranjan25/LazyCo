@@ -7,9 +7,11 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,6 +31,8 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
+    // order by called after adding all predicates
+    criteriaBuilderWrapper.orderBy();
     Query<E> query = session.createQuery(criteriaBuilderWrapper.getQuery());
     addPaginationFilters(filter, query);
     return query.getResultList();
@@ -41,6 +45,8 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
+    // order by called after adding all predicates
+    criteriaBuilderWrapper.orderBy();
 
     // Calculate total count BEFORE pagination if pageSize is specified
     if (filter.getPageSize() != null) {
@@ -113,7 +119,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       return (Class<E>) filter.getClass().getAnnotation(FilteredEntity.class).type();
     } catch (Throwable t) {
       // filtered entity is not present on the dto class
-      throw new RuntimeException("FilteredEntity annotation is missing on " + filter.getClass());
+      throw new ExceptionWrapper("FilteredEntity annotation is missing on " + filter.getClass());
     }
   }
 
@@ -130,6 +136,13 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       addIdNotInFilter(criteriaBuilderWrapper);
       addIdInFilter(criteriaBuilderWrapper);
       applyDistinct(criteriaBuilderWrapper);
+
+      // Add filter for userGroup if the entity has userGroup field
+      if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
+        criteriaBuilderWrapper.in(
+            "userGroup",
+            getAllApplicableParentGroups(criteriaBuilderWrapper.getFilter().getUserGroup()));
+      }
     }
   }
 
@@ -207,20 +220,19 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   //        }
   //    }
 
-  //    public static List<String> getAllApplicableParentGroups(String fullyQualifiedGroupName) {
-  //        // for matching "." in the regex (for split) escape characters(\\) are necessary as "."
-  // in regex
-  //        // mean "any character".
-  //        String[] splitGroupNames = fullyQualifiedGroupName.split("\\.");
-  //        List<String> applicableGroupNames = new ArrayList<>();
-  //        StringBuilder groupNameBuilder = new StringBuilder();
-  //        for (String splitGroupName : splitGroupNames) {
-  //            groupNameBuilder.append(splitGroupName);
-  //            applicableGroupNames.add(groupNameBuilder.toString());
-  //            groupNameBuilder.append(".");
-  //        }
-  //        return applicableGroupNames;
-  //    }
+  public static List<String> getAllApplicableParentGroups(String fullyQualifiedGroupName) {
+    // for matching "." in the regex (for split) escape characters(\\) are necessary as "." in regex
+    // mean "any character".
+    String[] splitGroupNames = fullyQualifiedGroupName.split("\\.");
+    List<String> applicableGroupNames = new ArrayList<>();
+    StringBuilder groupNameBuilder = new StringBuilder();
+    for (String splitGroupName : splitGroupNames) {
+      groupNameBuilder.append(splitGroupName);
+      applicableGroupNames.add(groupNameBuilder.toString());
+      groupNameBuilder.append(".");
+    }
+    return applicableGroupNames;
+  }
 
   public List getAbstractFilteredResult(
       AbstractDTO filter, Class<? extends AbstractModel> entityClass) {

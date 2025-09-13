@@ -6,6 +6,8 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.DateUtils.DateRangeDTO;
 import jakarta.persistence.criteria.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
@@ -368,6 +370,35 @@ public class CriteriaBuilderWrapper {
       expressions.add(getExpression(fieldPath));
     }
     query.groupBy(expressions);
+  }
+
+  public void orderBy() {
+    if (filter.getOrderBy() != null && !filter.getOrderBy().isEmpty()) {
+      query.orderBy(
+          ((Stream<OrderByDTO>) filter.getOrderBy().stream())
+              .map(
+                  orderByDTO ->
+                      getOrder(
+                          FieldFilterUtils.getPathNode(this, orderByDTO.getOrderProperty(), filter),
+                          orderByDTO.getOrderType()))
+              .collect(Collectors.toList()));
+    }
+  }
+
+  public void orderBy(String key) {
+    orderBy(key, OrderType.ASC);
+  }
+
+  public void orderBy(String key, OrderType orderType) {
+    query.orderBy(getOrder(getExpression(key), orderType));
+  }
+
+  private Order getOrder(Path<?> path, OrderType orderType) {
+    if (orderType.equals(OrderType.ASC)) {
+      return criteriaBuilder.asc(path);
+    } else {
+      return criteriaBuilder.desc(path);
+    }
   }
 
   public void orderBy(String... fieldPaths) {
