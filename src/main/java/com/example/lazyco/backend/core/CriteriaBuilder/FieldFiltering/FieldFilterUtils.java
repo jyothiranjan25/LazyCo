@@ -77,6 +77,14 @@ public class FieldFilterUtils {
     }
 
     if (!fullyQualifiedPath.isEmpty()) {
+      // if not working, remove it in function below
+      if (fieldPath.shouldFetch()) {
+        // You actually want the related data
+        criteriaBuilderWrapper.fetch(fullyQualifiedPath);
+      } else {
+        // Just create joins for filtering, don't fetch
+        ensureJoinExists(criteriaBuilderWrapper, fullyQualifiedPath);
+      }
       return getPathNode(criteriaBuilderWrapper, fullyQualifiedPath);
     } else {
       // Try to resolve using alias path, but fall back to field name if it fails
@@ -91,6 +99,16 @@ public class FieldFilterUtils {
       }
 
       return getPathNode(criteriaBuilderWrapper, resolvedPath);
+    }
+  }
+
+  private static void ensureJoinExists(CriteriaBuilderWrapper wrapper, String path) {
+    int lastDotIndex = path.lastIndexOf('.');
+    if (lastDotIndex > 0) {
+      String joinPath = path.substring(0, lastDotIndex);
+      if (!wrapper.getFullyQualifiedPathToJoinMap().containsKey(joinPath)) {
+        wrapper.join(joinPath, JoinType.LEFT);
+      }
     }
   }
 

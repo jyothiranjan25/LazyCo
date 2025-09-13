@@ -11,4 +11,6 @@ public @interface FieldPath {
   String aliasPath() default "";
 
   String fullyQualifiedPath() default "";
+
+  boolean shouldFetch() default false;
 }

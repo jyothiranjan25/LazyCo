@@ -157,7 +157,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   private void applyDistinct(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    criteriaBuilderWrapper.setDistinct(true);
+    criteriaBuilderWrapper.setDistinct();
   }
 
   //    void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {

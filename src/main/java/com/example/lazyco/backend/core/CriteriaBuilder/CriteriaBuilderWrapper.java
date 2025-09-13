@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.CriteriaBuilder;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.CriteriaBuilder.ComparisionPredicates.ComparisonPredicates;
 import com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
+import com.example.lazyco.backend.core.DateUtils.DateRangeDTO;
 import jakarta.persistence.criteria.*;
 import java.util.*;
 import lombok.Getter;
@@ -357,8 +358,7 @@ public class CriteriaBuilderWrapper {
   // Query configuration
   // -------------------------------
 
-  public void setDistinct(boolean distinct) {
-    this.isDistinct = distinct;
+  public void setDistinct() {
     query.select(root).distinct(isDistinct);
   }
 
@@ -537,5 +537,27 @@ public class CriteriaBuilderWrapper {
 
     aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
     fullyQualifiedPathToJoinTypeMap.put(fqPath.toString(), joinType);
+  }
+
+  public void addDateTimeRangeConflictCriteria(
+      DateRangeDTO dateRangeDTO, String startAlias, String endAlias) {
+    Disjunction d = new Disjunction(this);
+
+    Conjunction startDateBetween = new Conjunction(this);
+    startDateBetween.add(this.getGtPredicate(startAlias, dateRangeDTO.getStart()));
+    startDateBetween.add(this.getLtPredicate(startAlias, dateRangeDTO.getEnd()));
+
+    Conjunction endDateBetween = new Conjunction(this);
+    endDateBetween.add(this.getGtPredicate(endAlias, dateRangeDTO.getStart()));
+    endDateBetween.add(this.getLtPredicate(endAlias, dateRangeDTO.getEnd()));
+
+    Conjunction startAndEnd = new Conjunction(this);
+    startAndEnd.add(this.getLePredicate(startAlias, dateRangeDTO.getStart()));
+    startAndEnd.add(this.getGePredicate(endAlias, dateRangeDTO.getEnd()));
+
+    d.add(startDateBetween.build());
+    d.add(endDateBetween.build());
+    d.add(startAndEnd.build());
+    this.and(d.build());
   }
 }

@@ -1,10 +1,10 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
+import com.example.lazyco.backend.core.CriteriaBuilder.OrderBy;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -62,11 +62,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private List<Long> idsNotIn;
 
-  @Expose(serialize = false, deserialize = false)
-  private Map<String, List<String>> stringIn;
-
-  @Expose(serialize = false, deserialize = false)
-  private Map<String, List<String>> stringNotIn;
+  private OrderBy orderBy;
 
   @Override
   public Object clone() {
