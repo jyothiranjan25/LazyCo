@@ -56,6 +56,93 @@ public class FieldFilterUtils {
     }
   }
 
+  public static Path<?> getPathNode(CriteriaBuilderWrapper criteriaBuilderWrapper, Field field) {
+    // Validate field is not null
+    if (field == null) {
+      throw new IllegalArgumentException("Field cannot be null when resolving path node");
+    }
+
+    String aliasPath = "";
+    String fullyQualifiedPath = "";
+
+    // Get field name for fallback
+    String fieldName = getKeyNameForField(field);
+    // Check for @FieldPath annotation
+    FieldPath fieldPath = field.getAnnotation(FieldPath.class);
+    if (fieldPath != null) {
+      fullyQualifiedPath = fieldPath.fullyQualifiedPath();
+      if (!fieldPath.aliasPath().isEmpty()) {
+        aliasPath = fieldPath.aliasPath();
+      }
+    }
+
+    if (!fullyQualifiedPath.isEmpty()) {
+      return getPathNode(criteriaBuilderWrapper, fullyQualifiedPath);
+    } else {
+      // Try to resolve using alias path, but fall back to field name if it fails
+      String resolvedPath = null;
+      if (!aliasPath.isEmpty()) {
+        resolvedPath = criteriaBuilderWrapper.getFullyQualifiedPath(aliasPath);
+      }
+
+      // If no valid path resolved, use the field name directly
+      if (resolvedPath == null || resolvedPath.trim().isEmpty()) {
+        resolvedPath = fieldName;
+      }
+
+      return getPathNode(criteriaBuilderWrapper, resolvedPath);
+    }
+  }
+
+  public static Path<?> getPathNode(
+      CriteriaBuilderWrapper criteriaBuilderWrapper, String fullyQualifiedPath) {
+    // Validate input
+    if (fullyQualifiedPath == null || fullyQualifiedPath.trim().isEmpty()) {
+      throw new IllegalArgumentException("Fully qualified path cannot be null or empty");
+    }
+
+    // Remove any trailing dots
+    fullyQualifiedPath = fullyQualifiedPath.trim().replaceAll("\\.+$", "");
+
+    if (fullyQualifiedPath.isEmpty()) {
+      throw new IllegalArgumentException("Fully qualified path cannot be empty after trimming");
+    }
+    int fieldNameBeginIndex = fullyQualifiedPath.lastIndexOf('.') + 1;
+    String fieldName = fullyQualifiedPath.substring(fieldNameBeginIndex);
+    if (fieldNameBeginIndex == 0) {
+      return criteriaBuilderWrapper.getRoot().get(fieldName);
+    } else {
+      Join<?, ?> subRoot =
+          getSubRoot(
+              criteriaBuilderWrapper, fullyQualifiedPath.substring(0, fieldNameBeginIndex - 1));
+      return subRoot.get(fieldName);
+    }
+  }
+
+  public static Join<?, ?> getSubRoot(
+      CriteriaBuilderWrapper criteriaBuilderWrapper, String subRootPath) {
+    if (criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().containsKey(subRootPath)) {
+      return criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().get(subRootPath);
+    }
+    int lastJoinIndex = subRootPath.lastIndexOf('.') + 1;
+    String lastJoin = subRootPath.substring(lastJoinIndex);
+    Join<?, ?> subRoot;
+    JoinType joinType =
+        criteriaBuilderWrapper
+            .getFullyQualifiedPathToJoinTypeMap()
+            .getOrDefault(subRootPath, JoinType.LEFT);
+
+    if (lastJoinIndex == 0) {
+      subRoot = criteriaBuilderWrapper.getRoot().join(lastJoin, joinType);
+    } else {
+      Join<?, ?> parentSubRoot =
+          getSubRoot(criteriaBuilderWrapper, subRootPath.substring(0, lastJoinIndex - 1));
+      subRoot = parentSubRoot.join(lastJoin, joinType);
+    }
+    criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().put(subRootPath, subRoot);
+    return subRoot;
+  }
+
   private static String getOperatorValue(AbstractDTO<?> filter, String operatorFieldName) {
     try {
       // First try with the Java field name
@@ -81,23 +168,6 @@ public class FieldFilterUtils {
       }
     } catch (Exception e) {
       // Ignore - operator field may not exist or may not be accessible
-    }
-    return null;
-  }
-
-  private static String camelToSnakeCase(String camelCase) {
-    return camelCase.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
-  }
-
-  private static Field findFieldBySerializedName(Class<?> clazz, String serializedName) {
-    while (clazz != null && clazz != Object.class) {
-      for (Field field : clazz.getDeclaredFields()) {
-        SerializedName annotation = field.getAnnotation(SerializedName.class);
-        if (annotation != null && annotation.value().equals(serializedName)) {
-          return field;
-        }
-      }
-      clazz = clazz.getSuperclass();
     }
     return null;
   }
@@ -158,93 +228,6 @@ public class FieldFilterUtils {
     }
   }
 
-  public static Path<?> getPathNode(
-      CriteriaBuilderWrapper criteriaBuilderWrapper, String fullyQualifiedPath) {
-    // Validate input
-    if (fullyQualifiedPath == null || fullyQualifiedPath.trim().isEmpty()) {
-      throw new IllegalArgumentException("Fully qualified path cannot be null or empty");
-    }
-
-    // Remove any trailing dots
-    fullyQualifiedPath = fullyQualifiedPath.trim().replaceAll("\\.+$", "");
-
-    if (fullyQualifiedPath.isEmpty()) {
-      throw new IllegalArgumentException("Fully qualified path cannot be empty after trimming");
-    }
-    int fieldNameBeginIndex = fullyQualifiedPath.lastIndexOf('.') + 1;
-    String fieldName = fullyQualifiedPath.substring(fieldNameBeginIndex);
-    if (fieldNameBeginIndex == 0) {
-      return criteriaBuilderWrapper.getRoot().get(fieldName);
-    } else {
-      Join<?, ?> subRoot =
-          getSubRoot(
-              criteriaBuilderWrapper, fullyQualifiedPath.substring(0, fieldNameBeginIndex - 1));
-      return subRoot.get(fieldName);
-    }
-  }
-
-  public static Join<?, ?> getSubRoot(
-      CriteriaBuilderWrapper criteriaBuilderWrapper, String subRootPath) {
-    if (criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().containsKey(subRootPath)) {
-      return criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().get(subRootPath);
-    }
-    int lastJoinIndex = subRootPath.lastIndexOf('.') + 1;
-    String lastJoin = subRootPath.substring(lastJoinIndex);
-    Join<?, ?> subRoot;
-    JoinType joinType =
-        criteriaBuilderWrapper
-            .getFullyQualifiedPathToJoinTypeMap()
-            .getOrDefault(subRootPath, JoinType.LEFT);
-
-    if (lastJoinIndex == 0) {
-      subRoot = criteriaBuilderWrapper.getRoot().join(lastJoin, joinType);
-    } else {
-      Join<?, ?> parentSubRoot =
-          getSubRoot(criteriaBuilderWrapper, subRootPath.substring(0, lastJoinIndex - 1));
-      subRoot = parentSubRoot.join(lastJoin, joinType);
-    }
-    criteriaBuilderWrapper.getFullyQualifiedPathToJoinMap().put(subRootPath, subRoot);
-    return subRoot;
-  }
-
-  public static Path<?> getPathNode(CriteriaBuilderWrapper criteriaBuilderWrapper, Field field) {
-    // Validate field is not null
-    if (field == null) {
-      throw new IllegalArgumentException("Field cannot be null when resolving path node");
-    }
-
-    String aliasPath = "";
-    String fullyQualifiedPath = "";
-
-    // Get field name for fallback
-    String fieldName = getKeyNameForField(field);
-    // Check for @FieldPath annotation
-    FieldPath fieldPath = field.getAnnotation(FieldPath.class);
-    if (fieldPath != null) {
-      fullyQualifiedPath = fieldPath.fullyQualifiedPath();
-      if (!fieldPath.aliasPath().isEmpty()) {
-        aliasPath = fieldPath.aliasPath();
-      }
-    }
-
-    if (!fullyQualifiedPath.isEmpty()) {
-      return getPathNode(criteriaBuilderWrapper, fullyQualifiedPath);
-    } else {
-      // Try to resolve using alias path, but fall back to field name if it fails
-      String resolvedPath = null;
-      if (!aliasPath.isEmpty()) {
-        resolvedPath = criteriaBuilderWrapper.getFullyQualifiedPath(aliasPath);
-      }
-
-      // If no valid path resolved, use the field name directly
-      if (resolvedPath == null || resolvedPath.trim().isEmpty()) {
-        resolvedPath = fieldName;
-      }
-
-      return getPathNode(criteriaBuilderWrapper, resolvedPath);
-    }
-  }
-
   public static List<Field> getAllFields(Class<?> clazz) {
     // Get fields from the current class
     List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
@@ -270,6 +253,23 @@ public class FieldFilterUtils {
       CriteriaBuilderWrapper criteriaBuilderWrapper, String serializedName, AbstractDTO filter) {
     Field field = getField(serializedName, filter);
     return getPathNode(criteriaBuilderWrapper, field);
+  }
+
+  private static String camelToSnakeCase(String camelCase) {
+    return camelCase.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+  }
+
+  private static Field findFieldBySerializedName(Class<?> clazz, String serializedName) {
+    while (clazz != null && clazz != Object.class) {
+      for (Field field : clazz.getDeclaredFields()) {
+        SerializedName annotation = field.getAnnotation(SerializedName.class);
+        if (annotation != null && annotation.value().equals(serializedName)) {
+          return field;
+        }
+      }
+      clazz = clazz.getSuperclass();
+    }
+    return null;
   }
 
   /**

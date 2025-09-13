@@ -2,19 +2,15 @@ package com.example.lazyco.backend.core.AbstractClasses.Mapper;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.mapstruct.*;
 
 public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModel>
     extends MapBidirectionalReference<D, E> {
 
-    @Named("map")
+  @Named("map")
   D map(E entity);
 
   @InheritConfiguration(name = "map")
@@ -64,11 +60,11 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
     NullMappingProvider.validateAndSetNullIfFieldsAreNull(obj);
   }
 
-    default List<D> map(List<E> entities, D filter) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
-    }
+  default List<D> map(List<E> entities, D filter) {
+    return entities.stream().map(this::map).collect(Collectors.toList());
+  }
 
-    default Set<D> map(Set<E> entities, D filter) {
-        return  entities.stream().map(this::map).collect(Collectors.toSet());
-    }
+  default Set<D> map(Set<E> entities, D filter) {
+    return entities.stream().map(this::map).collect(Collectors.toSet());
+  }
 }

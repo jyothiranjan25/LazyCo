@@ -21,12 +21,12 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
           D execute(D t) {
-              try {
-                  return updateServiceComponent.update(t);
-              }catch (Exception e) {
-                  e.printStackTrace();
-              }
-              return t;
+            try {
+              return updateServiceComponent.update(t);
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+            return t;
           }
         })
         .template(incomingRequestDTO);

@@ -246,7 +246,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void postDelete(D dtoToDelete, E deletedEntity) {}
 
   // Get count of entity records matching the filter
-  @Transactional(value = "mongoTransactionManager",readOnly = true)
+  @Transactional(value = "mongoTransactionManager", readOnly = true)
   public Long getCount(D filter) {
     return abstractDAO.getCount(filter, this::addEntityFilters);
   }
@@ -399,6 +399,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Hook to mark the current transaction for rollback without throwing an exception
   public void markRollback(D dto) {
-          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }
 }
