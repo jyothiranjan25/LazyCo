@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.CriteriaBuilder.ComparisionPredicates;
+package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.ComparisionPredicates;
 
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;

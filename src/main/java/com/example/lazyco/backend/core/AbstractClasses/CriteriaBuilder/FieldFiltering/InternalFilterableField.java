@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering;
+package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

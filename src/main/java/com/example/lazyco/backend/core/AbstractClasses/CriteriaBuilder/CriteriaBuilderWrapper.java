@@ -1,8 +1,8 @@
-package com.example.lazyco.backend.core.CriteriaBuilder;
+package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.CriteriaBuilder.ComparisionPredicates.ComparisonPredicates;
-import com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.ComparisionPredicates.ComparisonPredicates;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.DateUtils.DateRangeDTO;
 import jakarta.persistence.criteria.*;
 import java.util.*;

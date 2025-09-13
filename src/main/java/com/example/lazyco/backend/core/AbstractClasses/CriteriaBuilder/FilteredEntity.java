@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.CriteriaBuilder;
+package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import java.lang.annotation.ElementType;

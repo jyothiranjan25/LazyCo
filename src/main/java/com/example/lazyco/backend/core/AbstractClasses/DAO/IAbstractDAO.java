@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import java.util.List;
 import java.util.function.BiConsumer;
 

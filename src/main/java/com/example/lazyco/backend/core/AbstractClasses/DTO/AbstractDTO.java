@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
-import com.example.lazyco.backend.core.CriteriaBuilder.OrderBy;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderBy;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;

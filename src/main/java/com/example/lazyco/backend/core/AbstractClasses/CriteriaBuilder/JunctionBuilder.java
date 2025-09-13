@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.CriteriaBuilder;
+package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder;
 
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
