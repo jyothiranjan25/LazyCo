@@ -57,7 +57,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
         incomingDTO.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
-        service.markRollback(incomingDTO);
+//        service.markRollback(incomingDTO);
       } else {
         incomingDTO.setMessage(
             CustomMessage.getMessageString(

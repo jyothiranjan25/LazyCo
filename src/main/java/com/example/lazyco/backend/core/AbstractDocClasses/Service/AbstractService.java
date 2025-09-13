@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-@Transactional("mongoTransactionManager")
+@Transactional(value = "mongoTransactionManager")
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractService<D, E> {
 
@@ -399,7 +399,6 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Hook to mark the current transaction for rollback without throwing an exception
   public void markRollback(D dto) {
-    // Tell Spring to roll back this transaction without throwing
-    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }
 }

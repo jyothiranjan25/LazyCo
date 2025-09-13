@@ -57,7 +57,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       filter.setTotalRecords((long) resultList.size());
     }
 
-    return mapper.map(resultList);
+    return mapper.map(resultList,filter);
   }
 
   protected CriteriaBuilderWrapper getCriteriaBuilderWrapper(
