@@ -56,6 +56,7 @@ public class GsonSingleton {
     gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberDeserializer());
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberSerializer());
+    gsonBuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
   }
 
   public static Gson getGson() {
@@ -297,6 +298,52 @@ public class GsonSingleton {
         }
       } catch (NumberFormatException e) {
         ApplicationLogger.error(e.getMessage(), e);
+      }
+      return null;
+    }
+  }
+
+  private static class EnumTypeAdapterFactory implements TypeAdapterFactory {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+      Class<T> rawType = (Class<T>) typeToken.getRawType();
+      if (!Enum.class.isAssignableFrom(rawType) || rawType == Enum.class) {
+        return null;
+      }
+      // Handle potential anonymous subclasses
+      if (!rawType.isEnum()) {
+        rawType = (Class<T>) rawType.getSuperclass();
+      }
+      return (TypeAdapter<T>) new CaseInsensitiveEnumAdapter(rawType);
+    }
+  }
+
+  private static class CaseInsensitiveEnumAdapter<T extends Enum<T>> extends TypeAdapter<T> {
+    private final Class<T> enumType;
+
+    CaseInsensitiveEnumAdapter(Class<T> enumType) {
+      this.enumType = enumType;
+    }
+
+    @Override
+    public void write(JsonWriter jsonWriter, T t) throws IOException {
+      if (t == null) {
+        jsonWriter.nullValue();
+      } else {
+        jsonWriter.value(t.name()); // standard serialization
+      }
+    }
+
+    @Override
+    public T read(JsonReader jsonReader) throws IOException {
+      String value = jsonReader.nextString();
+      if (value == null) return null;
+
+      for (T constant : enumType.getEnumConstants()) {
+        if (constant.name().equalsIgnoreCase(value.trim())) {
+          return constant;
+        }
       }
       return null;
     }

@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder;
 import lombok.Getter;
 
 @Getter
-public enum OrderBy {
+public enum OrderType {
   ASC,
   DESC,
 }

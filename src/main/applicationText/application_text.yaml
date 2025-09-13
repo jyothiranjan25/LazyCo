@@ -8,3 +8,4 @@ COMMON_MODULES:
   ID_REQUIRED: "The ID is required."
   INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
   FIELD_MISSING : "The field '%1$s' is missing."
+  DUPLICATE_FIELD : "The record '%1$s' already exists."

@@ -2,6 +2,8 @@ package com.example.lazyco.backend.core.Exceptions;
 
 import com.example.lazyco.backend.core.Messages.CustomMessage;
 import jakarta.persistence.OptimisticLockException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.hibernate.PropertyValueException;
 import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
@@ -25,10 +27,28 @@ public class ResolveException {
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
     if (e instanceof PSQLException psqlEx) {
+      String sqlState = psqlEx.getSQLState();
       String detail = psqlEx.getServerErrorMessage().getDetail();
-      if (detail != null) {
-        defaultMessage = detail.replaceFirst("Key \\([^)]*\\)=\\((.*?)\\)", "$1");
+      if ("23505".equals(sqlState)) {
+        // Unique violation
+        String value = null;
+        if (detail != null) {
+          // capture whatever is inside the parentheses after the equals sign
+          Matcher m = Pattern.compile("=\\((.*?)\\)").matcher(detail);
+          if (m.find()) {
+            value = m.group(1);
+          }
+        }
+        defaultMessage = CustomMessage.getMessageString(CommonMessage.DUPLICATE_FIELD, value);
         status = HttpStatus.CONFLICT;
+      } else if ("23502".equals(sqlState)) {
+        // NOT NULL violation
+        String column = psqlEx.getServerErrorMessage().getColumn();
+        defaultMessage = CustomMessage.getMessageString(CommonMessage.FIELD_MISSING, column);
+        status = HttpStatus.BAD_REQUEST;
+      } else {
+        defaultMessage = psqlEx.getMessage();
+        status = HttpStatus.BAD_REQUEST;
       }
     } else if (e instanceof PropertyValueException hibernateEx) {
       defaultMessage =

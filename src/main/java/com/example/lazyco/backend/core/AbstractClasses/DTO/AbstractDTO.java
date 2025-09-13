@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
-import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderBy;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
@@ -62,7 +62,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private List<Long> idsNotIn;
 
-  private OrderBy orderBy;
+  private List<OrderByDTO> orderBy;
 
   @Override
   public Object clone() {

@@ -1,8 +1,8 @@
 package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder;
 
-import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.ComparisionPredicates.ComparisonPredicates;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
+import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.DateUtils.DateRangeDTO;
 import jakarta.persistence.criteria.*;
 import java.util.*;
@@ -371,15 +371,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void orderBy(String... fieldPaths) {
-    orderBy(OrderBy.ASC, fieldPaths);
+    orderBy(OrderType.ASC, fieldPaths);
   }
 
-  public void orderBy(OrderBy asc, String... fieldPaths) {
+  public void orderBy(OrderType asc, String... fieldPaths) {
     List<Order> orders = new ArrayList<>();
     for (String fieldPath : fieldPaths) {
       Order order;
       Expression<?> expression = getExpression(fieldPath);
-      if (OrderBy.ASC.equals(asc)) {
+      if (OrderType.ASC.equals(asc)) {
         order = criteriaBuilder.asc(expression);
       } else {
         order = criteriaBuilder.desc(expression);
@@ -394,7 +394,7 @@ public class CriteriaBuilderWrapper {
 
     for (String fieldPath : fieldPaths) {
       // Default direction is ASC
-      OrderBy direction = OrderBy.ASC;
+      OrderType direction = OrderType.ASC;
       String cleanField = fieldPath;
 
       // Check if fieldPath contains ':asc' or ':desc'
@@ -403,7 +403,7 @@ public class CriteriaBuilderWrapper {
         cleanField = parts[0];
         if (parts.length > 1) {
           try {
-            direction = OrderBy.valueOf(parts[1].trim().toUpperCase());
+            direction = OrderType.valueOf(parts[1].trim().toUpperCase());
           } catch (Exception ignored) {
           }
         }
@@ -411,7 +411,7 @@ public class CriteriaBuilderWrapper {
 
       Order order;
       Expression<?> expression = getExpression(cleanField);
-      if (OrderBy.ASC.equals(direction)) {
+      if (OrderType.ASC.equals(direction)) {
         order = criteriaBuilder.asc(expression);
       } else {
         order = criteriaBuilder.desc(expression);
