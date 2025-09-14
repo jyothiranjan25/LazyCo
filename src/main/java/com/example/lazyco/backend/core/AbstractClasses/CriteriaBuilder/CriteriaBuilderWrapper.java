@@ -4,8 +4,10 @@ import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.Comparisi
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.DateUtils.DateRangeDTO;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -18,26 +20,19 @@ import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 public class CriteriaBuilderWrapper {
 
   private Root root;
-
   private CriteriaQuery query;
-
   private HibernateCriteriaBuilder criteriaBuilder;
-
   private AbstractDTO filter;
-
   private Predicate finalPredicate;
 
-  private Map<String, Join> joinMap = new HashMap<>();
+  // Use concurrent maps for thread safety
+  private Map<String, Join> joinMap = new ConcurrentHashMap<>();
+  private Map<String, Join> fetchMap = new ConcurrentHashMap<>();
+  private Map<String, String> aliasToFullyQualifiedPathMap = new ConcurrentHashMap<>();
+  private Map<String, Join> fullyQualifiedPathToJoinMap = new ConcurrentHashMap<>();
+  private Map<String, JoinType> fullyQualifiedPathToJoinTypeMap = new ConcurrentHashMap<>();
 
-  private Map<String, Join> fetchMap = new HashMap<>();
-
-  private Map<String, String> aliasToFullyQualifiedPathMap = new HashMap<>();
-
-  private Map<String, Join> fullyQualifiedPathToJoinMap = new HashMap<>();
-
-  private Map<String, JoinType> fullyQualifiedPathToJoinTypeMap = new HashMap<>();
-
-  private boolean isDistinct = true;
+  private boolean isDistinct = false;
 
   public CriteriaBuilderWrapper(
       Root root,
@@ -64,12 +59,17 @@ public class CriteriaBuilderWrapper {
   // -------------------------------
   // Common predicate methods (fluent)
   // -------------------------------
+
   public void eq(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(key, value));
+    }
   }
 
   public void eq(Path<?> path, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(path, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(path, value));
+    }
   }
 
   public Predicate getEqualPredicate(String key, Object value) {
@@ -87,16 +87,24 @@ public class CriteriaBuilderWrapper {
   }
 
   public void equalIgnoreCase(String key, Object value) {
-    Expression lower = criteriaBuilder.lower(getExpression(key));
-    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(lower, value));
+    if (Objects.nonNull(value)) {
+      Expression lower = criteriaBuilder.lower(getExpression(key));
+      finalPredicate =
+          criteriaBuilder.and(
+              finalPredicate, criteriaBuilder.equal(lower, value.toString().toLowerCase()));
+    }
   }
 
   public void notEqual(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(key, value));
+    }
   }
 
   public void notEqual(Path<?> path, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(path, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(path, value));
+    }
   }
 
   public void notEqualProperty(String column1, String column2) {
@@ -107,8 +115,12 @@ public class CriteriaBuilderWrapper {
   }
 
   public void notEqualIgnoreCase(String key, Object value) {
-    Expression lower = criteriaBuilder.lower(getExpression(key));
-    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.notEqual(lower, value));
+    if (Objects.nonNull(value)) {
+      Expression lower = criteriaBuilder.lower(getExpression(key));
+      finalPredicate =
+          criteriaBuilder.and(
+              finalPredicate, criteriaBuilder.notEqual(lower, value.toString().toLowerCase()));
+    }
   }
 
   public Predicate getNotEqualPredicate(String key, Object value) {
@@ -120,7 +132,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void gt(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(key, value));
+    }
   }
 
   public void greaterThan(String column1, String column2) {
@@ -142,7 +156,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void lt(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(key, value));
+    }
   }
 
   public void lessThan(String column1, String column2) {
@@ -164,7 +180,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void ge(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(key, value));
+    }
   }
 
   public void greaterThenOrEqual(String column1, String column2) {
@@ -186,7 +204,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void le(String key, Object value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(key, value));
+    if (Objects.nonNull(value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(key, value));
+    }
   }
 
   public void lessThenOrEqual(String column1, String column2) {
@@ -208,11 +228,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void in(String key, List value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(key, value));
+    if (value != null && !value.isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(key, value));
+    }
   }
 
   public void in(Path<?> path, Collection<?> value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(path, value));
+    if (value != null && !value.isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(path, value));
+    }
   }
 
   public Predicate getInPredicate(String key, List value) {
@@ -224,11 +248,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void notIn(String key, List value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(key, value));
+    if (value != null && !value.isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(key, value));
+    }
   }
 
   public void notIn(Path<?> path, Collection<?> value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(path, value));
+    if (value != null && !value.isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(path, value));
+    }
   }
 
   public Predicate getNotInPredicate(String key, List value) {
@@ -240,11 +268,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void like(String key, String value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(key, value));
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(key, value));
+    }
   }
 
   public void like(Path<?> path, String value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(path, value));
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(path, value));
+    }
   }
 
   public Predicate getLikePredicate(String key, String value) {
@@ -256,11 +288,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void iLike(String key, String value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(key, value));
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(key, value));
+    }
   }
 
   public void iLike(Path<?> path, String value) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(path, value));
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(path, value));
+    }
   }
 
   public Predicate getILikePredicate(String key, String value) {
@@ -312,11 +348,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void between(String key, Object from, Object to) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
+    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
+    }
   }
 
   public void between(Path<?> key, Object from, Object to) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
+    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
+    }
   }
 
   public Predicate getBetweenPredicate(String key, Object from, Object to) {
@@ -328,7 +368,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void and(Predicate... predicates) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
+    if (predicates != null && predicates.length > 0) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
+    }
   }
 
   public Predicate getAndPredicate(Predicate... predicates) {
@@ -336,7 +378,9 @@ public class CriteriaBuilderWrapper {
   }
 
   public void or(Predicate... predicates) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getOrPredicate(predicates));
+    if (predicates != null && predicates.length > 0) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getOrPredicate(predicates));
+    }
   }
 
   public Predicate getOrPredicate(Predicate... predicates) {
@@ -352,12 +396,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getSearchCriteria(Path<String> path, String keyWord) {
+    if (keyWord == null || keyWord.trim().isEmpty()) {
+      return criteriaBuilder.conjunction(); // Return true predicate for empty search
+    }
     return getOrPredicate(
         getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
   }
 
   // -------------------------------
-  // Query configuration
+  // Query configuration - Improved performance
   // -------------------------------
 
   public void setDistinct() {
@@ -365,23 +412,48 @@ public class CriteriaBuilderWrapper {
   }
 
   public void groupBy(String... fieldPaths) {
-    List<Expression<?>> expressions = new ArrayList<>();
-    for (String fieldPath : fieldPaths) {
-      expressions.add(getExpression(fieldPath));
+    if (fieldPaths != null && fieldPaths.length > 0) {
+      List<Expression<?>> expressions = new ArrayList<>();
+      for (String fieldPath : fieldPaths) {
+        try {
+          expressions.add(getExpression(fieldPath));
+        } catch (Exception e) {
+          ApplicationLogger.error("Failed to add groupBy field: " + fieldPath, e);
+        }
+      }
+      if (!expressions.isEmpty()) {
+        query.groupBy(expressions);
+      }
     }
-    query.groupBy(expressions);
   }
 
   public void orderBy() {
-    if (filter.getOrderBy() != null && !filter.getOrderBy().isEmpty()) {
-      query.orderBy(
-          ((Stream<OrderByDTO>) filter.getOrderBy().stream())
-              .map(
-                  orderByDTO ->
-                      getOrder(
-                          FieldFilterUtils.getPathNode(this, orderByDTO.getOrderProperty(), filter),
-                          orderByDTO.getOrderType()))
-              .collect(Collectors.toList()));
+    if (filter != null && filter.getOrderBy() != null && !filter.getOrderBy().isEmpty()) {
+      try {
+        List<Order> orders =
+            ((Stream<OrderByDTO>) filter.getOrderBy().stream())
+                .map(
+                    orderByDTO -> {
+                      try {
+                        return getOrder(
+                            FieldFilterUtils.getPathNode(
+                                this, orderByDTO.getOrderProperty(), filter),
+                            orderByDTO.getOrderType());
+                      } catch (Exception e) {
+                        ApplicationLogger.error(
+                            "Failed to create order for: " + orderByDTO.getOrderProperty(), e);
+                        return null;
+                      }
+                    })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (!orders.isEmpty()) {
+          query.orderBy(orders);
+        }
+      } catch (Exception e) {
+        ApplicationLogger.error("Failed to apply order by", e);
+      }
     }
   }
 
@@ -390,7 +462,11 @@ public class CriteriaBuilderWrapper {
   }
 
   public void orderBy(String key, OrderType orderType) {
-    query.orderBy(getOrder(getExpression(key), orderType));
+    try {
+      query.orderBy(getOrder(getExpression(key), orderType));
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to order by: " + key, e);
+    }
   }
 
   private Order getOrder(Path<?> path, OrderType orderType) {
@@ -406,51 +482,64 @@ public class CriteriaBuilderWrapper {
   }
 
   public void orderBy(OrderType asc, String... fieldPaths) {
-    List<Order> orders = new ArrayList<>();
-    for (String fieldPath : fieldPaths) {
-      Order order;
-      Expression<?> expression = getExpression(fieldPath);
-      if (OrderType.ASC.equals(asc)) {
-        order = criteriaBuilder.asc(expression);
-      } else {
-        order = criteriaBuilder.desc(expression);
+    if (fieldPaths != null && fieldPaths.length > 0) {
+      List<Order> orders = new ArrayList<>();
+      for (String fieldPath : fieldPaths) {
+        try {
+          Expression<?> expression = getExpression(fieldPath);
+          Order order =
+              OrderType.ASC.equals(asc)
+                  ? criteriaBuilder.asc(expression)
+                  : criteriaBuilder.desc(expression);
+          orders.add(order);
+        } catch (Exception e) {
+          ApplicationLogger.error("Failed to add order by field: " + fieldPath, e);
+        }
       }
-      orders.add(order);
+      if (!orders.isEmpty()) {
+        query.orderBy(orders);
+      }
     }
-    query.orderBy(orders);
   }
 
   public void orderByCriteria(String... fieldPaths) {
-    List<Order> orders = new ArrayList<>();
+    if (fieldPaths != null && fieldPaths.length > 0) {
+      List<Order> orders = new ArrayList<>();
 
-    for (String fieldPath : fieldPaths) {
-      // Default direction is ASC
-      OrderType direction = OrderType.ASC;
-      String cleanField = fieldPath;
+      for (String fieldPath : fieldPaths) {
+        try {
+          // Default direction is ASC
+          OrderType direction = OrderType.ASC;
+          String cleanField = fieldPath;
 
-      // Check if fieldPath contains ':asc' or ':desc'
-      if (fieldPath.contains(":")) {
-        String[] parts = fieldPath.split(":");
-        cleanField = parts[0];
-        if (parts.length > 1) {
-          try {
-            direction = OrderType.valueOf(parts[1].trim().toUpperCase());
-          } catch (Exception ignored) {
+          // Check if fieldPath contains ':asc' or ':desc'
+          if (fieldPath.contains(":")) {
+            String[] parts = fieldPath.split(":");
+            cleanField = parts[0];
+            if (parts.length > 1) {
+              try {
+                direction = OrderType.valueOf(parts[1].trim().toUpperCase());
+              } catch (IllegalArgumentException ignored) {
+                // Keep default ASC if invalid direction
+              }
+            }
           }
+
+          Expression<?> expression = getExpression(cleanField);
+          Order order =
+              OrderType.ASC.equals(direction)
+                  ? criteriaBuilder.asc(expression)
+                  : criteriaBuilder.desc(expression);
+          orders.add(order);
+        } catch (Exception e) {
+          ApplicationLogger.error("Failed to add order by criteria field: " + fieldPath, e);
         }
       }
 
-      Order order;
-      Expression<?> expression = getExpression(cleanField);
-      if (OrderType.ASC.equals(direction)) {
-        order = criteriaBuilder.asc(expression);
-      } else {
-        order = criteriaBuilder.desc(expression);
+      if (!orders.isEmpty()) {
+        query.orderBy(orders);
       }
-      orders.add(order);
     }
-
-    query.orderBy(orders);
   }
 
   public void clearOrderBy() {
@@ -458,37 +547,59 @@ public class CriteriaBuilderWrapper {
   }
 
   public void addProjection(String... fieldPaths) {
-    List<Expression<?>> expressions = new ArrayList<>();
-    for (String fieldPath : fieldPaths) {
-      expressions.add(getExpression(fieldPath));
+    if (fieldPaths != null && fieldPaths.length > 0) {
+      List<Expression<?>> expressions = new ArrayList<>();
+      for (String fieldPath : fieldPaths) {
+        try {
+          expressions.add(getExpression(fieldPath));
+        } catch (Exception e) {
+          ApplicationLogger.error("Failed to add projection field: " + fieldPath, e);
+        }
+      }
+      if (!expressions.isEmpty()) {
+        query.multiselect(expressions);
+      }
     }
-    query.multiselect(expressions);
   }
 
   // -------------------------------
-  // Helper methods
+  // Helper methods - Improved error handling
   // -------------------------------
 
   public Path getExpression(String aliasPath) {
-    String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
-    return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
+    try {
+      String fullyQualifiedPath = getFullyQualifiedPath(aliasPath);
+      return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to get expression for: " + aliasPath, e);
+      throw new RuntimeException("Failed to resolve path: " + aliasPath, e);
+    }
   }
 
   public String getFullyQualifiedPath(String aliasPath) {
+    if (aliasPath == null || aliasPath.trim().isEmpty()) {
+      throw new IllegalArgumentException("Alias path cannot be null or empty");
+    }
+
     int propertyIndex = aliasPath.lastIndexOf('.') + 1;
     String property = aliasPath.substring(propertyIndex);
     String fullyQualifiedPath;
+
     if (propertyIndex == 0) {
       fullyQualifiedPath = property;
     } else {
       String parentAlias = aliasPath.substring(0, propertyIndex - 1);
-      fullyQualifiedPath = aliasToFullyQualifiedPathMap.get(parentAlias) + "." + property;
+      String parentPath = aliasToFullyQualifiedPathMap.get(parentAlias);
+      if (parentPath == null) {
+        throw new IllegalArgumentException("No mapping found for alias: " + parentAlias);
+      }
+      fullyQualifiedPath = parentPath + "." + property;
     }
     return fullyQualifiedPath;
   }
 
   // -------------------------------
-  // Join methods
+  // Join methods - Improved with error handling and deduplication
   // -------------------------------
 
   public void join(String property) {
@@ -504,33 +615,44 @@ public class CriteriaBuilderWrapper {
   }
 
   public void join(String property, String alias, JoinType joinType) {
-    String[] props = property.split("\\.");
-    From<?, ?> from = root;
-    StringBuilder fqPath = new StringBuilder();
-
-    for (int i = 0; i < props.length; i++) {
-      String prop = props[i];
-      fqPath.append(prop);
-      String fqPathStr = fqPath.toString();
-
-      Join join = joinMap.get(fqPathStr);
-      if (join == null) {
-        join = from.join(prop, joinType);
-        joinMap.put(fqPathStr, join);
-      }
-      from = join;
-
-      if (i < props.length - 1) {
-        fqPath.append(".");
-      }
+    if (property == null || property.trim().isEmpty()) {
+      throw new IllegalArgumentException("Property path cannot be null or empty");
     }
 
-    aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
-    fullyQualifiedPathToJoinTypeMap.put(fqPath.toString(), joinType);
+    try {
+      String[] props = property.split("\\.");
+      From<?, ?> from = root;
+      StringBuilder fqPath = new StringBuilder();
+
+      for (int i = 0; i < props.length; i++) {
+        String prop = props[i];
+        fqPath.append(prop);
+        String fqPathStr = fqPath.toString();
+
+        // Check if join already exists to avoid duplicates
+        Join join = joinMap.get(fqPathStr);
+        if (join == null) {
+          join = from.join(prop, joinType);
+          joinMap.put(fqPathStr, join);
+          fullyQualifiedPathToJoinMap.put(fqPathStr, join);
+          fullyQualifiedPathToJoinTypeMap.put(fqPathStr, joinType);
+        }
+        from = join;
+
+        if (i < props.length - 1) {
+          fqPath.append(".");
+        }
+      }
+
+      aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to create join for property: " + property, e);
+      throw new RuntimeException("Failed to create join: " + property, e);
+    }
   }
 
   // -------------------------------
-  // Join Fetch methods
+  // Join Fetch methods - Improved
   // -------------------------------
 
   public void fetch(String fetchProperty) {
@@ -546,49 +668,71 @@ public class CriteriaBuilderWrapper {
   }
 
   public void joinFetch(String property, String alias, JoinType joinType) {
-    String[] props = property.split("\\.");
-    From<?, ?> from = root;
-    StringBuilder fqPath = new StringBuilder();
-
-    for (int i = 0; i < props.length; i++) {
-      String prop = props[i];
-      fqPath.append(prop);
-      String fqPathStr = fqPath.toString();
-
-      Fetch fetch = from.fetch(prop, joinType);
-      Join join = (Join) fetch;
-      joinMap.put(fqPathStr, join);
-
-      from = join;
-
-      if (i < props.length - 1) {
-        fqPath.append(".");
-      }
+    if (property == null || property.trim().isEmpty()) {
+      throw new IllegalArgumentException("Property path cannot be null or empty");
     }
 
-    aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
-    fullyQualifiedPathToJoinTypeMap.put(fqPath.toString(), joinType);
+    try {
+      String[] props = property.split("\\.");
+      From<?, ?> from = root;
+      StringBuilder fqPath = new StringBuilder();
+
+      for (int i = 0; i < props.length; i++) {
+        String prop = props[i];
+        fqPath.append(prop);
+        String fqPathStr = fqPath.toString();
+
+        // Check if fetch already exists
+        if (!fetchMap.containsKey(fqPathStr)) {
+          Fetch fetch = from.fetch(prop, joinType);
+          Join join = (Join) fetch;
+          joinMap.put(fqPathStr, join);
+          fetchMap.put(fqPathStr, join);
+          fullyQualifiedPathToJoinMap.put(fqPathStr, join);
+          fullyQualifiedPathToJoinTypeMap.put(fqPathStr, joinType);
+        }
+
+        from = joinMap.get(fqPathStr);
+
+        if (i < props.length - 1) {
+          fqPath.append(".");
+        }
+      }
+
+      aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to create fetch for property: " + property, e);
+      throw new RuntimeException("Failed to create fetch: " + property, e);
+    }
   }
 
   public void addDateTimeRangeConflictCriteria(
       DateRangeDTO dateRangeDTO, String startAlias, String endAlias) {
-    Disjunction d = new Disjunction(this);
+    if (dateRangeDTO == null || startAlias == null || endAlias == null) {
+      return;
+    }
 
-    Conjunction startDateBetween = new Conjunction(this);
-    startDateBetween.add(this.getGtPredicate(startAlias, dateRangeDTO.getStart()));
-    startDateBetween.add(this.getLtPredicate(startAlias, dateRangeDTO.getEnd()));
+    try {
+      Disjunction d = new Disjunction(this);
 
-    Conjunction endDateBetween = new Conjunction(this);
-    endDateBetween.add(this.getGtPredicate(endAlias, dateRangeDTO.getStart()));
-    endDateBetween.add(this.getLtPredicate(endAlias, dateRangeDTO.getEnd()));
+      Conjunction startDateBetween = new Conjunction(this);
+      startDateBetween.add(this.getGtPredicate(startAlias, dateRangeDTO.getStart()));
+      startDateBetween.add(this.getLtPredicate(startAlias, dateRangeDTO.getEnd()));
 
-    Conjunction startAndEnd = new Conjunction(this);
-    startAndEnd.add(this.getLePredicate(startAlias, dateRangeDTO.getStart()));
-    startAndEnd.add(this.getGePredicate(endAlias, dateRangeDTO.getEnd()));
+      Conjunction endDateBetween = new Conjunction(this);
+      endDateBetween.add(this.getGtPredicate(endAlias, dateRangeDTO.getStart()));
+      endDateBetween.add(this.getLtPredicate(endAlias, dateRangeDTO.getEnd()));
 
-    d.add(startDateBetween.build());
-    d.add(endDateBetween.build());
-    d.add(startAndEnd.build());
-    this.and(d.build());
+      Conjunction startAndEnd = new Conjunction(this);
+      startAndEnd.add(this.getLePredicate(startAlias, dateRangeDTO.getStart()));
+      startAndEnd.add(this.getGePredicate(endAlias, dateRangeDTO.getEnd()));
+
+      d.add(startDateBetween.build());
+      d.add(endDateBetween.build());
+      d.add(startAndEnd.build());
+      this.and(d.build());
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to add date range conflict criteria", e);
+    }
   }
 }

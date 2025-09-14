@@ -17,7 +17,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E save(E entity) {
     try {
       getCurrentSession().persist(entity);
-      getCurrentSession().flush();
+      flush();
       return entity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
@@ -30,9 +30,9 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
 
   public E update(E entity) {
     try {
-      getCurrentSession().merge(entity);
-      getCurrentSession().flush();
-      return entity;
+      E mergedEntity = getCurrentSession().merge(entity);
+      flush();
+      return mergedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
@@ -44,9 +44,10 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
 
   public E delete(E entity) {
     try {
-      getCurrentSession().remove(entity);
-      getCurrentSession().flush();
-      return entity;
+      // Ensure entity is managed before removal
+      E managedEntity = getCurrentSession().merge(entity);
+      getCurrentSession().remove(managedEntity);
+      return managedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
@@ -76,5 +77,17 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
       return defaultStatus.hasSavepoint(); // true if NESTED
     }
     return false;
+  }
+
+  // Simplified transaction checking - removed dangerous session clearing
+  public boolean isTransactionActive() {
+    return TransactionSynchronizationManager.isActualTransactionActive();
+  }
+
+  // Flush session manually when needed (controlled by caller)
+  public void flush() {
+    if (isTransactionActive()) {
+      getCurrentSession().flush();
+    }
   }
 }

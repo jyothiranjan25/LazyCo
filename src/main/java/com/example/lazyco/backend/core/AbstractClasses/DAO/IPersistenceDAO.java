@@ -11,4 +11,10 @@ public interface IPersistenceDAO<E extends AbstractModel> {
   E delete(E entity);
 
   E findById(Class<E> clazz, Long id);
+
+  boolean isNestedTransaction();
+
+  boolean isTransactionActive();
+
+  void flush();
 }
