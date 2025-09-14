@@ -5,11 +5,13 @@ import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFilt
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +126,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    //        addRBSECFilters(criteriaBuilderWrapper);
+      // Add filter for userGroup if the entity has userGroup field
+      if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
+          addRBSECFilters(criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserGroup());
+      }
+      addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     // DO NOT ADD ANY RESTRICTIONS AFTER THIS POINT!!!! As we are getting the count of response
     // for the applicable filters (except from pagination) here.
@@ -136,19 +142,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       addIdNotInFilter(criteriaBuilderWrapper);
       addIdInFilter(criteriaBuilderWrapper);
       applyDistinct(criteriaBuilderWrapper);
-
-      // Add filter for userGroup if the entity has userGroup field
-      if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
-        criteriaBuilderWrapper.in(
-            "userGroup",
-            getAllApplicableParentGroups(criteriaBuilderWrapper.getFilter().getUserGroup()));
-      }
     }
   }
 
   private void addIdFilter(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    if (criteriaBuilderWrapper.getFilter() == null
-        || criteriaBuilderWrapper.getFilter().getId() == null) {
+    if (criteriaBuilderWrapper.getFilter() == null || criteriaBuilderWrapper.getFilter().getId() == null) {
       return;
     }
     Long id = criteriaBuilderWrapper.getFilter().getId();
@@ -173,52 +171,50 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     criteriaBuilderWrapper.setDistinct();
   }
 
-  //    void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-  //        String groupName;
-  //        /** Check if a cron job is running, for which we need to disable role based user access.
-  // */
-  //        if (AbstractAction.getSystemJob() || AbstractAction.isBypassRBSEC()) return;
-  //
-  //        try {
-  //            /**
-  //             * logged-in users group must belong the lineage of the group of data they are
-  // querying from.
-  //             * Data from other lineages must be inaccessible.
-  //             */
-  //            UserGroupDTO aGrp = AbstractAction.getLoggedInGroup();
-  //            if (aGrp == null
-  //                    || aGrp.getFullyQualifiedName() == null
-  //                    || aGrp.getFullyQualifiedName().isBlank()) {
-  //                groupName = "blockAccessIfGroupNameIsNullForLoggedInUser";
-  //            } else {
-  //                groupName = aGrp.getFullyQualifiedName();
-  //            }
-  //
-  //            // Fixed RBSEC filtering logic
-  //            // Users can only see:
-  //            // 1. Data from their exact group
-  //            // 2. Data from their child groups (groups that start with their group + ".")
-  //            // 3. Data from their parent groups (but only direct lineage, not siblings)
-  //
-  //            List<String> allApplicableParentGroups = getAllApplicableParentGroups(groupName);
-  //
-  //            // Create three predicates:
-  //            // 1. Exact match for user's group and all parent groups in lineage
-  //            Predicate exactGroupPredicate =
-  //                    criteriaBuilderWrapper.getInPredicate("modifiedGroup",
-  // allApplicableParentGroups);
-  //
-  //            // 2. Child groups (groups that start with user's group + ".")
-  //            Predicate childGroupPredicate =
-  //                    criteriaBuilderWrapper.getILikePredicate("modifiedGroup", groupName + ".%");
-  //
-  //            // Combine with OR - user can see their lineage OR child groups
-  //            criteriaBuilderWrapper.or(exactGroupPredicate, childGroupPredicate);
-  //
-  //        } catch (Exception e) {
-  //            ApplicationLogger.error(e.getMessage(), e);
-  //        }
-  //    }
+  private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    String groupName;
+    try {
+      //              UserGroupDTO aGrp = AbstractAction.getLoggedInGroup();
+      //              if (aGrp == null
+      //                      || aGrp.getFullyQualifiedName() == null
+      //                      || aGrp.getFullyQualifiedName().isBlank()) {
+      //                  groupName = "blockAccessIfGroupNameIsNullForLoggedInUser";
+      //              } else {
+      //                  groupName = aGrp.getFullyQualifiedName();
+      //              }
+      // TODO: Replace with actual logged in user's group
+      groupName = AbstractModelListener.DEFAULT_USER_GROUP;
+      addRBSECFilters(criteriaBuilderWrapper, groupName);
+    } catch (Exception e) {
+      ApplicationLogger.error(e.getMessage(), e);
+    }
+  }
+
+  private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper, String groupName) {
+    try {
+      // Users can only see:
+      // 1. Data from their exact group
+      // 2. Data from their child groups (groups that start with their group + ".")
+      // 3. Data from their parent groups (but only direct lineage, not siblings)
+
+      List<String> allApplicableParentGroups = getAllApplicableParentGroups(groupName);
+
+      // Create three predicates:
+      // 1. Exact match for user's group and all parent groups in lineage
+      Predicate exactGroupPredicate =
+          criteriaBuilderWrapper.getInPredicate(
+              AbstractRBACModel.RBAC_COLUMN, allApplicableParentGroups);
+
+      // 2. Child groups (groups that start with user's group + ".")
+      Predicate childGroupPredicate =
+          criteriaBuilderWrapper.getILikePredicate(AbstractRBACModel.RBAC_COLUMN, groupName + ".%");
+
+      // Combine with OR - user can see their lineage OR child groups
+      criteriaBuilderWrapper.or(exactGroupPredicate, childGroupPredicate);
+    } catch (Exception e) {
+      ApplicationLogger.error(e.getMessage(), e);
+    }
+  }
 
   public static List<String> getAllApplicableParentGroups(String fullyQualifiedGroupName) {
     // for matching "." in the regex (for split) escape characters(\\) are necessary as "." in regex
