@@ -24,22 +24,6 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
   @InheritInverseConfiguration(name = "map")
   E map(D dto);
 
-  // --- DTO -> DTO updates ---
-  @Named("standardDTOMapping")
-  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  D mapDTO(D source, @MappingTarget D target);
-
-  @Named("standardDTOMappingWithNulls")
-  D mapDTOWithNulls(D source, @MappingTarget D target);
-
-  // --- Entity -> Entity updates ---
-  @Named("standardEntityMapping")
-  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  E mapEntity(E source, @MappingTarget E target);
-
-  @Named("standardEntityMappingWithNulls") // fixed unique name
-  E mapEntityWithNulls(E source, @MappingTarget E target);
-
   // --- DTO -> Entity updates ---
   @Named("standardDtoToEntityMapping")
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
