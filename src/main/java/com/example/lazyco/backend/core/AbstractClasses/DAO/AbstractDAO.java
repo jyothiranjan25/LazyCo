@@ -126,11 +126,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-      // Add filter for userGroup if the entity has userGroup field
-      if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
-          addRBSECFilters(criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserGroup());
-      }
-      addRBSECFilters(criteriaBuilderWrapper);
+    // Add filter for userGroup if the entity has userGroup field
+    if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
+      addRBSECFilters(criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserGroup());
+    }
+    addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     // DO NOT ADD ANY RESTRICTIONS AFTER THIS POINT!!!! As we are getting the count of response
     // for the applicable filters (except from pagination) here.
@@ -146,7 +146,8 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   private void addIdFilter(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    if (criteriaBuilderWrapper.getFilter() == null || criteriaBuilderWrapper.getFilter().getId() == null) {
+    if (criteriaBuilderWrapper.getFilter() == null
+        || criteriaBuilderWrapper.getFilter().getId() == null) {
       return;
     }
     Long id = criteriaBuilderWrapper.getFilter().getId();
@@ -174,14 +175,6 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     String groupName;
     try {
-      //              UserGroupDTO aGrp = AbstractAction.getLoggedInGroup();
-      //              if (aGrp == null
-      //                      || aGrp.getFullyQualifiedName() == null
-      //                      || aGrp.getFullyQualifiedName().isBlank()) {
-      //                  groupName = "blockAccessIfGroupNameIsNullForLoggedInUser";
-      //              } else {
-      //                  groupName = aGrp.getFullyQualifiedName();
-      //              }
       // TODO: Replace with actual logged in user's group
       groupName = AbstractModelListener.DEFAULT_USER_GROUP;
       addRBSECFilters(criteriaBuilderWrapper, groupName);
