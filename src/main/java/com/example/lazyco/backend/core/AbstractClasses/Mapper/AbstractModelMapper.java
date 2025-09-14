@@ -55,6 +55,7 @@ public class AbstractModelMapper {
     configurer.accept(typeMap);
   }
 
+  @SuppressWarnings("unchecked")
   public <E> E mapCircularReference(E source) {
     try {
       if (source == null) {
