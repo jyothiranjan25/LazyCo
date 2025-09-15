@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.GosnConf;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 
 import com.example.lazyco.backend.core.DateUtils.DateParser;
+import com.example.lazyco.backend.core.DateUtils.DateTimeProps;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
@@ -101,12 +102,12 @@ public class GsonSingleton {
     return getGson().fromJson(jsonObject.toString(), classOfT);
   }
 
-  private static class SerializationExclusionStrategy implements ExclusionStrategy {
+  private static class DeserializationExclusionStrategy implements ExclusionStrategy {
 
     @Override
     public boolean shouldSkipField(FieldAttributes f) {
       Expose expose = f.getAnnotation(Expose.class);
-      return expose != null && !expose.serialize();
+      return expose != null && !expose.deserialize();
     }
 
     @Override
@@ -115,12 +116,12 @@ public class GsonSingleton {
     }
   }
 
-  private static class DeserializationExclusionStrategy implements ExclusionStrategy {
+  private static class SerializationExclusionStrategy implements ExclusionStrategy {
 
     @Override
     public boolean shouldSkipField(FieldAttributes f) {
       Expose expose = f.getAnnotation(Expose.class);
-      return expose != null && !expose.deserialize();
+      return expose != null && !expose.serialize();
     }
 
     @Override
@@ -148,7 +149,8 @@ public class GsonSingleton {
           String dateString = primitive.getAsString();
           Date result = DateParser.deserializeDate(dateString);
           if (result == null) {
-            throw new JsonParseException("Unable to parse date: " + dateString);
+            ApplicationLogger.error("Unable to parse date: " + dateString);
+            return null;
           }
           return result;
         }
@@ -162,7 +164,7 @@ public class GsonSingleton {
     private final ThreadLocal<DateFormat> dateFormat =
         ThreadLocal.withInitial(
             () -> {
-              SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+              SimpleDateFormat sdf = new SimpleDateFormat(DateTimeProps.YYYY_MM_DD_T_HH_MM_SS);
               sdf.setTimeZone(TimeZone.getTimeZone(DateParser.getSystemTimezone()));
               return sdf;
             });
@@ -170,17 +172,6 @@ public class GsonSingleton {
     @Override
     public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
       String dateString = dateFormat.get().format(date);
-      return new JsonPrimitive(dateString);
-    }
-  }
-
-  private static class TimeSerializer implements JsonSerializer<Time> {
-    private final ThreadLocal<DateFormat> dateFormat =
-        ThreadLocal.withInitial(() -> new SimpleDateFormat("HH:mm:ss"));
-
-    @Override
-    public JsonElement serialize(Time time, Type typeOfSrc, JsonSerializationContext context) {
-      String dateString = dateFormat.get().format(time);
       return new JsonPrimitive(dateString);
     }
   }
@@ -205,7 +196,8 @@ public class GsonSingleton {
           String timeString = primitive.getAsString();
           Time result = DateParser.deserializeTime(timeString);
           if (result == null) {
-            throw new JsonParseException("Unable to parse time: " + timeString);
+            ApplicationLogger.error("Unable to parse time: " + timeString);
+            return null;
           }
           return result;
         }
@@ -215,10 +207,14 @@ public class GsonSingleton {
     }
   }
 
-  private static class StringSerializer implements JsonSerializer<String> {
+  private static class TimeSerializer implements JsonSerializer<Time> {
+    private final ThreadLocal<DateFormat> dateFormat =
+        ThreadLocal.withInitial(() -> new SimpleDateFormat(DateTimeProps.HH_MM_SS));
+
     @Override
-    public JsonElement serialize(String src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src);
+    public JsonElement serialize(Time time, Type typeOfSrc, JsonSerializationContext context) {
+      String dateString = dateFormat.get().format(time);
+      return new JsonPrimitive(dateString);
     }
   }
 
@@ -233,6 +229,13 @@ public class GsonSingleton {
         }
       }
       return null;
+    }
+  }
+
+  private static class StringSerializer implements JsonSerializer<String> {
+    @Override
+    public JsonElement serialize(String src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src);
     }
   }
 
@@ -257,17 +260,6 @@ public class GsonSingleton {
           }
         }
       };
-    }
-  }
-
-  public static class LenientNumberSerializer implements JsonSerializer<Number> {
-    @Override
-    public JsonElement serialize(
-        Number number, Type type, JsonSerializationContext jsonSerializationContext) {
-      if (number == null) {
-        return null; // JSON null
-      }
-      return new JsonPrimitive(number);
     }
   }
 
@@ -300,6 +292,17 @@ public class GsonSingleton {
         ApplicationLogger.error(e.getMessage(), e);
       }
       return null;
+    }
+  }
+
+  public static class LenientNumberSerializer implements JsonSerializer<Number> {
+    @Override
+    public JsonElement serialize(
+        Number number, Type type, JsonSerializationContext jsonSerializationContext) {
+      if (number == null) {
+        return null; // JSON null
+      }
+      return new JsonPrimitive(number);
     }
   }
 

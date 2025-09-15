@@ -10,14 +10,35 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * Utility class for parsing and formatting dates from various string formats. Handles multiple date
  * formats, timezone conversions, and epoch timestamps.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DateParser {
 
-  private static final ZoneId SYSTEM_TIMEZONE = ZoneId.systemDefault();
+    /**
+     * Get system timezone, defaulting to Asia/Kolkata if "timezone" system property is set.
+     *
+     * @return the system's timezone
+     */
+    public static TimeZone getSystemTimeZone() {
+        return System.getProperty("timezone") != null
+                ? TimeZone.getTimeZone(ZoneId.of("Asia/Kolkata"))
+                : TimeZone.getTimeZone("GMT");
+    }
+
+    /**
+     * Get current system timezone.
+     *
+     * @return the system's default timezone
+     */
+    public static ZoneId getSystemTimezone() {
+        return getSystemTimeZone().toZoneId();
+    }
 
   /**
    * Deserialize date string to Date object using multiple format attempts. Converts to system
@@ -38,27 +59,26 @@ public class DateParser {
       return parseTimestamp(dateString);
     }
 
-    // Try each format in the enum
-    for (DateTimeFormatEnum format : DateTimeFormatEnum.values()) {
+    // Try each pattern in DateTimeProps.ALL_PATTERNS
+    for (String pattern : DateTimeProps.ALL_PATTERNS) {
+      // Skip pure time-only format for date parsing
+      if (DateTimeProps.HH_MM_SS.equals(pattern)) {
+        continue;
+      }
       try {
-        // Skip time-only formats for date parsing
-        if (format == DateTimeFormatEnum.HH_mm_ss) {
-          continue;
-        }
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 
-        SimpleDateFormat sdf = new SimpleDateFormat(format.getValue());
-
-        // For formats with timezone info, let it parse naturally
-        if (format == DateTimeFormatEnum.yyyy_MM_dd_T_HH_mm_ssXXX) {
+        // If pattern includes timezone (XXX), handle conversion to system timezone
+        if (pattern.contains("XXX")) {
           Date parsedDate = sdf.parse(dateString);
           return convertToSystemTimezone(parsedDate, dateString);
         } else {
           // For formats without timezone, assume system timezone
-          sdf.setTimeZone(TimeZone.getTimeZone(SYSTEM_TIMEZONE));
+          sdf.setTimeZone(getSystemTimeZone());
           return sdf.parse(dateString);
         }
       } catch (ParseException e) {
-        // Continue to next format
+        // try next pattern
       }
     }
 
@@ -80,37 +100,28 @@ public class DateParser {
     timeString = timeString.trim();
 
     try {
-      // Try HH:mm:ss format first
-      SimpleDateFormat sdf = new SimpleDateFormat(DateTimeFormatEnum.HH_mm_ss.getValue());
+      // Try HH:mm:ss first
+      SimpleDateFormat sdf = new SimpleDateFormat(DateTimeProps.HH_MM_SS);
       Date parsedDate = sdf.parse(timeString);
       return new Time(parsedDate.getTime());
     } catch (ParseException e) {
-      // Try other formats that might contain time
-      for (DateTimeFormatEnum format : DateTimeFormatEnum.values()) {
-        if (format == DateTimeFormatEnum.yyyy_MM_dd) {
-          continue; // Skip date-only format
+      // Try other patterns that might contain time
+      for (String pattern : DateTimeProps.ALL_PATTERNS) {
+        if (DateTimeProps.YYYY_MM_DD.equals(pattern)
+            || DateTimeProps.YYYY_SLASH_MM_SLASH_DD.equals(pattern)) {
+          continue; // skip date-only
         }
-
         try {
-          SimpleDateFormat sdf = new SimpleDateFormat(format.getValue());
+          SimpleDateFormat sdf = new SimpleDateFormat(pattern);
           Date parsedDate = sdf.parse(timeString);
           return new Time(parsedDate.getTime());
         } catch (ParseException ex) {
-          // Continue to next format
+          // continue to next pattern
         }
       }
     }
 
     return null;
-  }
-
-  /**
-   * Get current system timezone.
-   *
-   * @return the system's default timezone
-   */
-  public static ZoneId getSystemTimezone() {
-    return SYSTEM_TIMEZONE;
   }
 
   /**
@@ -138,14 +149,13 @@ public class DateParser {
     try {
       // If the original string contains timezone info, convert to system timezone
       if (originalString.matches(".*[+-]\\d{2}:?\\d{2}$") || originalString.endsWith("Z")) {
-        // Parse as ZonedDateTime to handle timezone conversion
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(originalString, formatter);
-        ZonedDateTime systemZoned = zonedDateTime.withZoneSameInstant(SYSTEM_TIMEZONE);
+        ZonedDateTime systemZoned = zonedDateTime.withZoneSameInstant(getSystemTimezone());
         return Date.from(systemZoned.toInstant());
       }
     } catch (Exception e) {
-      // If conversion fails, return original date
+      // fallback to original
     }
 
     return date;
@@ -162,43 +172,24 @@ public class DateParser {
       return null;
     }
 
-    // Common additional patterns
-    String[] additionalPatterns = {
-      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-      "yyyy-MM-dd'T'HH:mm:ss.SSS",
-      "yyyy-MM-dd'T'HH:mm:ss",
-      "yyyy-MM-dd'T'HH:mm",
-      "yyyy/MM/dd HH:mm:ss",
-      "yyyy/MM/dd",
-      "dd/MM/yyyy HH:mm:ss",
-      "dd/MM/yyyy",
-      "dd-MM-yyyy HH:mm:ss",
-      "dd-MM-yyyy",
-      "MM/dd/yyyy HH:mm:ss",
-      "MM/dd/yyyy"
-    };
-
-    for (String pattern : additionalPatterns) {
+    for (String pattern : DateTimeProps.STANDARD_YEAR_MONTH_DATE) {
       try {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
+        LocalDateTime localDateTime;
         if (pattern.contains("HH")) {
-          // Has time component
-          LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
-          return Date.from(localDateTime.atZone(SYSTEM_TIMEZONE).toInstant());
+          localDateTime = LocalDateTime.parse(dateString, formatter);
         } else {
-          // Date only - add default time
-          LocalDateTime localDateTime =
+          localDateTime =
               LocalDateTime.parse(
                   dateString + " 00:00:00", DateTimeFormatter.ofPattern(pattern + " HH:mm:ss"));
-          return Date.from(localDateTime.atZone(SYSTEM_TIMEZONE).toInstant());
         }
+        return Date.from(localDateTime.atZone(getSystemTimezone()).toInstant());
       } catch (DateTimeParseException e) {
-        // Continue to next pattern
+        // continue
       }
     }
-
-    return null; // All parsing attempts failed
+    return null;
   }
 
   /**
