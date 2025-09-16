@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
 import lombok.AccessLevel;
@@ -130,12 +131,15 @@ public class GsonSingleton {
     }
   }
 
-  private static class DateDeserializer implements JsonDeserializer<Date> {
-
+  public static class DateDeserializer implements JsonDeserializer<Date> {
     @Override
     public Date deserialize(
-        JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
+        JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
+
+      if (jsonElement == null || jsonElement.isJsonNull()) {
+        return null;
+      }
 
       if (jsonElement.isJsonPrimitive()) {
         JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
@@ -149,7 +153,7 @@ public class GsonSingleton {
           String dateString = primitive.getAsString();
           Date result = DateParser.deserializeDate(dateString);
           if (result == null) {
-            ApplicationLogger.error("Unable to parse date: " + dateString);
+            ApplicationLogger.error("Unable to parse date: {}", dateString);
             return null;
           }
           return result;
@@ -160,27 +164,42 @@ public class GsonSingleton {
     }
   }
 
-  private static class DateSerializer implements JsonSerializer<Date> {
-    private final ThreadLocal<DateFormat> dateFormat =
+  public static class DateSerializer implements JsonSerializer<Date> {
+
+    private final ThreadLocal<SimpleDateFormat> dateFormat =
         ThreadLocal.withInitial(
-            () -> {
-              SimpleDateFormat sdf = new SimpleDateFormat(DateTimeProps.YYYY_MM_DD_T_HH_MM_SS);
-              sdf.setTimeZone(TimeZone.getTimeZone(DateParser.getSystemTimezone()));
-              return sdf;
-            });
+            () -> new SimpleDateFormat(DateTimeProps.YYYY_MM_DD_T_HH_MM_SS_SSS_XXX));
 
     @Override
     public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
-      String dateString = dateFormat.get().format(date);
-      return new JsonPrimitive(dateString);
+      if (date == null) {
+        return JsonNull.INSTANCE;
+      }
+
+      try {
+        ZoneId currentZone = DateParser.getSystemTimezone();
+        SimpleDateFormat sdf = dateFormat.get();
+        sdf.setTimeZone(TimeZone.getTimeZone(currentZone));
+        String dateString = sdf.format(date);
+        return new JsonPrimitive(dateString);
+      } catch (Exception e) {
+        ApplicationLogger.error("Error serializing date: {}", date);
+        // Fallback to timestamp
+        return new JsonPrimitive(date.getTime());
+      }
     }
   }
 
-  private static class TimeDeserializer implements JsonDeserializer<Time> {
+  public static class TimeDeserializer implements JsonDeserializer<Time> {
+
     @Override
     public Time deserialize(
-        JsonElement jsonElement, Type typeOF, JsonDeserializationContext context)
+        JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
+
+      if (jsonElement == null || jsonElement.isJsonNull()) {
+        return null;
+      }
 
       if (jsonElement.isJsonPrimitive()) {
         JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
@@ -188,15 +207,14 @@ public class GsonSingleton {
         if (primitive.isNumber()) {
           // Handle numeric timestamps for time
           long timestamp = primitive.getAsLong();
-          // For Time, we typically want just the time portion
           Date date = DateParser.parseTimestamp(timestamp);
-          return new Time(date.getTime());
+          return date != null ? new Time(date.getTime()) : null;
         } else if (primitive.isString()) {
           // Handle string time
           String timeString = primitive.getAsString();
           Time result = DateParser.deserializeTime(timeString);
           if (result == null) {
-            ApplicationLogger.error("Unable to parse time: " + timeString);
+            ApplicationLogger.error("Unable to parse time: {}", timeString);
             return null;
           }
           return result;
@@ -207,14 +225,26 @@ public class GsonSingleton {
     }
   }
 
-  private static class TimeSerializer implements JsonSerializer<Time> {
-    private final ThreadLocal<DateFormat> dateFormat =
-        ThreadLocal.withInitial(() -> new SimpleDateFormat(DateTimeProps.HH_MM_SS));
+  /** Thread-safe JSON serializer for Time objects. */
+  public static class TimeSerializer implements JsonSerializer<Time> {
+
+    private final ThreadLocal<DateFormat> timeFormat =
+        ThreadLocal.withInitial(() -> new SimpleDateFormat(DateTimeProps.HH_MM_SS_SSS));
 
     @Override
     public JsonElement serialize(Time time, Type typeOfSrc, JsonSerializationContext context) {
-      String dateString = dateFormat.get().format(time);
-      return new JsonPrimitive(dateString);
+      if (time == null) {
+        return JsonNull.INSTANCE;
+      }
+
+      try {
+        String timeString = timeFormat.get().format(time);
+        return new JsonPrimitive(timeString);
+      } catch (Exception e) {
+        ApplicationLogger.error("Unable to parse time: {}", time);
+        // Fallback to timestamp
+        return new JsonPrimitive(time.getTime());
+      }
     }
   }
 
