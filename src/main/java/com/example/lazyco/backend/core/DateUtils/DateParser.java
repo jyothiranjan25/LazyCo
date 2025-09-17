@@ -28,34 +28,13 @@ public class DateParser {
   private static final Map<String, ThreadLocal<SimpleDateFormat>> FORMAT_CACHE =
       new ConcurrentHashMap<>();
 
-  // Default fallback timezone
-  private static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("UTC");
-
   /**
    * Get system timezone from system property, environment variable, or default. Supports multiple
    * ways to configure timezone for different deployment environments.
    */
   public static ZoneId getSystemTimezone() {
-    // Try system property first
-    String timezoneProperty = System.getProperty("app.timezone");
-    if (timezoneProperty != null && !timezoneProperty.trim().isEmpty()) {
-      try {
-        return ZoneId.of(timezoneProperty.trim());
-      } catch (Exception e) {
-        ApplicationLogger.warn(
-            "Invalid timezone in system property 'app.timezone': {}", timezoneProperty);
-      }
-    }
-    // Next try environment variable
-    // ToDO: right now .env are not supported
-
-    // Fall back to system default, or UTC if that fails
-    try {
-      return ZoneId.systemDefault();
-    } catch (Exception e) {
-      ApplicationLogger.warn("Failed to get system default timezone, falling back to UTC");
-      return DEFAULT_ZONE_ID;
-    }
+    String timezoneProperty = System.getProperty("SYSTEM_TIMEZONE");
+    return DateTimeProps.getSystemTimezone(timezoneProperty);
   }
 
   /** Get legacy TimeZone for backwards compatibility. */

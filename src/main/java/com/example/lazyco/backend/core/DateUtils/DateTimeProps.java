@@ -1,10 +1,15 @@
 package com.example.lazyco.backend.core.DateUtils;
 
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import java.time.ZoneId;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateTimeProps {
+
+  // Default fallback timezone
+  private static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("UTC");
 
   // Base date only
   public static final String YYYY_MM_DD = "yyyy-MM-dd";
@@ -155,5 +160,29 @@ public final class DateTimeProps {
     datePart = datePart.replaceAll("[-:.]", "/");
 
     return datePart + timePart;
+  }
+
+  /**
+   * Get system timezone from system property, environment variable, or default. Supports multiple
+   * ways to configure timezone for different deployment environments.
+   */
+  public static ZoneId getSystemTimezone(String timezoneProperty) {
+    // Try system property first
+    if (timezoneProperty != null && !timezoneProperty.trim().isEmpty()) {
+      try {
+        return ZoneId.of(timezoneProperty.trim());
+      } catch (Exception e) {
+        ApplicationLogger.warn(
+            "Invalid timezone in system property 'app.timezone': {}", timezoneProperty);
+      }
+    }
+
+    // Fall back to system default, or UTC if that fails
+    try {
+      return ZoneId.systemDefault();
+    } catch (Exception e) {
+      ApplicationLogger.warn("Failed to get system default timezone, falling back to UTC");
+      return DEFAULT_ZONE_ID;
+    }
   }
 }

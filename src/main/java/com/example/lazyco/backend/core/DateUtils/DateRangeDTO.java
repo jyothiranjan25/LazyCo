@@ -9,4 +9,14 @@ import lombok.Setter;
 public class DateRangeDTO {
   private Date start;
   private Date end;
+
+  public DateRangeDTO() {
+    this.start = DateTimeZoneUtils.startOfDay(new Date());
+    this.end = DateTimeZoneUtils.endOfDay(new Date());
+  }
+
+  DateRangeDTO(Date start, Date end) {
+    this.start = start;
+    this.end = end;
+  }
 }
