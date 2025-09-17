@@ -109,6 +109,10 @@ public final class DateTimeZoneUtils {
     return instant.isBefore(nowInstant());
   }
 
+  public static boolean isFuture(Instant instant) {
+    return instant.isAfter(nowInstant());
+  }
+
   public static Duration diff(Instant start, Instant end) {
     return Duration.between(start, end);
   }
@@ -131,11 +135,19 @@ public final class DateTimeZoneUtils {
   }
 
   public static Instant startOfDay(LocalDate date) {
-    return date.atStartOfDay(systemZone()).toInstant();
+    return startOfDay(date, systemZone());
+  }
+
+  public static Instant startOfDay(LocalDate date, ZoneId zone) {
+    return date.atStartOfDay(zone).toInstant();
   }
 
   public static Instant endOfDay(LocalDate date) {
-    return date.atTime(LocalTime.MAX).atZone(systemZone()).toInstant();
+    return endOfDay(date, systemZone());
+  }
+
+  public static Instant endOfDay(LocalDate date, ZoneId zone) {
+    return date.atTime(LocalTime.MAX).atZone(zone).toInstant();
   }
 
   public static Date startOfDay(Date date) {

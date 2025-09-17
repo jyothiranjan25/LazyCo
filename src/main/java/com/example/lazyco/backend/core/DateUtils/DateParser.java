@@ -243,11 +243,10 @@ public class DateParser {
 
   /** Get thread-safe SimpleDateFormat instance for given pattern. */
   private static SimpleDateFormat getThreadSafeDateFormat(String pattern) {
-      ThreadLocal<SimpleDateFormat> tl = FORMAT_CACHE.computeIfAbsent(
-              pattern,
-              p -> ThreadLocal.withInitial(() -> new SimpleDateFormat(p, Locale.ROOT))
-      );
-      return (SimpleDateFormat) tl.get().clone(); // clone for safe mutation
+    ThreadLocal<SimpleDateFormat> tl =
+        FORMAT_CACHE.computeIfAbsent(
+            pattern, p -> ThreadLocal.withInitial(() -> new SimpleDateFormat(p, Locale.ROOT)));
+    return (SimpleDateFormat) tl.get().clone(); // clone for safe mutation
   }
 
   /** Try parsing with a specific pattern and timezone. */
@@ -363,10 +362,10 @@ public class DateParser {
 
   /** Check if string represents a numeric timestamp. */
   private static boolean isNumericTimestamp(String input) {
-      if (input == null || input.isEmpty()) {
-          return false;
-      }
-      // Allow optional leading minus and ensure 10–13 digits.
-      return input.matches("^-?\\d{10,13}$");
+    if (input == null || input.isEmpty()) {
+      return false;
+    }
+    // Allow optional leading minus and ensure 10–13 digits.
+    return input.matches("^-?\\d{10,13}$");
   }
 }
