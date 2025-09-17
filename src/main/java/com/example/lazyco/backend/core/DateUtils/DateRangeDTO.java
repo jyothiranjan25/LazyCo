@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Data Transfer Object for date ranges with validation and utility methods.
@@ -67,6 +68,28 @@ public class DateRangeDTO {
   }
 
   /**
+   * Constructor with explicit start and end dates.
+   *
+   * @param start the start date (inclusive), must not be null
+   * @param end the end date (inclusive), must not be null
+   */
+  public DateRangeDTO(String start, String end) {
+    if (StringUtils.isEmpty(start) || StringUtils.isEmpty(end)) {
+      return;
+    }
+    Date startDate = DateParser.deserializeDate(start);
+    Date endDate = DateParser.deserializeDate(end);
+
+    if (startDate == null || endDate == null) {
+      throw new ExceptionWrapper("Invalid date format");
+    }
+
+    setStart(startDate);
+    setEnd(endDate);
+    validateRange();
+  }
+
+  /**
    * Constructor using LocalDate with system timezone.
    *
    * @param startDate the start date, must not be null
@@ -94,6 +117,32 @@ public class DateRangeDTO {
 
     this.start = Date.from(DateTimeZoneUtils.startOfDay(startDate, zoneId));
     this.end = Date.from(DateTimeZoneUtils.endOfDay(endDate, zoneId));
+  }
+
+  /**
+   * Set the start date to the start of the specified day.
+   *
+   * @param start the date to set the start of day, must not be null
+   */
+  public void startOfDay(Date start) {
+    Objects.requireNonNull(start, "Start date cannot be null");
+    this.start = DateTimeZoneUtils.startOfDay(start);
+    if (this.end != null) {
+      validateRange();
+    }
+  }
+
+  /**
+   * Set the end date to the end of the specified day.
+   *
+   * @param end the date to set the end of day, must not be null
+   */
+  public void endOfDay(Date end) {
+    Objects.requireNonNull(end, "End date cannot be null");
+    this.end = DateTimeZoneUtils.endOfDay(end);
+    if (this.start != null) {
+      validateRange();
+    }
   }
 
   /**
