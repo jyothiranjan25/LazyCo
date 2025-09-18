@@ -56,6 +56,7 @@ public class GsonSingleton {
     gsonBuilder.registerTypeAdapter(Time.class, new TimeSerializer());
     gsonBuilder.registerTypeAdapter(String.class, new StringDeserializer());
     gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
+    gsonBuilder.serializeSpecialFloatingPointValues();
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberDeserializer());
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberSerializer());
     gsonBuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
