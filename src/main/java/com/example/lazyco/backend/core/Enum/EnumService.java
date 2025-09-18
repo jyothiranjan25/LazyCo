@@ -23,16 +23,6 @@ public class EnumService {
     return enumDTOS;
   }
 
-  // If the enumClassName is a key in EnumClasses, update it to the fully qualified class name
-  private Class<?> getClass(EnumDTO enumDTO) {
-    EnumClasses enumClass = EnumClasses.getByKey(enumDTO.getEnumType());
-    if (enumClass != null) {
-      return enumClass.getEnumClass().getName().getClass();
-    } else {
-      throw new ExceptionWrapper("Enum type not found");
-    }
-  }
-
   private EnumDTO getSingle(EnumDTO enumDTO) throws ClassNotFoundException {
     if (enumDTO.getEnumType() == null) {
       throw new ExceptionWrapper("Enum Type is required.");
