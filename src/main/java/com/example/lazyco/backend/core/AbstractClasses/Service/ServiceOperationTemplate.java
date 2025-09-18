@@ -23,9 +23,9 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     List<D> resultList = new ArrayList<>();
     List<D> successList = new ArrayList<>();
     List<D> errorList = new ArrayList<>();
-    if (incomingDTO.getObjectsList() != null && !incomingDTO.getObjectsList().isEmpty()) {
+    if (incomingDTO.getObjects() != null && !incomingDTO.getObjects().isEmpty()) {
       // Process all objects but track errors for atomic rollback
-      for (D object : incomingDTO.getObjectsList()) {
+      for (D object : incomingDTO.getObjects()) {
         // deep clone to avoid side effects
         D objectToProcess = (D) object.clone();
         try {
@@ -45,7 +45,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       }
       resultList.addAll(successList);
       resultList.addAll(errorList);
-      incomingDTO.setObjectsList(resultList);
+      incomingDTO.setObjects(resultList);
     } else {
       // Single object processing
       incomingDTO = execute(incomingDTO);

@@ -21,7 +21,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private String ApiAction;
 
   // List of objects for bulk operations
-  private List<D> objectsList;
+  private List<D> objects;
 
   // Pagination fields
   private Integer pageSize;

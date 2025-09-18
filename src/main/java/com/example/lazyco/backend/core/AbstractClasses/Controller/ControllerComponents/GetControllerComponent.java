@@ -23,7 +23,7 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
           @Override
           D execute(D t) {
             List<D> result = getServiceComponent.get(t);
-            t.setObjectsList(result);
+            t.setObjects(result);
             return t;
           }
         })

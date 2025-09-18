@@ -35,11 +35,12 @@ public class EnumService {
 
   private EnumDTO getSingle(EnumDTO enumDTO) throws ClassNotFoundException {
     if (enumDTO.getEnumType() == null) {
-      throw new ExceptionWrapper("Fully qualified enum class name is required.");
+      throw new ExceptionWrapper("Enum Type is required.");
     }
+    EnumClasses enumClasses = EnumClasses.getByKey(enumDTO.getEnumType());
     @SuppressWarnings("unchecked")
     Class<? extends Enum<?>> enumClass =
-        (Class<? extends Enum<?>>) Class.forName(getClass(enumDTO).toString());
+        (Class<? extends Enum<?>>) Class.forName(enumClasses.getEnumClass().getName());
     if (!enumClass.isEnum()) {
       throw new ExceptionWrapper("Provided class is not an enum.");
     }
