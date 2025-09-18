@@ -33,7 +33,12 @@ public class ApplicationLogger {
       Class<?> clazz,
       LogType logType,
       Object... params) {
-    if (message == null) return;
+
+    // If no message is supplied, fall back to exception class name
+    message =
+        (message != null && !message.isEmpty())
+            ? message
+            : (e != null ? e.getClass().getName() : "No message provided");
 
     Logger logger = getLogger(logType);
     if (!isLevelEnabled(logger, level)) return;

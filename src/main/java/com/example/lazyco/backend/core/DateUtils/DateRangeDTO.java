@@ -11,36 +11,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Data Transfer Object for date ranges with validation and utility methods.
- *
- * <p>This class provides:
- *
- * <ul>
- *   <li>Automatic validation of date range consistency
- *   <li>Utility methods for range operations
- *   <li>Support for both legacy Date and modern time APIs
- *   <li>Timezone-aware operations
- * </ul>
- *
- * <p>Usage examples:
- *
- * <pre>
- * // Create range for today
- * DateRangeDTO todayRange = new DateRangeDTO();
- *
- * // Create custom range
- * Date start = DateParser.parseDate("2024-01-01");
- * Date end = DateParser.parseDate("2024-01-31");
- * DateRangeDTO customRange = new DateRangeDTO(start, end);
- *
- * // Check if date falls within range
- * boolean contains = customRange.contains(DateParser.parseDate("2024-01-15"));
- *
- * // Get range duration
- * Duration duration = customRange.getDuration();
- * </pre>
- */
 @Getter
 @Setter
 public class DateRangeDTO {
@@ -335,6 +305,11 @@ public class DateRangeDTO {
     Date unionEnd = end.after(other.end) ? end : other.end;
 
     return new DateRangeDTO(unionStart, unionEnd);
+  }
+
+  /** Check if this range is adjacent to another (end of one is start of the other). */
+  private boolean areAdjacent(DateRangeDTO other) {
+    return end.getTime() + 1 == other.start.getTime() || other.end.getTime() + 1 == start.getTime();
   }
 
   /** Validate that start is not after end. */

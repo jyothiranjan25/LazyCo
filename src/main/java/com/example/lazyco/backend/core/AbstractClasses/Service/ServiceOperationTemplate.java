@@ -36,7 +36,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           incomingDTO.setHasError(true);
           objectToProcess.setMessage(e.getMessage());
           errorList.add(objectToProcess);
-        } catch (Throwable t) {
+        } catch (Exception t) {
           ApplicationLogger.error(t.getMessage(), t);
           incomingDTO.setHasError(true);
           objectToProcess.setMessage(ResolveException.resolveExceptionMessage(t));

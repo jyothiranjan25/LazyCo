@@ -112,7 +112,9 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
         .getQuery()
         .select(
             criteriaBuilderWrapper.getCriteriaBuilder().count(criteriaBuilderWrapper.getRoot()));
-    return (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
+    Long count = (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
+    // If count is null, return 0
+    return count != null ? count : 0L;
   }
 
   public Class<E> getEntityClass(D filter) {

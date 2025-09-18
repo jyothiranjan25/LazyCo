@@ -210,7 +210,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook called before the entity is updated
-  protected void preUpdate(D dtoToUpdate, E entityBeforeUpdates, E updatedEntity) {}
+  protected void preUpdate(D dtoToUpdate, E entityBeforeUpdates, E entityAfterUpdates) {}
 
   // Hook called after the entity is updated
   protected void postUpdate(D dtoToUpdate, E entityBeforeUpdate, E updatedEntity) {}
