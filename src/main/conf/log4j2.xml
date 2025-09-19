@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="LOG_DIR">${sys:catalina.home}/logs</Property>
+        <Property name="APP_LOG_DIR">${sys:catalina.home}/logs/App</Property>
+        <Property name="ARCHIVE_DIR">${sys:catalina.home}/logs/Archive</Property>
+        <!-- Enhanced pattern with MDC support -->
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} %X{userId:--} %X{requestId:--} %X{sessionId:--} - %msg%n</Property>
+        <Property name="CONSOLE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %highlight{%-5level}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=magenta} %logger{36} %X{userId:--} %X{requestId:--} - %msg%n%ex{full}</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- All Logs -->
+        <RollingFile name="AllLogsFile" fileName="${LOG_DIR}/all-logs.log" filePattern="${ARCHIVE_DIR}/all-logs-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- Common Loggers -->
+        <RollingFile name="CommonInfoFile" fileName="${LOG_DIR}/system-info.log" filePattern="${ARCHIVE_DIR}/system-info-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <LevelRangeFilter minLevel="info" maxLevel="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="CommonWarnFile" fileName="${LOG_DIR}/system-warn.log" filePattern="${ARCHIVE_DIR}/system-warn-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <LevelRangeFilter minLevel="warn" maxLevel="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="commonDebugFile" fileName="${LOG_DIR}/system-debug.log" filePattern="${ARCHIVE_DIR}/system-debug-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <LevelRangeFilter minLevel="debug" maxLevel="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="CommonErrorFile" fileName="${LOG_DIR}/system-error.log" filePattern="${ARCHIVE_DIR}/system-error-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <LevelRangeFilter minLevel="error" maxLevel="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- App Loggers -->
+        <RollingFile name="AppInfoFile" fileName="${APP_LOG_DIR}/app-info.log" filePattern="${ARCHIVE_DIR}/app-info-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="AppDebugFile" fileName="${APP_LOG_DIR}/app-debug.log" filePattern="${ARCHIVE_DIR}/app-debug-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="AppWarnFile" fileName="${APP_LOG_DIR}/app-warn.log" filePattern="${ARCHIVE_DIR}/app-warn-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="AppErrorFile" fileName="${APP_LOG_DIR}/app-error.log" filePattern="${ARCHIVE_DIR}/app-error-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="AppRequestFile" fileName="${APP_LOG_DIR}/app-request.log" filePattern="${ARCHIVE_DIR}/app-request-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="AppTraceFile" fileName="${APP_LOG_DIR}/app-trace.log" filePattern="${ARCHIVE_DIR}/app-trace-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- Performance Log for method execution times -->
+        <RollingFile name="PerformanceFile" fileName="${APP_LOG_DIR}/performance.log" filePattern="${ARCHIVE_DIR}/performance-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_DIR}" maxDepth="10">
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="CommonInfoFile"/>
+            <AppenderRef ref="CommonWarnFile"/>
+            <AppenderRef ref="commonDebugFile"/>
+            <AppenderRef ref="CommonErrorFile"/>
+        </Root>
+
+        <!-- Logger for InfoLogger -->
+        <Logger name="InfoLogger" level="info" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppInfoFile" />
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Logger for DebugLogger -->
+        <Logger name="DebugLogger" level="debug" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppDebugFile" />
+        </Logger>
+
+        <!-- Logger for WarnLogger -->
+        <Logger name="WarnLogger" level="warn" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppWarnFile" />
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="ErrorLogger" level="error" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppErrorFile" />
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="RequestLogger" level="info" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppRequestFile" />
+        </Logger>
+
+        <Logger name="TraceLogger" level="trace" additivity="false">
+            <AppenderRef ref="AllLogsFile" />
+            <AppenderRef ref="AppTraceFile" />
+        </Logger>
+
+        <!-- Performance Logger for method execution times -->
+        <Logger name="PerformanceLogger" level="debug" additivity="false">
+            <AppenderRef ref="PerformanceFile" />
+            <AppenderRef ref="AllLogsFile" />
+        </Logger>
+    </Loggers>
+</Configuration>
