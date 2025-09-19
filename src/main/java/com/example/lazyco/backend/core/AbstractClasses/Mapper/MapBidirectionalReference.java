@@ -15,6 +15,7 @@ public interface MapBidirectionalReference<D extends AbstractDTO<D>, E extends A
       if (source == null || source.isSkipMapping()) {
         return null;
       }
+      @SuppressWarnings("unchecked")
       E cloneEntity = (E) source.clone();
       AbstractModelMapper modelMapper = new AbstractModelMapper();
       E mappedEntity = modelMapper.mapCircularReference(cloneEntity);

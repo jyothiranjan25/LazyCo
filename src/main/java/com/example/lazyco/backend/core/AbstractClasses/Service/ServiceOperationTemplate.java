@@ -3,14 +3,11 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Exceptions.ResolveException;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
-import jakarta.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.PropertyValueException;
-import org.postgresql.util.PSQLException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
 
@@ -26,29 +23,29 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     List<D> resultList = new ArrayList<>();
     List<D> successList = new ArrayList<>();
     List<D> errorList = new ArrayList<>();
-    if (incomingDTO.getObjectsList() != null && !incomingDTO.getObjectsList().isEmpty()) {
+    if (incomingDTO.getObjects() != null && !incomingDTO.getObjects().isEmpty()) {
       // Process all objects but track errors for atomic rollback
-      for (D object : incomingDTO.getObjectsList()) {
+      for (D object : incomingDTO.getObjects()) {
         // deep clone to avoid side effects
         D objectToProcess = (D) object.clone();
         try {
           D result = execute(objectToProcess);
           successList.add(result);
         } catch (ExceptionWrapper e) {
-          incomingDTO.setHasError(true);
-          objectToProcess.setErrorMessage(e.getMessage());
-          errorList.add(objectToProcess);
           ApplicationLogger.error(e.getMessage(), e);
-        } catch (Throwable t) {
           incomingDTO.setHasError(true);
-          objectToProcess.setErrorMessage(resolveExceptionMessage(t));
+          objectToProcess.setMessage(e.getMessage());
           errorList.add(objectToProcess);
+        } catch (Exception t) {
           ApplicationLogger.error(t.getMessage(), t);
+          incomingDTO.setHasError(true);
+          objectToProcess.setMessage(ResolveException.resolveExceptionMessage(t));
+          errorList.add(objectToProcess);
         }
       }
       resultList.addAll(successList);
       resultList.addAll(errorList);
-      incomingDTO.setObjectsList(resultList);
+      incomingDTO.setObjects(resultList);
     } else {
       // Single object processing
       incomingDTO = execute(incomingDTO);
@@ -57,41 +54,18 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     // Rollback if atomic operation and errors occurred
     if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
       if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-        incomingDTO.setErrorMessage(
+        incomingDTO.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
         service.markRollback(incomingDTO);
       } else {
-        incomingDTO.setErrorMessage(
+        incomingDTO.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.NON_ATOMIC_OPERATION_ERROR, errorList.size(), successList.size()));
       }
     }
 
     return incomingDTO;
-  }
-
-  private String resolveExceptionMessage(Throwable e) {
-    while (e.getCause() != null) {
-      e = e.getCause();
-    }
-
-    String defaultMessage = CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
-
-    if (e instanceof PSQLException psqlEx) {
-      String detail = psqlEx.getServerErrorMessage().getDetail();
-      if (detail != null) {
-        defaultMessage = detail.replaceFirst("Key \\([^)]*\\)=\\((.*?)\\)", "$1");
-      }
-    } else if (e instanceof PropertyValueException hibernateEx) {
-      defaultMessage =
-          CustomMessage.getMessageString(
-              CommonMessage.FIELD_MISSING, hibernateEx.getPropertyName());
-    } else if (e instanceof OptimisticLockException
-        || e instanceof ObjectOptimisticLockingFailureException) {
-      defaultMessage = CustomMessage.getMessageString(CommonMessage.INTERNET_IS_SLOW);
-    }
-    return defaultMessage;
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(

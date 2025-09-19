@@ -10,6 +10,9 @@ import lombok.Setter;
 @MappedSuperclass
 public abstract class AbstractRBACModel extends AbstractModel {
 
+  // ✅ Global constant for the column name
+  public static final String RBAC_COLUMN = "userGroup";
+
   @Column(
       name = "user_group",
       nullable = false,

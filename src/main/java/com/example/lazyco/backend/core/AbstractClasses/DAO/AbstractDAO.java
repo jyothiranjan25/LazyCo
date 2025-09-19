@@ -1,15 +1,19 @@
 package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
-import com.example.lazyco.backend.core.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
-import com.example.lazyco.backend.core.CriteriaBuilder.FilteredEntity;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,6 +33,8 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
+    // order by called after adding all predicates
+    criteriaBuilderWrapper.orderBy();
     Query<E> query = session.createQuery(criteriaBuilderWrapper.getQuery());
     addPaginationFilters(filter, query);
     return query.getResultList();
@@ -41,6 +47,8 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Session session = getCurrentSession();
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, null);
+    // order by called after adding all predicates
+    criteriaBuilderWrapper.orderBy();
 
     // Calculate total count BEFORE pagination if pageSize is specified
     if (filter.getPageSize() != null) {
@@ -57,7 +65,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       filter.setTotalRecords((long) resultList.size());
     }
 
-    return mapper.map(resultList);
+    return mapper.map(resultList, filter);
   }
 
   protected CriteriaBuilderWrapper getCriteriaBuilderWrapper(
@@ -104,7 +112,9 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
         .getQuery()
         .select(
             criteriaBuilderWrapper.getCriteriaBuilder().count(criteriaBuilderWrapper.getRoot()));
-    return (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
+    Long count = (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
+    // If count is null, return 0
+    return count != null ? count : 0L;
   }
 
   public Class<E> getEntityClass(D filter) {
@@ -113,12 +123,16 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       return (Class<E>) filter.getClass().getAnnotation(FilteredEntity.class).type();
     } catch (Throwable t) {
       // filtered entity is not present on the dto class
-      throw new RuntimeException("FilteredEntity annotation is missing on " + filter.getClass());
+      throw new ExceptionWrapper("FilteredEntity annotation is missing on " + filter.getClass());
     }
   }
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    //        addRBSECFilters(criteriaBuilderWrapper);
+    // Add filter for userGroup if the entity has userGroup field
+    if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
+      addRBSECFilters(criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserGroup());
+    }
+    addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     // DO NOT ADD ANY RESTRICTIONS AFTER THIS POINT!!!! As we are getting the count of response
     // for the applicable filters (except from pagination) here.
@@ -157,70 +171,59 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   private void applyDistinct(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    criteriaBuilderWrapper.setDistinct(true);
+    criteriaBuilderWrapper.setDistinct();
   }
 
-  //    void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-  //        String groupName;
-  //        /** Check if a cron job is running, for which we need to disable role based user access.
-  // */
-  //        if (AbstractAction.getSystemJob() || AbstractAction.isBypassRBSEC()) return;
-  //
-  //        try {
-  //            /**
-  //             * logged-in users group must belong the lineage of the group of data they are
-  // querying from.
-  //             * Data from other lineages must be inaccessible.
-  //             */
-  //            UserGroupDTO aGrp = AbstractAction.getLoggedInGroup();
-  //            if (aGrp == null
-  //                    || aGrp.getFullyQualifiedName() == null
-  //                    || aGrp.getFullyQualifiedName().isBlank()) {
-  //                groupName = "blockAccessIfGroupNameIsNullForLoggedInUser";
-  //            } else {
-  //                groupName = aGrp.getFullyQualifiedName();
-  //            }
-  //
-  //            // Fixed RBSEC filtering logic
-  //            // Users can only see:
-  //            // 1. Data from their exact group
-  //            // 2. Data from their child groups (groups that start with their group + ".")
-  //            // 3. Data from their parent groups (but only direct lineage, not siblings)
-  //
-  //            List<String> allApplicableParentGroups = getAllApplicableParentGroups(groupName);
-  //
-  //            // Create three predicates:
-  //            // 1. Exact match for user's group and all parent groups in lineage
-  //            Predicate exactGroupPredicate =
-  //                    criteriaBuilderWrapper.getInPredicate("modifiedGroup",
-  // allApplicableParentGroups);
-  //
-  //            // 2. Child groups (groups that start with user's group + ".")
-  //            Predicate childGroupPredicate =
-  //                    criteriaBuilderWrapper.getILikePredicate("modifiedGroup", groupName + ".%");
-  //
-  //            // Combine with OR - user can see their lineage OR child groups
-  //            criteriaBuilderWrapper.or(exactGroupPredicate, childGroupPredicate);
-  //
-  //        } catch (Exception e) {
-  //            ApplicationLogger.error(e.getMessage(), e);
-  //        }
-  //    }
+  private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    String groupName;
+    try {
+      // TODO: Replace with actual logged in user's group
+      groupName = AbstractModelListener.DEFAULT_USER_GROUP;
+      addRBSECFilters(criteriaBuilderWrapper, groupName);
+    } catch (Exception e) {
+      ApplicationLogger.error(e.getMessage(), e);
+    }
+  }
 
-  //    public static List<String> getAllApplicableParentGroups(String fullyQualifiedGroupName) {
-  //        // for matching "." in the regex (for split) escape characters(\\) are necessary as "."
-  // in regex
-  //        // mean "any character".
-  //        String[] splitGroupNames = fullyQualifiedGroupName.split("\\.");
-  //        List<String> applicableGroupNames = new ArrayList<>();
-  //        StringBuilder groupNameBuilder = new StringBuilder();
-  //        for (String splitGroupName : splitGroupNames) {
-  //            groupNameBuilder.append(splitGroupName);
-  //            applicableGroupNames.add(groupNameBuilder.toString());
-  //            groupNameBuilder.append(".");
-  //        }
-  //        return applicableGroupNames;
-  //    }
+  private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper, String groupName) {
+    try {
+      // Users can only see:
+      // 1. Data from their exact group
+      // 2. Data from their child groups (groups that start with their group + ".")
+      // 3. Data from their parent groups (but only direct lineage, not siblings)
+
+      List<String> allApplicableParentGroups = getAllApplicableParentGroups(groupName);
+
+      // Create three predicates:
+      // 1. Exact match for user's group and all parent groups in lineage
+      Predicate exactGroupPredicate =
+          criteriaBuilderWrapper.getInPredicate(
+              AbstractRBACModel.RBAC_COLUMN, allApplicableParentGroups);
+
+      // 2. Child groups (groups that start with user's group + ".")
+      Predicate childGroupPredicate =
+          criteriaBuilderWrapper.getILikePredicate(AbstractRBACModel.RBAC_COLUMN, groupName + ".%");
+
+      // Combine with OR - user can see their lineage OR child groups
+      criteriaBuilderWrapper.or(exactGroupPredicate, childGroupPredicate);
+    } catch (Exception e) {
+      ApplicationLogger.error(e.getMessage(), e);
+    }
+  }
+
+  public static List<String> getAllApplicableParentGroups(String fullyQualifiedGroupName) {
+    // for matching "." in the regex (for split) escape characters(\\) are necessary as "." in regex
+    // mean "any character".
+    String[] splitGroupNames = fullyQualifiedGroupName.split("\\.");
+    List<String> applicableGroupNames = new ArrayList<>();
+    StringBuilder groupNameBuilder = new StringBuilder();
+    for (String splitGroupName : splitGroupNames) {
+      groupNameBuilder.append(splitGroupName);
+      applicableGroupNames.add(groupNameBuilder.toString());
+      groupNameBuilder.append(".");
+    }
+    return applicableGroupNames;
+  }
 
   public List getAbstractFilteredResult(
       AbstractDTO filter, Class<? extends AbstractModel> entityClass) {

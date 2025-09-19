@@ -1,10 +1,10 @@
 package com.example.lazyco.backend.core.AbstractClasses.Service;
 
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.DAO.IAbstractDAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
@@ -12,6 +12,8 @@ import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,10 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
     implements IAbstractService<D, E> {
+
+  // Cache for DTO class calculation to avoid repeated reflection
+  private static final ConcurrentHashMap<Class<?>, Class<?>> dtoClassCache =
+      new ConcurrentHashMap<>();
 
   @Lazy
   @Autowired
@@ -45,16 +51,22 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   @SuppressWarnings("unchecked")
   private Class<D> calculateDTOClass() {
-    Type superClass = getClass().getGenericSuperclass();
-    if (superClass instanceof ParameterizedType parameterizedType) {
-      Type type = parameterizedType.getActualTypeArguments()[0];
-      if (type instanceof Class) {
-        return (Class<D>) type;
-      } else if (type instanceof ParameterizedType) {
-        return (Class<D>) ((ParameterizedType) type).getRawType();
-      }
-    }
-    throw new ExceptionWrapper("Unable to determine DTO class");
+    // Use cache to avoid repeated reflection
+    return (Class<D>)
+        dtoClassCache.computeIfAbsent(
+            getClass(),
+            clazz -> {
+              Type superClass = clazz.getGenericSuperclass();
+              if (superClass instanceof ParameterizedType parameterizedType) {
+                Type type = parameterizedType.getActualTypeArguments()[0];
+                if (type instanceof Class) {
+                  return (Class<?>) type;
+                } else if (type instanceof ParameterizedType) {
+                  return (Class<?>) ((ParameterizedType) type).getRawType();
+                }
+              }
+              throw new ExceptionWrapper("Unable to determine DTO class for: " + clazz.getName());
+            });
   }
 
   // Do not call this method directly, use the template method instead
@@ -100,18 +112,19 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
-    entityToCreate = abstractDAO.save(entityToCreate);
+    E createdEntity = abstractDAO.save(entityToCreate);
 
+    // TODO: (low priority) optimize to avoid double DB hit
     // Retrieve the created entity to ensure all fields are populated
     @SuppressWarnings("unchecked")
-    E createdEntity =
-        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), entityToCreate.getId());
+    E refreshedEntity =
+        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), createdEntity.getId());
 
     // Post-create hook
-    postCreate(dtoToCreate, createdEntity);
+    postCreate(dtoToCreate, refreshedEntity);
 
     // Map back to DTO and return
-    return abstractMapper.map(createdEntity);
+    return abstractMapper.map(refreshedEntity);
   }
 
   // Hooks called to modify the DTO before creation
@@ -126,7 +139,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
     return executeWithTemplate(
-        dto, self::executeUpdateNewTransactional, self::executeUpdateNestedTransactional);
+        dto, self::executeUpdateNestedTransactional, self::executeUpdateNewTransactional);
   }
 
   // Execute update in the current transaction
@@ -152,7 +165,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     updateDtoBeforeUpdate(dtoToUpdate);
 
     // Validate that the DTO has an ID
-    if (dtoToUpdate == null || dtoToUpdate.getId() == null) {
+    if (Objects.isNull(dtoToUpdate) || Objects.isNull(dtoToUpdate.getId())) {
       throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
     }
 
@@ -175,16 +188,17 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // Save the updated entity
     E updatedEntity = abstractDAO.update(existingEntityClone);
 
+    // TODO: (low priority) optimize to avoid double DB hit
     // Retrieve the updated entity to ensure all fields are populated
     @SuppressWarnings("unchecked")
-    E updatedEntityClean =
+    E refreshedEntity =
         assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
 
     // Post-update hook
-    postUpdate(dtoToUpdate, existingEntity, updatedEntityClean);
+    postUpdate(dtoToUpdate, existingEntity, refreshedEntity);
 
     // Map back to DTO and return
-    return abstractMapper.map(updatedEntityClean);
+    return abstractMapper.map(refreshedEntity);
   }
 
   // Hooks called to modify the DTO before update
@@ -196,7 +210,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook called before the entity is updated
-  protected void preUpdate(D dtoToUpdate, E entityBeforeUpdates, E updatedEntity) {}
+  protected void preUpdate(D dtoToUpdate, E entityBeforeUpdates, E entityAfterUpdates) {}
 
   // Hook called after the entity is updated
   protected void postUpdate(D dtoToUpdate, E entityBeforeUpdate, E updatedEntity) {}
@@ -207,7 +221,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
     return executeWithTemplate(
-        dto, self::executeDeleteNewTransactional, self::executeDeleteNestedTransactional);
+        dto, self::executeDeleteNestedTransactional, self::executeDeleteNewTransactional);
   }
 
   // Execute delete in the current transaction
@@ -233,7 +247,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     updateDtoBeforeDelete(dtoToDelete);
 
     // Validate that the DTO has an ID
-    if (dtoToDelete == null || dtoToDelete.getId() == null) {
+    if (Objects.isNull(dtoToDelete) || Objects.isNull(dtoToDelete.getId())) {
       throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
     }
 

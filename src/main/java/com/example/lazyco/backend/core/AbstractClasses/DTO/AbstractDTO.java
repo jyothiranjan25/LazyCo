@@ -1,10 +1,10 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -18,8 +18,10 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private Long version;
 
+  private String ApiAction;
+
   // List of objects for bulk operations
-  private List<D> objectsList;
+  private List<D> objects;
 
   // Pagination fields
   private Integer pageSize;
@@ -51,7 +53,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Boolean hasError;
 
   @Expose(deserialize = false)
-  private String errorMessage;
+  private String message;
 
   // filtering fields
   @Expose(serialize = false, deserialize = false)
@@ -60,11 +62,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private List<Long> idsNotIn;
 
-  @Expose(serialize = false, deserialize = false)
-  private Map<String, List<String>> stringIn;
-
-  @Expose(serialize = false, deserialize = false)
-  private Map<String, List<String>> stringNotIn;
+  private List<OrderByDTO> orderBy;
 
   @Override
   public Object clone() {

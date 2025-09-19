@@ -6,5 +6,5 @@ public interface CommonConstrains extends APISchema {
   String TOMCAT_TEMP = System.getProperty("java.io.tmpdir").concat("/"); // Tomcat temp directory
 
   // File Storage Locations
-  String UPLOADS_LOCATION = TOMCAT_HOME.concat("Uploads/");
+  String UPLOADS_LOCATION = TOMCAT_HOME.concat("uploads/");
 }

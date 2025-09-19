@@ -401,6 +401,22 @@
         </dependency>
         <!-- /Java melody dependencies -->
 
+        <!-- File Extraction dependency -->
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>3.2.3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.20.0</version>
+        </dependency>
+        <!-- /File Extraction dependency -->
+
+        <!-- Miscellaneous dependencies -->
         <!-- https://mvnrepository.com/artifact/org.checkerframework/checker -->
         <dependency>
             <groupId>org.checkerframework</groupId>
@@ -420,11 +436,13 @@
             <version>4.5.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.glassfish/jakarta.el -->
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>
             <version>4.0.2</version>
         </dependency>
+        <!-- /Miscellaneous dependencies -->
 
         <!-- Test dependencies -->
         <!-- TestNG -->

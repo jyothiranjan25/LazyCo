@@ -6,11 +6,13 @@ import java.util.Date;
 
 public class AbstractModelListener {
 
+  public static final String DEFAULT_USER_GROUP = "DEFAULT";
+
   @PrePersist
   public void prePersist(AbstractModel source) {
     if (source instanceof AbstractRBACModel modelBase) {
       if (modelBase.getUserGroup() == null) {
-        modelBase.setUserGroup("DEFAULT");
+        modelBase.setUserGroup(DEFAULT_USER_GROUP);
       }
     }
     source.setCreatedBy("DEFAULT");
