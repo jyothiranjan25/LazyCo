@@ -39,6 +39,12 @@ public class FileDTO {
       this.fileDirectory = file.getParent();
       this.type = new Tika().detect(file);
       this.fileSize = FileUtils.sizeOf(file);
+      if (!FileTypeEnum.isSupported(this.extension)) {
+        throw new ExceptionWrapper(
+            "FileDTO: Unsupported file type: " + this.type + " for file: " + this.fullFileName);
+      }
+    } catch (ExceptionWrapper ex) {
+      throw ex;
     } catch (Exception e) {
       ApplicationLogger.error(e);
       throw new ExceptionWrapper("FileDTO: Error initializing from file");

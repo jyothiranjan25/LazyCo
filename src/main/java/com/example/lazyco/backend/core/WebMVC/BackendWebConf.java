@@ -3,7 +3,8 @@ package com.example.lazyco.backend.core.WebMVC;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
 
 import com.example.lazyco.backend.core.DatabaseConf.PostgresConfig;
-import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsArgumentResolver;
+import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileParamsResolver;
+import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsResolver;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +34,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class BackendWebConf implements WebMvcConfigurer {
 
   private Gson gson;
-  private QueryParamsArgumentResolver queryParamsArgumentResolver;
+  private QueryParamsResolver queryParamsResolver;
+  private FileParamsResolver fileParamsResolver;
 
   @Autowired
   public void injectDependencies(
-      Gson gson, QueryParamsArgumentResolver queryParamsArgumentResolver) {
+      Gson gson, QueryParamsResolver queryParamsResolver, FileParamsResolver fileParamsResolver) {
     this.gson = gson;
-    this.queryParamsArgumentResolver = queryParamsArgumentResolver;
+    this.queryParamsResolver = queryParamsResolver;
+    this.fileParamsResolver = fileParamsResolver;
   }
 
   @Bean
@@ -49,7 +52,8 @@ public class BackendWebConf implements WebMvcConfigurer {
 
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-    argumentResolvers.add(queryParamsArgumentResolver);
+    argumentResolvers.add(queryParamsResolver);
+    argumentResolvers.add(fileParamsResolver);
   }
 
   @Bean

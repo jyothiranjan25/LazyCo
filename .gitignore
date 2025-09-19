@@ -33,6 +33,7 @@ build/
 !**/src/test/**/build/
 
 .smarttomcat/*
+smarttomcat/*
 
 ### VS Code ###
 .vscode/

@@ -20,12 +20,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * target object type using JSON conversion.
  */
 @Component
-public class QueryParamsArgumentResolver implements HandlerMethodArgumentResolver {
+public class QueryParamsResolver implements HandlerMethodArgumentResolver {
 
   private final Gson gson;
 
   @Autowired
-  public QueryParamsArgumentResolver(Gson gson) {
+  public QueryParamsResolver(Gson gson) {
     if (gson == null) {
       throw new IllegalArgumentException("Gson instance cannot be null");
     }
