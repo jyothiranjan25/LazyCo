@@ -7,10 +7,7 @@ import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileArgumentResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReaderHeaderAware;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,8 +40,10 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory)
       throws Exception {
-    MultipartHttpServletRequest multipartRequest =
-        (MultipartHttpServletRequest) webRequest.getNativeRequest();
+
+    if (!(webRequest.getNativeRequest() instanceof MultipartHttpServletRequest multipartRequest)) {
+      throw new ExceptionWrapper("Request is not a multipart request");
+    }
 
     CsvParams annotation = parameter.getParameterAnnotation(CsvParams.class);
     String paramName =
@@ -78,23 +77,23 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
                 .get();
         Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
 
-        List<Map<String, String>> rows = new ArrayList<>();
-        try (CSVReaderHeaderAware readers = new CSVReaderHeaderAware(reader)){
-            Map<String, String> row;
-            while ((row = readers.readMap()) != null) {
-                rows.add(row);
-            }
+      List<Map<String, String>> rows = new ArrayList<>();
+      try (CSVReaderHeaderAware readers = new CSVReaderHeaderAware(reader)) {
+        Map<String, String> row;
+        while ((row = readers.readMap()) != null) {
+          rows.add(row);
         }
+      }
 
-        AbstractDTO dtoInstance = (AbstractDTO) dtoType.getDeclaredConstructor().newInstance();
-        List<AbstractDTO> dtoList = new ArrayList<>();
-        for (Map<String, String> row : rows) {
-            String json = GsonSingleton.convertObjectToJSONString(row);
-            dtoList.add(GsonSingleton.getInstance()
-                    .fromJson(
-                            json, (Class<? extends AbstractDTO>) parameter.getParameterType()));
-        }
-        dtoInstance.setObjects(dtoList);
+      AbstractDTO dtoInstance = (AbstractDTO) dtoType.getDeclaredConstructor().newInstance();
+      List<AbstractDTO> dtoList = new ArrayList<>();
+      for (Map<String, String> row : rows) {
+        String json = GsonSingleton.getCsvInstance().toJson(row);
+        dtoList.add(
+            GsonSingleton.getCsvInstance()
+                .fromJson(json, (Class<? extends AbstractDTO>) parameter.getParameterType()));
+      }
+      dtoInstance.setObjects(dtoList);
       return dtoInstance;
     } catch (Exception e) {
       ApplicationLogger.error("Failed to parse CSV into DTO: " + dtoType.getName(), e);

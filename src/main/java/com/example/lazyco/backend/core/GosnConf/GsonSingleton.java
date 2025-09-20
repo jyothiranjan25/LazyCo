@@ -5,6 +5,7 @@ import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import com.example.lazyco.backend.core.DateUtils.DateParser;
 import com.example.lazyco.backend.core.DateUtils.DateTimeProps;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
@@ -60,6 +61,19 @@ public class GsonSingleton {
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberDeserializer());
     gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberSerializer());
     gsonBuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
+  }
+
+  // this instance is used for CSV parsing where we want to ignore nulls
+  public static Gson getCsvInstance() {
+    // Create Gson instance with custom serializer
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    // Register custom serializers
+    gsonBuilder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
+    gsonBuilder.setPrettyPrinting();
+    registerTypeAdapter(gsonBuilder);
+    gsonBuilder.addSerializationExclusionStrategy(new CsvExclusionStrategy());
+    gsonBuilder.addDeserializationExclusionStrategy(new CsvExclusionStrategy());
+    return gsonBuilder.create();
   }
 
   public static Gson getGson() {
@@ -128,6 +142,19 @@ public class GsonSingleton {
 
     @Override
     public boolean shouldSkipClass(Class<?> clazz) {
+      return false;
+    }
+  }
+
+  private static class CsvExclusionStrategy implements ExclusionStrategy {
+
+    @Override
+    public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+      return fieldAttributes.getAnnotation(CsvField.class) == null;
+    }
+
+    @Override
+    public boolean shouldSkipClass(Class<?> aClass) {
       return false;
     }
   }
