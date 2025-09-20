@@ -23,8 +23,11 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 2)
   private String email;
 
-  @CsvField(order = 4)
+  @CsvField(order = 5)
   private String firstName;
+
+  @CsvField(order = 4)
+  private CRUDEnums crudEnum;
 
   private String lastName;
 

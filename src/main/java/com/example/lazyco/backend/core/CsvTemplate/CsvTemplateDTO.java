@@ -11,5 +11,6 @@ public class CsvTemplateDTO {
   private String csvType;
   private Boolean excludeNonMandatoryFields;
   private List<String> headers;
+  private Map<String, List<String>> optionRows;
   private List<Map<String, String>> rows;
 }

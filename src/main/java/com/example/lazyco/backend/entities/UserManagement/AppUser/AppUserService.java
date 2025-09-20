@@ -10,9 +10,4 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser> {
   protected AppUserService(AppUserMapper appUserMapper) {
     super(appUserMapper);
   }
-
-  @Override
-  public AppUserDTO create(AppUserDTO dto) {
-    return dto;
-  }
 }
