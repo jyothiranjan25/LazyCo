@@ -2,12 +2,11 @@ package com.example.lazyco.backend.core.Utils;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.SimpleResponseDTO;
+import com.example.lazyco.backend.core.File.FileDTO;
+import java.io.ByteArrayOutputStream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 /**
  * Utility class for creating standardized HTTP responses Supports various response types including
@@ -46,5 +45,18 @@ public class ResponseUtils {
     return ResponseEntity.status(httpStatusCode)
         .contentType(MediaType.APPLICATION_JSON)
         .body(abstractDTO);
+  }
+
+  public static ResponseEntity<?> sendResponse(FileDTO fileDTO) {
+    return sendFile(
+        fileDTO.getByteArrayOutputStream(), fileDTO.getFullFileName(), fileDTO.getContentType());
+  }
+
+  public static ResponseEntity<?> sendFile(
+      ByteArrayOutputStream fileStream, String fileName, String contentType) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.parseMediaType(contentType));
+    headers.add("Content-Disposition", "attachment; filename=" + fileName);
+    return new ResponseEntity<>(fileStream.toByteArray(), headers, HttpStatus.OK);
   }
 }

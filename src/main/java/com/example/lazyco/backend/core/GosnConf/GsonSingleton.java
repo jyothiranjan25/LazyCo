@@ -2,16 +2,19 @@ package com.example.lazyco.backend.core.GosnConf;
 
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 
+import com.example.lazyco.backend.core.CsvTemplate.CsvStrategies;
 import com.example.lazyco.backend.core.DateUtils.DateParser;
 import com.example.lazyco.backend.core.DateUtils.DateTimeProps;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.DateFormat;
@@ -67,12 +70,11 @@ public class GsonSingleton {
   public static Gson getCsvInstance() {
     // Create Gson instance with custom serializer
     GsonBuilder gsonBuilder = new GsonBuilder();
-    // Register custom serializers
-    gsonBuilder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
     gsonBuilder.setPrettyPrinting();
     registerTypeAdapter(gsonBuilder);
     gsonBuilder.addSerializationExclusionStrategy(new CsvExclusionStrategy());
     gsonBuilder.addDeserializationExclusionStrategy(new CsvExclusionStrategy());
+    gsonBuilder.setFieldNamingStrategy(new CsvFieldNamingStrategy());
     return gsonBuilder.create();
   }
 
@@ -156,6 +158,14 @@ public class GsonSingleton {
     @Override
     public boolean shouldSkipClass(Class<?> aClass) {
       return false;
+    }
+  }
+
+  public static class CsvFieldNamingStrategy extends PropertyNamingStrategy
+      implements FieldNamingStrategy {
+    @Override
+    public String translateName(Field field) {
+      return CsvStrategies.fieldNamingStrategy(field);
     }
   }
 

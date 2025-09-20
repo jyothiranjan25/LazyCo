@@ -35,16 +35,16 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppUser extends AbstractRBACModel {
 
-  @Column(name = "user_id", nullable = false, length = 50, comment = "Unique user identifier")
+  @Column(name = "user_id", length = 50, comment = "Unique user identifier")
   private String userId;
 
-  @Column(name = "password", nullable = false, comment = "Hashed user password")
+  @Column(name = "password", comment = "Hashed user password")
   private String password;
 
-  @Column(name = "email", nullable = false, length = 100, comment = "User email address")
+  @Column(name = "email", length = 100, comment = "User email address")
   private String email;
 
-  @Column(name = "first_name", nullable = false, length = 50, comment = "User first name")
+  @Column(name = "first_name", length = 50, comment = "User first name")
   private String firstName;
 
   @Column(name = "last_name", length = 50, comment = "User last name")

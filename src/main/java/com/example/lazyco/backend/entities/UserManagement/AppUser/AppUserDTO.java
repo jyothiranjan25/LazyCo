@@ -14,12 +14,16 @@ import lombok.Setter;
 @FilteredEntity(type = AppUser.class)
 public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
-  @CsvField private String userId;
+  @CsvField(order = 1)
+  private String userId;
 
+  @CsvField(order = 3)
   private String password;
 
+  @CsvField(order = 2)
   private String email;
 
+  @CsvField(order = 4)
   private String firstName;
 
   private String lastName;

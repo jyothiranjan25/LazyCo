@@ -17,24 +17,28 @@ public class EnumService {
     this.enumDisplayValueService = enumDisplayValueService;
   }
 
-  public List<EnumDTO> get(EnumDTO enumDTOs) throws ClassNotFoundException {
+  public List<EnumDTO> get(EnumDTO enumDTOs) {
     List<EnumDTO> enumDTOS = new ArrayList<>();
     enumDTOS.add(getSingle(enumDTOs));
     return enumDTOS;
   }
 
-  private EnumDTO getSingle(EnumDTO enumDTO) throws ClassNotFoundException {
+  @SuppressWarnings("unchecked")
+  private EnumDTO getSingle(EnumDTO enumDTO) {
     if (enumDTO.getEnumType() == null) {
       throw new ExceptionWrapper("Enum Type is required.");
     }
-    EnumClasses enumClasses = EnumClasses.getByKey(enumDTO.getEnumType());
-    @SuppressWarnings("unchecked")
-    Class<? extends Enum<?>> enumClass =
-        (Class<? extends Enum<?>>) Class.forName(enumClasses.getEnumClass().getName());
+
+    Class<? extends Enum<?>> enumClass;
+    try {
+      EnumClasses enumClasses = EnumClasses.getByKey(enumDTO.getEnumType());
+      enumClass = (Class<? extends Enum<?>>) Class.forName(enumClasses.getEnumClass().getName());
+    } catch (Exception e) {
+      throw new ExceptionWrapper("Enum class " + enumDTO.getEnumType() + " is not found");
+    }
     if (!enumClass.isEnum()) {
       throw new ExceptionWrapper("Provided class is not an enum.");
     }
-    @SuppressWarnings("unchecked")
     Map<?, String> originalMap =
         (Map<?, String>) enumDisplayValueService.getEnumCodeToDisplayValueMap(enumClass);
     Map<String, String> stringKeyMap = new LinkedHashMap<>();

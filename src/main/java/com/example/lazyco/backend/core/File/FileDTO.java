@@ -18,7 +18,7 @@ public class FileDTO {
   private final String fileDirectory;
   private final File file;
   private final String extension;
-  private final String type;
+  private final String contentType;
   private final Long fileSize;
   private byte[] byteArray;
   private ByteArrayOutputStream byteArrayOutputStream;
@@ -38,11 +38,14 @@ public class FileDTO {
       this.fullFileName = file.getName();
       this.absolutePath = file.getAbsolutePath();
       this.fileDirectory = file.getParent();
-      this.type = new Tika().detect(file);
+      this.contentType = new Tika().detect(file);
       this.fileSize = FileUtils.sizeOf(file);
       if (!FileTypeEnum.isSupported(this.extension)) {
         throw new ExceptionWrapper(
-            "FileDTO: Unsupported file type: " + this.type + " for file: " + this.fullFileName);
+            "FileDTO: Unsupported file type: "
+                + this.contentType
+                + " for file: "
+                + this.fullFileName);
       }
     } catch (ExceptionWrapper ex) {
       throw ex;

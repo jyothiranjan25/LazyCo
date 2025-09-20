@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.Enum;
 
-import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParams;
 import java.util.List;
@@ -21,13 +20,9 @@ public class EnumController {
 
   @GetMapping
   public ResponseEntity<EnumDTO> read(@QueryParams EnumDTO enumDTO) {
-    try {
-      List<EnumDTO> enumDTOList = enumService.get(enumDTO);
-      EnumDTO result = new EnumDTO();
-      result.setObjects(enumDTOList);
-      return ResponseUtils.sendResponse(result);
-    } catch (ClassNotFoundException e) {
-      throw new ExceptionWrapper("Enum class " + enumDTO.getEnumType() + " is not found");
-    }
+    List<EnumDTO> enumDTOList = enumService.get(enumDTO);
+    EnumDTO result = new EnumDTO();
+    result.setObjects(enumDTOList);
+    return ResponseUtils.sendResponse(result);
   }
 }
