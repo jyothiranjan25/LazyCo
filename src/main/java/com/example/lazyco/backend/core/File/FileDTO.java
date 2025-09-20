@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.File;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -85,9 +86,23 @@ public class FileDTO {
 
   public FileReader getFileReader() {
     try {
-      return new FileReader(this.file);
+      return new FileReader(this.file, StandardCharsets.UTF_8);
     } catch (Exception e) {
-      throw new ExceptionWrapper("FileDTO: Cannot open FileReader for " + absolutePath);
+      throw new ExceptionWrapper("FileDTO: Cannot open FileReader for " + this.absolutePath);
+    }
+  }
+
+  public void deleteSafe() {
+    try {
+      if (this.file != null && this.file.exists()) {
+        boolean deleted = this.file.delete();
+        if (!deleted) {
+          // Fallback: Apache Commons IO provides a quiet delete
+          FileUtils.forceDelete(this.file);
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Could not delete temp file: " + this.absolutePath, e);
     }
   }
 }

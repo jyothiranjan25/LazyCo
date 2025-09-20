@@ -4,7 +4,7 @@ import static com.example.lazyco.backend.core.Utils.APISchema.APP_USER_API;
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.backend.core.AbstractClasses.Service.IAbstractService;
-import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileParams;
+import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParams;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ public class AppUserController extends AbstractController<AppUserDTO> {
   }
 
   @PostMapping
-  protected ResponseEntity<?> create(@FileParams AppUserDTO t)
+  protected ResponseEntity<?> create(@CsvParams AppUserDTO t)
       throws HttpRequestMethodNotSupportedException {
     return super.create(t);
   }

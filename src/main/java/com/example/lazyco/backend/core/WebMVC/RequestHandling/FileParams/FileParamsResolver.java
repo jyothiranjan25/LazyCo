@@ -5,13 +5,8 @@ import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.JSONUtils.JSONUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -21,7 +16,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
@@ -47,7 +41,8 @@ public class FileParamsResolver implements HandlerMethodArgumentResolver {
 
     Map<String, FileDTO> filesMap = new HashMap<>();
     for (String paramName : multipartRequest.getFileMap().keySet()) {
-      FileDTO attachmentFile = readFileFromMultiPartRequest(paramName, multipartRequest);
+      FileDTO attachmentFile =
+          FileArgumentResolver.readFileFromMultiPartRequest(paramName, multipartRequest);
       if (attachmentFile != null
           && attachmentFile.getFile() != null
           && attachmentFile.getFile().length() > 0) {
@@ -93,7 +88,8 @@ public class FileParamsResolver implements HandlerMethodArgumentResolver {
         .forEach(
             (paramName, multipartFile) -> {
               try {
-                FileDTO fileDTO = readFileFromMultiPartRequest(paramName, multipartRequest);
+                FileDTO fileDTO =
+                    FileArgumentResolver.readFileFromMultiPartRequest(paramName, multipartRequest);
                 if (fileDTO != null
                     && fileDTO.getFile() != null
                     && fileDTO.getFile().length() > 0) {
@@ -105,31 +101,5 @@ public class FileParamsResolver implements HandlerMethodArgumentResolver {
             });
 
     return filesMap;
-  }
-
-  private FileDTO readFileFromMultiPartRequest(
-      String paramName, MultipartHttpServletRequest multipartRequest) throws IOException {
-    MultipartFile file = multipartRequest.getFile(paramName);
-    if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
-      return null;
-    }
-
-    // Sanitize filename to avoid path traversal
-    String originalFileName = Path.of(file.getOriginalFilename()).getFileName().toString();
-    String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
-
-    // Create a temp file in a safe location
-    Path tempDir = Path.of(CommonConstrains.TOMCAT_TEMP);
-    if (!Files.exists(tempDir)) {
-      Files.createDirectories(tempDir);
-    }
-    Path tempFile = tempDir.resolve(uniqueFileName);
-
-    // Move file immediately to target location
-    file.transferTo(tempFile.toFile());
-    // Use streaming copy to avoid memory issues with large files
-    // Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
-
-    return new FileDTO(tempFile.toFile());
   }
 }

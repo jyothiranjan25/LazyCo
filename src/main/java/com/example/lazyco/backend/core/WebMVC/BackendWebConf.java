@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.WebMVC;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
 
 import com.example.lazyco.backend.core.DatabaseConf.PostgresConfig;
+import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsResolver;
 import com.google.gson.Gson;
@@ -36,13 +37,18 @@ public class BackendWebConf implements WebMvcConfigurer {
   private Gson gson;
   private QueryParamsResolver queryParamsResolver;
   private FileParamsResolver fileParamsResolver;
+  private CsvParamsResolver csvParamsResolver;
 
   @Autowired
   public void injectDependencies(
-      Gson gson, QueryParamsResolver queryParamsResolver, FileParamsResolver fileParamsResolver) {
+      Gson gson,
+      QueryParamsResolver queryParamsResolver,
+      FileParamsResolver fileParamsResolver,
+      CsvParamsResolver csvParamsResolver) {
     this.gson = gson;
     this.queryParamsResolver = queryParamsResolver;
     this.fileParamsResolver = fileParamsResolver;
+    this.csvParamsResolver = csvParamsResolver;
   }
 
   @Bean
@@ -54,6 +60,7 @@ public class BackendWebConf implements WebMvcConfigurer {
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
     argumentResolvers.add(queryParamsResolver);
     argumentResolvers.add(fileParamsResolver);
+    argumentResolvers.add(csvParamsResolver);
   }
 
   @Bean
