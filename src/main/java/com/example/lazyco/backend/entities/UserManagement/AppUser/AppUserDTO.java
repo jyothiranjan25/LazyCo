@@ -15,10 +15,11 @@ import lombok.Setter;
 @FilteredEntity(type = AppUser.class)
 public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
-  @CsvBindByName private String userId;
+  private String userId;
 
-  @CsvBindByName private String password;
-  @CsvBindByName private String email;
+  private String password;
+
+  private String email;
 
   private String firstName;
 
@@ -26,6 +27,5 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
   private List<CRUDEnums> permissions;
 
-  @CsvBindByName
   private Date test;
 }
