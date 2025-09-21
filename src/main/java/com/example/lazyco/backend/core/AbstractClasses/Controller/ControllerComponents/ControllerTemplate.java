@@ -14,7 +14,7 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
     this.controllerTemplateParam = controllerTemplateParam;
   }
 
-  public ResponseEntity<D> template(D incomingRequestDTO) {
+  public ResponseEntity<?> template(D incomingRequestDTO) {
     if (incomingRequestDTO.getApiAction() != null) {
       if (isPostRequest()) {
         return controllerTemplateParam.resolvePostAction(

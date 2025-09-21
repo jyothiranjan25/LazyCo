@@ -71,32 +71,24 @@ public abstract class AbstractController<D extends AbstractDTO<D>>
     throw new HttpRequestMethodNotSupportedException("Request method 'DELETE' is not supported");
   }
 
-  @SuppressWarnings("unchecked")
-  public ResponseEntity<D> resolveAction(String action, D t) {
-    return (ResponseEntity<D>)
-        ResponseUtils.sendResponse(
-            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  public ResponseEntity<?> resolveAction(String action, D t) {
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
-  @SuppressWarnings("unchecked")
-  public ResponseEntity<D> resolvePostAction(String action, D t) {
-    return (ResponseEntity<D>)
-        ResponseUtils.sendResponse(
-            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  public ResponseEntity<?> resolvePostAction(String action, D t) {
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
-  @SuppressWarnings("unchecked")
-  public ResponseEntity<D> resolvePatchAction(String action, D t) {
-    return (ResponseEntity<D>)
-        ResponseUtils.sendResponse(
-            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  public ResponseEntity<?> resolvePatchAction(String action, D t) {
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
-  @SuppressWarnings("unchecked")
-  public ResponseEntity<D> resolveDeleteAction(String action, D t) {
-    return (ResponseEntity<D>)
-        ResponseUtils.sendResponse(
-            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  public ResponseEntity<?> resolveDeleteAction(String action, D t) {
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
   public List<CRUDEnums> restrictCRUDAction() {

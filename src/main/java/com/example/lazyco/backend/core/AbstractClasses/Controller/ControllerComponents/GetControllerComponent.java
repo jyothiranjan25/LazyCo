@@ -18,7 +18,7 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
     this.controllerTemplateParam = controllerTemplateParam;
   }
 
-  public ResponseEntity<D> execute(D incomingRequestDTO) {
+  public ResponseEntity<?> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
           D execute(D t) {
