@@ -12,7 +12,7 @@ import org.apache.commons.lang3.SerializationUtils;
 @Setter
 public class CsvTemplateDTO implements Serializable, Cloneable {
   private String csvType;
-  private Boolean excludeNonMandatoryFields;
+  private Boolean excludeOptionalFields;
   private Class<?> csvClass;
   private List<?> data;
   private List<String> headers;

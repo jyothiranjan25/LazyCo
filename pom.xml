@@ -383,6 +383,15 @@
         </dependency>
         <!-- /Loggers dependencies -->
 
+        <!-- Scheduler dependency -->
+        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <!-- /Scheduler dependency -->
+
         <!-- Java melody dependencies -->
         <!-- https://mvnrepository.com/artifact/net.bull.javamelody/javamelody-core -->
         <dependency>

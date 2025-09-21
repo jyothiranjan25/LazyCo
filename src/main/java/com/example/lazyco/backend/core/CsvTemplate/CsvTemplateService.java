@@ -34,10 +34,8 @@ public class CsvTemplateService {
     }
     // Set the class in the DTO
     csvTemplateDTO.setCsvClass(rawClass);
-    // 3️⃣ Generate headers and option rows
-    csvTemplateDTO = CsvService.generateCsvHeaders(csvTemplateDTO);
 
-    // 4️⃣ Generate CSV file
+    // 3️⃣ Generate the CSV file
     return CsvService.generateCsvFile(csvTemplateDTO);
   }
 }

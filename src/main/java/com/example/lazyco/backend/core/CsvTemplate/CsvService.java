@@ -33,7 +33,7 @@ public class CsvService {
             .filter(f -> f.isAnnotationPresent(CsvField.class))
             .filter(
                 f -> {
-                  if (!Boolean.TRUE.equals(csvTemplateDTO.getExcludeNonMandatoryFields())) {
+                  if (!Boolean.TRUE.equals(csvTemplateDTO.getExcludeOptionalFields())) {
                     return true; // keep all fields
                   }
                   CsvField annotation = f.getAnnotation(CsvField.class);
@@ -85,6 +85,12 @@ public class CsvService {
     File file = new File(fileName);
     try {
       try (CSVWriter writer = new CSVWriter(new FileWriter(file))) {
+
+        // generate headers if not set
+        if (csvTemplateDTO.getHeaders() == null || csvTemplateDTO.getHeaders().isEmpty()) {
+          csvTemplateDTO = generateCsvHeaders(csvTemplateDTO);
+        }
+
         // Write BOM for UTF-8 encoding
         if (csvTemplateDTO.getHeaders() != null) {
           // Write headers

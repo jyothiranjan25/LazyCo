@@ -11,7 +11,13 @@ import org.hibernate.envers.Audited;
 @Getter
 @Setter
 @Entity
-@Table(name = "enum_display_value")
+@Table(
+    name = "enum_display_value",
+    comment = "Table storing display values for enums",
+    indexes = {
+      @Index(name = "idx_enum_display_value_enum_code", columnList = "enum_code"),
+      @Index(name = "idx_enum_display_value_category", columnList = "category")
+    })
 @Audited
 @EntityListeners(EnumDisplayValueListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
