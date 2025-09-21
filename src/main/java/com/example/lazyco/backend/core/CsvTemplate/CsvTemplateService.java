@@ -1,13 +1,9 @@
 package com.example.lazyco.backend.core.CsvTemplate;
 
-import static com.example.lazyco.backend.core.WebMVC.SpringContext.getBean;
-
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
 import java.util.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

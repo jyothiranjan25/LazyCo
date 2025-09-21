@@ -24,7 +24,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
         headers == null
             ? null
             : headers.stream()
-                .map(CsvStrategies::fieldNamingStrategy) // <-- call static helper correctly
+                .map(CsvStrategies::fieldNamingStrategy) // <-- call fieldNamingStrategy correctly
                 .collect(Collectors.toList());
   }
 
@@ -37,7 +37,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
                     Collectors.toMap(
                         e ->
                             CsvStrategies.fieldNamingStrategy(
-                                e.getKey()), // <-- call static helper correctly
+                                e.getKey()), // <-- call fieldNamingStrategy correctly
                         Map.Entry::getValue));
   }
 
@@ -53,7 +53,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
                                 Collectors.toMap(
                                     e ->
                                         CsvStrategies.fieldNamingStrategy(
-                                            e.getKey()), // <-- call static helper correctly
+                                            e.getKey()), // <-- call fieldNamingStrategy correctly
                                     Map.Entry::getValue)))
                 .collect(Collectors.toList());
   }
