@@ -73,6 +73,10 @@ public final class DateTimeZoneUtils {
     return nowInstant();
   }
 
+  public static Date getCurrentDate() {
+    return Date.from(nowInstant());
+  }
+
   public static LocalDate currentDate() {
     return nowInstant().atZone(systemZone()).toLocalDate();
   }

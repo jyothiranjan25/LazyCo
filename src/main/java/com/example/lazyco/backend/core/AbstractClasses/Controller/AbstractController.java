@@ -78,11 +78,28 @@ public abstract class AbstractController<D extends AbstractDTO<D>>
             HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
-  public List<CRUDEnums> restrictCRUDAction() {
-    return List.of();
+  @SuppressWarnings("unchecked")
+  public ResponseEntity<D> resolvePostAction(String action, D t) {
+    return (ResponseEntity<D>)
+        ResponseUtils.sendResponse(
+            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
   }
 
-  public String getResponseListKey() {
-    return null;
+  @SuppressWarnings("unchecked")
+  public ResponseEntity<D> resolvePatchAction(String action, D t) {
+    return (ResponseEntity<D>)
+        ResponseUtils.sendResponse(
+            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  }
+
+  @SuppressWarnings("unchecked")
+  public ResponseEntity<D> resolveDeleteAction(String action, D t) {
+    return (ResponseEntity<D>)
+        ResponseUtils.sendResponse(
+            HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + action + "' not supported");
+  }
+
+  public List<CRUDEnums> restrictCRUDAction() {
+    return List.of();
   }
 }

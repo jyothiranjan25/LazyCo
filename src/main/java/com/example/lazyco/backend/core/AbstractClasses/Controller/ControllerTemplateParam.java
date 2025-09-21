@@ -8,7 +8,11 @@ import org.springframework.http.ResponseEntity;
 public interface ControllerTemplateParam<D extends AbstractDTO<D>> {
   ResponseEntity<D> resolveAction(String action, D t);
 
-  List<CRUDEnums> restrictCRUDAction();
+  ResponseEntity<D> resolvePostAction(String action, D t);
 
-  String getResponseListKey();
+  ResponseEntity<D> resolvePatchAction(String action, D t);
+
+  ResponseEntity<D> resolveDeleteAction(String action, D t);
+
+  List<CRUDEnums> restrictCRUDAction();
 }

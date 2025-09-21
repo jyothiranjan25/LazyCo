@@ -26,6 +26,11 @@ public class GetControllerComponent<D extends AbstractDTO<D>> {
             t.setObjects(result);
             return t;
           }
+
+          @Override
+          protected boolean isGetRequest() {
+            return true;
+          }
         })
         .template(incomingRequestDTO);
   }

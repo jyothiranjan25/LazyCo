@@ -23,6 +23,11 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
           D execute(D t) {
             return updateServiceComponent.update(t);
           }
+
+          @Override
+          protected boolean isPatchRequest() {
+            return true;
+          }
         })
         .template(incomingRequestDTO);
   }

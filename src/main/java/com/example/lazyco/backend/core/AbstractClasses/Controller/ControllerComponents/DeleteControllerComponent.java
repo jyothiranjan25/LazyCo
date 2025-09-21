@@ -23,6 +23,11 @@ public class DeleteControllerComponent<D extends AbstractDTO<D>> {
           D execute(D requestDTO) {
             return deleteServiceComponent.delete(requestDTO);
           }
+
+          @Override
+          protected boolean isDeleteRequest() {
+            return true;
+          }
         })
         .template(incomingRequestDTO);
   }

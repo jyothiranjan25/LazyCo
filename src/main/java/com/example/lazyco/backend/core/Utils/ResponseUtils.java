@@ -48,11 +48,11 @@ public class ResponseUtils {
   }
 
   public static ResponseEntity<?> sendResponse(FileDTO fileDTO) {
-    return sendFile(
+    return sendResponse(
         fileDTO.getByteArrayOutputStream(), fileDTO.getFullFileName(), fileDTO.getContentType());
   }
 
-  public static ResponseEntity<?> sendFile(
+  public static ResponseEntity<?> sendResponse(
       ByteArrayOutputStream fileStream, String fileName, String contentType) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.parseMediaType(contentType));

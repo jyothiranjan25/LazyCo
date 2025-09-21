@@ -16,8 +16,19 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
 
   public ResponseEntity<D> template(D incomingRequestDTO) {
     if (incomingRequestDTO.getApiAction() != null) {
-      return controllerTemplateParam.resolveAction(
-          incomingRequestDTO.getApiAction(), incomingRequestDTO);
+      if (isPostRequest()) {
+        return controllerTemplateParam.resolvePostAction(
+            incomingRequestDTO.getApiAction(), incomingRequestDTO);
+      } else if (isPatchRequest()) {
+        return controllerTemplateParam.resolvePatchAction(
+            incomingRequestDTO.getApiAction(), incomingRequestDTO);
+      } else if (isDeleteRequest()) {
+        return controllerTemplateParam.resolveDeleteAction(
+            incomingRequestDTO.getApiAction(), incomingRequestDTO);
+      } else {
+        return controllerTemplateParam.resolveAction(
+            incomingRequestDTO.getApiAction(), incomingRequestDTO);
+      }
     } else {
       incomingRequestDTO = execute(incomingRequestDTO);
 
@@ -26,6 +37,7 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
           && Boolean.TRUE.equals(incomingRequestDTO.getHasError())) {
         return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, incomingRequestDTO);
       }
+      // Send appropriate response based on request type
       if (isPostRequest()) {
         return ResponseUtils.sendResponse(HttpStatus.CREATED, incomingRequestDTO);
       } else {
@@ -36,7 +48,19 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
 
   abstract D execute(D t);
 
+  protected boolean isGetRequest() {
+    return false;
+  }
+
   protected boolean isPostRequest() {
+    return false;
+  }
+
+  protected boolean isPatchRequest() {
+    return false;
+  }
+
+  protected boolean isDeleteRequest() {
     return false;
   }
 }
