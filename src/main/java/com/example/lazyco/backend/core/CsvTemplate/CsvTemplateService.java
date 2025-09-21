@@ -1,12 +1,13 @@
 package com.example.lazyco.backend.core.CsvTemplate;
 
+import static com.example.lazyco.backend.core.WebMVC.SpringContext.getBean;
+
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
-import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
-import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
-import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
 import java.util.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,44 +36,11 @@ public class CsvTemplateService {
     if (!AbstractDTO.class.isAssignableFrom(rawClass)) {
       throw new ExceptionWrapper("Provided class is not a valid CSV DTO.");
     }
-    Map<String, List<String>> options = new HashMap<>();
-    // 3️⃣ Extract fields with @CsvField annotation and sort by order
-    List<String> headers =
-        Arrays.stream(rawClass.getDeclaredFields())
-            .filter(f -> f.isAnnotationPresent(CsvField.class))
-            .filter(
-                f -> {
-                  if (!Boolean.TRUE.equals(csvTemplateDTO.getExcludeNonMandatoryFields())) {
-                    return true; // keep all fields
-                  }
-                  CsvField annotation = f.getAnnotation(CsvField.class);
-                  return !annotation.optional(); // exclude optional fields
-                })
-            .sorted(
-                (f1, f2) -> {
-                  int o1 = f1.getAnnotation(CsvField.class).order();
-                  int o2 = f2.getAnnotation(CsvField.class).order();
-                  return Integer.compare(o1, o2);
-                })
-            .peek(
-                f -> {
-                  try {
-                    if (f.getType().isEnum()) {
-                      String serializedName =
-                          new GsonSingleton.CsvFieldNamingStrategy().translateName(f);
-                      Object[] constants = f.getType().getEnumConstants();
-                      List<String> enumValues =
-                          Arrays.stream(constants).map(Object::toString).toList();
-                      options.put(serializedName, enumValues);
-                    }
-                  } catch (Exception e) {
-                    ApplicationLogger.warn("Failed to process enum field: " + f.getName(), e);
-                  }
-                })
-            .map(new GsonSingleton.CsvFieldNamingStrategy()::translateName)
-            .toList();
-    csvTemplateDTO.setHeaders(headers);
-    csvTemplateDTO.setOptionRows(options);
+    // Set the class in the DTO
+    csvTemplateDTO.setCsvClass(rawClass);
+    // 3️⃣ Generate headers and option rows
+    csvTemplateDTO = CsvService.generateCsvHeaders(csvTemplateDTO);
+
     // 4️⃣ Generate CSV file
     return CsvService.generateCsvFile(csvTemplateDTO);
   }

@@ -18,7 +18,6 @@ public class CsvTemplateController {
 
   @GetMapping
   public ResponseEntity<?> read(@QueryParams CsvTemplateDTO csvTemplateDTO) {
-    csvTemplateDTO.setCsvType("APP_USER");
     return csvTemplateService.get(csvTemplateDTO);
   }
 }
