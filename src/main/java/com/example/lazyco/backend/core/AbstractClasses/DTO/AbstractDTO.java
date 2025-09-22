@@ -69,6 +69,8 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private Map<String, FileDTO> fileMap;
 
+  private Integer auditSequence;
+
   @Override
   public Object clone() {
     Object o1 = null;

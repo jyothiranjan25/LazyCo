@@ -7,4 +7,6 @@ public interface CommonConstrains extends APISchema {
 
   // File Storage Locations
   String UPLOADS_LOCATION = TOMCAT_HOME.concat("uploads/");
+
+  String BATCH_AUDIT_UPLOAD_LOCATION = UPLOADS_LOCATION.concat("batch_audit/");
 }

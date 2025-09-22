@@ -12,7 +12,6 @@ import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryP
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 
 public abstract class AbstractController<D extends AbstractDTO<D>>
@@ -37,38 +36,39 @@ public abstract class AbstractController<D extends AbstractDTO<D>>
   }
 
   @GetMapping
-  protected ResponseEntity<?> read(@QueryParams D t) throws HttpRequestMethodNotSupportedException {
+  protected ResponseEntity<?> read(@QueryParams D t) {
     if (!restrictCRUDAction().contains(CRUDEnums.GET)) {
       return readControllerComponent.execute(t);
     }
-    throw new HttpRequestMethodNotSupportedException("Request method 'GET' is not supported");
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method 'GET' not supported");
   }
 
   @PostMapping
-  protected ResponseEntity<?> create(@RequestBody D t)
-      throws HttpRequestMethodNotSupportedException {
+  protected ResponseEntity<?> create(@RequestBody D t) {
     if (!restrictCRUDAction().contains(CRUDEnums.POST)) {
       return createControllerComponent.execute(t);
     }
-    throw new HttpRequestMethodNotSupportedException("Request method 'POST' is not supported");
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method 'POST' not supported");
   }
 
   @PatchMapping
-  protected ResponseEntity<?> update(@RequestBody D t)
-      throws HttpRequestMethodNotSupportedException {
+  protected ResponseEntity<?> update(@RequestBody D t) {
     if (!restrictCRUDAction().contains(CRUDEnums.PATCH)) {
       return updateControllerComponent.execute(t);
     }
-    throw new HttpRequestMethodNotSupportedException("Request method 'PATCH' is not supported");
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method 'PATCH' not supported");
   }
 
   @DeleteMapping
-  protected ResponseEntity<?> delete(@RequestBody D t)
-      throws HttpRequestMethodNotSupportedException {
+  protected ResponseEntity<?> delete(@RequestBody D t) {
     if (!restrictCRUDAction().contains(CRUDEnums.DELETE)) {
       return deleteControllerComponent.execute(t);
     }
-    throw new HttpRequestMethodNotSupportedException("Request method 'DELETE' is not supported");
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method 'DELETE' not supported");
   }
 
   public ResponseEntity<?> resolveAction(String action, D t) {
