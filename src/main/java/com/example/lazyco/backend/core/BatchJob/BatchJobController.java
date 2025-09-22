@@ -20,23 +20,23 @@ public class BatchJobController extends AbstractController<BatchJobDTO> {
 
   @Override
   public ResponseEntity<?> resolvePatchAction(String action, BatchJobDTO batchJobDTO) {
-      switch (BatchJobDTO.APIAction.valueOf(action)) {
-        case TERMINATE:
-          batchJobDTO = batchJobService.terminateJob(batchJobDTO);
-          break;
-        case RESTART:
-          batchJobDTO = batchJobService.restartJob(batchJobDTO);
-          break;
-//        case PAUSE:
-//          batchJobDTO = batchJobService.pauseJob(batchJobDTO);
-//          break;
-        case RESUME:
-          batchJobDTO = batchJobService.restartJob(batchJobDTO); // Resume is same as restart
-          break;
-        default:
-          batchJobDTO = batchJobService.update(batchJobDTO);
-      }
-      return ResponseUtils.sendResponse(batchJobDTO);
+    switch (BatchJobDTO.APIAction.valueOf(action)) {
+      case TERMINATE:
+        batchJobDTO = batchJobService.terminateJob(batchJobDTO);
+        break;
+      case RESTART:
+        batchJobDTO = batchJobService.restartJob(batchJobDTO);
+        break;
+        //        case PAUSE:
+        //          batchJobDTO = batchJobService.pauseJob(batchJobDTO);
+        //          break;
+      case RESUME:
+        batchJobDTO = batchJobService.restartJob(batchJobDTO); // Resume is same as restart
+        break;
+      default:
+        batchJobDTO = batchJobService.update(batchJobDTO);
+    }
+    return ResponseUtils.sendResponse(batchJobDTO);
   }
 
   public List<CRUDEnums> restrictCRUDAction() {

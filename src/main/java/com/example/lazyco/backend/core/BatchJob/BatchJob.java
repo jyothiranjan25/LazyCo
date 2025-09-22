@@ -51,8 +51,8 @@ public class BatchJob extends AbstractRBACModel {
   @Column(name = "input_file_path", length = 2048)
   private String inputFilePath;
 
-    @Column(name = "output_file_path", length = 2048)
-    private String outputFilePath;
+  @Column(name = "output_file_path", length = 2048)
+  private String outputFilePath;
 
   public enum BatchJobStatus {
     INITIALIZED,

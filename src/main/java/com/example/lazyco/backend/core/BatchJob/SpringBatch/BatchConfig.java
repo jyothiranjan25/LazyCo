@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
@@ -20,10 +19,13 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 @Configuration
 @EnableBatchProcessing
-@RequiredArgsConstructor
 public class BatchConfig {
 
   private final DataSource dataSource;
+
+  public BatchConfig(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
   @Bean
   public JobRepository jobRepository() throws Exception {
