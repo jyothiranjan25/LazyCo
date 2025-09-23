@@ -36,21 +36,27 @@ public class EnumService {
     } catch (Exception e) {
       throw new ExceptionWrapper("Enum class " + enumDTO.getEnumType() + " is not found");
     }
-    if (!enumClass.isEnum()) {
-      throw new ExceptionWrapper("Provided class is not an enum.");
-    }
-    Map<?, String> originalMap =
-        (Map<?, String>) enumDisplayValueService.getEnumCodeToDisplayValueMap(enumClass);
-    Map<String, String> stringKeyMap = new LinkedHashMap<>();
-    for (Map.Entry<?, String> entry : originalMap.entrySet()) {
-      Object key = entry.getKey();
-      if (key instanceof Enum) {
-        stringKeyMap.put(((Enum<?>) key).name(), entry.getValue());
-      } else {
-        stringKeyMap.put(key.toString(), entry.getValue());
-      }
-    }
-    enumDTO.setEnumMap(stringKeyMap);
+    Map<String, String> enumMap = (Map<String, String>) getEnumMapByType(enumClass);
+    enumDTO.setEnumMap(enumMap);
     return enumDTO;
+  }
+
+    @SuppressWarnings("unchecked")
+  public Map<?, String> getEnumMapByType(Class<? extends Enum<?>> enumClass) {
+        if (!enumClass.isEnum()) {
+            throw new ExceptionWrapper("Provided class is not an enum.");
+        }
+      Map<?, String> originalMap =
+              (Map<?, String>) enumDisplayValueService.getEnumCodeToDisplayValueMap(enumClass);
+      Map<String, String> stringKeyMap = new LinkedHashMap<>();
+      for (Map.Entry<?, String> entry : originalMap.entrySet()) {
+          Object key = entry.getKey();
+          if (key instanceof Enum) {
+              stringKeyMap.put(((Enum<?>) key).name(), entry.getValue());
+          } else {
+              stringKeyMap.put(key.toString(), entry.getValue());
+          }
+      }
+        return stringKeyMap;
   }
 }

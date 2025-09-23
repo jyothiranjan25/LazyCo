@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
+import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterFieldMetadata;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
@@ -68,6 +69,10 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   @Expose(serialize = false, deserialize = false)
   private Map<String, FileDTO> fileMap;
+
+  private Boolean getFilterMetadata;
+
+  private List<FilterFieldMetadata> filterFieldMetadata;
 
   @Override
   public Object clone() {
