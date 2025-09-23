@@ -442,6 +442,15 @@ public class CriteriaBuilderWrapper {
   }
 
   public void orderBy(String key, OrderType orderType) {
+    // Ignore null or empty keys
+    if (key == null || key.trim().isEmpty()) {
+      return;
+    }
+    // Default to ASC if orderType is null
+    if (orderType == null) {
+      orderType = OrderType.ASC;
+    }
+
     try {
       Order order = getOrder(getExpression(key), orderType);
       orderMap.putIfAbsent(order, order);
@@ -455,6 +464,14 @@ public class CriteriaBuilderWrapper {
       return criteriaBuilder.asc(path);
     } else {
       return criteriaBuilder.desc(path);
+    }
+  }
+
+  public void orderBy(List<Order> orders) {
+    if (orders != null && !orders.isEmpty()) {
+      for (Order order : orders) {
+        orderMap.putIfAbsent(order, order);
+      }
     }
   }
 
@@ -482,17 +499,14 @@ public class CriteriaBuilderWrapper {
             }
           }
 
-          Expression<?> expression = getExpression(cleanField);
-          Order order =
-              OrderType.ASC.equals(direction)
-                  ? criteriaBuilder.asc(expression)
-                  : criteriaBuilder.desc(expression);
+          Path<?> expression = getExpression(cleanField);
+          Order order = getOrder(expression, direction);
           orders.add(order);
         } catch (Exception e) {
           ApplicationLogger.error("Failed to add order by criteria field: " + fieldPath, e);
         }
       }
-        return orders;
+      return orders;
     }
     return Collections.emptyList();
   }

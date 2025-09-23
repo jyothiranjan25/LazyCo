@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
-import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderType;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;
@@ -78,9 +78,10 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     resultClass = resultClass == null ? entityClass : resultClass;
     HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
     CriteriaQuery<?> criteriaQuery = builder.createQuery(resultClass);
+    Root<?> root = criteriaQuery.from(resultClass);
 
     CriteriaBuilderWrapper criteriaBuilderWrapper =
-        new CriteriaBuilderWrapper(criteriaQuery.from(entityClass), criteriaQuery, builder, filter);
+        new CriteriaBuilderWrapper(root, criteriaQuery, builder, filter);
 
     if (addEntityFilters != null) addEntityFilters.accept(criteriaBuilderWrapper, filter);
 
@@ -145,6 +146,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       addIdNotInFilter(criteriaBuilderWrapper);
       addIdInFilter(criteriaBuilderWrapper);
       applyDistinct(criteriaBuilderWrapper);
+      applyOrderBy(criteriaBuilderWrapper);
     }
   }
 
@@ -173,6 +175,15 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   private void applyDistinct(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     criteriaBuilderWrapper.setDistinct();
+  }
+
+  private void applyOrderBy(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    if (CollectionUtils.isNotEmpty(criteriaBuilderWrapper.getFilter().getOrderBy())) {
+      List<OrderByDTO> orderBy = criteriaBuilderWrapper.getFilter().getOrderBy();
+      for (OrderByDTO order : orderBy) {
+        criteriaBuilderWrapper.orderBy(order.getOrderProperty(), order.getOrderType());
+      }
+    }
   }
 
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
@@ -224,34 +235,5 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       groupNameBuilder.append(".");
     }
     return applicableGroupNames;
-  }
-
-  public List getAbstractFilteredResult(
-      AbstractDTO filter, Class<? extends AbstractModel> entityClass) {
-    Session session = getCurrentSession();
-    try {
-      HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
-      CriteriaQuery<?> criteriaQuery = builder.createQuery(entityClass);
-      Root<?> root = criteriaQuery.from(entityClass);
-      CriteriaBuilderWrapper cbw = new CriteriaBuilderWrapper(root, criteriaQuery, builder, filter);
-
-      if (entityClass.isAssignableFrom(AbstractRBACModel.class)) {
-        commonAbstractDTOFilters(cbw);
-      } else {
-        commonAbstractDTOUnauditedFilters(cbw);
-      }
-      cbw.getFinalPredicate();
-      Query<?> query = session.createQuery(cbw.getQuery());
-
-      if (cbw.getFilter() != null) {
-        addPaginationFilters(filter, query);
-      }
-
-      cbw.getFinalPredicate();
-      return query.getResultList();
-    } catch (Exception e) {
-      ApplicationLogger.error(e.getMessage(), e);
-      return List.of();
-    }
   }
 }
