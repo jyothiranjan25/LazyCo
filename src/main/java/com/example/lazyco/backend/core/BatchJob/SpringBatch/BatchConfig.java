@@ -52,6 +52,7 @@ public class BatchConfig {
   public JobExplorer jobExplorer() throws Exception {
     JobExplorerFactoryBean factory = new JobExplorerFactoryBean();
     factory.setDataSource(dataSource);
+    factory.setTransactionManager(new DataSourceTransactionManager(dataSource));
     factory.afterPropertiesSet();
     return factory.getObject();
   }

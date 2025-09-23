@@ -8,8 +8,6 @@ import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
@@ -31,6 +29,7 @@ public class CriteriaBuilderWrapper {
   private Map<String, String> aliasToFullyQualifiedPathMap = new ConcurrentHashMap<>();
   private Map<String, Join> fullyQualifiedPathToJoinMap = new ConcurrentHashMap<>();
   private Map<String, JoinType> fullyQualifiedPathToJoinTypeMap = new ConcurrentHashMap<>();
+  private Map<Order, Order> orderMap = new ConcurrentHashMap<>();
 
   private boolean isDistinct = false;
 
@@ -428,33 +427,14 @@ public class CriteriaBuilderWrapper {
   }
 
   public void orderBy() {
-    if (filter != null && filter.getOrderBy() != null && !filter.getOrderBy().isEmpty()) {
-      try {
-        List<Order> orders =
-            ((Stream<OrderByDTO>) filter.getOrderBy().stream())
-                .map(
-                    orderByDTO -> {
-                      try {
-                        return getOrder(
-                            FieldFilterUtils.getPathNode(
-                                this, orderByDTO.getOrderProperty(), filter),
-                            orderByDTO.getOrderType());
-                      } catch (Exception e) {
-                        ApplicationLogger.error(
-                            "Failed to create order for: " + orderByDTO.getOrderProperty(), e);
-                        return null;
-                      }
-                    })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    List<Order> orders = new ArrayList<>(orderMap.keySet());
+    if (!orders.isEmpty()) query.orderBy(orders);
+    else query.orderBy();
+  }
 
-        if (!orders.isEmpty()) {
-          query.orderBy(orders);
-        }
-      } catch (Exception e) {
-        ApplicationLogger.error("Failed to apply order by", e);
-      }
-    }
+  public void clearOrderBy() {
+    orderMap.clear();
+    query.orderBy();
   }
 
   public void orderBy(String key) {
@@ -463,7 +443,8 @@ public class CriteriaBuilderWrapper {
 
   public void orderBy(String key, OrderType orderType) {
     try {
-      query.orderBy(getOrder(getExpression(key), orderType));
+      Order order = getOrder(getExpression(key), orderType);
+      orderMap.putIfAbsent(order, order);
     } catch (Exception e) {
       ApplicationLogger.error("Failed to order by: " + key, e);
     }
@@ -477,32 +458,8 @@ public class CriteriaBuilderWrapper {
     }
   }
 
-  public void orderBy(String... fieldPaths) {
-    orderBy(OrderType.ASC, fieldPaths);
-  }
-
-  public void orderBy(OrderType asc, String... fieldPaths) {
-    if (fieldPaths != null && fieldPaths.length > 0) {
-      List<Order> orders = new ArrayList<>();
-      for (String fieldPath : fieldPaths) {
-        try {
-          Expression<?> expression = getExpression(fieldPath);
-          Order order =
-              OrderType.ASC.equals(asc)
-                  ? criteriaBuilder.asc(expression)
-                  : criteriaBuilder.desc(expression);
-          orders.add(order);
-        } catch (Exception e) {
-          ApplicationLogger.error("Failed to add order by field: " + fieldPath, e);
-        }
-      }
-      if (!orders.isEmpty()) {
-        query.orderBy(orders);
-      }
-    }
-  }
-
-  public void orderByCriteria(String... fieldPaths) {
+  // use format: "fieldPath:asc" or "fieldPath:desc"
+  public List<Order> orderByCriteria(String... fieldPaths) {
     if (fieldPaths != null && fieldPaths.length > 0) {
       List<Order> orders = new ArrayList<>();
 
@@ -535,15 +492,9 @@ public class CriteriaBuilderWrapper {
           ApplicationLogger.error("Failed to add order by criteria field: " + fieldPath, e);
         }
       }
-
-      if (!orders.isEmpty()) {
-        query.orderBy(orders);
-      }
+        return orders;
     }
-  }
-
-  public void clearOrderBy() {
-    query.orderBy();
+    return Collections.emptyList();
   }
 
   public void addProjection(String... fieldPaths) {

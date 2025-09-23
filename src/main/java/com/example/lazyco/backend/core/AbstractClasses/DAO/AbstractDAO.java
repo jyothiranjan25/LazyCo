@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderType;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;

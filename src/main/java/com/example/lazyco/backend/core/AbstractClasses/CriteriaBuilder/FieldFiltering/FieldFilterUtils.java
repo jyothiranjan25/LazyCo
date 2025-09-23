@@ -1,9 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering;
 
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
-import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
@@ -19,8 +17,6 @@ public class FieldFilterUtils {
 
   // Cache for reflection operations to improve performance
   private static final ConcurrentHashMap<Class<?>, List<Field>> fieldCache =
-      new ConcurrentHashMap<>();
-  private static final ConcurrentHashMap<String, Field> fieldByNameCache =
       new ConcurrentHashMap<>();
 
   public static void addInternalFieldFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
@@ -58,16 +54,10 @@ public class FieldFilterUtils {
         return;
       }
 
-      // Check for corresponding operator field
-      String operatorFieldName = field.getName() + "Operator";
-      String operator = getOperatorValue(criteriaBuilderWrapper.getFilter(), operatorFieldName);
-
       if (value instanceof Collection<?>) {
         criteriaBuilderWrapper.in(fieldPathNode, (Collection<?>) value);
       } else {
-        // Apply the appropriate operation based on operator
-        applyFilterOperation(
-            criteriaBuilderWrapper, fieldPathNode, value, operator, field.getName());
+        criteriaBuilderWrapper.eq(fieldPathNode, value);
       }
     } catch (Exception e) {
       ApplicationLogger.error("Error processing field filter for: " + field.getName(), e);
@@ -85,7 +75,7 @@ public class FieldFilterUtils {
       String fullyQualifiedPath = "";
 
       // Get field name for fallback
-      String fieldName = getKeyNameForField(field);
+      String fieldName = field.getName();
 
       // Check for @FieldPath annotation
       FieldPath fieldPath = field.getAnnotation(FieldPath.class);
@@ -97,7 +87,7 @@ public class FieldFilterUtils {
       }
 
       if (!fullyQualifiedPath.isEmpty()) {
-        if (fieldPath != null && fieldPath.shouldFetch()) {
+        if (fieldPath.shouldFetch()) {
           // You actually want the related data
           criteriaBuilderWrapper.fetch(fullyQualifiedPath);
         } else {
@@ -217,112 +207,6 @@ public class FieldFilterUtils {
     }
   }
 
-  private static String getOperatorValue(AbstractDTO<?> filter, String operatorFieldName) {
-    try {
-      // Use cache for field lookup
-      String cacheKey = filter.getClass().getName() + "." + operatorFieldName;
-      Field operatorField =
-          fieldByNameCache.computeIfAbsent(
-              cacheKey,
-              k -> {
-                // First try with the Java field name
-                Field field = findFieldByName(filter.getClass(), operatorFieldName);
-                if (field != null) {
-                  return field;
-                }
-
-                // If not found, try with underscore naming convention for serialized names
-                String snakeCaseOperatorFieldName = camelToSnakeCase(operatorFieldName);
-                return findFieldBySerializedName(filter.getClass(), snakeCaseOperatorFieldName);
-              });
-
-      if (operatorField != null) {
-        operatorField.setAccessible(true);
-        Object operatorValue = operatorField.get(filter);
-        if (operatorValue != null) {
-          return operatorValue.toString();
-        }
-      }
-    } catch (Exception e) {
-      ApplicationLogger.error("Failed to get operator value for: " + operatorFieldName, e);
-    }
-    return null;
-  }
-
-  private static Field findFieldByName(Class<?> clazz, String fieldName) {
-    while (clazz != null && clazz != Object.class) {
-      try {
-        return clazz.getDeclaredField(fieldName);
-      } catch (NoSuchFieldException e) {
-        clazz = clazz.getSuperclass();
-      }
-    }
-    return null;
-  }
-
-  private static void applyFilterOperation(
-      CriteriaBuilderWrapper criteriaBuilderWrapper,
-      Path<?> fieldPath,
-      Object value,
-      String operator,
-      String fieldName) {
-
-    if (value == null) {
-      return;
-    }
-
-    try {
-      if (operator == null) {
-        // Default to equals if no operator specified
-        criteriaBuilderWrapper.eq(fieldPath, value);
-        return;
-      }
-
-      switch (operator.toLowerCase()) {
-        case "contains":
-          // Use the field name directly - CriteriaBuilderWrapper will resolve the path
-          criteriaBuilderWrapper.like(fieldName, "%" + value.toString() + "%");
-          break;
-        case "startswith":
-          criteriaBuilderWrapper.like(fieldName, value.toString() + "%");
-          break;
-        case "endswith":
-          criteriaBuilderWrapper.like(fieldName, "%" + value.toString());
-          break;
-        case "greaterthan":
-          criteriaBuilderWrapper.gt(fieldName, value);
-          break;
-        case "greaterthanorequal":
-          criteriaBuilderWrapper.ge(fieldName, value);
-          break;
-        case "lessthan":
-          criteriaBuilderWrapper.lt(fieldName, value);
-          break;
-        case "lessthanorequal":
-          criteriaBuilderWrapper.le(fieldName, value);
-          break;
-        case "notequals":
-          criteriaBuilderWrapper.notEqual(fieldName, value);
-          break;
-        case "isnull":
-          criteriaBuilderWrapper.isNull(fieldName);
-          break;
-        case "isnotnull":
-          criteriaBuilderWrapper.isNotNull(fieldName);
-          break;
-        default:
-          // Default to equals for unknown operators
-          criteriaBuilderWrapper.eq(fieldPath, value);
-          break;
-      }
-    } catch (Exception e) {
-      ApplicationLogger.error(
-          "Failed to apply filter operation: " + operator + " for field: " + fieldName, e);
-      // Fallback to simple equality if operation fails
-      criteriaBuilderWrapper.eq(fieldPath, value);
-    }
-  }
-
   public static List<Field> getAllFields(Class<?> clazz) {
     // Use cache to improve performance
     return fieldCache.computeIfAbsent(
@@ -345,81 +229,8 @@ public class FieldFilterUtils {
         });
   }
 
-  public static Field getField(String serializedName, AbstractDTO<?> filter) {
-    if (serializedName == null || filter == null) {
-      return null;
-    }
-
-    try {
-      String cacheKey = filter.getClass().getName() + "." + serializedName;
-      return fieldByNameCache.computeIfAbsent(
-          cacheKey,
-          k -> {
-            for (Field field : getAllFields(filter.getClass())) {
-              if (getKeyNameForField(field).equals(serializedName)) {
-                return field;
-              }
-            }
-            return null;
-          });
-    } catch (Exception e) {
-      ApplicationLogger.error("Failed to get field by serialized name: " + serializedName, e);
-      return null;
-    }
-  }
-
-  public static Path<?> getPathNode(
-      CriteriaBuilderWrapper criteriaBuilderWrapper, String serializedName, AbstractDTO filter) {
-    Field field = getField(serializedName, filter);
-    return field != null ? getPathNode(criteriaBuilderWrapper, field) : null;
-  }
-
-  private static String camelToSnakeCase(String camelCase) {
-    if (camelCase == null || camelCase.isEmpty()) {
-      return camelCase;
-    }
-    return camelCase.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
-  }
-
-  private static Field findFieldBySerializedName(Class<?> clazz, String serializedName) {
-    while (clazz != null && clazz != Object.class) {
-      try {
-        for (Field field : clazz.getDeclaredFields()) {
-          SerializedName annotation = field.getAnnotation(SerializedName.class);
-          if (annotation != null && annotation.value().equals(serializedName)) {
-            return field;
-          }
-        }
-      } catch (Exception e) {
-        ApplicationLogger.error("Error scanning fields in class: " + clazz.getName(), e);
-      }
-      clazz = clazz.getSuperclass();
-    }
-    return null;
-  }
-
-  /**
-   * key is either the serializedName value(if present) or the fieldName itself (if serializedName
-   * annotation not found.)
-   */
-  public static String getKeyNameForField(Field field) {
-    if (field == null) {
-      return null;
-    }
-
-    String key;
-    if (field.isAnnotationPresent(SerializedName.class)) {
-      SerializedName serializedName = field.getAnnotation(SerializedName.class);
-      key = serializedName.value();
-    } else {
-      key = field.getName();
-    }
-    return key;
-  }
-
   // Clear cache when needed (useful for testing or memory management)
   public static void clearCache() {
     fieldCache.clear();
-    fieldByNameCache.clear();
   }
 }
