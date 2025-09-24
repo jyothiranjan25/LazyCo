@@ -13,7 +13,7 @@ public @interface FilterableField {
 
   String description() default "";
 
-  int displayOrder() default Integer.MIN_VALUE;
+  int displayOrder() default 0;
 
   String type() default "";
 

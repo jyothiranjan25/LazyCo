@@ -33,14 +33,14 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 5)
   private String firstName;
 
-    @FilterableField
+  @FilterableField
   @InternalFilterableField
   @CsvField(order = 4)
   private CRUDEnums crudEnum;
 
   @InternalFilterableField private String lastName;
 
-  private List<CRUDEnums> permissions;
+  @FilterableField private List<CRUDEnums> permissions;
 
   private Date test;
 }

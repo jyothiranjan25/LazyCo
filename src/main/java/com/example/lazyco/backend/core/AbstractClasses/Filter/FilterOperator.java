@@ -1,11 +1,12 @@
 package com.example.lazyco.backend.core.AbstractClasses.Filter;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 import lombok.Getter;
 
 @Getter
@@ -28,7 +29,7 @@ public enum FilterOperator {
   DATE_EQUALS("DATE_EQUALS", "Date Equals"),
   DATE_BEFORE("DATE_BEFORE", "Before Date"),
   DATE_AFTER("DATE_AFTER", "After Date"),
-  DATE_BETWEEN("DATE_BETWEEN", "Date Between");
+  DATE_BETWEEN("DATE_BETWEEN", "Date Between")
   ;
   private final String operatorName;
   private final String displayName;
@@ -79,26 +80,88 @@ public enum FilterOperator {
     Class<?> type = field.getType();
     if (type == String.class) {
       return "string";
-    } else if (type == Integer.class
-        || type == int.class
-        || type == Long.class
-        || type == long.class
-        || type == Double.class
-        || type == double.class
-        || type == Float.class
-        || type == float.class) {
+    } else if (Number.class.isAssignableFrom(type)
+        || type.isPrimitive()
+            && (type == int.class
+                || type == long.class
+                || type == double.class
+                || type == float.class)) {
       return "number";
-    } else if (type == Boolean.class || type == boolean.class) {
+    } else if (Boolean.class.equals(type) || type == boolean.class) {
       return "boolean";
-    } else if (type == Date.class || type == LocalDate.class || type == LocalDateTime.class) {
+    } else if (Date.class.isAssignableFrom(type)
+        || LocalDate.class.equals(type)
+        || LocalDateTime.class.equals(type)) {
       return "date";
-    } else if (type == List.class || type == Set.class) {
+    } else if (Collection.class.isAssignableFrom(type)) {
       return "multiselect";
     } else if (type.isEnum()) {
       return "enum";
     } else {
       return "string";
     }
+  }
+
+  public static Class<?> getCollectionElementClass(Field field) {
+    Class<?> rawType = field.getType();
+
+    if (rawType.isArray()) {
+      Class<?> component = rawType.getComponentType();
+      return component.isEnum() ? Enum.class : component;
+    }
+
+    if (!Collection.class.isAssignableFrom(rawType)) {
+      return rawType.isEnum() ? Enum.class : rawType;
+    }
+
+    Type gType = field.getGenericType();
+    if (gType instanceof ParameterizedType pType) {
+      Type[] args = pType.getActualTypeArguments();
+      if (args.length == 1) {
+        Type arg = args[0];
+        if (arg instanceof Class<?> cls) {
+          return cls.isEnum() ? Enum.class : cls;
+        }
+        if (arg instanceof ParameterizedType pt && pt.getRawType() instanceof Class<?> raw) {
+          return raw.isEnum() ? Enum.class : raw;
+        }
+      }
+    }
+
+    // Fallback when generic info is erased
+    return Object.class;
+  }
+
+  public static Class<?> getEnumElementClass(Field field) {
+    Class<?> rawType = field.getType();
+
+    // Arrays
+    if (rawType.isArray()) {
+      return rawType.getComponentType();
+    }
+
+    // Collections
+    if (Collection.class.isAssignableFrom(rawType)) {
+      Type gType = field.getGenericType();
+      if (gType instanceof ParameterizedType pType) {
+        Type[] args = pType.getActualTypeArguments();
+        if (args.length == 1) {
+          Type arg = args[0];
+          if (arg instanceof Class<?> cls && cls.isEnum()) {
+            return cls;
+          }
+          if (arg instanceof ParameterizedType pt
+              && pt.getRawType() instanceof Class<?> raw
+              && raw.isEnum()) {
+            return raw;
+          }
+        }
+      }
+      return null; // collection with no enum element
+    }
+
+    // Single enum field
+    return rawType;
   }
 
   public enum MatchMode {

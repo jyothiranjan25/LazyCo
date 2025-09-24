@@ -17,8 +17,8 @@ public enum ExpressionOperation {
       return cb.conjunction();
     }
     return switch (this) {
-      case OR -> cb.or(expressionPredicates.toArray(new Predicate[expressionPredicates.size()]));
-      case AND -> cb.and(expressionPredicates.toArray(new Predicate[expressionPredicates.size()]));
+      case OR -> cb.or(expressionPredicates.toArray(new Predicate[0]));
+      case AND -> cb.and(expressionPredicates.toArray(new Predicate[0]));
     };
   }
 

@@ -13,6 +13,7 @@ public class FilterFieldMetadata {
   private String description;
   private Integer displayOrder;
   private String type;
+  private String collectionElementType;
   private Boolean sortable;
   private List<FilterOption> supportedOperators;
   private List<ExpressionOperation> supportedExpressions;
@@ -25,7 +26,7 @@ public class FilterFieldMetadata {
   private FilterOperator operator;
   private ExpressionOperation expressionOperation;
   private OrderType sortDirection;
-    private FilterConstraints filterConstraints;
+  private FilterConstraints filterConstraints;
 
   @Getter
   @Setter
