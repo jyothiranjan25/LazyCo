@@ -22,7 +22,7 @@ public class FilterFieldMetadata {
 
   // New fields for enhanced filtering
   private String fieldName;
-  private String fieldValue;
+  private Object fieldValue;
   private FilterOperator operator;
   private ExpressionOperation expressionOperation;
   private OrderType sortDirection;

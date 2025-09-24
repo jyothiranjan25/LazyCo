@@ -8,6 +8,7 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterBuilder;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
@@ -91,7 +92,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     }
 
+    // Add internal field filters (fields annotated with @InternalFilterableField)
     FieldFilterUtils.addInternalFieldFilters(criteriaBuilderWrapper);
+
+    // add Filters from filterFieldMetadata
+    FilterBuilder.build(criteriaBuilderWrapper);
 
     criteriaBuilderWrapper.getFinalPredicate();
     return criteriaBuilderWrapper;

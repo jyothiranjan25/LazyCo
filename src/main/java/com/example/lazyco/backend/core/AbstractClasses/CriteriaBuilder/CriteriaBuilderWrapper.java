@@ -434,7 +434,6 @@ public class CriteriaBuilderWrapper {
 
   public void clearOrderBy() {
     orderMap.clear();
-    query.orderBy();
   }
 
   public void orderBy(String key) {
