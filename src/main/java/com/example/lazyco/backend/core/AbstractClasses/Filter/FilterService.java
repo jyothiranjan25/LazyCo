@@ -36,10 +36,10 @@ public class FilterService {
       metadata.setSupportedExpressions(ExpressionOperation.getAllExpressionOperations());
 
       // set field type and enum values if applicable
-      String fieldType;
+      FieldType fieldType;
       String fieldClass = FilterOperator.getCollectionElementClass(field).getSimpleName();
       if (annotation.type() != null && !annotation.type().isEmpty()) {
-        fieldType = annotation.type();
+        fieldType = FieldType.valueOf(annotation.type().toUpperCase());
         metadata.setType(fieldType);
       } else {
         fieldType = FilterOperator.getFieldType(field);

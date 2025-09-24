@@ -12,7 +12,7 @@ public class FilterFieldMetadata {
   private String displayName;
   private String description;
   private Integer displayOrder;
-  private String type;
+  private FieldType type;
   private String collectionElementType;
   private Boolean sortable;
   private List<FilterOption> supportedOperators;

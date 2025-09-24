@@ -1,12 +1,11 @@
 package com.example.lazyco.backend.core.AbstractClasses.Filter;
 
+import static com.example.lazyco.backend.core.AbstractClasses.Filter.FieldType.*;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import lombok.Getter;
 
 @Getter
@@ -29,8 +28,7 @@ public enum FilterOperator {
   DATE_EQUALS("DATE_EQUALS", "Date Equals"),
   DATE_BEFORE("DATE_BEFORE", "Before Date"),
   DATE_AFTER("DATE_AFTER", "After Date"),
-  DATE_BETWEEN("DATE_BETWEEN", "Date Between")
-  ;
+  DATE_BETWEEN("DATE_BETWEEN", "Date Between");
   private final String operatorName;
   private final String displayName;
 
@@ -40,12 +38,12 @@ public enum FilterOperator {
   }
 
   /** Get default operators for a given field type */
-  public static FilterOperator[] getDefaultOperatorsForType(String fieldType) {
-    return switch (fieldType.toLowerCase()) {
-      case "string" -> new FilterOperator[] {
+  public static FilterOperator[] getDefaultOperatorsForType(FieldType type) {
+    return switch (type) {
+      case STRING -> new FilterOperator[] {
         EQUALS, CONTAINS, STARTS_WITH, ENDS_WITH, IS_NULL, IS_NOT_NULL
       };
-      case "number", "integer", "double", "float", "long" -> new FilterOperator[] {
+      case NUMBER -> new FilterOperator[] {
         EQUALS,
         GREATER_THAN,
         LESS_THAN,
@@ -55,51 +53,18 @@ public enum FilterOperator {
         IS_NULL,
         IS_NOT_NULL
       };
-      case "date", "datetime" -> new FilterOperator[] {
+      case DATE -> new FilterOperator[] {
         DATE_EQUALS, DATE_BEFORE, DATE_AFTER, DATE_BETWEEN, IS_NULL, IS_NOT_NULL
       };
-      case "boolean" -> new FilterOperator[] {EQUALS, IS_NULL, IS_NOT_NULL};
-      case "enum" -> new FilterOperator[] {EQUALS, NOT_EQUALS, IN, NOT_IN, IS_NULL, IS_NOT_NULL};
-      case "multiselect" -> new FilterOperator[] {IN, NOT_IN, CONTAINS, IS_NULL, IS_NOT_NULL};
+      case BOOLEAN -> new FilterOperator[] {EQUALS, IS_NULL, IS_NOT_NULL};
+      case ENUM -> new FilterOperator[] {EQUALS, NOT_EQUALS, IN, NOT_IN, IS_NULL, IS_NOT_NULL};
+      case MULTISELECT -> new FilterOperator[] {IN, NOT_IN, IS_NULL, IS_NOT_NULL};
       default -> new FilterOperator[] {EQUALS, CONTAINS};
     };
   }
 
-  public record OperatorInfo(String name, String value) {}
-
-  public static OperatorInfo[] getDefaultOperatorInfosForType(String fieldType) {
-    FilterOperator[] ops = getDefaultOperatorsForType(fieldType);
-    OperatorInfo[] infos = new OperatorInfo[ops.length];
-    for (int i = 0; i < ops.length; i++) {
-      infos[i] = new OperatorInfo(ops[i].getOperatorName(), ops[i].getDisplayName());
-    }
-    return infos;
-  }
-
-  public static String getFieldType(Field field) {
-    Class<?> type = field.getType();
-    if (type == String.class) {
-      return "string";
-    } else if (Number.class.isAssignableFrom(type)
-        || type.isPrimitive()
-            && (type == int.class
-                || type == long.class
-                || type == double.class
-                || type == float.class)) {
-      return "number";
-    } else if (Boolean.class.equals(type) || type == boolean.class) {
-      return "boolean";
-    } else if (Date.class.isAssignableFrom(type)
-        || LocalDate.class.equals(type)
-        || LocalDateTime.class.equals(type)) {
-      return "date";
-    } else if (Collection.class.isAssignableFrom(type)) {
-      return "multiselect";
-    } else if (type.isEnum()) {
-      return "enum";
-    } else {
-      return "string";
-    }
+  public static FieldType getFieldType(Field field) {
+    return FieldType.fromClass(field.getType());
   }
 
   public static Class<?> getCollectionElementClass(Field field) {
@@ -169,20 +134,12 @@ public enum FilterOperator {
     END,
     ANYWHERE;
 
-    public String resolveString(String string) {
-      char w = '%';
-      switch (this) {
-        case START -> {
-          return string + w;
-        }
-        case END -> {
-          return w + string;
-        }
-        case ANYWHERE -> {
-          return w + string + w;
-        }
-      }
-      return string;
+    public String resolveString(String s) {
+      return switch (this) {
+        case START -> s + "%";
+        case END -> "%" + s;
+        case ANYWHERE -> "%" + s + "%";
+      };
     }
   }
 }
