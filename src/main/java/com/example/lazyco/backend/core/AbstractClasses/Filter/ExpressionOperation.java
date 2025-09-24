@@ -9,14 +9,16 @@ public enum ExpressionOperation {
   AND,
   OR;
 
-  public Predicate getJunction(
-      CriteriaBuilderWrapper criteriaBuilderWrapper, List<Predicate> expressionPredicates) {
+  public static Predicate getJunction(
+      ExpressionOperation op,
+      CriteriaBuilderWrapper criteriaBuilderWrapper,
+      List<Predicate> expressionPredicates) {
     CriteriaBuilder cb = criteriaBuilderWrapper.getCriteriaBuilder();
     if (expressionPredicates == null || expressionPredicates.isEmpty()) {
       // Decide how to handle empty list. Often returning `cb.conjunction()` is safe.
       return cb.conjunction();
     }
-    return switch (this) {
+    return switch (op) {
       case OR -> cb.or(expressionPredicates.toArray(new Predicate[0]));
       case AND -> cb.and(expressionPredicates.toArray(new Predicate[0]));
     };

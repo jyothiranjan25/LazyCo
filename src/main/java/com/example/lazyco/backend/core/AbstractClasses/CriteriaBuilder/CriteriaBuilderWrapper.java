@@ -185,9 +185,18 @@ public class CriteriaBuilderWrapper {
   }
 
   public void greaterThenOrEqual(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate, getGePredicate(getExpression(column1), getExpression(column2)));
+    Predicate gePredicate = getGePredicate(getExpression(column1), getExpression(column2));
+    finalPredicate = criteriaBuilder.and(finalPredicate, gePredicate);
+  }
+
+  public Predicate greaterThanOrEqual(String key, Object value) {
+    Predicate gePredicate = getGePredicate(getExpression(key), criteriaBuilder.literal(value));
+    return criteriaBuilder.and(finalPredicate, gePredicate);
+  }
+
+  public Predicate greaterThanOrEqual(Path<?> path, Object value) {
+    Predicate gePredicate = getGePredicate(path, criteriaBuilder.literal(value));
+    return criteriaBuilder.and(finalPredicate, gePredicate);
   }
 
   public Predicate getGePredicate(String key, Object value) {
@@ -209,9 +218,18 @@ public class CriteriaBuilderWrapper {
   }
 
   public void lessThenOrEqual(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate, getLePredicate(getExpression(column1), getExpression(column2)));
+    Predicate lePredicate = getLePredicate(getExpression(column1), getExpression(column2));
+    finalPredicate = criteriaBuilder.and(finalPredicate, lePredicate);
+  }
+
+  public Predicate lessThanOrEqual(String key, Object value) {
+    Predicate lePredicate = getLePredicate(getExpression(key), criteriaBuilder.literal(value));
+    return criteriaBuilder.and(finalPredicate, lePredicate);
+  }
+
+  public Predicate lessThanOrEqual(Path<?> path, Object value) {
+    Predicate lePredicate = getLePredicate(path, criteriaBuilder.literal(value));
+    return criteriaBuilder.and(finalPredicate, lePredicate);
   }
 
   public Predicate getLePredicate(String key, Object value) {
@@ -304,6 +322,19 @@ public class CriteriaBuilderWrapper {
 
   public Predicate getILikePredicate(Path<?> path, String value) {
     return criteriaBuilder.ilike((Expression<String>) path, value);
+  }
+
+  public Predicate getILikePredicate(Path<?> path, Object value) {
+    return criteriaBuilder.ilike((Expression<String>) path, (Expression<String>) value);
+  }
+
+  public Predicate getNotILikePredicate(String key, Object value) {
+    return getNotILikePredicate(getExpression(key), value);
+  }
+
+  public Predicate getNotILikePredicate(Path<?> path, Object value) {
+    return criteriaBuilder.not(
+        criteriaBuilder.ilike((Expression<String>) path, (Expression<String>) value));
   }
 
   public void isNull(String key) {

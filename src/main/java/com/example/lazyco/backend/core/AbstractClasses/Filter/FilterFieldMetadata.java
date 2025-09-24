@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.Filter;
 
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderType;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import lombok.*;
@@ -27,6 +28,8 @@ public class FilterFieldMetadata {
   private ExpressionOperation expressionOperation;
   private OrderType sortDirection;
   private FilterConstraints filterConstraints;
+
+  private Field field;
 
   @Getter
   @Setter

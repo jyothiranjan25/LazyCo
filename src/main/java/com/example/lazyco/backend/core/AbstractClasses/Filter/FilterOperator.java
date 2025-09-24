@@ -134,8 +134,8 @@ public enum FilterOperator {
     END,
     ANYWHERE;
 
-    public String resolveString(String s) {
-      return switch (this) {
+    public static Object resolveString(MatchMode mode, Object s) {
+      return switch (mode) {
         case START -> s + "%";
         case END -> "%" + s;
         case ANYWHERE -> "%" + s + "%";
