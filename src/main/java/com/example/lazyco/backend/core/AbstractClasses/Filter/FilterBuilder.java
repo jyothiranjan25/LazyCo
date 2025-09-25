@@ -181,11 +181,12 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.lessThanOrEqual(fieldPathNode, fieldValue);
       }
       case BETWEEN -> {
-        if (!(fieldValue instanceof List<?> values) || values.size() != 2) {
+        FilterFieldMetadata.FilterConstraints constraints = metadata.getFilterConstraints();
+        if (constraints == null) {
           return null;
         }
-        Object start = values.get(0);
-        Object end = values.get(1);
+        Object start = constraints.getMinValue();
+        Object end = constraints.getMaxValue();
         if (start == null || end == null) {
           return null;
         }
@@ -209,16 +210,7 @@ public class FilterBuilder {
       case IS_NOT_NULL -> {
         return criteriaBuilderWrapper.getIsNotNullPredicate(fieldPathNode);
       }
-      case DATE_EQUALS -> {
-        return null;
-      }
-      case DATE_BEFORE -> {
-        return null;
-      }
-      case DATE_AFTER -> {
-        return null;
-      }
-      case DATE_BETWEEN -> {
+      case DATE_EQUALS, DATE_BEFORE, DATE_AFTER, DATE_BETWEEN -> {
         return null;
       }
       default -> {

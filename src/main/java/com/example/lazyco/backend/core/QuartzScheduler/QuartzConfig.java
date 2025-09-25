@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.spi.JobFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -13,6 +14,15 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 @Configuration
 public class QuartzConfig {
+
+  @Value("${db.url}")
+  private String jdbcUrl;
+
+  @Value("${db.username}")
+  private String username;
+
+  @Value("${db.password}")
+  private String password;
 
   @Bean
   public JobFactory jobFactory() {
@@ -27,9 +37,9 @@ public class QuartzConfig {
   private Properties quartzProperties() {
     // Quartz properties
     Properties properties = new Properties();
-    properties.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
     properties.setProperty("org.quartz.scheduler.instanceName", "QuartzScheduler");
     properties.setProperty("org.quartz.scheduler.instanceId", "AUTO");
+    properties.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
     properties.setProperty("org.quartz.scheduler.makeSchedulerThreadDaemon", "true");
 
     // Thread Pool Configuration
@@ -37,8 +47,32 @@ public class QuartzConfig {
     properties.setProperty("org.quartz.threadPool.threadCount", "10");
     properties.setProperty("org.quartz.threadPool.threadPriority", "5");
 
-    // Job Store Configuration (RAM-based)
-    properties.setProperty("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+    //    // Job Store Configuration (RAM-based)
+    //    properties.setProperty("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+
+    // JDBC JobStore Configuration with explicit DataSource configuration
+    properties.setProperty("org.quartz.jobStore.class", "org.quartz.impl.jdbcjobstore.JobStoreTX");
+    properties.setProperty("org.quartz.jobStore.useProperties", "false");
+    properties.setProperty(
+        "org.quartz.jobStore.driverDelegateClass",
+        "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+    properties.setProperty("org.quartz.jobStore.tablePrefix", "QRTZ_");
+    properties.setProperty("org.quartz.jobStore.misfireThreshold", "60000");
+
+    // Configure DataSource for Quartz
+    properties.setProperty("org.quartz.dataSource.quartzDS.driver", "org.postgresql.Driver");
+    properties.setProperty("org.quartz.dataSource.quartzDS.URL", jdbcUrl);
+    properties.setProperty("org.quartz.dataSource.quartzDS.user", username);
+    properties.setProperty("org.quartz.dataSource.quartzDS.password", password);
+    properties.setProperty("org.quartz.dataSource.quartzDS.maxConnections", "10");
+    properties.setProperty("org.quartz.dataSource.quartzDS.validationQuery", "SELECT 1");
+
+    // Link JobStore to DataSource
+    properties.setProperty("org.quartz.jobStore.dataSource", "quartzDS");
+
+    // Optional clustering (uncomment if you need clustering)
+    properties.setProperty("org.quartz.jobStore.isClustered", "true");
+    properties.setProperty("org.quartz.jobStore.clusterCheckinInterval", "20000");
 
     // Shutdown hook
     properties.setProperty(
@@ -51,9 +85,15 @@ public class QuartzConfig {
   public SchedulerFactoryBean schedulerFactoryBean() {
     SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 
+    // Set Quartz properties
     schedulerFactory.setQuartzProperties(quartzProperties());
+
+    // Configuration options
     schedulerFactory.setOverwriteExistingJobs(true);
     schedulerFactory.setWaitForJobsToCompleteOnShutdown(false);
+    schedulerFactory.setStartupDelay(10); // Delay startup by 10 seconds
+
+    // Set job factory
     schedulerFactory.setJobFactory(jobFactory());
 
     // Set global job listeners
@@ -70,7 +110,7 @@ public class QuartzConfig {
 
   //  @Bean
   //  public JobDetail exampleJobDetail() {
-  //    return JobBuilder.newJob(Job.class)
+  //    return JobBuilder.newJob(MyJob.class)
   //        .withIdentity("exampleJob", "group1")
   //        .storeDurably()
   //        .build();

@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.Filter;
 
 import static com.example.lazyco.backend.core.CsvTemplate.CsvStrategies.fieldNamingStrategy;
-import static com.example.lazyco.backend.core.WebMVC.SpringContext.getBean;
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderType;

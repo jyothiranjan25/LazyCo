@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.Enum.EnumDisplayValue;
 
-import static com.example.lazyco.backend.core.WebMVC.SpringContext.getBean;
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import jakarta.persistence.PrePersist;

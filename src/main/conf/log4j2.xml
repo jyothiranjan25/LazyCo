@@ -194,6 +194,7 @@
             <AppenderRef ref="CommonWarnFile"/>
             <AppenderRef ref="commonDebugFile"/>
             <AppenderRef ref="CommonErrorFile"/>
+            <AppenderRef ref="Console"/>
         </Root>
 
         <!-- Logger for InfoLogger -->
@@ -207,6 +208,7 @@
         <Logger name="DebugLogger" level="debug" additivity="false">
             <AppenderRef ref="AllLogsFile" />
             <AppenderRef ref="AppDebugFile" />
+            <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Logger for WarnLogger -->
@@ -225,11 +227,13 @@
         <Logger name="RequestLogger" level="info" additivity="false">
             <AppenderRef ref="AllLogsFile" />
             <AppenderRef ref="AppRequestFile" />
+            <AppenderRef ref="Console"/>
         </Logger>
 
         <Logger name="TraceLogger" level="trace" additivity="false">
             <AppenderRef ref="AllLogsFile" />
             <AppenderRef ref="AppTraceFile" />
+            <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Performance Logger for method execution times -->

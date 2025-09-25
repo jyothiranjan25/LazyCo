@@ -50,8 +50,13 @@ public class CriteriaBuilderWrapper {
     return query.getRestriction();
   }
 
-  private CriteriaBuilderWrapper addPredicate(Predicate predicate) {
+  private CriteriaBuilderWrapper addAndPredicate(Predicate predicate) {
     this.finalPredicate = criteriaBuilder.and(finalPredicate, predicate);
+    return this;
+  }
+
+  private CriteriaBuilderWrapper addOrPredicate(Predicate predicate) {
+    this.finalPredicate = criteriaBuilder.or(finalPredicate, predicate);
     return this;
   }
 

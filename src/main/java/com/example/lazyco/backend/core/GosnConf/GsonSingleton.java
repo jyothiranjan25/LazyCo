@@ -246,7 +246,7 @@ public class GsonSingleton {
           // Handle numeric timestamps for time
           long timestamp = primitive.getAsLong();
           Date date = DateParser.parseTimestamp(timestamp);
-          return date != null ? new Time(date.getTime()) : null;
+          return new Time(date.getTime());
         } else if (primitive.isString()) {
           // Handle string time
           String timeString = primitive.getAsString();

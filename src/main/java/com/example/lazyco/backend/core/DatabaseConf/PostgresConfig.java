@@ -202,7 +202,7 @@ public class PostgresConfig {
     properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
 
     // Enable savepoint support for nested transactions
-    properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
+    properties.put("hibernate.boot.allow_jdbc_metadata_access", "false");
 
     // Use Spring-managed session context
     properties.put(
