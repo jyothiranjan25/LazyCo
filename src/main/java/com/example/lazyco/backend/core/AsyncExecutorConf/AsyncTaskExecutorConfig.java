@@ -84,10 +84,21 @@ public class AsyncTaskExecutorConfig implements AsyncConfigurer, DisposableBean 
     };
   }
 
-  @Override
   public void destroy() {
-    if (executor != null) {
-      executor.shutdown();
+    ApplicationLogger.info("Shutting down Async Task Executor");
+    try {
+      if (executor != null) {
+        executor.shutdown();
+        if (!executor
+            .getThreadPoolExecutor()
+            .awaitTermination(shutdownTimeoutInMinutes, TimeUnit.MINUTES)) {
+          ApplicationLogger.warn("Executor did not terminate in the specified time.");
+          executor.getThreadPoolExecutor().shutdownNow();
+        }
+      }
+    } catch (InterruptedException e) {
+      ApplicationLogger.error("Interrupted while waiting for executor termination");
+      Thread.currentThread().interrupt();
     }
   }
 

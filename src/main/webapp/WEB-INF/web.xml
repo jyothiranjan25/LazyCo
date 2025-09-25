@@ -29,4 +29,8 @@
         <servlet-name>springDispatcher</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
+
+    <listener>
+        <listener-class>com.example.lazyco.backend.core.WebMVC.AppContextListener</listener-class>
+    </listener>
 </web-app>

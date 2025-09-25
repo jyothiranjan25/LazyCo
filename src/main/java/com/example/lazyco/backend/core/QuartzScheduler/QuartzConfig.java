@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.core.QuartzScheduler;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import jakarta.annotation.PostConstruct;
 import java.util.Properties;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -9,6 +8,8 @@ import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
@@ -48,36 +49,40 @@ public class QuartzConfig {
     properties.setProperty("org.quartz.threadPool.threadPriority", "5");
 
     //    // Job Store Configuration (RAM-based)
-    //    properties.setProperty("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+    properties.setProperty("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+
+    // DON'T use JDBC JobStore It is buggy and causes connection leaks and Memory issues
 
     // JDBC JobStore Configuration with explicit DataSource configuration
-    properties.setProperty("org.quartz.jobStore.class", "org.quartz.impl.jdbcjobstore.JobStoreTX");
-    properties.setProperty("org.quartz.jobStore.useProperties", "false");
-    properties.setProperty(
-        "org.quartz.jobStore.driverDelegateClass",
-        "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
-    properties.setProperty("org.quartz.jobStore.tablePrefix", "QRTZ_");
-    properties.setProperty("org.quartz.jobStore.misfireThreshold", "60000");
-
-    // Configure DataSource for Quartz
-    properties.setProperty("org.quartz.dataSource.quartzDS.driver", "org.postgresql.Driver");
-    properties.setProperty("org.quartz.dataSource.quartzDS.URL", jdbcUrl);
-    properties.setProperty("org.quartz.dataSource.quartzDS.user", username);
-    properties.setProperty("org.quartz.dataSource.quartzDS.password", password);
-    properties.setProperty("org.quartz.dataSource.quartzDS.maxConnections", "10");
-    properties.setProperty("org.quartz.dataSource.quartzDS.validationQuery", "SELECT 1");
-
-    // Link JobStore to DataSource
-    properties.setProperty("org.quartz.jobStore.dataSource", "quartzDS");
-
-    // Optional clustering (uncomment if you need clustering)
-    properties.setProperty("org.quartz.jobStore.isClustered", "true");
-    properties.setProperty("org.quartz.jobStore.clusterCheckinInterval", "20000");
+    //    properties.setProperty("org.quartz.jobStore.class",
+    // "org.quartz.impl.jdbcjobstore.JobStoreTX");
+    //    properties.setProperty("org.quartz.jobStore.useProperties", "false");
+    //    properties.setProperty(
+    //        "org.quartz.jobStore.driverDelegateClass",
+    //        "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+    //    properties.setProperty("org.quartz.jobStore.tablePrefix", "QRTZ_");
+    //    properties.setProperty("org.quartz.jobStore.misfireThreshold", "60000");
+    //
+    //    // Configure DataSource for Quartz
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.driver", "org.postgresql.Driver");
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.URL", jdbcUrl);
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.user", username);
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.password", password);
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.maxConnections", "10");
+    //    properties.setProperty("org.quartz.dataSource.quartzDS.validationQuery", "SELECT 1");
+    //
+    //    // Link JobStore to DataSource
+    //    properties.setProperty("org.quartz.jobStore.dataSource", "quartzDS");
+    //
+    //    // Optional clustering (uncomment if you need clustering)
+    //    properties.setProperty("org.quartz.jobStore.isClustered", "true");
+    //    properties.setProperty("org.quartz.jobStore.clusterCheckinInterval", "20000");
 
     // Shutdown hook
-    properties.setProperty(
-        "org.quartz.plugin.shutdownhook.class", "org.quartz.plugins.management.ShutdownHookPlugin");
-    properties.setProperty("org.quartz.plugin.shutdownhook.cleanShutdown", "TRUE");
+    //    properties.setProperty(
+    //        "org.quartz.plugin.shutdownhook.class",
+    // "org.quartz.plugins.management.ShutdownHookPlugin");
+    //    properties.setProperty("org.quartz.plugin.shutdownhook.cleanShutdown", "TRUE");
     return properties;
   }
 
@@ -125,7 +130,8 @@ public class QuartzConfig {
   //        .build();
   //  }
 
-  @PostConstruct
+  // Shutdown default QuartzScheduler after Spring context is initialized
+  @EventListener(ContextRefreshedEvent.class)
   public void shutdownDefaultScheduler() {
     try {
       Scheduler defaultScheduler = StdSchedulerFactory.getDefaultScheduler();

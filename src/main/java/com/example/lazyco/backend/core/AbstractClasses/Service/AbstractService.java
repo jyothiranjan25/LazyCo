@@ -205,8 +205,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void updateDtoBeforeUpdate(D dtoToUpdate) {}
 
   // Hook to apply updates from DTO to the existing entity
-  protected void makeUpdates(D dtoToUpdate, E existingEntity) {
-    abstractMapper.mapDTOToEntity(dtoToUpdate, existingEntity);
+  protected void makeUpdates(D source, E target) {
+    abstractMapper.mapDTOToEntity(source, target);
   }
 
   // Hook called before the entity is updated

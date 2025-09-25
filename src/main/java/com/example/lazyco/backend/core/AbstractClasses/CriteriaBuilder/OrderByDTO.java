@@ -11,6 +11,10 @@ public class OrderByDTO {
 
   private OrderType orderType;
 
+  public OrderByDTO(String orderProperty) {
+    this(orderProperty, OrderType.ASC);
+  }
+
   public OrderByDTO(String orderProperty, OrderType orderType) {
     if (StringUtils.isEmpty(orderProperty)) {
       throw new IllegalArgumentException("Order property cannot be null or empty");
