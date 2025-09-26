@@ -96,7 +96,7 @@ public class QuartzConfig {
     // Configuration options
     schedulerFactory.setOverwriteExistingJobs(true);
     schedulerFactory.setWaitForJobsToCompleteOnShutdown(false);
-    schedulerFactory.setStartupDelay(10); // Delay startup by 10 seconds
+    //    schedulerFactory.setStartupDelay(10); // Delay startup by 10 seconds
 
     // Set job factory
     schedulerFactory.setJobFactory(jobFactory());

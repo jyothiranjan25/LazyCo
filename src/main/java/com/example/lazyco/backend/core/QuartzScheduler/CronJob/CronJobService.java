@@ -105,9 +105,15 @@ public class CronJobService {
   public void shutdown() {
     try {
       if (scheduler != null && !scheduler.isShutdown()) {
-        scheduler.shutdown();
+        scheduler.shutdown(true);
       }
       ApplicationLogger.info("Scheduler manually shut down.");
+
+      if (scheduler != null && scheduler.isShutdown()) {
+        ApplicationLogger.info("Scheduler is shutdown.");
+      } else {
+        ApplicationLogger.warn("Scheduler is not shutdown.");
+      }
     } catch (SchedulerException e) {
       ApplicationLogger.error(e, e.getClass());
     }

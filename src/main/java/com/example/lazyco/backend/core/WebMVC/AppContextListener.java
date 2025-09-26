@@ -91,24 +91,6 @@ public class AppContextListener implements ServletContextListener {
         }
       }
 
-      // Force shutdown all Quartz schedulers
-      try {
-        Class<?> stdSchedulerFactoryClass = Class.forName("org.quartz.impl.StdSchedulerFactory");
-        Method getAllSchedulersMethod = stdSchedulerFactoryClass.getMethod("getAllSchedulers");
-        @SuppressWarnings("unchecked")
-        java.util.Collection<Scheduler> schedulers =
-            (java.util.Collection<Scheduler>) getAllSchedulersMethod.invoke(null);
-
-        for (Scheduler scheduler : schedulers) {
-          if (!scheduler.isShutdown()) {
-            System.out.println("Force shutting down scheduler: " + scheduler.getSchedulerName());
-            scheduler.shutdown(true);
-          }
-        }
-      } catch (Exception e) {
-        System.err.println("Error in force Quartz shutdown: " + e.getMessage());
-      }
-
     } catch (Exception e) {
       System.err.println("Error shutting down Quartz schedulers: " + e.getMessage());
     }
