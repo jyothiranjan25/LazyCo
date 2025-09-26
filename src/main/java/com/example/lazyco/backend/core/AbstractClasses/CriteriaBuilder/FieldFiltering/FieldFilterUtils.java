@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("rawtypes")
 public class FieldFilterUtils {
 
   // Cache for reflection operations to improve performance

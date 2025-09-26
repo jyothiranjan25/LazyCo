@@ -53,8 +53,8 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   protected int chunkSize = 1; // Default chunk size - will be overridden based on session type
 
   // Store user context to pass to background thread
-  protected String initiatingUserId;
-  protected String initiatingUserGroup;
+  protected String initiatingUserId = "SYSTEM";
+  protected String initiatingUserGroup = "DEFAULT";
 
   // CSV audit tracking
   protected int currentChunkNumber = 0;
@@ -92,6 +92,8 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   public void executeJob(List<T> inputData, String batchJobName) {
     // Removed verbose info logs for inputData, jobRepository, transactionManager
     try {
+        BatchJobDTO dto = new BatchJobDTO();
+        this.batchJobDTO = dto;   // set once for this run
       // Create batch job record
       createBatchJobRecord(batchJobName, inputData.size());
 
@@ -104,8 +106,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
           new JobParametersBuilder()
               .addLong("timestamp", System.currentTimeMillis())
               .addLong("batchJobId", batchJobDTO.getId())
-              .addString("initiatingUserId", initiatingUserId)
-              .addString("initiatingUserGroup", initiatingUserGroup)
               .toJobParameters();
       ApplicationLogger.info(
           "Starting Spring Batch job: "
@@ -412,14 +412,14 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
    * @param dto The DTO to set modified fields on
    */
   private void setBatchJobModifiedFields(AbstractDTO<?> dto) {
-    if (dto != null) {
-      String modifiedBy = initiatingUserId != null ? initiatingUserId : "SYSTEM";
-      String modifiedGroup = initiatingUserGroup != null ? initiatingUserGroup : "SYSTEM";
-      ApplicationLogger.info(
-          "Setting modified fields for DTO. modified_by: "
-              + modifiedBy
-              + ", modified_group: "
-              + modifiedGroup);
-    }
+//    if (dto != null) {
+//      String modifiedBy = initiatingUserId != null ? initiatingUserId : "SYSTEM";
+//      String modifiedGroup = initiatingUserGroup != null ? initiatingUserGroup : "SYSTEM";
+//      ApplicationLogger.info(
+//          "Setting modified fields for DTO. modified_by: "
+//              + modifiedBy
+//              + ", modified_group: "
+//              + modifiedGroup);
+//    }
   }
 }

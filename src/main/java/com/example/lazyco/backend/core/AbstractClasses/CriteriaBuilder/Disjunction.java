@@ -10,6 +10,6 @@ public class Disjunction extends JunctionBuilder {
 
   public Predicate build() {
     return criteriaBuilderWrapper.getOrPredicate(
-        predicates.toArray(new Predicate[predicates.size()]));
+        predicates.toArray(new Predicate[0]));
   }
 }
