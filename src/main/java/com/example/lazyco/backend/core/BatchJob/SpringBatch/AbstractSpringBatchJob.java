@@ -106,10 +106,9 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
    * @param batchJobName Display name for the job
    */
   public void executeJobInBackground(List<T> inputData, String batchJobName) {
-    // Removed verbose info logs for inputData, jobRepository, transactionManager
     try {
-      BatchJobDTO dto = new BatchJobDTO();
-      this.batchJobDTO = dto; // set once for this run
+      this.batchJobDTO = new BatchJobDTO(); // Direct assignment, removing redundant variable
+
       // Create batch job record
       createBatchJobRecord(batchJobName, inputData.size());
 
@@ -117,7 +116,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
       configureChunkSizeBasedOnSessionType(inputData);
 
       Job job = createJob(inputData);
-      // Removed verbose info log for job creation
       JobParameters jobParameters =
           new JobParametersBuilder()
               .addLong("timestamp", System.currentTimeMillis())
@@ -246,8 +244,10 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   protected ItemProcessor<T, P> createCompositeProcessor(ItemProcessor<T, P> userProcessor) {
     return item -> {
       P processedItem = userProcessor != null ? userProcessor.process(item) : null;
+      // Increment item counter for tracking
       if (processedItem != null) {
-        // TODO: Add any automatic field handling if needed
+        itemCounter.incrementAndGet();
+        // Add any automatic field handling here if needed in the future
       }
       return processedItem;
     };
@@ -361,38 +361,38 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   public void afterJob(JobExecution jobExecution) {
     ApplicationLogger.info(
         "Spring Batch job completed: " + jobExecution.getJobInstance().getJobName());
-    boolean anyFailed = false;
+
+    // Calculate failed count from step executions
     int failedCount = 0;
+    int processedCount = 0;
+
+    for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+      failedCount += (int) stepExecution.getSkipCount();
+      processedCount += (int) stepExecution.getWriteCount();
+    }
+
+    boolean anyFailed = failedCount > 0 || jobExecution.getStatus() == BatchStatus.FAILED;
+
     if (anyFailed) {
       updateJobStatus(BatchJob.BatchJobStatus.FAILED);
-      ApplicationLogger.info("Batch job marked as FAILED due to item failures.");
+      ApplicationLogger.info("Batch job marked as FAILED due to item failures. Failed count: " + failedCount);
     } else {
       updateJobStatus(BatchJob.BatchJobStatus.COMPLETED);
       ApplicationLogger.info("Batch job marked as COMPLETED (no item failures).");
     }
 
-    // Update final processed count and CSV audit file path
+    // Update final processed count and failed count
     if (batchJobDTO != null) {
       try {
         BatchJobDTO updateObject = new BatchJobDTO();
         updateObject.setId(batchJobDTO.getId());
-
-        // Set processed count
-        int processedCount = 0;
-        if (!jobExecution.getStepExecutions().isEmpty()) {
-          processedCount = (int) jobExecution.getStepExecutions().iterator().next().getWriteCount();
-        } else {
-          ApplicationLogger.info(
-              "[BATCH] No step executions found for job: "
-                  + jobExecution.getJobInstance().getJobName());
-        }
         updateObject.setProcessedCount(processedCount);
         updateObject.setFailedCount(failedCount);
 
         batchJobService.update(updateObject);
 
       } catch (Exception e) {
-        ApplicationLogger.error("Failed to update final processed count and CSV file path", e);
+        ApplicationLogger.error("Failed to update final processed count", e);
       }
     }
 
@@ -400,7 +400,9 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
         "Completed Spring Batch job execution: "
             + jobExecution.getJobInstance().getJobName()
             + " with status: "
-            + jobExecution.getStatus());
+            + jobExecution.getStatus()
+            + ", processed: " + processedCount
+            + ", failed: " + failedCount);
 
     // Send notification
     if (batchJobDTO != null) {
