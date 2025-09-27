@@ -14,6 +14,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
@@ -28,6 +29,7 @@ public class BatchConfig {
   }
 
   @Bean
+  @Primary
   public JobRepository jobRepository() throws Exception {
     JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
     factory.setDataSource(dataSource);
@@ -38,6 +40,7 @@ public class BatchConfig {
   }
 
   @Bean
+  @Primary
   public JobLauncher jobLauncher(JobRepository repo) throws Exception {
     TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
     jobLauncher.setJobRepository(repo);
@@ -49,6 +52,7 @@ public class BatchConfig {
   }
 
   @Bean
+  @Primary
   public JobExplorer jobExplorer() throws Exception {
     JobExplorerFactoryBean factory = new JobExplorerFactoryBean();
     factory.setDataSource(dataSource);
@@ -58,11 +62,13 @@ public class BatchConfig {
   }
 
   @Bean
+  @Primary
   public JobRegistry jobRegistry() {
     return new MapJobRegistry();
   }
 
   @Bean
+  @Primary
   public JobOperator jobOperator(
       JobLauncher jobLauncher,
       JobRepository jobRepository,

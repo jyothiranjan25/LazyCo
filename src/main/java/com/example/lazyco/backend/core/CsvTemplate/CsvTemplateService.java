@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CsvTemplateService {
 
+  private CsvService csvService;
+
+  public CsvTemplateService(CsvService csvService) {
+    this.csvService = csvService;
+  }
+
   public ResponseEntity<?> get(CsvTemplateDTO csvTemplateDTO) {
     if (csvTemplateDTO.getCsvType() == null) {
       throw new ExceptionWrapper("Enum Type is required.");
@@ -36,6 +42,6 @@ public class CsvTemplateService {
     csvTemplateDTO.setCsvClass(rawClass);
 
     // 3️⃣ Generate the CSV file
-    return CsvService.generateCsvFile(csvTemplateDTO);
+    return csvService.generateCsvFile(csvTemplateDTO);
   }
 }

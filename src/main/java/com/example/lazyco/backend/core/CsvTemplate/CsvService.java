@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CsvService {
 
-  public static CsvTemplateDTO generateCsvHeaders(CsvTemplateDTO csvDto) {
+  public CsvTemplateDTO generateCsvHeaders(CsvTemplateDTO csvDto) {
     // Clone the input DTO to avoid mutating it
     CsvTemplateDTO csvTemplateDTO = csvDto.clone();
     Class<?> rawClass = csvTemplateDTO.getCsvClass();
@@ -68,7 +70,7 @@ public class CsvService {
 
   // Convert list of objects to list of maps for CSV rows
   @SuppressWarnings("rawtypes")
-  public static List generateCsvRows(List<?> objects) {
+  public List generateCsvRows(List<?> objects) {
     if (objects == null || objects.isEmpty()) {
       return List.of();
     }
@@ -76,7 +78,7 @@ public class CsvService {
         .fromJson(GsonSingleton.getCsvInstance().toJson(objects), List.class);
   }
 
-  public static FileDTO generateCsvFile(CsvTemplateDTO csvTemplateDTO) {
+  public FileDTO generateCsvFile(CsvTemplateDTO csvTemplateDTO) {
     String defaultFile =
         StringUtils.isNotEmpty(csvTemplateDTO.getCsvType())
             ? csvTemplateDTO.getCsvType()

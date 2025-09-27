@@ -1,17 +1,20 @@
 package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModelListener;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterBuilder;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.UserGroupDTO;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -195,8 +198,16 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     String groupName;
     try {
       // TODO: Replace with actual logged in user's group
-      groupName = AbstractModelListener.DEFAULT_USER_GROUP;
-      addRBSECFilters(criteriaBuilderWrapper, groupName);
+      UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
+
+      String userGroup;
+      if (userGroupDTO == null || userGroupDTO.getFullyQualifiedName() == null) {
+        ApplicationLogger.warn("Logged in user's group is null, skipping RBSEC filters");
+        userGroup = "APPLY_NONE_POSSIBLE_FILTER";
+      } else {
+        userGroup = userGroupDTO.getFullyQualifiedName();
+      }
+      addRBSECFilters(criteriaBuilderWrapper, userGroup);
     } catch (Exception e) {
       ApplicationLogger.error(e.getMessage(), e);
     }

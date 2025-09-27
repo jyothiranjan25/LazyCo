@@ -52,10 +52,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   protected String jobName;
   protected int chunkSize = 1; // Default chunk size - will be overridden based on session type
 
-  // Store user context to pass to background thread
-  protected String initiatingUserId = "SYSTEM";
-  protected String initiatingUserGroup = "DEFAULT";
-
   // CSV audit tracking
   protected int currentChunkNumber = 0;
 
@@ -88,12 +84,11 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
    * @param inputData List of items to process
    * @param batchJobName Display name for the job
    */
-  //  @Async
   public void executeJob(List<T> inputData, String batchJobName) {
     // Removed verbose info logs for inputData, jobRepository, transactionManager
     try {
-        BatchJobDTO dto = new BatchJobDTO();
-        this.batchJobDTO = dto;   // set once for this run
+      BatchJobDTO dto = new BatchJobDTO();
+      this.batchJobDTO = dto; // set once for this run
       // Create batch job record
       createBatchJobRecord(batchJobName, inputData.size());
 
@@ -108,15 +103,7 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
               .addLong("batchJobId", batchJobDTO.getId())
               .toJobParameters();
       ApplicationLogger.info(
-          "Starting Spring Batch job: "
-              + jobName
-              + " with "
-              + inputData.size()
-              + " items"
-              + ", initiated by user: "
-              + initiatingUserId
-              + ", group: "
-              + initiatingUserGroup);
+          "Starting Spring Batch job: " + jobName + " with " + inputData.size() + " items");
       jobLauncher.run(job, jobParameters);
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in executeJob: " + e.getMessage(), e);
@@ -239,7 +226,7 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     return item -> {
       P processedItem = userProcessor != null ? userProcessor.process(item) : null;
       if (processedItem != null) {
-        setBatchJobModifiedFields(processedItem);
+        // TODO: Add any automatic field handling if needed
       }
       return processedItem;
     };
@@ -303,8 +290,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
     batchJobDTO.setTotalItemCount(totalItems);
     batchJobDTO.setStatus(BatchJob.BatchJobStatus.INITIALIZED);
-    // Set mandatory modified fields using captured user context
-    setBatchJobModifiedFields(batchJobDTO);
 
     batchJobDTO = batchJobService.create(batchJobDTO);
     ApplicationLogger.info(
@@ -331,9 +316,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
       if (status == BatchJob.BatchJobStatus.COMPLETED || status == BatchJob.BatchJobStatus.FAILED) {
         updateObject.setEndTime(DateTimeZoneUtils.getCurrentDate());
       }
-
-      // Set modified fields using logged-in user information
-      setBatchJobModifiedFields(updateObject);
 
       batchJobService.update(updateObject);
       ApplicationLogger.info("Updated batch job " + batchJobDTO.getId() + " status to: " + status);
@@ -403,23 +385,5 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     if (batchJobDTO != null) {
       batchJobService.sendNotificationToUser(batchJobDTO);
     }
-  }
-
-  /**
-   * Internal method to set modified fields for batch job processing using captured user context
-   * This is automatically called by the composite processor for all successfully processed items
-   *
-   * @param dto The DTO to set modified fields on
-   */
-  private void setBatchJobModifiedFields(AbstractDTO<?> dto) {
-//    if (dto != null) {
-//      String modifiedBy = initiatingUserId != null ? initiatingUserId : "SYSTEM";
-//      String modifiedGroup = initiatingUserGroup != null ? initiatingUserGroup : "SYSTEM";
-//      ApplicationLogger.info(
-//          "Setting modified fields for DTO. modified_by: "
-//              + modifiedBy
-//              + ", modified_group: "
-//              + modifiedGroup);
-//    }
   }
 }

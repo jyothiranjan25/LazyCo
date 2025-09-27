@@ -9,7 +9,6 @@ public class Conjunction extends JunctionBuilder {
   }
 
   public Predicate build() {
-    return criteriaBuilderWrapper.getAndPredicate(
-        predicates.toArray(new Predicate[0]));
+    return criteriaBuilderWrapper.getAndPredicate(predicates.toArray(new Predicate[0]));
   }
 }

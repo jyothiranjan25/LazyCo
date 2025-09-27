@@ -55,13 +55,19 @@ public class BatchJob extends AbstractRBACModel {
   private String outputFilePath;
 
   public enum BatchJobStatus {
-    INITIALIZED,
-    RUNNING,
-    COMPLETED,
-    FAILED,
-    PAUSED,
-    TERMINATED,
-    RESTARTED;
+    INITIALIZED("STARTING"),
+    RUNNING("STARTED"),
+    COMPLETED("COMPLETED"),
+    FAILED("FAILED"),
+    PAUSED("STOPPED,STOPPING"),
+    RESTARTED("STARTED"),
+    TERMINATED("ABANDONED"),
+    ;
+    @Getter private final String batchJobStatus;
+
+    BatchJobStatus(String batchJobStatus) {
+      this.batchJobStatus = batchJobStatus;
+    }
 
     public static Set<BatchJobStatus> getInturruptedStatusSet() {
       Set<BatchJobStatus> set = new HashSet<>();

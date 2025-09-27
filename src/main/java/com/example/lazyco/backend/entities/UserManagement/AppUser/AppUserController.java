@@ -20,8 +20,8 @@ public class AppUserController extends AbstractController<AppUserDTO> {
   }
 
   @PostMapping("csv")
-    public ResponseEntity<?> uploadCsv(@CsvParams AppUserDTO inputData) {
-      getBean(AppUserCsvUpload.class).executeJob(inputData.getObjects(), "AppUserCsvUpload");
-        return ResponseEntity.ok().build();
-    }
+  public ResponseEntity<?> uploadCsv(@CsvParams AppUserDTO inputData) {
+    getBean(AppUserCsvUpload.class).executeJob(inputData.getObjects(), "AppUserCsvUpload");
+    return ResponseEntity.ok().build();
+  }
 }
