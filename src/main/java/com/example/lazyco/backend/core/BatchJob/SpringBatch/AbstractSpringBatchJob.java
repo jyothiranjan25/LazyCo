@@ -11,8 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
@@ -33,17 +35,24 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   private JobLauncher jobLauncher;
   private PlatformTransactionManager transactionManager;
   private BatchJobService batchJobService;
+  private JobExplorer jobExplorer;
+  private JobOperator jobOperator;
 
   @Autowired
   public void injectDependencies(
       JobRepository jobRepository,
       JobLauncher jobLauncher,
       PlatformTransactionManager transactionManager,
-      BatchJobService batchJobService) {
+      BatchJobService batchJobService,
+      JobExplorer jobExplorer,
+      JobOperator jobOperator) {
+
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
     this.transactionManager = transactionManager;
     this.batchJobService = batchJobService;
+    this.jobExplorer = jobExplorer;
+    this.jobOperator = jobOperator;
   }
 
   /** -- GETTER -- Get the current batch job DTO */
@@ -78,13 +87,25 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     this.chunkSize = chunkSize;
   }
 
+  /** Launch a Spring Batch job in the background */
+  public void executeJob(List<T> inputData, String jobName) {
+    try {
+      ApplicationLogger.info(
+          "Executing Spring Batch job: " + jobName + " with " + inputData.size() + " items");
+      this.executeJobInBackground(inputData, jobName);
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to execute Spring Batch job: " + jobName, e);
+      throw new RuntimeException("Batch job execution failed", e);
+    }
+  }
+
   /**
    * Create and execute a Spring Batch job
    *
    * @param inputData List of items to process
    * @param batchJobName Display name for the job
    */
-  public void executeJob(List<T> inputData, String batchJobName) {
+  public void executeJobInBackground(List<T> inputData, String batchJobName) {
     // Removed verbose info logs for inputData, jobRepository, transactionManager
     try {
       BatchJobDTO dto = new BatchJobDTO();
@@ -385,5 +406,85 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     if (batchJobDTO != null) {
       batchJobService.sendNotificationToUser(batchJobDTO);
     }
+  }
+
+  /** Latest execution for a given job name */
+  public JobExecution getLatestJobExecution(String jobName) {
+    try {
+      List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 1);
+      if (!jobInstances.isEmpty()) {
+        JobInstance latestInstance = jobInstances.get(0);
+        List<JobExecution> executions = jobExplorer.getJobExecutions(latestInstance);
+        if (!executions.isEmpty()) {
+          return executions.get(executions.size() - 1);
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to get job execution for: " + jobName, e);
+    }
+    return null;
+  }
+
+  /** Check if a job is running */
+  public boolean isJobRunning(String jobName) {
+    JobExecution execution = getLatestJobExecution(jobName);
+    return execution != null && execution.getStatus().isRunning();
+  }
+
+  /** Number of currently running executions for this job */
+  public int getRunningJobCount(String jobName) {
+    try {
+      Set<JobExecution> running = jobExplorer.findRunningJobExecutions(jobName);
+      return running.size();
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to get running job count", e);
+      return 0;
+    }
+  }
+
+  /** Stop a running job */
+  public boolean stopJob(String jobName) {
+    JobExecution exec = getLatestJobExecution(jobName);
+    if (exec != null && exec.getStatus().isRunning()) {
+      try {
+        jobOperator.stop(exec.getId());
+        ApplicationLogger.info("Stop requested for job: " + jobName);
+        return true;
+      } catch (Exception e) {
+        ApplicationLogger.error("Failed to stop job: " + jobName, e);
+      }
+    }
+    return false;
+  }
+
+  /** Restart a failed or stopped job */
+  public boolean restartJob(String jobName) {
+    JobExecution exec = getLatestJobExecution(jobName);
+    if (exec != null
+        && (exec.getStatus() == BatchStatus.FAILED || exec.getStatus() == BatchStatus.STOPPED)) {
+      try {
+        long newExecId = jobOperator.restart(exec.getId());
+        ApplicationLogger.info("Restarted job: " + jobName + " new executionId=" + newExecId);
+        return true;
+      } catch (Exception e) {
+        ApplicationLogger.error("Failed to restart job: " + jobName, e);
+      }
+    }
+    return false;
+  }
+
+  /** Terminate a job (abandon it) */
+  public boolean terminateJob(String jobName) {
+    JobExecution exec = getLatestJobExecution(jobName);
+    if (exec != null) {
+      try {
+        jobOperator.abandon(exec.getId());
+        ApplicationLogger.info("Job abandoned (terminated): " + jobName);
+        return true;
+      } catch (Exception e) {
+        ApplicationLogger.error("Failed to abandon job: " + jobName, e);
+      }
+    }
+    return false;
   }
 }
