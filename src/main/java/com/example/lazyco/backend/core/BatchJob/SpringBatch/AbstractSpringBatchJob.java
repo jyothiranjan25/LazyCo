@@ -5,6 +5,7 @@ import com.example.lazyco.backend.core.BatchJob.BatchJob;
 import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
 import com.example.lazyco.backend.core.BatchJob.BatchJobService;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
+import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,6 +23,10 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.mapping.RecordFieldSetMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -218,23 +223,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   }
 
   /**
-   * Create item reader from input list
-   *
-   * @param inputData Input data list
-   * @return ItemReader for the data
-   */
-  protected ItemReader<T> createItemReader(List<T> inputData) {
-    return new ItemReader<>() {
-      private final ListItemReader<T> delegate = new ListItemReader<>(inputData);
-
-      @Override
-      public T read() {
-        return delegate.read();
-      }
-    };
-  }
-
-  /**
    * Creates a composite processor that combines user business logic with automatic modified field
    * handling
    *
@@ -269,6 +257,46 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
       }
     };
   }
+
+    /**
+     * Create item reader from input list
+     *
+     * @param inputData Input data list
+     * @return ItemReader for the data
+     */
+    protected ItemReader<T> createItemReader(List<T> inputData) {
+        return new ItemReader<>() {
+            private final ListItemReader<T> delegate = new ListItemReader<>(inputData);
+
+            @Override
+            public T read() {
+                return delegate.read();
+            }
+        };
+    }
+
+    protected ItemReader<T> createCsvItemReader(FileDTO fileDTO,String[] tokens,Class<?> targetClass) {
+        FlatFileItemReader<T> reader = new FlatFileItemReader<T>();
+
+        // Configure tokenizer (set delimiter, names, etc.) based on your CSV structure
+        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+         tokenizer.setDelimiter(",");
+        tokenizer.setNames(tokens);
+
+        DefaultLineMapper<T> lineMapper = new DefaultLineMapper<>();
+        lineMapper.setLineTokenizer(tokenizer);
+        lineMapper.setFieldSetMapper(new RecordFieldSetMapper(targetClass));
+
+        reader.setLineMapper(lineMapper);
+        reader.setResource(fileDTO.getResource());
+        try {
+            reader.afterPropertiesSet();
+        } catch (Exception e) {
+            ApplicationLogger.error("Failed to initialize CSV reader", e);
+            throw new RuntimeException("Failed to initialize CSV reader", e);
+        }
+        return reader;
+    }
 
   /**
    * Abstract method to create the item processor Implement this to define your business logic Note:
