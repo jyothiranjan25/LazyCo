@@ -258,45 +258,46 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     };
   }
 
-    /**
-     * Create item reader from input list
-     *
-     * @param inputData Input data list
-     * @return ItemReader for the data
-     */
-    protected ItemReader<T> createItemReader(List<T> inputData) {
-        return new ItemReader<>() {
-            private final ListItemReader<T> delegate = new ListItemReader<>(inputData);
+  /**
+   * Create item reader from input list
+   *
+   * @param inputData Input data list
+   * @return ItemReader for the data
+   */
+  protected ItemReader<T> createItemReader(List<T> inputData) {
+    return new ItemReader<>() {
+      private final ListItemReader<T> delegate = new ListItemReader<>(inputData);
 
-            @Override
-            public T read() {
-                return delegate.read();
-            }
-        };
+      @Override
+      public T read() {
+        return delegate.read();
+      }
+    };
+  }
+
+  protected ItemReader<T> createCsvItemReader(
+      FileDTO fileDTO, String[] tokens, Class<?> targetClass) {
+    FlatFileItemReader<T> reader = new FlatFileItemReader<T>();
+
+    // Configure tokenizer (set delimiter, names, etc.) based on your CSV structure
+    DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+    tokenizer.setDelimiter(",");
+    tokenizer.setNames(tokens);
+
+    DefaultLineMapper<T> lineMapper = new DefaultLineMapper<>();
+    lineMapper.setLineTokenizer(tokenizer);
+    lineMapper.setFieldSetMapper(new RecordFieldSetMapper(targetClass));
+
+    reader.setLineMapper(lineMapper);
+    reader.setResource(fileDTO.getResource());
+    try {
+      reader.afterPropertiesSet();
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to initialize CSV reader", e);
+      throw new RuntimeException("Failed to initialize CSV reader", e);
     }
-
-    protected ItemReader<T> createCsvItemReader(FileDTO fileDTO,String[] tokens,Class<?> targetClass) {
-        FlatFileItemReader<T> reader = new FlatFileItemReader<T>();
-
-        // Configure tokenizer (set delimiter, names, etc.) based on your CSV structure
-        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-         tokenizer.setDelimiter(",");
-        tokenizer.setNames(tokens);
-
-        DefaultLineMapper<T> lineMapper = new DefaultLineMapper<>();
-        lineMapper.setLineTokenizer(tokenizer);
-        lineMapper.setFieldSetMapper(new RecordFieldSetMapper(targetClass));
-
-        reader.setLineMapper(lineMapper);
-        reader.setResource(fileDTO.getResource());
-        try {
-            reader.afterPropertiesSet();
-        } catch (Exception e) {
-            ApplicationLogger.error("Failed to initialize CSV reader", e);
-            throw new RuntimeException("Failed to initialize CSV reader", e);
-        }
-        return reader;
-    }
+    return reader;
+  }
 
   /**
    * Abstract method to create the item processor Implement this to define your business logic Note:
@@ -403,7 +404,8 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
 
     if (anyFailed) {
       updateJobStatus(BatchJob.BatchJobStatus.FAILED);
-      ApplicationLogger.info("Batch job marked as FAILED due to item failures. Failed count: " + failedCount);
+      ApplicationLogger.info(
+          "Batch job marked as FAILED due to item failures. Failed count: " + failedCount);
     } else {
       updateJobStatus(BatchJob.BatchJobStatus.COMPLETED);
       ApplicationLogger.info("Batch job marked as COMPLETED (no item failures).");
@@ -429,8 +431,10 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
             + jobExecution.getJobInstance().getJobName()
             + " with status: "
             + jobExecution.getStatus()
-            + ", processed: " + processedCount
-            + ", failed: " + failedCount);
+            + ", processed: "
+            + processedCount
+            + ", failed: "
+            + failedCount);
 
     // Send notification
     if (batchJobDTO != null) {

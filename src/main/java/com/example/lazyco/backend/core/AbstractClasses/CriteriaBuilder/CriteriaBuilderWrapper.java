@@ -430,12 +430,17 @@ public class CriteriaBuilderWrapper {
     return getSearchCriteria(getExpression(key), keyWord);
   }
 
-  public Predicate getSearchCriteria(Path<String> path, String keyWord) {
+  public Predicate getSearchCriteria(Path<?> path, String keyWord) {
     if (keyWord == null || keyWord.trim().isEmpty()) {
       return criteriaBuilder.conjunction(); // Return true predicate for empty search
     }
-    return getOrPredicate(
-        getLikePredicate(path, keyWord + "%"), getLikePredicate(path, "% " + keyWord + "%"));
+    return getOrPredicate(getSearchPredicate(path, "% " + keyWord + "%"));
+  }
+
+  public Predicate getSearchPredicate(Path<?> path, String value) {
+    return criteriaBuilder.ilike(
+        criteriaBuilder.lower(criteriaBuilder.toString((Expression<Character>) path)),
+        value.toLowerCase());
   }
 
   // -------------------------------
@@ -545,6 +550,10 @@ public class CriteriaBuilderWrapper {
     }
     return Collections.emptyList();
   }
+
+  // -------------------------------
+  // Projection methods - Improved error handling
+  // -------------------------------
 
   public void addProjection(String... fieldPaths) {
     if (fieldPaths != null && fieldPaths.length > 0) {

@@ -1,8 +1,11 @@
 package com.example.lazyco.backend.core.AbstractClasses.DTO;
 
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterFieldMetadata;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
@@ -73,6 +76,65 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private Boolean getFilterMetadata;
 
   private List<FilterFieldMetadata> filterFieldMetadata;
+
+  private String searchString;
+
+  // This field holds the actual entity class that this DTO filters
+  // It is set based on the @FilteredEntity annotation
+  @Expose(serialize = false, deserialize = false)
+  private Class<?> filterableEntityClass;
+
+  // Setter with logic to extract from annotation if present
+  public void setFilterableEntityClass(Class<?> filterableEntityClass) {
+    try {
+      // ✅ Check if annotation is present first
+      if (this.getClass().isAnnotationPresent(FilteredEntity.class)) {
+        FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);
+        Class<?> currentEntityClass = annotation.type();
+
+        if (currentEntityClass != null) {
+          this.filterableEntityClass = currentEntityClass;
+        } else {
+          throw new ExceptionWrapper(
+              "Annotation @FilteredEntity does not define a valid entity type");
+        }
+      } else {
+        this.filterableEntityClass = filterableEntityClass;
+      }
+    } catch (ExceptionWrapper e) {
+      throw e; // Re-throw custom exceptions as is
+    } catch (Exception t) {
+      ApplicationLogger.error(t);
+      throw new ExceptionWrapper("Failed to get filterableEntityClass", t);
+    }
+  }
+
+  // Getter with logic to extract from annotation if not already set
+  public Class<?> getFilterableEntityClass() {
+    try {
+      // ✅ Check if annotation is present first
+      if (!this.getClass().isAnnotationPresent(FilteredEntity.class)) {
+        throw new ExceptionWrapper(
+            "Class " + this.getClass().getName() + " is not annotated with @FilteredEntity");
+      }
+
+      FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);
+      Class<?> currentEntityClass = annotation.type();
+
+      if (currentEntityClass != null) {
+        this.filterableEntityClass = currentEntityClass;
+        return this.filterableEntityClass;
+      } else {
+        throw new ExceptionWrapper(
+            "Annotation @FilteredEntity does not define a valid entity type");
+      }
+    } catch (ExceptionWrapper e) {
+      throw e; // Re-throw custom exceptions as is
+    } catch (Exception t) {
+      ApplicationLogger.error(t);
+      throw new ExceptionWrapper("Failed to get filterableEntityClass", t);
+    }
+  }
 
   @Override
   public Object clone() {

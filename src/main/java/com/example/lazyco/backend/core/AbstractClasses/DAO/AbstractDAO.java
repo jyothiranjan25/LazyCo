@@ -5,14 +5,12 @@ import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
-import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterBuilder;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.UserGroupDTO;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -23,6 +21,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.springframework.stereotype.Component;
@@ -33,6 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
+
+  public AbstractDAO(SessionFactory sessionFactory) {
+    super(sessionFactory);
+  }
 
   public List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
     Session session = getCurrentSession();
@@ -78,7 +81,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       D filter,
       BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters,
       Class<?> resultClass) {
-    Class<E> entityClass = getEntityClass(filter);
+    Class<E> entityClass = (Class<E>) filter.getFilterableEntityClass();
     resultClass = resultClass == null ? entityClass : resultClass;
     HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
     CriteriaQuery<?> criteriaQuery = builder.createQuery(resultClass);
@@ -100,6 +103,11 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
     // add Filters from filterFieldMetadata
     FilterBuilder.build(criteriaBuilderWrapper);
+
+    // add search String filter if present
+    if (filter.getSearchString() != null && !filter.getSearchString().isBlank()) {
+      FieldFilterUtils.addSearchStringFilter(criteriaBuilderWrapper);
+    }
 
     criteriaBuilderWrapper.getFinalPredicate();
     return criteriaBuilderWrapper;
@@ -125,16 +133,6 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     Long count = (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
     // If count is null, return 0
     return count != null ? count : 0L;
-  }
-
-  public Class<E> getEntityClass(D filter) {
-    // get the type parameter passed to the FilteredEntity annotation of the filter class
-    try {
-      return (Class<E>) filter.getClass().getAnnotation(FilteredEntity.class).type();
-    } catch (Throwable t) {
-      // filtered entity is not present on the dto class
-      throw new ExceptionWrapper("FilteredEntity annotation is missing on " + filter.getClass());
-    }
   }
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {

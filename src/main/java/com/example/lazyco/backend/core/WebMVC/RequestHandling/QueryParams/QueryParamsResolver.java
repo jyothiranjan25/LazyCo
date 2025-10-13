@@ -7,7 +7,6 @@ import com.google.gson.JsonSyntaxException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,7 +23,6 @@ public class QueryParamsResolver implements HandlerMethodArgumentResolver {
 
   private final Gson gson;
 
-  @Autowired
   public QueryParamsResolver(Gson gson) {
     if (gson == null) {
       throw new IllegalArgumentException("Gson instance cannot be null");

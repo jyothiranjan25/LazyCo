@@ -8,7 +8,6 @@ import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -92,12 +91,12 @@ public class FileDTO {
   }
 
   public Resource getResource() {
-      try {
-          this.resource = new FileSystemResource(this.file);
-      } catch (Exception e) {
-          ApplicationLogger.error(e);
-          throw new ExceptionWrapper("FileDTO: Error getting resource");
-      }
+    try {
+      this.resource = new FileSystemResource(this.file);
+    } catch (Exception e) {
+      ApplicationLogger.error(e);
+      throw new ExceptionWrapper("FileDTO: Error getting resource");
+    }
     return this.resource;
   }
 

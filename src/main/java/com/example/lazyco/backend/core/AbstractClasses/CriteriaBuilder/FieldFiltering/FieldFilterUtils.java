@@ -1,22 +1,25 @@
 package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering;
 
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class FieldFilterUtils {
 
   // Cache for reflection operations to improve performance
-  private static final ConcurrentHashMap<Class<?>, List<Field>> fieldCache =
-      new ConcurrentHashMap<>();
+  private static final Map<Class<?>, List<Field>> fieldCache = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, List<String>> entityFieldCache = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, List<Path<?>>> dtoFieldCache = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, List<Field>> searchableFieldsCache = new ConcurrentHashMap<>();
 
   public static void addInternalFieldFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     Class<?> filterClass = criteriaBuilderWrapper.getFilter().getClass();
@@ -224,6 +227,85 @@ public class FieldFilterUtils {
             currentClass = currentClass.getSuperclass();
           }
 
+          return fields;
+        });
+  }
+
+  // Add search string filter
+  public static void addSearchStringFilter(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+
+    String searchString = criteriaBuilderWrapper.getFilter().getSearchString();
+    if (searchString == null || searchString.isBlank()) {
+      return;
+    }
+
+    Class<?> filterableEntityClass = criteriaBuilderWrapper.getFilter().getFilterableEntityClass();
+
+    // Collect searchable fields
+    List<String> entityFieldNames = getSearchableEntityFieldNames(filterableEntityClass);
+    List<Path<?>> dtoFieldPaths = getSearchableDtoFieldPaths(criteriaBuilderWrapper);
+
+    List<Predicate> searchPredicates = new ArrayList<>();
+
+    for (String fieldName : entityFieldNames) {
+      searchPredicates.add(criteriaBuilderWrapper.getSearchCriteria(fieldName, searchString));
+    }
+    for (Path<?> path : dtoFieldPaths) {
+      searchPredicates.add(criteriaBuilderWrapper.getSearchCriteria(path, searchString));
+    }
+    if (!searchPredicates.isEmpty()) {
+      criteriaBuilderWrapper.or(searchPredicates.toArray(new Predicate[0]));
+    }
+  }
+
+  private static List<String> getSearchableEntityFieldNames(Class<?> clazz) {
+    return entityFieldCache.computeIfAbsent(
+        clazz,
+        cls -> {
+          List<Field> fields = getAllSearchableFields(cls);
+          return fields.stream()
+              .filter(
+                  f ->
+                      !Collection.class.isAssignableFrom(f.getType())
+                          && !Map.class.isAssignableFrom(f.getType()))
+              .map(Field::getName)
+              .distinct()
+              .collect(Collectors.toList());
+        });
+  }
+
+  private static List<Path<?>> getSearchableDtoFieldPaths(CriteriaBuilderWrapper cbw) {
+    Class<?> dtoClass = cbw.getFilter().getClass();
+    return dtoFieldCache.computeIfAbsent(
+        dtoClass,
+        cls -> {
+          List<Field> fields = getAllSearchableFields(cls);
+          List<Path<?>> paths = new ArrayList<>();
+          for (Field field : fields) {
+            if (field.isAnnotationPresent(FieldPath.class)) {
+              paths.add(getPathNode(cbw, field));
+            }
+          }
+          return paths;
+        });
+  }
+
+  private static List<Field> getAllSearchableFields(Class<?> clazz) {
+    return searchableFieldsCache.computeIfAbsent(
+        clazz,
+        k -> {
+          List<Field> fields = new ArrayList<>();
+          Class<?> current = k; // <-- use k here
+
+          while (current != null && current != Object.class) {
+            // Stop if the current class is AbstractModel or AbstractRBACModel
+            if (current == AbstractModel.class || current == AbstractRBACModel.class) {
+              break;
+            }
+
+            Collections.addAll(fields, current.getDeclaredFields());
+            current = current.getSuperclass();
+          }
           return fields;
         });
   }

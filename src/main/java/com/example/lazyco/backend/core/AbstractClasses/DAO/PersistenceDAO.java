@@ -3,7 +3,6 @@ package com.example.lazyco.backend.core.AbstractClasses.DAO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.DefaultTransactionStatus;
@@ -12,7 +11,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Repository
 public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<E> {
 
-  @Autowired private SessionFactory sessionFactory;
+  private final SessionFactory sessionFactory;
+
+  public PersistenceDAO(SessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
+  }
 
   public E save(E entity) {
     try {
