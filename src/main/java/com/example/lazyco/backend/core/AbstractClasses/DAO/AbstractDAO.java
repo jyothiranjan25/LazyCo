@@ -6,6 +6,7 @@ import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.OrderType;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
@@ -90,8 +91,10 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         new CriteriaBuilderWrapper(root, criteriaQuery, builder, filter);
 
+    // add entity specific filters
     if (addEntityFilters != null) addEntityFilters.accept(criteriaBuilderWrapper, filter);
 
+    // Add common filters for AbstractDTO and AbstractRBACModel
     if (AbstractRBACModel.class.isAssignableFrom(entityClass)) {
       commonAbstractDTOFilters(criteriaBuilderWrapper);
     } else {
@@ -189,26 +192,30 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       for (OrderByDTO order : orderBy) {
         criteriaBuilderWrapper.orderBy(order.getOrderProperty(), order.getOrderType());
       }
+    } else {
+      // Default order by id desc
+      criteriaBuilderWrapper.orderBy("id", OrderType.DESC);
     }
   }
 
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-    String groupName;
+    String userGroup;
     try {
       // TODO: Replace with actual logged in user's group
       UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
 
-      String userGroup;
       if (userGroupDTO == null || userGroupDTO.getFullyQualifiedName() == null) {
-        ApplicationLogger.warn("Logged in user's group is null, skipping RBSEC filters");
+        ApplicationLogger.error("Logged in user's group is null, skipping RBSEC filters");
         userGroup = "APPLY_NONE_POSSIBLE_FILTER";
       } else {
         userGroup = userGroupDTO.getFullyQualifiedName();
       }
-      addRBSECFilters(criteriaBuilderWrapper, userGroup);
     } catch (Exception e) {
       ApplicationLogger.error(e.getMessage(), e);
+      userGroup = "APPLY_NONE_POSSIBLE_FILTER";
     }
+
+    addRBSECFilters(criteriaBuilderWrapper, userGroup);
   }
 
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper, String groupName) {

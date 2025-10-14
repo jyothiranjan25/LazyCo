@@ -434,7 +434,7 @@ public class CriteriaBuilderWrapper {
     if (keyWord == null || keyWord.trim().isEmpty()) {
       return criteriaBuilder.conjunction(); // Return true predicate for empty search
     }
-    return getOrPredicate(getSearchPredicate(path, "% " + keyWord + "%"));
+    return getOrPredicate(getSearchPredicate(path, "%" + keyWord + "%"));
   }
 
   public Predicate getSearchPredicate(Path<?> path, String value) {

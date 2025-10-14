@@ -61,6 +61,10 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(deserialize = false)
   private String message;
 
+  // This field holds a map of file identifiers to their corresponding FileDTOs
+  @Expose(serialize = false, deserialize = false)
+  private Map<String, FileDTO> fileMap;
+
   // filtering fields
   @Expose(serialize = false, deserialize = false)
   private List<Long> idsIn;
@@ -69,9 +73,6 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   private List<Long> idsNotIn;
 
   private List<OrderByDTO> orderBy;
-
-  @Expose(serialize = false, deserialize = false)
-  private Map<String, FileDTO> fileMap;
 
   private Boolean getFilterMetadata;
 
