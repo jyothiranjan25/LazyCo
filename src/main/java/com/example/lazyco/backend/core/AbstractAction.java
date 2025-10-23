@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class AbstractAction {
 
-  public AppUserDTO getLoggedInUser() {
+  public static AppUserDTO getLoggedInUser() {
     AppUserDTO appUserDTO = new AppUserDTO();
     appUserDTO.setUserId("JO");
     return appUserDTO;
   }
 
-  public UserGroupDTO loggedInUserGroup() {
+  public static UserGroupDTO loggedInUserGroup() {
     UserGroupDTO userGroupDTO = new UserGroupDTO();
     userGroupDTO.setFullyQualifiedName("DEFAULT");
     return userGroupDTO;

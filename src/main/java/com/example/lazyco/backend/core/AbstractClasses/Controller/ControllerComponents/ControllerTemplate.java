@@ -16,7 +16,7 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
   }
 
   public ResponseEntity<?> template(D incomingRequestDTO) {
-    if (incomingRequestDTO.getApiAction() != null) {
+    if (incomingRequestDTO.getApiAction() != null && !incomingRequestDTO.getApiAction().isEmpty()) {
       return resolveActionByMethod(incomingRequestDTO);
     } else {
       @SuppressWarnings("unchecked")

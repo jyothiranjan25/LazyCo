@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CsvTemplateService {
 
-  private CsvService csvService;
+  private final CsvService csvService;
 
   public CsvTemplateService(CsvService csvService) {
     this.csvService = csvService;

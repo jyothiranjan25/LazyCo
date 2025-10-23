@@ -33,16 +33,14 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
   // Constructor to initialize the cache using Ehcache
   public TimedECacheLRU(String cacheName, Class<T> valueType, Duration ttl, int maxSize) {
     Cache<String, T> cache;
-    try {
-      CacheManager cacheManager =
-          CacheManagerBuilder.newCacheManagerBuilder()
-              .withCache(
-                  cacheName,
-                  CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                          String.class, valueType, ResourcePoolsBuilder.heap(maxSize))
-                      .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(ttl)))
-              .build(true);
-
+    try (CacheManager cacheManager =
+        CacheManagerBuilder.newCacheManagerBuilder()
+            .withCache(
+                cacheName,
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String.class, valueType, ResourcePoolsBuilder.heap(maxSize))
+                    .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(ttl)))
+            .build(true)) {
       cache = cacheManager.getCache(cacheName, String.class, valueType);
     } catch (Exception e) {
       ApplicationLogger.error("Error in initializing cache", e.getClass());

@@ -28,7 +28,8 @@ public enum FilterOperator {
   DATE_EQUALS("DATE_EQUALS", "Date Equals"),
   DATE_BEFORE("DATE_BEFORE", "Before Date"),
   DATE_AFTER("DATE_AFTER", "After Date"),
-  DATE_BETWEEN("DATE_BETWEEN", "Date Between");
+  DATE_BETWEEN("DATE_BETWEEN", "Date Between"),
+  ;
   private final String operatorName;
   private final String displayName;
 

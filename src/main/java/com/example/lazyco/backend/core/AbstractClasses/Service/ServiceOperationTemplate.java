@@ -27,6 +27,7 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
       // Process all objects but track errors for atomic rollback
       for (D object : incomingDTO.getObjects()) {
         // deep clone to avoid side effects
+        @SuppressWarnings("unchecked")
         D objectToProcess = (D) object.clone();
         try {
           D result = execute(objectToProcess);

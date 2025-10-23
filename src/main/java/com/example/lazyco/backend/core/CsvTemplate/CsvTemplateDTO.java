@@ -11,14 +11,20 @@ import org.apache.commons.lang3.SerializationUtils;
 @Getter
 @Setter
 public class CsvTemplateDTO implements Serializable, Cloneable {
+  // Input fields
   private String csvType;
   private Boolean excludeOptionalFields;
+
+  // Raw fields
   private Class<?> csvClass;
   private List<?> data;
+
+  // Processed fields
   private List<String> headers;
   private Map<String, List<String>> optionRows;
   private List<Map<String, String>> rows;
 
+  // Setters with processing logic
   public void setHeaders(List<String> headers) {
     this.headers =
         headers == null
@@ -28,6 +34,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
                 .collect(Collectors.toList());
   }
 
+  // Setter for optionRows with field naming strategy applied
   public void setOptionRows(Map<String, List<String>> optionRows) {
     this.optionRows =
         optionRows == null
@@ -41,6 +48,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
                         Map.Entry::getValue));
   }
 
+  // Setter for rows with field naming strategy applied to keys
   public void setRows(List<Map<String, String>> rows) {
     this.rows =
         rows == null

@@ -313,5 +313,8 @@ public class FieldFilterUtils {
   // Clear cache when needed (useful for testing or memory management)
   public static void clearCache() {
     fieldCache.clear();
+    entityFieldCache.clear();
+    dtoFieldCache.clear();
+    searchableFieldsCache.clear();
   }
 }

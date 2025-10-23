@@ -17,6 +17,13 @@ public class JacksonDepthHandler {
   private static final ThreadLocal<Integer> CURRENT_DEPTH = ThreadLocal.withInitial(() -> 0);
   private static final ThreadLocal<Set<Integer>> SEEN_PATH = ThreadLocal.withInitial(HashSet::new);
 
+  // Register this with your ObjectMapper
+  public static void registerModule(ObjectMapper objectMapper) {
+    SimpleModule module = new SimpleModule();
+    module.setSerializerModifier(new DynamicDepthSerializerModifier());
+    objectMapper.registerModule(module);
+  }
+
   public static class DynamicDepthSerializerModifier extends BeanSerializerModifier {
     @Override
     public JsonSerializer<?> modifySerializer(
@@ -81,12 +88,5 @@ public class JacksonDepthHandler {
         return "unknown";
       }
     }
-  }
-
-  // Register this with your ObjectMapper
-  public static void registerModule(ObjectMapper objectMapper) {
-    SimpleModule module = new SimpleModule();
-    module.setSerializerModifier(new DynamicDepthSerializerModifier());
-    objectMapper.registerModule(module);
   }
 }

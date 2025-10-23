@@ -54,8 +54,8 @@ public class TimedCacheConcurrent<K, T> implements TimedCache<K, T> {
   }
 
   public T get(K key, Supplier<T> dbFetcher) {
-    long now = System.currentTimeMillis();
     long last = lastCleanupTimestamp.get();
+    long now = System.currentTimeMillis();
 
     if (now - last >= ttlMillis) {
       if (lastCleanupTimestamp.compareAndSet(last, now)) {
