@@ -24,7 +24,6 @@ public class FileDTO {
   private final Long fileSize;
   private byte[] byteArray;
   private ByteArrayOutputStream byteArrayOutputStream;
-  private Resource resource;
 
   public FileDTO(String filePath) {
     this(new File(filePath));
@@ -91,13 +90,14 @@ public class FileDTO {
   }
 
   public Resource getResource() {
+    Resource resource;
     try {
-      this.resource = new FileSystemResource(this.file);
+      resource = new FileSystemResource(this.file);
     } catch (Exception e) {
       ApplicationLogger.error(e);
       throw new ExceptionWrapper("FileDTO: Error getting resource");
     }
-    return this.resource;
+    return resource;
   }
 
   public FileReader getFileReader() {

@@ -6,5 +6,8 @@ import java.lang.annotation.*;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CsvParams {
+
+  boolean dtoAsFileParam() default false;
+
   String fileParam() default "file";
 }

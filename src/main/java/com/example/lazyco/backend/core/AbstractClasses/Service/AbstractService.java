@@ -7,8 +7,8 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
+import com.example.lazyco.backend.core.Exceptions.EntityNotFoundExemption;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
-import com.example.lazyco.backend.core.Exceptions.ResourceNotFoundExemption;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -382,9 +382,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
       D criteria = createFilterDto();
       criteria.setId(id);
       E result = getSingleEntity(criteria);
-      if (result == null) throw new ResourceNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND);
+      if (result == null) throw new EntityNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND);
       return result;
-    } catch (ApplicationExemption | ResourceNotFoundExemption e) {
+    } catch (ApplicationExemption | EntityNotFoundExemption e) {
       throw e;
     } catch (Exception e) {
       throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);

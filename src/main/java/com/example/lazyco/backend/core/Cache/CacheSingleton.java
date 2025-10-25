@@ -2,8 +2,11 @@ package com.example.lazyco.backend.core.Cache;
 
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import java.time.Duration;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CacheSingleton {
 
   // the TTL for the cache

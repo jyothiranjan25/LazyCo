@@ -6,14 +6,14 @@ import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileArgumentResolver;
+import com.example.lazyco.backend.core.Utils.CommonConstrains;
 import com.opencsv.CSVReaderHeaderAware;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 @Component
@@ -46,15 +47,24 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
     }
 
     CsvParams annotation = parameter.getParameterAnnotation(CsvParams.class);
-    String paramName =
-        (annotation != null && StringUtils.isNotBlank(annotation.fileParam()))
-            ? annotation.fileParam()
-            : null;
+    boolean dtoAsFileParam = annotation != null && annotation.dtoAsFileParam();
+
+    String paramName;
+    if (dtoAsFileParam) {
+      // Use DTO class name as file parameter
+      paramName = parameter.getParameterType().getSimpleName();
+    } else {
+      paramName =
+          (annotation != null && StringUtils.isNotBlank(annotation.fileParam()))
+              ? annotation.fileParam()
+              : null;
+    }
 
     if (paramName == null || !multipartRequest.getFileMap().containsKey(paramName)) {
       throw new ExceptionWrapper("File parameter is missing in the request");
     }
-    FileDTO file = FileArgumentResolver.readFileFromMultiPartRequest(paramName, multipartRequest);
+
+    FileDTO file = readFileFromMultiPartRequest(paramName, multipartRequest);
     if (file == null || file.getFile() == null || file.getFile().length() == 0) {
       throw new ExceptionWrapper("Uploaded file is empty or invalid");
     }
@@ -62,6 +72,11 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       throw new ExceptionWrapper("Uploaded file is not a CSV file");
     }
 
+    // Prepare file map
+    Map<String, FileDTO> fileDTOMap = new HashMap<>();
+    fileDTOMap.put(paramName, file);
+
+    // Parse CSV and map to DTO
     Class<?> dtoType = parameter.getParameterType();
     try (InputStream fis = new FileInputStream(file.getFile());
         BOMInputStream bomInputStream =
@@ -94,12 +109,53 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
                 .fromJson(json, (Class<? extends AbstractDTO>) parameter.getParameterType()));
       }
       dtoInstance.setObjects(dtoList);
+      dtoInstance.setFileMap(fileDTOMap);
       return dtoInstance;
     } catch (Exception e) {
       ApplicationLogger.error("Failed to parse CSV into DTO: " + dtoType.getName(), e);
       throw e;
-    } finally {
-      file.deleteSafe();
     }
+  }
+
+  public static FileDTO readFileFromMultiPartRequest(
+      String paramName, MultipartHttpServletRequest multipartRequest) throws IOException {
+    MultipartFile file = multipartRequest.getFile(paramName);
+    if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
+      return null;
+    }
+
+    // Sanitize filename to avoid path traversal
+    String originalFileName = Path.of(file.getOriginalFilename()).getFileName().toString();
+    String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
+
+    // Create a temp file in a safe location
+    Path tempDir = Path.of(CommonConstrains.TOMCAT_TEMP);
+    if (!Files.exists(tempDir)) {
+      Files.createDirectories(tempDir);
+    }
+
+    // Ensure unique file path
+    Path tempFile = tempDir.resolve(uniqueFileName);
+
+    // Create the file
+    File tempFileCheck = tempFile.toFile();
+
+    try {
+      // First try transferTo (fastest, platform-dependent)
+      // Move file immediately to target location
+      file.transferTo(tempFileCheck);
+    } catch (Exception e) {
+      // If transferTo fails, fallback to streaming copy (safe for large files)
+      try (InputStream inputStream = file.getInputStream()) {
+        // Use streaming copy to avoid memory issues with large files
+        Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException copyEx) {
+        // Cleanup partially written file
+        Files.deleteIfExists(tempFile);
+        throw copyEx; // rethrow to caller
+      }
+    }
+
+    return new FileDTO(tempFileCheck);
   }
 }

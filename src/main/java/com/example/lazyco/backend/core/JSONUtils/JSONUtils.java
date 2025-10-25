@@ -2,6 +2,8 @@ package com.example.lazyco.backend.core.JSONUtils;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.util.Iterator;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +12,7 @@ import org.json.JSONObject;
  * Utility class for JSON operations including validation, parsing, and cleaning. Provides methods
  * to work with JSONObject and JSONArray instances.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JSONUtils {
 
   /**
