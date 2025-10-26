@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Entity;
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.UserGroupDTO;
+import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 

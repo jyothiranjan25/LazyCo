@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core;
 
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.UserGroupDTO;
+import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import org.springframework.stereotype.Service;
 
 @Service

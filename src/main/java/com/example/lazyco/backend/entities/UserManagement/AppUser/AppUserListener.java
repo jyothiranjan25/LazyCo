@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
+import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
@@ -10,7 +11,9 @@ public class AppUserListener {
   @PrePersist
   public void prePersist(AppUser appUser) {
     // Logic to execute before persisting an AppUser entity
-    ApplicationLogger.info("AppUserListener prePersist");
+    if (appUser.getUserId() == null) {
+      throw new ApplicationExemption(AppUserMessage.USER_ID_REQUIRED);
+    }
   }
 
   @PreUpdate

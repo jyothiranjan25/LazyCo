@@ -94,8 +94,16 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
 
       List<Map<String, String>> rows = new ArrayList<>();
       try (CSVReaderHeaderAware readers = new CSVReaderHeaderAware(reader)) {
-        Map<String, String> row;
+        // 👇 Skip the first row after headers
+        readers.skip(1);
+
+        Map<String, String> row; // Read each subsequent row
         while ((row = readers.readMap()) != null) {
+          // ✅ Skip completely empty rows
+          boolean isEmptyRow = row.values().stream().allMatch(v -> v == null || v.trim().isEmpty());
+          if (isEmptyRow) {
+            continue;
+          }
           rows.add(row);
         }
       }

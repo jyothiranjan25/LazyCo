@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import static com.example.lazyco.backend.core.Utils.APISchema.APP_USER_API;
-import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.backend.core.AbstractClasses.Service.IAbstractService;
@@ -15,13 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(APP_USER_API)
 public class AppUserController extends AbstractController<AppUserDTO> {
 
-  public AppUserController(IAbstractService<AppUserDTO, ?> abstractService) {
+  private final AppUserUploader appUserUploader;
+
+  public AppUserController(
+      IAbstractService<AppUserDTO, ?> abstractService, AppUserUploader appUserUploader) {
     super(abstractService);
+    this.appUserUploader = appUserUploader;
   }
 
   @PostMapping("csv")
   public ResponseEntity<?> uploadCsv(@CsvParams AppUserDTO inputData) {
-    getBean(AppUserCsvUpload.class).executeJob(inputData.getObjects(), "AppUserCsvUpload");
+    appUserUploader.executeJob(inputData.getObjects());
     return ResponseEntity.ok().build();
   }
 }
