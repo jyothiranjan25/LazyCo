@@ -2,6 +2,8 @@ package com.example.lazyco.backend.core.AbstractClasses.Filter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Date;
 
 public enum FieldType {
   STRING,
@@ -23,12 +25,12 @@ public enum FieldType {
       return NUMBER;
     }
     if (Boolean.class.equals(type) || type == boolean.class) return BOOLEAN;
-    if (java.util.Date.class.isAssignableFrom(type)
+    if (Date.class.isAssignableFrom(type)
         || LocalDate.class.equals(type)
         || LocalDateTime.class.equals(type)) {
       return DATE;
     }
-    if (java.util.Collection.class.isAssignableFrom(type)) return MULTISELECT;
+    if (Collection.class.isAssignableFrom(type)) return MULTISELECT;
     if (type.isEnum()) return ENUM;
     return UNKNOWN;
   }

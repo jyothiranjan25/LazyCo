@@ -110,21 +110,23 @@ public class FilterBuilder {
       ApplicationLogger.error("Failed to resolve path for field: " + field.getName());
       return null;
     }
-    Object fieldValue = metadata.getFieldValue();
     switch (operator) {
-      case EQUALS -> {
+      case EQUALS, DATE_EQUALS -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getEqualPredicate(fieldPathNode, fieldValue);
       }
       case NOT_EQUALS -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getNotEqualPredicate(fieldPathNode, fieldValue);
       }
       case CONTAINS -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
@@ -133,6 +135,7 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.getILikePredicate(fieldPathNode, value);
       }
       case NOT_CONTAINS -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
@@ -141,6 +144,7 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.getNotILikePredicate(fieldPathNode, value);
       }
       case STARTS_WITH -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
@@ -149,6 +153,7 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.getILikePredicate(fieldPathNode, value);
       }
       case ENDS_WITH -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
@@ -156,31 +161,35 @@ public class FilterBuilder {
             FilterOperator.MatchMode.resolveString(FilterOperator.MatchMode.END, fieldValue);
         return criteriaBuilderWrapper.getILikePredicate(fieldPathNode, value);
       }
-      case GREATER_THAN -> {
+      case GREATER_THAN, DATE_AFTER -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getGePredicate(fieldPathNode, fieldValue);
       }
       case GREATER_THAN_OR_EQUAL -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.greaterThanOrEqual(fieldPathNode, fieldValue);
       }
-      case LESS_THAN -> {
+      case LESS_THAN, DATE_BEFORE -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getLePredicate(fieldPathNode, fieldValue);
       }
       case LESS_THAN_OR_EQUAL -> {
+        Object fieldValue = metadata.getFieldValue();
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.lessThanOrEqual(fieldPathNode, fieldValue);
       }
-      case BETWEEN -> {
+      case BETWEEN, DATE_BETWEEN -> {
         FilterFieldMetadata.FilterConstraints constraints = metadata.getFilterConstraints();
         if (constraints == null) {
           return null;
@@ -193,25 +202,26 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.getBetweenPredicate(fieldPathNode, start, end);
       }
       case IN -> {
-        if (fieldValue == null) {
+        FilterFieldMetadata.FilterConstraints constraints = metadata.getFilterConstraints();
+        if (constraints == null) {
           return null;
         }
-        return criteriaBuilderWrapper.getInPredicate(fieldPathNode, (Collection<?>) fieldValue);
+        List<Object> values = constraints.getAllowedValues();
+        return criteriaBuilderWrapper.getInPredicate(fieldPathNode, values);
       }
       case NOT_IN -> {
-        if (fieldValue == null) {
+        FilterFieldMetadata.FilterConstraints constraints = metadata.getFilterConstraints();
+        if (constraints == null) {
           return null;
         }
-        return criteriaBuilderWrapper.getNotInPredicate(fieldPathNode, (Collection<?>) fieldValue);
+        List<Object> values = constraints.getAllowedValues();
+        return criteriaBuilderWrapper.getNotInPredicate(fieldPathNode, values);
       }
       case IS_NULL -> {
         return criteriaBuilderWrapper.getIsNullPredicate(fieldPathNode);
       }
       case IS_NOT_NULL -> {
         return criteriaBuilderWrapper.getIsNotNullPredicate(fieldPathNode);
-      }
-      case DATE_EQUALS, DATE_BEFORE, DATE_AFTER, DATE_BETWEEN -> {
-        return null;
       }
       default -> {
         return criteriaBuilderWrapper.getEqualPredicate(fieldPathNode, metadata.getFieldValue());

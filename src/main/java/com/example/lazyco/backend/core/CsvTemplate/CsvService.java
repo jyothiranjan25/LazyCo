@@ -11,10 +11,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -50,11 +49,19 @@ public class CsvService {
             .peek(
                 f -> {
                   try {
-                    if (f.getType().isEnum()) {
+                    CsvField annotation = f.getAnnotation(CsvField.class);
+                    String[] optionsArray = annotation.options();
+                    if (optionsArray.length > 0) {
+                      options.put(f.getName(), Arrays.asList(optionsArray));
+                    } else if (f.getType().isEnum()) {
                       Object[] constants = f.getType().getEnumConstants();
                       List<String> enumValues =
                           Arrays.stream(constants).map(Object::toString).toList();
                       options.put(f.getName(), enumValues);
+                    } else if (Date.class.isAssignableFrom(f.getType())
+                        || LocalDate.class.equals(f.getType())
+                        || LocalDateTime.class.equals(f.getType())) {
+                      options.put(f.getName(), List.of("yyyy-MM-dd"));
                     }
                   } catch (Exception e) {
                     ApplicationLogger.warn("Failed to process enum field: " + f.getName(), e);
@@ -101,21 +108,20 @@ public class CsvService {
 
           // Write option rows if available
           if (csvTemplateDTO.getOptionRows() != null && !csvTemplateDTO.getOptionRows().isEmpty()) {
-            for (Map.Entry<String, List<String>> entry :
-                csvTemplateDTO.getOptionRows().entrySet()) {
-              String header = entry.getKey();
-              List<String> options = entry.getValue();
-              String optionsStr = String.join(",", options); // Join options with ','
-              String[] optionRow = new String[csvTemplateDTO.getHeaders().size()];
-              for (int i = 0; i < optionRow.length; i++) {
-                if (csvTemplateDTO.getHeaders().get(i).equals(header)) {
-                  optionRow[i] = optionsStr;
+            // For each entry in optionRows, create a row with options in the correct column
+            String[] optionRow = new String[csvTemplateDTO.getHeaders().size()];
+            for (int i = 0; i < optionRow.length; i++) {
+              String header = csvTemplateDTO.getHeaders().get(i);
+              List<String> options = csvTemplateDTO.getOptionRows().get(header);
+              if (csvTemplateDTO.getHeaders().get(i).equals(header)) {
+                if (options != null) {
+                  optionRow[i] = String.join(",", options); // Join options with ','
                 } else {
-                  optionRow[i] = ""; // Empty for other columns
+                  optionRow[i] = "Ignore This Column";
                 }
               }
-              writer.writeNext(optionRow);
             }
+            writer.writeNext(optionRow);
           }
 
           // Generate rows from data if provided

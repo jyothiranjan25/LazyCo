@@ -14,5 +14,7 @@ public @interface CsvField {
 
   String type() default "String";
 
+  String[] options() default {};
+
   int order() default Integer.MAX_VALUE;
 }
