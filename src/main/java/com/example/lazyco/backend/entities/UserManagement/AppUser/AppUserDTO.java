@@ -46,4 +46,8 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 6)
   @FilterableField
   private List<CRUDEnums> permissions;
+
+  @CsvField(order = 7)
+  @FilterableField
+  private List<String> permissions1;
 }

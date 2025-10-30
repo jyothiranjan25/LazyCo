@@ -107,9 +107,8 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       List<AbstractDTO> dtoList = new ArrayList<>();
       for (Map<String, String> row : rows) {
         String json = GsonSingleton.getCsvInstance().toJson(row);
-        dtoList.add(
-            GsonSingleton.getCsvInstance()
-                .fromJson(json, (Class<? extends AbstractDTO>) parameter.getParameterType()));
+        Object dto = GsonSingleton.getCsvInstance().fromJson(json, parameter.getParameterType());
+        dtoList.add((AbstractDTO) dto);
       }
 
       AbstractDTO dtoInstance =

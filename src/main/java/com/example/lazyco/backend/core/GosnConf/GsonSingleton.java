@@ -12,6 +12,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -21,10 +22,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.json.JSONObject;
@@ -174,66 +172,176 @@ public class GsonSingleton {
   }
 
   private static class CsvTypeAdapterFactory implements TypeAdapterFactory {
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    @SuppressWarnings("unchecked")
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
-      // Match List, ArrayList, etc.
-      if (!List.class.isAssignableFrom(typeToken.getRawType())) {
+      Class<T> rawType = (Class<T>) typeToken.getRawType();
+
+      if (!List.class.isAssignableFrom(rawType)) {
         return null;
       }
 
-      final TypeAdapter<T> delegate = gson.getDelegateAdapter(this, typeToken);
-      return new TypeAdapter<T>() {
-        @Override
-        public void write(JsonWriter jsonWriter, T t) throws IOException {
-          delegate.write(jsonWriter, t);
-        }
+      // Get the generic type parameter of the List
+      Type elementType = null;
+      if (typeToken.getType() instanceof ParameterizedType parameterizedType) {
+        elementType = parameterizedType.getActualTypeArguments()[0];
+      }
 
-        @Override
-        public T read(JsonReader jsonReader) throws IOException {
-          try {
-            JsonElement jsonElement = JsonParser.parseReader(jsonReader);
-            return (T) deserializeList(gson, jsonElement, typeToken.getType());
-          } catch (IllegalStateException | JsonSyntaxException e) {
-            jsonReader.skipValue(); // Skip the bad value
-            return null;
-          }
-        }
-      };
+      if (elementType == null) {
+        return null;
+      }
+
+      // Get the delegate adapter for normal JSON array handling
+      final TypeAdapter<T> delegateAdapter = gson.getDelegateAdapter(this, typeToken);
+
+      return (TypeAdapter<T>) new CsvListAdapter(elementType, delegateAdapter);
     }
 
-    private List<?> deserializeList(Gson gson, JsonElement json, Type typeOfT) {
-      if (json == null || json.isJsonNull()) {
-        return Collections.emptyList();
+    private static class CsvListAdapter<T> extends TypeAdapter<List<?>> {
+      private final Type elementType;
+      private final TypeAdapter<T> delegateAdapter;
+
+      CsvListAdapter(Type elementType, TypeAdapter<T> delegateAdapter) {
+        this.elementType = elementType;
+        this.delegateAdapter = delegateAdapter;
       }
 
-      try {
-        // Normal array: ["GET","POST"]
-        if (json.isJsonArray()) {
-          return gson.fromJson(json, typeOfT);
+      @Override
+      public void write(JsonWriter jsonWriter, List<?> list) throws IOException {
+
+        if (list == null) {
+          jsonWriter.nullValue();
+          return;
         }
 
-        // Quoted array string: "[\"GET\",\"POST\"]"
-        if (json.isJsonPrimitive()) {
-          String raw = json.getAsString().trim();
-
-          if (raw.startsWith("[") && raw.endsWith("]")) {
-            JsonArray inner = JsonParser.parseString(raw).getAsJsonArray();
-            return gson.fromJson(inner, typeOfT);
-          }
-
-          // Single element: "GET" -> ["GET"]
-          if (!raw.isEmpty()) {
-            Type elementType = ((ParameterizedType) typeOfT).getActualTypeArguments()[0];
-            Object single = gson.fromJson(new JsonPrimitive(raw), elementType);
-            return Collections.singletonList(single);
+        // Write as JSON string for CSV compatibility
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < list.size(); i++) {
+          if (i > 0) sb.append(",");
+          Object elem = list.get(i);
+          if (elem instanceof Enum) {
+            sb.append("\"").append(((Enum<?>) elem).name()).append("\"");
+          } else if (elem instanceof String) {
+            sb.append("\"").append(elem).append("\"");
+          } else {
+            sb.append(elem);
           }
         }
-      } catch (Exception e) {
-        ApplicationLogger.error("Failed to parse list: {}", e.getMessage());
+        sb.append("]");
+
+        String result = sb.toString();
+        jsonWriter.value(result);
       }
 
-      return Collections.emptyList();
+      @Override
+      public List<?> read(JsonReader jsonReader) throws IOException {
+        List<Object> result = new ArrayList<>();
+
+        // Check if it's a string (CSV format) or array (JSON format)
+        JsonToken token = jsonReader.peek();
+
+        if (token == JsonToken.STRING) {
+          // Handle CSV string format: "[\"GET\",\"POST\"]"
+          String arrayString = jsonReader.nextString();
+
+          // Remove brackets and split
+          arrayString = arrayString.trim();
+
+          if (arrayString.isEmpty()) {
+            return result;
+          }
+
+          if (arrayString.startsWith("[") && arrayString.endsWith("]")) {
+            arrayString = arrayString.substring(1, arrayString.length() - 1);
+          }
+
+          if (!arrayString.isEmpty()) {
+            // Split by comma (but handle quoted commas properly)
+            List<String> elements = splitCsvElements(arrayString);
+
+            for (String s : elements) {
+              String element = s.trim();
+
+              // Remove quotes
+              if (element.startsWith("\"") && element.endsWith("\"")) {
+                element = element.substring(1, element.length() - 1);
+              }
+
+              Object parsed = parseElement(element);
+              // Only add to result if parsing was successful (not null)
+              if (parsed != null) {
+                result.add(parsed);
+              }
+            }
+          }
+        } else if (token == JsonToken.BEGIN_ARRAY) {
+          // Use the delegate adapter for normal JSON array
+          return (List<?>) delegateAdapter.read(jsonReader);
+        } else if (token == JsonToken.NULL) {
+          jsonReader.nextNull();
+          return null;
+        }
+        return result;
+      }
+
+      private List<String> splitCsvElements(String input) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < input.length(); i++) {
+          char c = input.charAt(i);
+
+          if (c == '"') {
+            inQuotes = !inQuotes;
+            current.append(c);
+          } else if (c == ',' && !inQuotes) {
+            result.add(current.toString());
+            current = new StringBuilder();
+          } else {
+            current.append(c);
+          }
+        }
+
+        if (!current.isEmpty()) {
+          result.add(current.toString());
+        }
+
+        return result;
+      }
+
+      private Object parseElement(String value) {
+
+        if (elementType instanceof Class<?> elementClass) {
+          if (elementClass.isEnum()) {
+            try {
+              // Try case-insensitive enum matching
+              @SuppressWarnings({"unchecked", "rawtypes"})
+              Class<Enum> enumClass = (Class<Enum>) elementClass;
+
+              for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
+                if (enumConstant.name().equalsIgnoreCase(value.trim())) {
+                  return enumConstant;
+                }
+              }
+              // If no match found, return null
+              return null;
+            } catch (Exception ignored) {
+              return null;
+            }
+          } else if (elementClass == Integer.class || elementClass == int.class) {
+            try {
+              return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+              return null; // Skip invalid integers
+            }
+          } else if (elementClass == String.class) {
+            return value;
+          }
+        }
+        return value;
+      }
     }
   }
 
