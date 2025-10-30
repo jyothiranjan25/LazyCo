@@ -28,7 +28,7 @@ public class CsvService {
       throw new IllegalArgumentException("CSV class must be set before generating headers.");
     }
     // Prepare to collect headers and options
-    Map<String, List<String>> options = new HashMap<>();
+    Map<String, String> options = new HashMap<>();
     List<String> headers =
         Arrays.stream(rawClass.getDeclaredFields())
             .filter(f -> f.isAnnotationPresent(CsvField.class))
@@ -52,16 +52,24 @@ public class CsvService {
                     CsvField annotation = f.getAnnotation(CsvField.class);
                     String[] optionsArray = annotation.options();
                     if (optionsArray.length > 0) {
-                      options.put(f.getName(), Arrays.asList(optionsArray));
+                      options.put(f.getName(), String.join(",", optionsArray));
                     } else if (f.getType().isEnum()) {
                       Object[] constants = f.getType().getEnumConstants();
                       List<String> enumValues =
                           Arrays.stream(constants).map(Object::toString).toList();
-                      options.put(f.getName(), enumValues);
+                      options.put(f.getName(), String.join(",", enumValues));
                     } else if (Date.class.isAssignableFrom(f.getType())
                         || LocalDate.class.equals(f.getType())
                         || LocalDateTime.class.equals(f.getType())) {
-                      options.put(f.getName(), List.of("yyyy-MM-dd"));
+                      options.put(f.getName(), "yyyy-MM-dd");
+                    } else if (Collection.class.isAssignableFrom(f.getType())) {
+                      Class<?> genericType = getCollectionGenericType(f);
+                      if (genericType.isEnum()) {
+                        Object[] constants = genericType.getEnumConstants();
+                        List<String> enumValues =
+                            Arrays.stream(constants).map(Object::toString).toList();
+                        options.put(f.getName(), "[" + String.join(",", enumValues) + "]");
+                      }
                     }
                   } catch (Exception e) {
                     ApplicationLogger.warn("Failed to process enum field: " + f.getName(), e);
@@ -112,13 +120,11 @@ public class CsvService {
             String[] optionRow = new String[csvTemplateDTO.getHeaders().size()];
             for (int i = 0; i < optionRow.length; i++) {
               String header = csvTemplateDTO.getHeaders().get(i);
-              List<String> options = csvTemplateDTO.getOptionRows().get(header);
+              String options = csvTemplateDTO.getOptionRows().get(header);
               if (csvTemplateDTO.getHeaders().get(i).equals(header)) {
-                if (options != null) {
-                  optionRow[i] = String.join(",", options); // Join options with ','
-                } else {
-                  optionRow[i] = "Ignore This Column";
-                }
+                optionRow[i] =
+                    Objects.requireNonNullElse(
+                        options, "Ignore This Column"); // Join options with ','
               }
             }
             writer.writeNext(optionRow);
@@ -145,5 +151,24 @@ public class CsvService {
       throw new RuntimeException(e);
     }
     return new FileDTO(file);
+  }
+
+  private Class<?> getCollectionGenericType(Field field) {
+    try {
+      var genericType = field.getGenericType();
+      if (genericType instanceof java.lang.reflect.ParameterizedType parameterizedType) {
+        var typeArgs = parameterizedType.getActualTypeArguments();
+        if (typeArgs.length == 1) {
+          var typeArg = typeArgs[0];
+          if (typeArg instanceof Class<?> clazz) {
+            return clazz;
+          }
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.warn(
+          "Failed to determine generic type for collection field: " + field.getName(), e);
+    }
+    return Object.class;
   }
 }

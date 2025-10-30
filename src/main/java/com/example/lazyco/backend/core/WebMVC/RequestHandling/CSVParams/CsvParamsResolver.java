@@ -104,8 +104,6 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
         }
       }
 
-      AbstractDTO dtoInstance =
-          RequestHandlingHelper.populateDTOFromRequest(parameter, multipartRequest);
       List<AbstractDTO> dtoList = new ArrayList<>();
       for (Map<String, String> row : rows) {
         String json = GsonSingleton.getCsvInstance().toJson(row);
@@ -113,6 +111,9 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
             GsonSingleton.getCsvInstance()
                 .fromJson(json, (Class<? extends AbstractDTO>) parameter.getParameterType()));
       }
+
+      AbstractDTO dtoInstance =
+          RequestHandlingHelper.populateDTOFromRequest(parameter, multipartRequest);
       dtoInstance.setObjects(dtoList);
       dtoInstance.setFileMap(fileDTOMap);
       return dtoInstance;

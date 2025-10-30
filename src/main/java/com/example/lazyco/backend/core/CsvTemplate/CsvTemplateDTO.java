@@ -21,7 +21,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
 
   // Processed fields
   private List<String> headers;
-  private Map<String, List<String>> optionRows;
+  private Map<String, String> optionRows;
   private List<Map<String, String>> rows;
 
   // Setters with processing logic
@@ -35,7 +35,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
   }
 
   // Setter for optionRows with field naming strategy applied
-  public void setOptionRows(Map<String, List<String>> optionRows) {
+  public void setOptionRows(Map<String, String> optionRows) {
     this.optionRows =
         optionRows == null
             ? null

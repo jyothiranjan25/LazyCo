@@ -15,12 +15,15 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -75,6 +78,7 @@ public class GsonSingleton {
     gsonBuilder.addSerializationExclusionStrategy(new CsvExclusionStrategy());
     gsonBuilder.addDeserializationExclusionStrategy(new CsvExclusionStrategy());
     gsonBuilder.setFieldNamingStrategy(new CsvFieldNamingStrategy());
+    gsonBuilder.registerTypeAdapterFactory(new CsvTypeAdapterFactory());
     return gsonBuilder.create();
   }
 
@@ -166,6 +170,70 @@ public class GsonSingleton {
     @Override
     public String translateName(Field field) {
       return CsvStrategies.fieldNamingStrategy(field);
+    }
+  }
+
+  private static class CsvTypeAdapterFactory implements TypeAdapterFactory {
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+      // Match List, ArrayList, etc.
+      if (!List.class.isAssignableFrom(typeToken.getRawType())) {
+        return null;
+      }
+
+      final TypeAdapter<T> delegate = gson.getDelegateAdapter(this, typeToken);
+      return new TypeAdapter<T>() {
+        @Override
+        public void write(JsonWriter jsonWriter, T t) throws IOException {
+          delegate.write(jsonWriter, t);
+        }
+
+        @Override
+        public T read(JsonReader jsonReader) throws IOException {
+          try {
+            JsonElement jsonElement = JsonParser.parseReader(jsonReader);
+            return (T) deserializeList(gson, jsonElement, typeToken.getType());
+          } catch (IllegalStateException | JsonSyntaxException e) {
+            jsonReader.skipValue(); // Skip the bad value
+            return null;
+          }
+        }
+      };
+    }
+
+    private List<?> deserializeList(Gson gson, JsonElement json, Type typeOfT) {
+      if (json == null || json.isJsonNull()) {
+        return Collections.emptyList();
+      }
+
+      try {
+        // Normal array: ["GET","POST"]
+        if (json.isJsonArray()) {
+          return gson.fromJson(json, typeOfT);
+        }
+
+        // Quoted array string: "[\"GET\",\"POST\"]"
+        if (json.isJsonPrimitive()) {
+          String raw = json.getAsString().trim();
+
+          if (raw.startsWith("[") && raw.endsWith("]")) {
+            JsonArray inner = JsonParser.parseString(raw).getAsJsonArray();
+            return gson.fromJson(inner, typeOfT);
+          }
+
+          // Single element: "GET" -> ["GET"]
+          if (!raw.isEmpty()) {
+            Type elementType = ((ParameterizedType) typeOfT).getActualTypeArguments()[0];
+            Object single = gson.fromJson(new JsonPrimitive(raw), elementType);
+            return Collections.singletonList(single);
+          }
+        }
+      } catch (Exception e) {
+        ApplicationLogger.error("Failed to parse list: {}", e.getMessage());
+      }
+
+      return Collections.emptyList();
     }
   }
 
