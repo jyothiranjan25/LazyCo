@@ -80,6 +80,10 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   public void executeJobInBackground(List<T> inputData, String batchJobName) {
     try {
       this.batchJobDTO = new BatchJobDTO(); // Direct assignment, removing redundant variable
+
+      // Create batch job record
+      createBatchJobRecord(batchJobName, inputData.size());
+
       // Configure chunk size based on session type
       configureChunkSizeBasedOnSessionType(inputData);
 
@@ -92,8 +96,6 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
           "Starting Spring Batch job: " + jobName + " with " + inputData.size() + " items");
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
       this.jobId = jobExecution.getJobId();
-      // Create batch job record
-      createBatchJobRecord(batchJobName, inputData.size());
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in executeJob: " + e.getMessage(), e);
       if (batchJobDTO != null) {
@@ -103,6 +105,7 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
   }
 
   protected void createBatchJobRecord(String batchJobName, int totalItems) {
+    batchJobDTO.setJobId(this.jobId);
     batchJobDTO.setName(batchJobName);
     batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
     batchJobDTO.setTotalItemCount(totalItems);
