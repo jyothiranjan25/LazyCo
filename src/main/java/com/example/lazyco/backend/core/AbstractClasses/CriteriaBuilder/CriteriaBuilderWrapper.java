@@ -195,8 +195,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate greaterThanOrEqual(String key, Object value) {
-    Predicate gePredicate = getGePredicate(getExpression(key), criteriaBuilder.literal(value));
-    return criteriaBuilder.and(finalPredicate, gePredicate);
+    return greaterThanOrEqual(getExpression(key), value);
   }
 
   public Predicate greaterThanOrEqual(Path<?> path, Object value) {
@@ -228,8 +227,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate lessThanOrEqual(String key, Object value) {
-    Predicate lePredicate = getLePredicate(getExpression(key), criteriaBuilder.literal(value));
-    return criteriaBuilder.and(finalPredicate, lePredicate);
+    return lessThanOrEqual(getExpression(key), value);
   }
 
   public Predicate lessThanOrEqual(Path<?> path, Object value) {

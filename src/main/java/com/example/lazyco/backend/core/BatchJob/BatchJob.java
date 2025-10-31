@@ -19,6 +19,9 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class BatchJob extends AbstractRBACModel {
 
+  @Column(name = "job_id")
+  private Long jobId;
+
   @Column(name = "name")
   private String name;
 
@@ -36,9 +39,6 @@ public class BatchJob extends AbstractRBACModel {
 
   @Column(name = "failed_count")
   private Integer failedCount;
-
-  @Column(name = "job_thread_name")
-  private String jobThreadName;
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)

@@ -3,8 +3,10 @@ package com.example.lazyco.backend.core.BatchJob;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.BATCH_AUDIT_UPLOAD_LOCATION;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.backend.core.BatchJob.SpringBatch.SpringBatchAction;
 import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,13 +14,18 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
     implements IBatchJobService {
 
-  public BatchJobService(BatchJobMapper batchJobMapper) {
+  private final SpringBatchAction springBatchAction;
+
+  public BatchJobService(BatchJobMapper batchJobMapper, SpringBatchAction springBatchAction) {
     super(batchJobMapper);
+    this.springBatchAction = springBatchAction;
   }
 
   public void makeUpdates(BatchJobDTO updateObject, BatchJob existing) {
@@ -47,16 +54,30 @@ public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
   }
 
   @Override
-  public BatchJobDTO getByJobThreadName(String jobThreadName) {
+  public BatchJobDTO getByJobId(Long jobId) {
     BatchJobDTO filter = new BatchJobDTO();
-    filter.setJobThreadName(jobThreadName);
+    filter.setJobId(jobId);
     return getSingle(filter);
   }
 
   @Override
   public BatchJobDTO restartJob(BatchJobDTO batchJobDTO) {
-    // TODO implement restart logic later!!!
-    return null;
+    try {
+      if (batchJobDTO == null || batchJobDTO.getId() == null) {
+        throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
+      }
+      BatchJob batchJob = getEntityById(batchJobDTO.getId());
+
+      if (batchJob.isActive()) {
+        throw new ExceptionWrapper("Active batch job cannot be restarted.");
+      }
+      if (!springBatchAction.isJobRunning(batchJob.getJobId())) {
+        springBatchAction.restartJob(batchJob.getJobId());
+      }
+    } catch (Exception e) {
+      throw new ExceptionWrapper("Failed to restart batch job.", e);
+    }
+    return batchJobDTO;
   }
 
   @Override

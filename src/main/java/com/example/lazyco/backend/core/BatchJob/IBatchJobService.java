@@ -5,7 +5,7 @@ import com.example.lazyco.backend.core.File.FileDTO;
 import java.util.List;
 
 public interface IBatchJobService extends IAbstractService<BatchJobDTO, BatchJob> {
-  BatchJobDTO getByJobThreadName(String jobThreadName);
+  BatchJobDTO getByJobId(Long jobId);
 
   BatchJobDTO terminateJob(BatchJobDTO batchJobDTO);
 

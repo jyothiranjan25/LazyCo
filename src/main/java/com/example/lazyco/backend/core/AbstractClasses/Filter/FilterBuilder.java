@@ -6,6 +6,8 @@ import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
 
 public class FilterBuilder {
@@ -113,6 +115,7 @@ public class FilterBuilder {
     switch (operator) {
       case EQUALS, DATE_EQUALS -> {
         Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
         if (fieldValue == null) {
           return null;
         }
@@ -120,6 +123,7 @@ public class FilterBuilder {
       }
       case NOT_EQUALS -> {
         Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
         if (fieldValue == null) {
           return null;
         }
@@ -163,31 +167,35 @@ public class FilterBuilder {
       }
       case GREATER_THAN, DATE_AFTER -> {
         Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
+        if (fieldValue == null) {
+          return null;
+        }
+        return criteriaBuilderWrapper.getGtPredicate(fieldPathNode, fieldValue);
+      }
+      case GREATER_THAN_OR_EQUAL -> {
+        Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getGePredicate(fieldPathNode, fieldValue);
       }
-      case GREATER_THAN_OR_EQUAL -> {
+      case LESS_THAN, DATE_BEFORE -> {
         Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
         if (fieldValue == null) {
           return null;
         }
-        return criteriaBuilderWrapper.greaterThanOrEqual(fieldPathNode, fieldValue);
+        return criteriaBuilderWrapper.getLtPredicate(fieldPathNode, fieldValue);
       }
-      case LESS_THAN, DATE_BEFORE -> {
+      case LESS_THAN_OR_EQUAL -> {
         Object fieldValue = metadata.getFieldValue();
+        fieldValue = parseFieldValue(field, fieldValue);
         if (fieldValue == null) {
           return null;
         }
         return criteriaBuilderWrapper.getLePredicate(fieldPathNode, fieldValue);
-      }
-      case LESS_THAN_OR_EQUAL -> {
-        Object fieldValue = metadata.getFieldValue();
-        if (fieldValue == null) {
-          return null;
-        }
-        return criteriaBuilderWrapper.lessThanOrEqual(fieldPathNode, fieldValue);
       }
       case BETWEEN, DATE_BETWEEN -> {
         FilterFieldMetadata.FilterConstraints constraints = metadata.getFilterConstraints();
@@ -196,6 +204,8 @@ public class FilterBuilder {
         }
         Object start = constraints.getMinValue();
         Object end = constraints.getMaxValue();
+        start = parseFieldValue(field, start);
+        end = parseFieldValue(field, end);
         if (start == null || end == null) {
           return null;
         }
@@ -206,7 +216,10 @@ public class FilterBuilder {
         if (constraints == null) {
           return null;
         }
-        List<Object> values = constraints.getAllowedValues();
+        List<Object> values = parseFieldValue(field, constraints.getAllowedValues());
+        if (values.isEmpty()) {
+          return null;
+        }
         return criteriaBuilderWrapper.getInPredicate(fieldPathNode, values);
       }
       case NOT_IN -> {
@@ -214,7 +227,10 @@ public class FilterBuilder {
         if (constraints == null) {
           return null;
         }
-        List<Object> values = constraints.getAllowedValues();
+        List<Object> values = parseFieldValue(field, constraints.getAllowedValues());
+        if (values.isEmpty()) {
+          return null;
+        }
         return criteriaBuilderWrapper.getNotInPredicate(fieldPathNode, values);
       }
       case IS_NULL -> {
@@ -227,5 +243,38 @@ public class FilterBuilder {
         return criteriaBuilderWrapper.getEqualPredicate(fieldPathNode, metadata.getFieldValue());
       }
     }
+  }
+
+  private static Object parseFieldValue(Field field, Object value) {
+    Class<?> fieldType = field.getType();
+    try {
+      if (fieldType == Date.class && value instanceof String) {
+        LocalDate localDate = LocalDate.parse((String) value);
+        return Timestamp.valueOf(localDate.atStartOfDay());
+      } else if (fieldType == Integer.class && value instanceof String) {
+        return Integer.parseInt((String) value);
+      } else if (fieldType == Long.class && value instanceof String) {
+        return Long.parseLong((String) value);
+      } else if (fieldType == Double.class && value instanceof String) {
+        return Double.parseDouble((String) value);
+      } else if (fieldType == Float.class && value instanceof String) {
+        return Float.parseFloat((String) value);
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to parse field value: " + e.getMessage());
+      return null;
+    }
+    return value;
+  }
+
+  private static List<Object> parseFieldValue(Field field, List<Object> values) {
+    List<Object> parsedValues = new ArrayList<>();
+    for (Object value : values) {
+      Object parsedValue = parseFieldValue(field, value);
+      if (parsedValue != null) {
+        parsedValues.add(parsedValue);
+      }
+    }
+    return parsedValues;
   }
 }

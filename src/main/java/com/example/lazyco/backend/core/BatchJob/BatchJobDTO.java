@@ -11,13 +11,13 @@ import lombok.Setter;
 @FilteredEntity(type = BatchJob.class)
 public class BatchJobDTO extends AbstractDTO<BatchJobDTO> {
 
+  private Long jobId;
   private String name;
   private Date startTime;
   private Date endTime;
   private Integer totalItemCount;
   private Integer processedCount;
   private Integer failedCount;
-  private String jobThreadName;
   private BatchJob.BatchJobStatus status;
   private BatchJob.BatchJobSessionType sessionType;
 
