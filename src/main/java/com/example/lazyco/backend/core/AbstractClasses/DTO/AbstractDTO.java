@@ -62,7 +62,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // This field holds a map of file identifiers to their corresponding FileDTOs
   @Expose(serialize = false, deserialize = false)
-  private List<FileDTO> fileMap;
+  private List<FileDTO> fileList;
 
   @Expose(serialize = false, deserialize = false)
   private FileDTO file;
