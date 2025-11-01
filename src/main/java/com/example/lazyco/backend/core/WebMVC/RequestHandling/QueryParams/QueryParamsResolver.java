@@ -1,8 +1,8 @@
 package com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams;
 
+import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.JSONUtils.JSONUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
@@ -13,42 +13,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-/**
- * Spring MVC argument resolver that converts HTTP query parameters to Java objects. Supports
- * parameters annotated with @QueryParams and automatically deserializes query parameters into the
- * target object type using JSON conversion.
- */
 @Component
 public class QueryParamsResolver implements HandlerMethodArgumentResolver {
-
-  private final Gson gson;
-
-  public QueryParamsResolver(Gson gson) {
-    if (gson == null) {
-      throw new IllegalArgumentException("Gson instance cannot be null");
-    }
-    this.gson = gson;
-  }
-
-  /**
-   * Determines if this resolver supports the given method parameter.
-   *
-   * @param parameter the method parameter to check
-   * @return true if the parameter is annotated with @QueryParams
-   */
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
     return parameter.hasParameterAnnotation(QueryParams.class);
   }
 
   /**
-   * Resolves the method argument by converting query parameters to the target object type.
-   *
-   * @param parameter the method parameter to resolve
-   * @param mavContainer the ModelAndViewContainer (not used)
-   * @param webRequest the current web request
-   * @param binderFactory the web data binder factory (not used)
-   * @return the resolved argument object, or null if resolution fails
+   * Resolves method arguments annotated with @QueryParams by extracting query parameters from the
+   * HTTP request and deserializing them into the target DTO.
    */
   @Override
   public Object resolveArgument(
@@ -66,7 +40,7 @@ public class QueryParamsResolver implements HandlerMethodArgumentResolver {
       }
 
       Class<?> parameterType = parameter.getParameterType();
-      return gson.fromJson(paramMap.toString(), parameterType);
+      return GsonSingleton.getInstance().fromJson(paramMap.toString(), parameterType);
 
     } catch (JsonSyntaxException e) {
       // Log the error and return a default instance
@@ -136,10 +110,7 @@ public class QueryParamsResolver implements HandlerMethodArgumentResolver {
       return targetClass.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       ApplicationLogger.error(
-          "Failed to create default instance of "
-              + targetClass.getSimpleName()
-              + ": "
-              + e.getMessage());
+          "Failed to create default instance of " + targetClass.getSimpleName(), e);
       return null;
     }
   }

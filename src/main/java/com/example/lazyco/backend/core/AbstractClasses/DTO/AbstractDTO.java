@@ -10,6 +10,7 @@ import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -62,7 +63,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // This field holds a map of file identifiers to their corresponding FileDTOs
   @Expose(serialize = false, deserialize = false)
-  private List<FileDTO> fileList;
+  private Map<String, FileDTO> fileMap;
 
   @Expose(serialize = false, deserialize = false)
   private FileDTO file;

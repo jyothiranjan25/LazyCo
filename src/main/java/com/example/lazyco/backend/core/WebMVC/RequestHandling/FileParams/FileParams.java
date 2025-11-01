@@ -7,9 +7,4 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FileParams {
-
-  String fileParam() default "file";
-
-  boolean isMultipleFiles() default false;
-}
+public @interface FileParams {}

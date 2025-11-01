@@ -5,7 +5,6 @@ import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.RequestHandlingHelper;
-import java.io.*;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -24,6 +23,10 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
     return parameter.hasParameterAnnotation(CsvParams.class);
   }
 
+  /**
+   * Resolves method arguments annotated with @CsvParams by extracting the CSV file and populating
+   * the corresponding DTO from the multipart request.
+   */
   @Override
   public Object resolveArgument(
       MethodParameter parameter,
@@ -54,7 +57,7 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       throw new ExceptionWrapper("File parameter is missing in the request");
     }
 
-    FileDTO file = RequestHandlingHelper.readFileFromMultiPartRequest(paramName, multipartRequest);
+    FileDTO file = RequestHandlingHelper.readSingleFileFromRequest(paramName, multipartRequest);
     if (file == null || file.getFile() == null || file.getFile().length() == 0) {
       throw new ExceptionWrapper("Uploaded file is empty or invalid");
     }

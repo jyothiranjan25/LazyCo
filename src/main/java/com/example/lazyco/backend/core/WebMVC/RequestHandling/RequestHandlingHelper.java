@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.WebMVC.RequestHandling;
 
-import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.JSONUtils.JSONUtils;
@@ -23,14 +22,12 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 public class RequestHandlingHelper {
 
-  // Use this method to populate DTO from non-file parameters
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static AbstractDTO populateDTOFromRequest(
-      MethodParameter parameter, MultipartHttpServletRequest multipartRequest) {
+  // Use this method to populate DTO from parameters
+  @SuppressWarnings({"unchecked"})
+  public static <T> T populateDTOFromRequest(MethodParameter mp, MultipartHttpServletRequest mr) {
 
     JSONObject jsonObject = new JSONObject();
-    multipartRequest
-        .getParameterMap()
+    mr.getParameterMap()
         .forEach(
             (paramName, paramValues) -> {
               if (StringUtils.isBlank(paramName)) return; // skip blank parameter names
@@ -43,19 +40,25 @@ public class RequestHandlingHelper {
             });
 
     // Convert JSON to DTO
-    return GsonSingleton.getInstance()
-        .fromJson(
-            jsonObject.toString(), (Class<? extends AbstractDTO>) parameter.getParameterType());
+    return (T)
+        GsonSingleton.getInstance()
+            .fromJson(jsonObject.toString(), (Class<?>) mp.getParameterType());
+  }
+
+  // Read single file from multipart request by parameter name
+  public static FileDTO readSingleFileFromRequest(
+      String paramName, MultipartHttpServletRequest multipartRequest) {
+    return saveFileToTemp(multipartRequest.getFile(paramName));
   }
 
   // Read all files from multipart request
   public static List<FileDTO> readMultipleFileFromMultiPartRequest(
-      MultipartHttpServletRequest multipartRequest) {
-    return multipartRequest.getFileMap().values().stream()
+      String paramName, MultipartHttpServletRequest multipartRequest) {
+    return multipartRequest.getFiles(paramName).stream()
         .map(
             multipartFile -> {
               try {
-                return RequestHandlingHelper.readFileFromMultiPartRequest(multipartFile);
+                return RequestHandlingHelper.saveFileToTemp(multipartFile);
               } catch (Exception e) {
                 ApplicationLogger.error(
                     "Error processing file: " + multipartFile.getOriginalFilename(), e);
@@ -67,19 +70,8 @@ public class RequestHandlingHelper {
         .collect(Collectors.toList());
   }
 
-  // Read single file from multipart request by parameter name
-  public static FileDTO readFileFromMultiPartRequest(
-      String paramName, MultipartHttpServletRequest multipartRequest) throws IOException {
-    MultipartFile file = multipartRequest.getFile(paramName);
-    if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
-      return null;
-    }
-    return readFileFromMultiPartRequest(file);
-  }
-
   // Use this method to extract files from the request and ignore empty files
-  @Deprecated
-  private Map<String, FileDTO> extractFilesFromRequest(
+  public static Map<String, FileDTO> extractFileFromRequest(
       MultipartHttpServletRequest multipartRequest) {
     Map<String, FileDTO> filesMap = new HashMap<>();
     multipartRequest
@@ -87,11 +79,32 @@ public class RequestHandlingHelper {
         .forEach(
             (paramName, multipartFile) -> {
               try {
-                FileDTO fileDTO = readFileFromMultiPartRequest(multipartFile);
+                FileDTO fileDTO = readSingleFileFromRequest(paramName, multipartRequest);
                 if (fileDTO != null
                     && fileDTO.getFile() != null
                     && fileDTO.getFile().length() > 0) {
                   filesMap.put(paramName, fileDTO);
+                }
+              } catch (Exception e) {
+                ApplicationLogger.error("Error processing file parameter: " + paramName, e);
+              }
+            });
+    return filesMap;
+  }
+
+  // Use this method to extract files from the request and ignore empty files
+  public static Map<String, List<FileDTO>> extractFilesFromRequest(
+      MultipartHttpServletRequest multipartRequest) {
+    Map<String, List<FileDTO>> filesMap = new HashMap<>();
+    multipartRequest
+        .getFileMap()
+        .forEach(
+            (paramName, multipartFile) -> {
+              try {
+                List<FileDTO> fileDTOs =
+                    readMultipleFileFromMultiPartRequest(paramName, multipartRequest);
+                if (!fileDTOs.isEmpty()) {
+                  filesMap.put(paramName, fileDTOs);
                 }
               } catch (Exception e) {
                 ApplicationLogger.error("Error processing file parameter: " + paramName, e);
@@ -102,7 +115,7 @@ public class RequestHandlingHelper {
   }
 
   // Read single file, validate, and save to a safe temp directory
-  public static FileDTO readFileFromMultiPartRequest(MultipartFile file) throws IOException {
+  public static FileDTO saveFileToTemp(MultipartFile file) {
     if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
       return null;
     }
@@ -113,8 +126,13 @@ public class RequestHandlingHelper {
 
     // Create a temp file in a safe location
     Path tempDir = Path.of(CommonConstrains.TOMCAT_TEMP);
-    if (!Files.exists(tempDir)) {
-      Files.createDirectories(tempDir);
+    try {
+      if (!Files.exists(tempDir)) {
+        Files.createDirectories(tempDir);
+      }
+    } catch (IOException e) {
+      ApplicationLogger.error("Failed to create temp directory: " + tempDir, e);
+      return null;
     }
 
     // Ensure unique file path
@@ -128,15 +146,21 @@ public class RequestHandlingHelper {
       // Move file immediately to target location
       file.transferTo(tempFileCheck);
     } catch (Exception e) {
+      ApplicationLogger.error("Failed to transfer fileto temp location: " + tempFileCheck, e);
       // If transferTo fails, fallback to streaming copy (safe for large files)
       try (InputStream inputStream = file.getInputStream()) {
         // Use streaming copy to avoid memory issues with large files
         Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException copyEx) {
-        ApplicationLogger.error("Failed to copy uploaded file to temp location", copyEx);
-        // Cleanup partially written file
-        Files.deleteIfExists(tempFile);
-        throw copyEx; // rethrow to caller
+        ApplicationLogger.error(
+            "Failed to copy uploaded file to temp location: " + tempFileCheck, copyEx);
+        try {
+          // Cleanup partially written file
+          Files.deleteIfExists(tempFile);
+        } catch (IOException deleteEx) {
+          ApplicationLogger.error("Failed to delete partial temp file: " + tempFile, deleteEx);
+        }
+        return null;
       }
     }
 
