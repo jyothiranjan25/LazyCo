@@ -11,6 +11,8 @@ public interface IBatchJobService extends IAbstractService<BatchJobDTO, BatchJob
 
   BatchJobDTO restartJob(BatchJobDTO batchJobDTO);
 
+  BatchJobDTO pauseJob(BatchJobDTO batchJobDTO);
+
   void sendNotificationToUser(BatchJobDTO batchJob);
 
   BatchJobDTO update(BatchJobDTO batchJobDTO);

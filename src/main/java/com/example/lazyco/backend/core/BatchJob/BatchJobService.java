@@ -60,6 +60,12 @@ public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
   }
 
   @Override
+  public BatchJobDTO pauseJob(BatchJobDTO batchJobDTO) {
+    // TODO implement pause logic later!!!
+    return null;
+  }
+
+  @Override
   public void sendNotificationToUser(BatchJobDTO batchJob) {
     // Minimal implementation - can be enhanced later if needed
     System.out.println("Batch job notification sent for: " + batchJob.getName());

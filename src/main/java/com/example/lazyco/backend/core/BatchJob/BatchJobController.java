@@ -27,9 +27,9 @@ public class BatchJobController extends AbstractController<BatchJobDTO> {
       case RESTART:
         batchJobDTO = batchJobService.restartJob(batchJobDTO);
         break;
-        //        case PAUSE:
-        //          batchJobDTO = batchJobService.pauseJob(batchJobDTO);
-        //          break;
+      case PAUSE:
+        batchJobDTO = batchJobService.pauseJob(batchJobDTO);
+        break;
       case RESUME:
         batchJobDTO = batchJobService.restartJob(batchJobDTO); // Resume is same as restart
         break;
