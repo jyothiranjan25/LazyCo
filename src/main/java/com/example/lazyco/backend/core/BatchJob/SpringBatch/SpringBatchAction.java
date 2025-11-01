@@ -28,7 +28,7 @@ public class SpringBatchAction {
     }
   }
 
-  public JobExecution getLatestJobExecution(Long jobId) {
+  public JobExecution getJobExecutionById(Long jobId) {
     try {
       JobInstance jobInstances = jobExplorer.getJobInstance(jobId);
       if (jobInstances != null) {
@@ -44,12 +44,12 @@ public class SpringBatchAction {
   }
 
   public boolean isJobRunning(Long jobId) {
-    JobExecution execution = getLatestJobExecution(jobId);
+    JobExecution execution = getJobExecutionById(jobId);
     return execution != null && execution.getStatus().isRunning();
   }
 
   public boolean stopJob(Long jobId) {
-    JobExecution exec = getLatestJobExecution(jobId);
+    JobExecution exec = getJobExecutionById(jobId);
     if (exec != null && exec.getStatus().isRunning()) {
       try {
         jobOperator.stop(exec.getId());
@@ -63,7 +63,7 @@ public class SpringBatchAction {
   }
 
   public boolean restartJob(Long jobId) {
-    JobExecution exec = getLatestJobExecution(jobId);
+    JobExecution exec = getJobExecutionById(jobId);
     if (exec != null
         && (exec.getStatus() == BatchStatus.FAILED || exec.getStatus() == BatchStatus.STOPPED)) {
       try {
@@ -78,7 +78,7 @@ public class SpringBatchAction {
   }
 
   public boolean terminateJob(Long jobId) {
-    JobExecution exec = getLatestJobExecution(jobId);
+    JobExecution exec = getJobExecutionById(jobId);
     if (exec != null) {
       try {
         jobOperator.abandon(exec.getId());
