@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
-public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
+public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>>
     implements JobExecutionListener {
 
   private JobRepository jobRepository;
@@ -66,18 +66,25 @@ public abstract class AbstractSpringBatchJob<T, P extends AbstractDTO<?>>
     this.chunkSize = chunkSize;
   }
 
-  public void executeJob(List<T> inputData) {
+  @SuppressWarnings("unchecked")
+  public void executeJob(T inputData) {
     try {
-      ApplicationLogger.info(
-          "Executing Spring Batch job: " + jobName + " with " + inputData.size() + " items");
-      this.executeJobInBackground(inputData, jobName);
+        if(inputData.getObjects()!= null && !inputData.getObjects().isEmpty()){
+            ApplicationLogger.info(
+                    "Executing Spring Batch job: " + jobName + " with input object containing "
+                            + inputData.getObjects().size() + " items");
+            this.executeJobInBackground((List<T>) inputData.getObjects(), jobName);
+        } else {
+            ApplicationLogger.info(
+                    "No input objects found in the provided DTO for job: " + jobName);
+        }
     } catch (Exception e) {
       ApplicationLogger.error("Failed to execute Spring Batch job: " + jobName, e);
       throw new RuntimeException("Batch job execution failed", e);
     }
   }
 
-  public void executeJobInBackground(List<T> inputData, String batchJobName) {
+  private void executeJobInBackground(List<T> inputData, String batchJobName) {
     try {
       this.batchJobDTO = new BatchJobDTO(); // Direct assignment, removing redundant variable
 

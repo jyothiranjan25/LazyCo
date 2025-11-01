@@ -18,7 +18,7 @@
         <springframework.version>6.2.10</springframework.version>
         <springframework.data.version>2025.0.3</springframework.data.version>
         <springframework.security.version>6.5.3</springframework.security.version>
-        <springframework.batch.version>5.2.2</springframework.batch.version>
+        <springframework.batch.version>5.2.4</springframework.batch.version>
         <!-- /Spring Framework dependencies -->
         <hibernate.orm.version>7.1.0.Final</hibernate.orm.version>
         <lombok.version>1.18.36</lombok.version>
