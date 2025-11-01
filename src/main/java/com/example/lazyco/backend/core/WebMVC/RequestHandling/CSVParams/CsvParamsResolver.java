@@ -61,8 +61,6 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
     if (!Objects.equals(file.getExtension(), FileTypeEnum.CSV.name().toLowerCase())) {
       throw new ExceptionWrapper("Uploaded file is not a CSV file");
     }
-    // Parse CSV and map to DTO
-    Class<?> dtoType = parameter.getParameterType();
     try {
       AbstractDTO dtoInstance =
           RequestHandlingHelper.populateDTOFromRequest(parameter, multipartRequest);
