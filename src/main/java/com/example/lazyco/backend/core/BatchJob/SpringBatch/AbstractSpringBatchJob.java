@@ -4,8 +4,10 @@ import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.BatchJob.BatchJob;
 import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
 import com.example.lazyco.backend.core.BatchJob.BatchJobService;
+import com.example.lazyco.backend.core.CsvTemplate.CsvService;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
@@ -20,14 +22,13 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>>
-    implements JobExecutionListener {
+    implements JobExecutionListener, StepExecutionListener {
 
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
@@ -69,6 +70,8 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
   @SuppressWarnings("unchecked")
   public void executeJob(T inputData) {
     try {
+      List<?> listDate = CsvService.generateCsvToList(inputData.getFile(), inputData.getClass());
+      inputData.setObjects(listDate);
       if (inputData.getObjects() != null && !inputData.getObjects().isEmpty()) {
         ApplicationLogger.info(
             "Executing Spring Batch job: "
@@ -183,6 +186,7 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
       return new StepBuilder(jobName + "Step", jobRepository)
           .<T, P>chunk(chunkSize, transactionManager)
+          .listener(this)
           .reader(ItemReader(inputData))
           .processor(compositeProcessor)
           .writer(compositeWriter)
@@ -222,14 +226,7 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
   }
 
   protected ItemReader<T> ItemReader(List<T> inputData) {
-    return new ItemReader<>() {
-      private final ListItemReader<T> delegate = new ListItemReader<>(inputData);
-
-      @Override
-      public T read() {
-        return delegate.read();
-      }
-    };
+    return new CheckpointingItemReader<>(inputData, "checkpoint_" + jobName + ".chk");
   }
 
   protected abstract ItemProcessor<T, P> createItemProcessor();
@@ -272,6 +269,21 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
     itemCounter.set(0);
     ApplicationLogger.info("Set system job flag to true for batch processing");
     updateJobStatus(BatchJob.BatchJobStatus.RUNNING);
+  }
+
+  @Override
+  public void beforeStep(StepExecution stepExecution) {
+    ApplicationLogger.info("Starting Step: " + stepExecution.getStepName());
+  }
+
+  @Override
+  public ExitStatus afterStep(StepExecution stepExecution) {
+    ApplicationLogger.info(
+        "Completed Step: "
+            + stepExecution.getStepName()
+            + " with status: "
+            + stepExecution.getStatus());
+    return stepExecution.getExitStatus();
   }
 
   @Override
@@ -327,6 +339,57 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
     // Send notification
     if (batchJobDTO != null) {
       batchJobService.sendNotificationToUser(batchJobDTO);
+    }
+  }
+
+  public static class CheckpointingItemReader<T> implements ItemReader<T> {
+
+    private final List<T> data;
+    private int currentIndex = 0;
+    private final File checkpointFile;
+
+    public CheckpointingItemReader(List<T> data, String checkpointFilePath) {
+      this.data = data;
+      this.checkpointFile = new File(checkpointFilePath);
+      restoreCheckpoint();
+    }
+
+    @Override
+    public T read() {
+      if (currentIndex >= data.size()) {
+        return null; // end of data
+      }
+      T item = data.get(currentIndex++);
+      saveCheckpoint();
+      return item;
+    }
+
+    private void saveCheckpoint() {
+      try (FileWriter fw = new FileWriter(checkpointFile)) {
+        fw.write(String.valueOf(currentIndex));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    private void restoreCheckpoint() {
+      if (checkpointFile.exists()) {
+        try (BufferedReader br = new BufferedReader(new FileReader(checkpointFile))) {
+          String line = br.readLine();
+          if (line != null && !line.isEmpty()) {
+            currentIndex = Integer.parseInt(line);
+          }
+        } catch (Exception e) {
+          currentIndex = 0;
+        }
+      }
+    }
+
+    public void resetCheckpoint() {
+      if (checkpointFile.exists()) {
+        checkpointFile.delete();
+      }
+      currentIndex = 0;
     }
   }
 }
