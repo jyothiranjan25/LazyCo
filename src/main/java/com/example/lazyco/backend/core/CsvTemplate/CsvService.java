@@ -1,19 +1,23 @@
 package com.example.lazyco.backend.core.CsvTemplate;
 
+import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstrains;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
+import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.CSVWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -170,5 +174,51 @@ public class CsvService {
           "Failed to determine generic type for collection field: " + field.getName(), e);
     }
     return Object.class;
+  }
+
+  public static List<?> generateCsvToList(FileDTO file, Class<?> dtoType) {
+    try {
+      try (InputStream fis = new FileInputStream(file.getFile());
+          BOMInputStream bomInputStream =
+              BOMInputStream.builder()
+                  .setInputStream(fis)
+                  .setByteOrderMarks(
+                      ByteOrderMark.UTF_8,
+                      ByteOrderMark.UTF_16LE,
+                      ByteOrderMark.UTF_16BE,
+                      ByteOrderMark.UTF_32LE,
+                      ByteOrderMark.UTF_32BE)
+                  .setInclude(false)
+                  .get();
+          Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
+
+        List<Map<String, String>> rows = new ArrayList<>();
+        try (CSVReaderHeaderAware readers = new CSVReaderHeaderAware(reader)) {
+          // 👇 Skip the first row after headers
+          readers.skip(1);
+
+          Map<String, String> row; // Read each subsequent row
+          while ((row = readers.readMap()) != null) {
+            // ✅ Skip completely empty rows
+            boolean isEmptyRow =
+                row.values().stream().allMatch(v -> v == null || v.trim().isEmpty());
+            if (isEmptyRow) {
+              continue;
+            }
+            rows.add(row);
+          }
+        }
+
+        List<AbstractDTO> dtoList = new ArrayList<>();
+        for (Map<String, String> row : rows) {
+          String json = GsonSingleton.getCsvInstance().toJson(row);
+          Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
+          dtoList.add((AbstractDTO) dto);
+        }
+        return dtoList;
+      }
+    } catch (Exception e) {
+      throw new ExceptionWrapper("Failed to parse CSV into DTO: " + dtoType.getName(), e);
+    }
   }
 }

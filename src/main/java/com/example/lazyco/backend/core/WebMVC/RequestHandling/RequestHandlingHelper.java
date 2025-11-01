@@ -12,7 +12,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -47,7 +48,26 @@ public class RequestHandlingHelper {
             jsonObject.toString(), (Class<? extends AbstractDTO>) parameter.getParameterType());
   }
 
-  // Read file from multipart request by parameter name
+  // Read all files from multipart request
+  public static List<FileDTO> readMultipleFileFromMultiPartRequest(
+      MultipartHttpServletRequest multipartRequest) {
+    return multipartRequest.getFileMap().values().stream()
+        .map(
+            multipartFile -> {
+              try {
+                return RequestHandlingHelper.readFileFromMultiPartRequest(multipartFile);
+              } catch (Exception e) {
+                ApplicationLogger.error(
+                    "Error processing file: " + multipartFile.getOriginalFilename(), e);
+                return null;
+              }
+            })
+        .filter(Objects::nonNull)
+        .filter(dto -> dto.getFile() != null && dto.getFile().length() > 0)
+        .collect(Collectors.toList());
+  }
+
+  // Read single file from multipart request by parameter name
   public static FileDTO readFileFromMultiPartRequest(
       String paramName, MultipartHttpServletRequest multipartRequest) throws IOException {
     MultipartFile file = multipartRequest.getFile(paramName);
@@ -57,7 +77,31 @@ public class RequestHandlingHelper {
     return readFileFromMultiPartRequest(file);
   }
 
-  // Read file from multipart request and save to temp location
+  // Use this method to extract files from the request and ignore empty files
+  @Deprecated
+  private Map<String, FileDTO> extractFilesFromRequest(
+      MultipartHttpServletRequest multipartRequest) {
+    Map<String, FileDTO> filesMap = new HashMap<>();
+    multipartRequest
+        .getFileMap()
+        .forEach(
+            (paramName, multipartFile) -> {
+              try {
+                FileDTO fileDTO = readFileFromMultiPartRequest(multipartFile);
+                if (fileDTO != null
+                    && fileDTO.getFile() != null
+                    && fileDTO.getFile().length() > 0) {
+                  filesMap.put(paramName, fileDTO);
+                }
+              } catch (Exception e) {
+                ApplicationLogger.error("Error processing file parameter: " + paramName, e);
+              }
+            });
+
+    return filesMap;
+  }
+
+  // Read single file, validate, and save to a safe temp directory
   public static FileDTO readFileFromMultiPartRequest(MultipartFile file) throws IOException {
     if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
       return null;

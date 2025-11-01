@@ -69,15 +69,17 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
   @SuppressWarnings("unchecked")
   public void executeJob(T inputData) {
     try {
-        if(inputData.getObjects()!= null && !inputData.getObjects().isEmpty()){
-            ApplicationLogger.info(
-                    "Executing Spring Batch job: " + jobName + " with input object containing "
-                            + inputData.getObjects().size() + " items");
-            this.executeJobInBackground((List<T>) inputData.getObjects(), jobName);
-        } else {
-            ApplicationLogger.info(
-                    "No input objects found in the provided DTO for job: " + jobName);
-        }
+      if (inputData.getObjects() != null && !inputData.getObjects().isEmpty()) {
+        ApplicationLogger.info(
+            "Executing Spring Batch job: "
+                + jobName
+                + " with input object containing "
+                + inputData.getObjects().size()
+                + " items");
+        this.executeJobInBackground((List<T>) inputData.getObjects(), jobName);
+      } else {
+        ApplicationLogger.info("No input objects found in the provided DTO for job: " + jobName);
+      }
     } catch (Exception e) {
       ApplicationLogger.error("Failed to execute Spring Batch job: " + jobName, e);
       throw new RuntimeException("Batch job execution failed", e);
