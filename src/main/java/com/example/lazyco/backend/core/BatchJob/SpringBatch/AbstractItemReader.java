@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
+import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.io.*;
 import java.util.List;
 import org.springframework.batch.item.ItemReader;
@@ -20,6 +21,7 @@ public class AbstractItemReader<I> implements ItemReader<I> {
     if (currentIndex >= data.size()) {
       return null; // end of data
     }
+    ApplicationLogger.info("Current Index: " + currentIndex);
     I item = data.get(currentIndex++);
     saveCheckpoint();
     return item;
