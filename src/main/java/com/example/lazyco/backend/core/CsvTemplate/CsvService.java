@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.CsvTemplate;
 
-import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
@@ -213,7 +212,7 @@ public class CsvService {
         for (Map<String, String> row : rows) {
           String json = GsonSingleton.getCsvInstance().toJson(row);
           Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
-          dtoList.add((T)dto);
+          dtoList.add((T) dto);
         }
         return dtoList;
       }

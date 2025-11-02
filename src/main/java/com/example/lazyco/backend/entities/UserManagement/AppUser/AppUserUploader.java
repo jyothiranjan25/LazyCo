@@ -1,13 +1,13 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
-import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractSpringBatchJob;
+import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractBatchJob;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppUserUploader extends AbstractSpringBatchJob<AppUserDTO, AppUserDTO> {
+public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
 
   private final AppUserService appUserService;
 

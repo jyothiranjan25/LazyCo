@@ -7,9 +7,8 @@ import com.example.lazyco.backend.core.BatchJob.BatchJobService;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import java.io.*;
+
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.batch.core.*;
@@ -27,10 +26,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
-public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
+public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
 
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
+  private AbstractJobListener jobListener;
+  private AbstractStepListener stepListener;
+  private AbstractChunkListener chunkListener;
   private PlatformTransactionManager transactionManager;
   private BatchJobService batchJobService;
 
@@ -38,10 +40,16 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
   public void injectDependencies(
       JobRepository jobRepository,
       JobLauncher jobLauncher,
+      AbstractJobListener jobListener,
+      AbstractStepListener stepListener,
+      AbstractChunkListener chunkListener,
       PlatformTransactionManager transactionManager,
       BatchJobService batchJobService) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
+    this.jobListener = jobListener;
+    this.stepListener = stepListener;
+    this.chunkListener = chunkListener;
     this.transactionManager = transactionManager;
     this.batchJobService = batchJobService;
   }
@@ -50,18 +58,19 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
 
   protected String jobName;
 
-  public AbstractSpringBatchJob() {
+  public AbstractBatchJob() {
     this.jobName = this.getClass().getSimpleName();
   }
 
-  public AbstractSpringBatchJob(String jobName) {
+  public AbstractBatchJob(String jobName) {
     this.jobName = jobName;
   }
 
   @SuppressWarnings("unchecked")
   public void executeJob(T inputData) {
     try {
-      List<T> listDate = (List<T>) CsvService.generateCsvToList(inputData.getFile(), inputData.getClass());
+      List<T> listDate =
+          (List<T>) CsvService.generateCsvToList(inputData.getFile(), inputData.getClass());
       if (!listDate.isEmpty()) {
         ApplicationLogger.info(
             "Executing Spring Batch job: "
@@ -121,7 +130,7 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
   protected Job createJob(List<T> inputData) {
     try {
       return new JobBuilder(jobName, jobRepository)
-          .listener(this)
+          .listener(jobListener)
           .start(createProcessingStep(inputData))
           .build();
     } catch (Exception e) {
@@ -140,7 +149,8 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
       return new StepBuilder(jobName + "Step", jobRepository)
           .<T, P>chunk(1, transactionManager)
-          .listener(this)
+          .listener(stepListener)
+          .listener(chunkListener)
           .reader(ItemReader(inputData))
           .processor(compositeProcessor)
           .writer(compositeWriter)
@@ -158,7 +168,7 @@ public abstract class AbstractSpringBatchJob<T extends AbstractDTO<?>, P extends
 
   protected ItemProcessor<T, P> createCompositeProcessor(ItemProcessor<T, P> userProcessor) {
     return item -> {
-        return userProcessor != null ? userProcessor.process(item) : null;
+      return userProcessor != null ? userProcessor.process(item) : null;
     };
   }
 
