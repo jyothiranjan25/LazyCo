@@ -1,15 +1,10 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.BatchJob.BatchJob;
-import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
-import com.example.lazyco.backend.core.BatchJob.BatchJobService;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
-import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.util.*;
-import lombok.Getter;
-import lombok.Setter;
+import javax.sql.DataSource;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -21,39 +16,34 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
 
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
+  private DataSource dataSource;
   private AbstractJobListener jobListener;
   private AbstractStepListener stepListener;
   private AbstractChunkListener chunkListener;
-  private PlatformTransactionManager transactionManager;
-  private BatchJobService batchJobService;
 
   @Autowired
   public void injectDependencies(
       JobRepository jobRepository,
       JobLauncher jobLauncher,
+      DataSource dataSource,
       AbstractJobListener jobListener,
       AbstractStepListener stepListener,
-      AbstractChunkListener chunkListener,
-      PlatformTransactionManager transactionManager,
-      BatchJobService batchJobService) {
+      AbstractChunkListener chunkListener) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
+    this.dataSource = dataSource;
     this.jobListener = jobListener;
     this.stepListener = stepListener;
     this.chunkListener = chunkListener;
-    this.transactionManager = transactionManager;
-    this.batchJobService = batchJobService;
   }
-
-  @Setter @Getter protected BatchJobDTO batchJobDTO;
 
   protected String jobName;
 
@@ -89,11 +79,6 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   private void executeJobInBackground(List<T> inputData, String batchJobName) {
     try {
-      this.batchJobDTO = new BatchJobDTO(); // Direct assignment, removing redundant variable
-
-      // Create batch job record
-      createBatchJobRecord(batchJobName, inputData.size());
-
       Job job = createJob(inputData);
       JobParameters jobParameters =
           new JobParametersBuilder()
@@ -104,26 +89,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in executeJob: " + e.getMessage(), e);
-      if (batchJobDTO != null) {
-        updateJobStatus(BatchJob.BatchJobStatus.FAILED);
-      }
     }
-  }
-
-  protected void createBatchJobRecord(String batchJobName, int totalItems) {
-    batchJobDTO.setName(batchJobName);
-    batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
-    batchJobDTO.setTotalItemCount(totalItems);
-    batchJobDTO.setStatus(BatchJob.BatchJobStatus.INITIALIZED);
-
-    batchJobDTO = batchJobService.create(batchJobDTO);
-    ApplicationLogger.info(
-        "Created batch job record with ID: "
-            + batchJobDTO.getId()
-            + ", name: "
-            + batchJobName
-            + ", total items: "
-            + totalItems);
   }
 
   protected Job createJob(List<T> inputData) {
@@ -147,7 +113,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       if (userProcessor == null) ApplicationLogger.error("[BATCH] User processor is null!");
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
       return new StepBuilder(jobName + "Step", jobRepository)
-          .<T, P>chunk(1, transactionManager)
+          .<T, P>chunk(1, new DataSourceTransactionManager(dataSource))
           .listener(stepListener)
           .listener(chunkListener)
           .reader(ItemReader(inputData))
@@ -199,23 +165,5 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
           "[BATCH] Skipping failed item (skip count: " + skipCount + ") due to: " + t.getMessage());
       return true;
     };
-  }
-
-  protected void updateJobStatus(BatchJob.BatchJobStatus status) {
-    if (batchJobDTO == null) return;
-
-    try {
-      BatchJobDTO updateObject = new BatchJobDTO();
-      updateObject.setId(batchJobDTO.getId());
-      updateObject.setStatus(status);
-      if (status == BatchJob.BatchJobStatus.COMPLETED || status == BatchJob.BatchJobStatus.FAILED) {
-        updateObject.setEndTime(DateTimeZoneUtils.getCurrentDate());
-      }
-
-      batchJobService.update(updateObject);
-      ApplicationLogger.info("Updated batch job " + batchJobDTO.getId() + " status to: " + status);
-    } catch (Exception e) {
-      ApplicationLogger.error("Failed to update batch job status", e);
-    }
   }
 }

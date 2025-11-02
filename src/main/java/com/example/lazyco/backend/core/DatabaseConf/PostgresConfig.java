@@ -167,7 +167,7 @@ public class PostgresConfig {
     config.setKeepaliveTime(keepaliveTime);
 
     // Disable auto-commit, Hibernate manages transactions
-    config.setAutoCommit(false);
+    config.setAutoCommit(true);
     // Custom pool name (useful for monitoring/metrics)
     config.setPoolName("HikariPool-HighConcurrency");
     // Lightweight validation query for checking connections
@@ -190,8 +190,6 @@ public class PostgresConfig {
 
     // Dialect for SQL generation (e.g., PostgreSQLDialect, MySQLDialect, etc.)
     properties.put(AvailableSettings.DIALECT, hibernateDialect);
-    // Disable auto-commit handling by Hibernate (let Spring/JPA manage it)
-    properties.put(AvailableSettings.CONNECTION_PROVIDER_DISABLES_AUTOCOMMIT, "true");
     // Number of statements to batch before execution
     properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "100");
     // Optimize insert batching by ordering inserts by entity
@@ -228,8 +226,6 @@ public class PostgresConfig {
     // Strategy for schema generation/validation (validate, update, create, create-drop)
     properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);
 
-    // Disable Hibernate autocommit — handled by Spring Tx manager
-    properties.put(AvailableSettings.AUTOCOMMIT, "false");
     // Ensure JPA transaction behavior is strictly followed
     properties.put(AvailableSettings.JPA_TRANSACTION_COMPLIANCE, "false");
     // Allow Hibernate to handle transaction coordination with Spring
