@@ -18,6 +18,7 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   @Override
   protected ItemProcessor<AppUserDTO, AppUserDTO> createItemProcessor() {
     return item -> {
+      ApplicationLogger.info("AppUserUploader: Processing AppUserDTO");
       // Here you can implement any processing logic if needed
       return item;
     };

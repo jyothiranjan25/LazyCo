@@ -18,10 +18,10 @@ public class AbstractItemReader<I> implements ItemReader<I> {
 
   @Override
   public I read() {
+    ApplicationLogger.info("Current Index: " + currentIndex);
     if (currentIndex >= data.size()) {
       return null; // end of data
     }
-    ApplicationLogger.info("Current Index: " + currentIndex);
     I item = data.get(currentIndex++);
     saveCheckpoint();
     return item;
