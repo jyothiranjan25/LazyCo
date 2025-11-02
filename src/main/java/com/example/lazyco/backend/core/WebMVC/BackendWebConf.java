@@ -9,6 +9,8 @@ import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryP
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.MediaType;
@@ -26,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 @Configuration
 @EnableScheduling
+@EnableBatchProcessing
 @Import({PostgresConfig.class})
 @EnableAsync(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)

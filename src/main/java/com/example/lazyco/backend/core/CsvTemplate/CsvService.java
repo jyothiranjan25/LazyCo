@@ -176,7 +176,7 @@ public class CsvService {
     return Object.class;
   }
 
-  public static List<?> generateCsvToList(FileDTO file, Class<?> dtoType) {
+  public static <T> List<T> generateCsvToList(FileDTO file, Class<T> dtoType) {
     try {
       try (InputStream fis = new FileInputStream(file.getFile());
           BOMInputStream bomInputStream =
@@ -209,11 +209,11 @@ public class CsvService {
           }
         }
 
-        List<AbstractDTO> dtoList = new ArrayList<>();
+        List<T> dtoList = new ArrayList<>();
         for (Map<String, String> row : rows) {
           String json = GsonSingleton.getCsvInstance().toJson(row);
           Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
-          dtoList.add((AbstractDTO) dto);
+          dtoList.add((T)dto);
         }
         return dtoList;
       }

@@ -83,10 +83,6 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   private String searchString;
 
-  public void setObjects(List<?> listDate) {
-    this.objects = (List<D>) listDate;
-  }
-
   // This field holds the actual entity class that this DTO filters
   // It is set based on the @FilteredEntity annotation
   @Expose(serialize = false, deserialize = false)
