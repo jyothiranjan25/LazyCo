@@ -21,6 +21,7 @@ public class FileDTO {
   private final File file;
   private final String extension;
   private final String contentType;
+  private final String mimeType;
   private final Long fileSize;
   private byte[] byteArray;
   private ByteArrayOutputStream byteArrayOutputStream;
@@ -41,6 +42,7 @@ public class FileDTO {
       this.absolutePath = file.getAbsolutePath();
       this.fileDirectory = file.getParent();
       this.contentType = new Tika().detect(file);
+      this.mimeType = this.contentType != null ? this.contentType.split("/")[0] : "unknown";
       this.fileSize = FileUtils.sizeOf(file);
       if (!FileTypeEnum.isSupported(this.extension)) {
         throw new ExceptionWrapper(

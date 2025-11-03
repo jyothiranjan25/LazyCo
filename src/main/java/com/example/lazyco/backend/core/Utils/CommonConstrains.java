@@ -1,9 +1,11 @@
 package com.example.lazyco.backend.core.Utils;
 
 public interface CommonConstrains extends APISchema {
+  String HOME_DIR = System.getProperty("catalina.home");
+  String TEMP_DIR = System.getProperty("java.io.tmpdir");
   // Tomcat home directory
-  String TOMCAT_HOME = System.getProperty("catalina.home").concat("/"); // Tomcat home directory
-  String TOMCAT_TEMP = System.getProperty("java.io.tmpdir").concat("/"); // Tomcat temp directory
+  String TOMCAT_HOME = HOME_DIR.concat("/"); // Tomcat home directory
+  String TOMCAT_TEMP = TEMP_DIR.concat("/"); // Tomcat temp directory
 
   // File Storage Locations
   String UPLOADS_LOCATION = TOMCAT_HOME.concat("uploads/");

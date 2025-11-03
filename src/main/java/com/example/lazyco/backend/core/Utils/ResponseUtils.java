@@ -3,9 +3,12 @@ package com.example.lazyco.backend.core.Utils;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.SimpleResponseDTO;
 import com.example.lazyco.backend.core.File.FileDTO;
+import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.http.*;
 
 /**
@@ -45,6 +48,50 @@ public class ResponseUtils {
     return ResponseEntity.status(httpStatusCode)
         .contentType(MediaType.APPLICATION_JSON)
         .body(abstractDTO);
+  }
+
+  private static JSONObject prepareJsonObject(String responseKey, JSONObject jsonObject) {
+    if (responseKey != null && !responseKey.isEmpty()) {
+      Object obj = jsonObject.get("objects");
+      jsonObject.remove("objects");
+      jsonObject.put(responseKey, obj);
+    }
+    return jsonObject;
+  }
+
+  private static <T extends AbstractDTO<T>> JSONObject prepareJsonObject(
+      String responseKey, T abstractDTO) {
+    JSONObject jsonObject = GsonSingleton.convertObjectToJSONObject(abstractDTO);
+    return prepareJsonObject(responseKey, jsonObject);
+  }
+
+  public static <T extends AbstractDTO<T>> ResponseEntity<?> sendResponse(
+      String responseKey, T abstractDTO) {
+    return sendResponse(prepareJsonObject(responseKey, abstractDTO));
+  }
+
+  public static <T extends AbstractDTO<T>> ResponseEntity<?> sendResponse(
+      HttpStatus httpStatus, String responseKey, T abstractDTO) {
+    return sendResponse(httpStatus, prepareJsonObject(responseKey, abstractDTO));
+  }
+
+  public static <T extends AbstractDTO<T>> ResponseEntity<?> sendResponse(
+      HttpStatusCode httpStatusCode, String responseKey, T abstractDTO) {
+    return sendResponse(httpStatusCode, prepareJsonObject(responseKey, abstractDTO));
+  }
+
+  public static ResponseEntity<?> sendResponse(JSONObject jsonObject) {
+    return sendResponse(HttpStatus.OK, jsonObject);
+  }
+
+  public static ResponseEntity<?> sendResponse(HttpStatus httpStatus, JSONObject jsonObject) {
+    return sendResponse((HttpStatusCode) httpStatus, jsonObject);
+  }
+
+  public static ResponseEntity<?> sendResponse(
+      HttpStatusCode httpStatusCode, JSONObject jsonObject) {
+    Map<String, Object> map = jsonObject.toMap();
+    return ResponseEntity.status(httpStatusCode).contentType(MediaType.APPLICATION_JSON).body(map);
   }
 
   public static ResponseEntity<?> sendResponse(FileDTO fileDTO) {
