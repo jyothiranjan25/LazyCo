@@ -18,13 +18,14 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
 
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
-  private DataSource dataSource;
+  private PlatformTransactionManager transactionManager;
   private AbstractJobListener jobListener;
   private AbstractStepListener stepListener;
   private AbstractChunkListener chunkListener;
@@ -33,13 +34,13 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   public void injectDependencies(
       JobRepository jobRepository,
       JobLauncher jobLauncher,
-      DataSource dataSource,
+      PlatformTransactionManager transactionManager,
       AbstractJobListener jobListener,
       AbstractStepListener stepListener,
       AbstractChunkListener chunkListener) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
-    this.dataSource = dataSource;
+    this.transactionManager = transactionManager;
     this.jobListener = jobListener;
     this.stepListener = stepListener;
     this.chunkListener = chunkListener;
@@ -113,7 +114,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       if (userProcessor == null) ApplicationLogger.error("[BATCH] User processor is null!");
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
       return new StepBuilder(jobName + "Step", jobRepository)
-          .<T, P>chunk(1, new DataSourceTransactionManager(dataSource))
+          .<T, P>chunk(1, transactionManager)
           .listener(stepListener)
           .listener(chunkListener)
           .reader(ItemReader(inputData))
