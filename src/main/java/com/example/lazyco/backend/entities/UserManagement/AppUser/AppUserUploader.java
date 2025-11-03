@@ -6,6 +6,15 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Service;
 
+/**
+ * AppUserUploader is a batch job service that processes and uploads AppUserDTO objects. It extends
+ * AbstractBatchJob to leverage batch processing capabilities.
+ *
+ * @see AbstractBatchJob
+ * @see AppUserDTO
+ * @see AppUserService use @Scope("prototype") at service if you want a new instance each time else
+ *     use applicationContect.getBean(AppUserUploader.class) to get a new instance each time
+ */
 @Service
 public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
 

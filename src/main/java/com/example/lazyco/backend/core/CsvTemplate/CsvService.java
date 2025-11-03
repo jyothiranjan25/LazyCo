@@ -175,7 +175,7 @@ public class CsvService {
     return Object.class;
   }
 
-  public static <T> List<T> generateCsvToList(FileDTO file, Class<T> dtoType) {
+  public <T> List<T> generateCsvToList(FileDTO file, Class<T> dtoType) {
     try {
       try (InputStream fis = new FileInputStream(file.getFile());
           BOMInputStream bomInputStream =
