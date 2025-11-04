@@ -11,6 +11,7 @@ import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.CSVWriter;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,12 +68,12 @@ public class CsvService {
                       options.put(f.getName(), "yyyy-MM-dd");
                     } else if (Collection.class.isAssignableFrom(f.getType())) {
                       Class<?> genericType = getCollectionGenericType(f);
+                      List<String> enumValues = List.of();
                       if (genericType.isEnum()) {
                         Object[] constants = genericType.getEnumConstants();
-                        List<String> enumValues =
-                            Arrays.stream(constants).map(Object::toString).toList();
-                        options.put(f.getName(), "[" + String.join(",", enumValues) + "]");
+                        enumValues = Arrays.stream(constants).map(Object::toString).toList();
                       }
+                      options.put(f.getName(), "[" + String.join(",", enumValues) + "]");
                     }
                   } catch (Exception e) {
                     ApplicationLogger.warn("Failed to process enum field: " + f.getName(), e);
@@ -159,7 +160,7 @@ public class CsvService {
   private Class<?> getCollectionGenericType(Field field) {
     try {
       var genericType = field.getGenericType();
-      if (genericType instanceof java.lang.reflect.ParameterizedType parameterizedType) {
+      if (genericType instanceof ParameterizedType parameterizedType) {
         var typeArgs = parameterizedType.getActualTypeArguments();
         if (typeArgs.length == 1) {
           var typeArg = typeArgs[0];
