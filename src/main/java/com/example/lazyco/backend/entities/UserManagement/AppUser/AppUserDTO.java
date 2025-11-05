@@ -4,7 +4,6 @@ import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFilt
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterableField;
-import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
 import java.util.Date;
 import java.util.List;
@@ -33,21 +32,14 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 5)
   private String firstName;
 
-  @FilterableField
   @InternalFilterableField
-  @CsvField(order = 4)
-  private CRUDEnums crudEnum;
-
-  @CsvField(order = 5)
-  private Date lastLogin;
-
-  @InternalFilterableField private String lastName;
-
   @CsvField(order = 6)
-  @FilterableField
-  private List<CRUDEnums> permissions;
+  private String lastName;
 
   @CsvField(order = 7)
+  private Date lastLogin;
+
+  @CsvField(order = 8)
   @FilterableField
-  private List<String> permissions1;
+  private List<AuthorityEntity> authorities;
 }

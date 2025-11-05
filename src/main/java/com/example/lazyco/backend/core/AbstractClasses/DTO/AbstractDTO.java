@@ -119,7 +119,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
       // ✅ Check if annotation is present first
       if (!this.getClass().isAnnotationPresent(FilteredEntity.class)) {
         throw new ExceptionWrapper(
-            "Class " + this.getClass().getName() + " is not annotated with @FilteredEntity");
+            "Class " + this.getClass().getSimpleName() + " is not annotated with @FilteredEntity");
       }
 
       FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);

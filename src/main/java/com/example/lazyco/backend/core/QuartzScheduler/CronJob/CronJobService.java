@@ -2,6 +2,7 @@ package com.example.lazyco.backend.core.QuartzScheduler.CronJob;
 
 import static org.quartz.JobBuilder.newJob;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleDTO;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleService;
@@ -78,9 +79,8 @@ public class CronJobService {
   /** method to run at the startup, that will start all the active cronJobSchedules */
   @EventListener(ContextRefreshedEvent.class)
   public void startAllActiveCronJobs() {
-    //        setSystemJob(true);
+    AbstractAction.setBypassRBAC(true);
     try {
-
       // get all the active cronJobSchedules
       CronJobScheduleDTO cronJobScheduleDTO = new CronJobScheduleDTO();
       cronJobScheduleDTO.setStatus(true);
@@ -88,15 +88,15 @@ public class CronJobService {
       // get the cronJobScheduleDTOs
       List<CronJobScheduleDTO> cronJobScheduleDTOs = cronJobScheduleService.get(cronJobScheduleDTO);
 
+      ApplicationLogger.info("Started cron jobs: " + cronJobScheduleDTOs.size());
       // loop through the cronJobScheduleDTOs and add the cron jobs
       for (CronJobScheduleDTO cronJobSchedule : cronJobScheduleDTOs) {
-        ApplicationLogger.info("Started cron jobs: " + cronJobScheduleDTOs.size());
         CronJobTypeEnum cronJobType = cronJobSchedule.getCronJobType();
         Class<? extends Job> jobClass = cronJobType.getCronJobType();
         addCronJob(jobClass, cronJobSchedule);
       }
     } finally {
-      //            setSystemJob(false);
+      AbstractAction.setBypassRBAC(false);
     }
   }
 

@@ -208,6 +208,10 @@ public class PostgresConfig {
         "org.springframework.orm.hibernate5.SpringSessionContext");
     // Disallow updates outside of a transaction
     properties.put(AvailableSettings.ALLOW_UPDATE_OUTSIDE_TRANSACTION, "false");
+    // Set maximum depth for outer joins/fetching associations
+    properties.put(AvailableSettings.MAX_FETCH_DEPTH, "3");
+    // Allow lazy loading outside of transactions
+    properties.put(AvailableSettings.ENABLE_LAZY_LOAD_NO_TRANS, "false");
 
     // Enable/disable second-level cache
     properties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, useSecondLevelCache);

@@ -61,14 +61,7 @@ public class AbstractModelMapper {
       if (source == null) {
         return null;
       }
-
-      E cloneEntity = source;
-
-      // Check if the source object is cloneable and clone it
-      if (source instanceof Cloneable) {
-        cloneEntity = (E) source.getClass().getMethod("clone").invoke(source);
-      }
-
+      // Note: Don't use clone method as it won't clone the lazy loaded entities properly
       // Create a new ObjectMapper instance for serialization
       ObjectMapper objectMapper = new ObjectMapper();
       JacksonDepthHandler.registerModule(objectMapper);
@@ -76,7 +69,7 @@ public class AbstractModelMapper {
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-      String jsonString = objectMapper.writeValueAsString(cloneEntity);
+      String jsonString = objectMapper.writeValueAsString(source);
       String cleanJsonString = JSONUtils.removeNumbersAndReferences(jsonString);
 
       E newEntity = (E) GsonSingleton.JsonStringToObject(cleanJsonString, source.getClass());

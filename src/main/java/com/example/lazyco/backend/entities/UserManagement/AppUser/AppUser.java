@@ -1,8 +1,8 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
-import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import jakarta.persistence.*;
+import java.util.Date;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,21 +35,28 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AppUser extends AbstractRBACModel {
 
-  @Column(name = "user_id", length = 50, comment = "Unique user identifier")
+  @Column(name = "user_id", comment = "Unique user identifier")
   private String userId;
 
   @Column(name = "password", comment = "Hashed user password")
   private String password;
 
-  @Column(name = "email", length = 100, comment = "User email address")
+  @Column(name = "email", comment = "User email address")
   private String email;
 
-  @Column(name = "first_name", length = 50, comment = "User first name")
+  @Column(name = "first_name", comment = "User first name")
   private String firstName;
 
-  @Column(name = "last_name", length = 50, comment = "User last name")
+  @Column(name = "last_name", comment = "User last name")
   private String lastName;
 
+  @Column(name = "last_login", comment = "Timestamp of the last user login")
+  private Date lastLogin;
+
+  @Column(name = "ip_address", comment = "User IP address")
+  private String ipAddress;
+
   @Enumerated(EnumType.STRING)
-  private List<CRUDEnums> permissions;
+  @Column(name = "authorities", comment = "User authorities/roles")
+  private List<AuthorityEntity> authorities;
 }

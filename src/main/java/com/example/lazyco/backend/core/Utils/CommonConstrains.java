@@ -1,6 +1,16 @@
 package com.example.lazyco.backend.core.Utils;
 
-public interface CommonConstrains extends APISchema {
+public interface CommonConstrains {
+
+  // Base package for the backend application
+  String BACKEND_PACKAGE = "com.example.lazyco.backend";
+
+  // Environment Variables
+  String TEST_MODE = "Test";
+  String DEV_MODE = "Development";
+  String PROD_MODE = "Production";
+
+  // System Properties
   String HOME_DIR = System.getProperty("catalina.home");
   String TEMP_DIR = System.getProperty("java.io.tmpdir");
   // Tomcat home directory

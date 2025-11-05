@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.DateUtils;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -15,14 +16,6 @@ import lombok.NoArgsConstructor;
 /** Modern, thread-safe date/time utilities with deterministic test mode. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateTimeZoneUtils {
-
-  /**
-   * Check if TEST_MODE is enabled via system property. In test mode, current time is fixed to a
-   * specific instant for deterministic testing.
-   */
-  private static boolean isTestMode() {
-    return Boolean.parseBoolean(System.getProperty("TEST_MODE", "false"));
-  }
 
   /**
    * If TEST_MODE is enabled, this reads the fixed time from the system property TEST_FIXED_TIME
@@ -53,7 +46,7 @@ public final class DateTimeZoneUtils {
 
   /** Centralized "now" supplier respecting test mode */
   private static Instant nowInstant() {
-    return isTestMode() ? fixedInstant() : Instant.now();
+    return AbstractAction.isTestEnvironment() ? fixedInstant() : Instant.now();
   }
 
   /**

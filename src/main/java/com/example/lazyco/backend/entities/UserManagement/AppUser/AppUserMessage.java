@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum AppUserMessage implements MessageCodes {
-  USER_ID_REQUIRED("APP_USER.USER_ID_REQUIRED");
+  USER_ID_REQUIRED("APP_USER.USER_ID_REQUIRED"),
+  ;
 
   private final String value;
 
