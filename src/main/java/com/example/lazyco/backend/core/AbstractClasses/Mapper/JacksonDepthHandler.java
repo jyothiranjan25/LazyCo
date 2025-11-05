@@ -50,7 +50,13 @@ public class JacksonDepthHandler {
       int depth = CURRENT_DEPTH.get();
       int identity = System.identityHashCode(o);
 
-      // Prevent infinite recursion
+      // Circular reference check
+      if (SEEN_PATH.get().contains(identity)) {
+        jsonGenerator.writeNull();
+        return;
+      }
+
+      // Prevent infinite recursion by depth check
       if (depth >= MAX_DEPTH) {
         // Skip writing anything at max depth or circular reference
         jsonGenerator.writeNull();
