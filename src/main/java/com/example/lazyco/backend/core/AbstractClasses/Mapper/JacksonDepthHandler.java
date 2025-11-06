@@ -6,16 +6,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class JacksonDepthHandler {
-  // Max depth control never set to 0 to avoid infinite recursion
-  private static final int MAX_DEPTH = 2;
 
-  // ThreadLocal to track depth and avoid shared state issues in multi-threaded environments
-  private static final ThreadLocal<Integer> CURRENT_DEPTH = ThreadLocal.withInitial(() -> 0);
-  private static final ThreadLocal<Set<Integer>> SEEN_PATH = ThreadLocal.withInitial(HashSet::new);
+  // Max depth control never set to 0 to avoid infinite recursion
+  private static final int MAX_DEPTH = 5;
 
   // Register this with your ObjectMapper
   public static void registerModule(ObjectMapper objectMapper) {
@@ -36,6 +32,11 @@ public class JacksonDepthHandler {
   }
 
   private static class DynamicDepthSerializer extends JsonSerializer<Object> {
+
+    // ThreadLocal to track depth and avoid shared state issues in multi-threaded environments
+    private static final ThreadLocal<Integer> CURRENT_DEPTH = ThreadLocal.withInitial(() -> 0);
+    private static final ThreadLocal<Set<Integer>> SEEN_PATH =
+        ThreadLocal.withInitial(HashSet::new);
 
     private final BeanSerializerBase defaultSerializer;
 
@@ -84,14 +85,13 @@ public class JacksonDepthHandler {
     }
 
     // Optionally get "id" field via reflection
-    private String tryGetId(Object obj) {
+    private Object tryGetId(Object obj) {
       try {
         var field = obj.getClass().getDeclaredField("id");
         field.setAccessible(true);
-        Object idVal = field.get(obj);
-        return idVal != null ? idVal.toString() : "unknown";
+        return field.get(obj);
       } catch (Exception e) {
-        return "unknown";
+        return null;
       }
     }
   }

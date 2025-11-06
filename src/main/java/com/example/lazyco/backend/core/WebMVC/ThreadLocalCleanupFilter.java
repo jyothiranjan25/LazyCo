@@ -1,5 +1,6 @@
-package com.example.lazyco.backend.core;
+package com.example.lazyco.backend.core.WebMVC;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
