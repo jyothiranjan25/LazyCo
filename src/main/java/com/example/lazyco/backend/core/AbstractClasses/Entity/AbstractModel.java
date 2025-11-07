@@ -22,21 +22,21 @@ public abstract class AbstractModel implements Serializable, Cloneable {
       pkColumnName = "sequence_name",
       valueColumnName = "next_hi",
       allocationSize = 1)
-  @Column(name = "id")
+  @Column(name = "id",comment = "Primary key of the table")
   private Long id;
 
   @Version private Long version; // for optimistic locking safety
 
-  @Column(name = "created_at")
+  @Column(name = "created_at",comment = "Record creation timestamp",updatable = false)
   private Date createdAt;
 
-  @Column(name = "updated_at")
+  @Column(name = "updated_at",comment = "Record last update timestamp")
   private Date updatedAt;
 
-  @Column(name = "created_by")
+  @Column(name = "created_by",comment = "User who created the record",updatable = false)
   private String createdBy;
 
-  @Column(name = "updated_by")
+  @Column(name = "updated_by",comment = "User who last updated the record")
   private String updatedBy;
 
   @Transient private boolean skipMapping;
