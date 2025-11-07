@@ -64,7 +64,7 @@ public class AbstractModelMapper {
       // Note: Don't use clone method as it won't clone the lazy loaded entities properly
       // Create a new ObjectMapper instance for serialization
       ObjectMapper objectMapper = new ObjectMapper();
-      JacksonDepthHandler.registerModule(objectMapper);
+      JacksonDepthHandler.registerModule(objectMapper, 3); // Set max depth
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

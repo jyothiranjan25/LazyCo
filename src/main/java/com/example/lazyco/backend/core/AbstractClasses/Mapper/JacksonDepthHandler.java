@@ -6,26 +6,30 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class JacksonDepthHandler {
 
-  // Max depth control never set to 0 to avoid infinite recursion
-  private static final int MAX_DEPTH = 5;
-
   // Register this with your ObjectMapper
-  public static void registerModule(ObjectMapper objectMapper) {
+  public static void registerModule(ObjectMapper o, int maxDepth) {
     SimpleModule module = new SimpleModule();
-    module.setSerializerModifier(new DynamicDepthSerializerModifier());
-    objectMapper.registerModule(module);
+    module.setSerializerModifier(new DynamicDepthSerializerModifier(maxDepth));
+    o.registerModule(module);
   }
 
   public static class DynamicDepthSerializerModifier extends BeanSerializerModifier {
+    private final int maxDepth;
+
+    public DynamicDepthSerializerModifier(int maxDepth) {
+      this.maxDepth = maxDepth;
+    }
+
     @Override
     public JsonSerializer<?> modifySerializer(
         SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
       if (serializer instanceof BeanSerializerBase) {
-        return new DynamicDepthSerializer((BeanSerializerBase) serializer);
+        return new DynamicDepthSerializer((BeanSerializerBase) serializer, maxDepth);
       }
       return serializer;
     }
@@ -39,28 +43,33 @@ public class JacksonDepthHandler {
         ThreadLocal.withInitial(HashSet::new);
 
     private final BeanSerializerBase defaultSerializer;
+    // Max depth control never set to 0 to avoid infinite recursion
+    private final int maxDepth;
 
-    public DynamicDepthSerializer(BeanSerializerBase src) {
+    public DynamicDepthSerializer(BeanSerializerBase src, int maxDepth) {
       this.defaultSerializer = src;
+      this.maxDepth = Math.max(1, maxDepth);
     }
 
     @Override
-    public void serialize(
-        Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
-        throws IOException {
+    public void serialize(Object o, JsonGenerator j, SerializerProvider s) throws IOException {
       int depth = CURRENT_DEPTH.get();
       int identity = System.identityHashCode(o);
 
       // Circular reference check
       if (SEEN_PATH.get().contains(identity)) {
-        jsonGenerator.writeNull();
+        //        Object id = tryGetId(o);
+        //        jsonGenerator.writeStartObject();
+        //        jsonGenerator.writeObjectField("id", id);
+        //        jsonGenerator.writeEndObject();
+        j.writeNull();
         return;
       }
 
       // Prevent infinite recursion by depth check
-      if (depth >= MAX_DEPTH) {
+      if (depth >= maxDepth) {
         // Skip writing anything at max depth or circular reference
-        jsonGenerator.writeNull();
+        j.writeNull();
         return;
       }
 
@@ -70,11 +79,11 @@ public class JacksonDepthHandler {
 
       try {
         // Serialize normally
-        defaultSerializer.serialize(o, jsonGenerator, serializerProvider);
+        defaultSerializer.serialize(o, j, s);
       } finally {
         // Decrease depth
-        CURRENT_DEPTH.set(depth);
         SEEN_PATH.get().remove(identity);
+        CURRENT_DEPTH.set(depth);
 
         // Clean up ThreadLocal at the root level
         if (depth == 0) {
@@ -86,13 +95,22 @@ public class JacksonDepthHandler {
 
     // Optionally get "id" field via reflection
     private Object tryGetId(Object obj) {
-      try {
-        var field = obj.getClass().getDeclaredField("id");
-        field.setAccessible(true);
-        return field.get(obj);
-      } catch (Exception e) {
-        return null;
+      if (obj == null) return null;
+
+      Class<?> clazz = obj.getClass();
+
+      while (clazz != null) {
+        try {
+          Field field = clazz.getDeclaredField("id");
+          field.setAccessible(true);
+          return field.get(obj);
+        } catch (NoSuchFieldException ignored) {
+          clazz = clazz.getSuperclass(); // keep searching
+        } catch (Exception e) {
+          return null;
+        }
       }
+      return null; // no "id" field found
     }
   }
 }
