@@ -58,5 +58,5 @@ public class AppUser extends AbstractRBACModel {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "authorities", comment = "User authorities/roles")
-  private List<AuthorityEntity> authorities;
+  private List<AuthorityEntityEnum> authorities;
 }

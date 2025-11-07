@@ -41,5 +41,5 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
   @CsvField(order = 8)
   @FilterableField
-  private List<AuthorityEntity> authorities;
+  private List<AuthorityEntityEnum> authorities;
 }

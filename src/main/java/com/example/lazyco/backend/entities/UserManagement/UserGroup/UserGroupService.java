@@ -1,11 +1,11 @@
 package com.example.lazyco.backend.entities.UserManagement.UserGroup;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Primary
 @Service
+@Transactional
 public class UserGroupService extends AbstractService<UserGroupDTO, UserGroup> {
   protected UserGroupService(UserGroupMapper UserGroupMapper) {
     super(UserGroupMapper);
