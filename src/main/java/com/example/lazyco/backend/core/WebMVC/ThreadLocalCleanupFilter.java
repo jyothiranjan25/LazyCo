@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.WebMVC;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.servlet.FilterChain;
@@ -7,10 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 public class ThreadLocalCleanupFilter extends OncePerRequestFilter {
 

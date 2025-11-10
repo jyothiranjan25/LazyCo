@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.WebMVC;
 
+import static com.example.lazyco.backend.core.Utils.CommonConstrains.APPLICATION_PROPERTIES;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
 
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParamsResolver;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -33,7 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(basePackages = {BACKEND_PACKAGE})
-@PropertySources({@PropertySource("classpath:application.properties")})
+@PropertySources({@PropertySource("classpath:" + APPLICATION_PROPERTIES)})
 public class BackendWebConf implements WebMvcConfigurer {
 
   private Gson gson;
@@ -97,5 +100,22 @@ public class BackendWebConf implements WebMvcConfigurer {
 
     // Add Gson converter
     converters.add(gsonHttpMessageConverter());
+  }
+
+  @Bean
+  public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+    // This bean is necessary to resolve @Value and ${...}
+    PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+
+    // Add the properties file to the list of resources
+    List<ClassPathResource> resources = new ArrayList<>();
+    resources.add(new ClassPathResource(APPLICATION_PROPERTIES));
+
+    // Set the location of the properties file
+    configurer.setLocations(resources.toArray(new ClassPathResource[0]));
+    configurer.setFileEncoding("UTF-8"); // Set the file encoding
+    configurer.setIgnoreUnresolvablePlaceholders(false); // Ignore unresolvable placeholders
+    configurer.setIgnoreResourceNotFound(false); // Ignore resource not found
+    return configurer;
   }
 }

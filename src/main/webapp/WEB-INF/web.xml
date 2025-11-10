@@ -30,7 +30,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>springDispatcher</servlet-name>
-        <url-pattern>/api/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
     <!-- Spring Security Configuration -->
@@ -40,7 +40,7 @@
     </filter>
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/api/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <!-- ThreadLocal cleanup filter -->
@@ -50,7 +50,7 @@
     </filter>
     <filter-mapping>
         <filter-name>threadLocalCleanupFilter</filter-name>
-        <url-pattern>/api/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <!-- Spring Request Caching Filter -->

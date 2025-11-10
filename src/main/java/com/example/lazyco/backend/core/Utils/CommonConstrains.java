@@ -4,6 +4,7 @@ public interface CommonConstrains {
 
   // Base package for the backend application
   String BACKEND_PACKAGE = "com.example.lazyco.backend";
+  String APPLICATION_PROPERTIES = "application.properties";
 
   // Environment Variables
   String TEST_MODE = "Test";

@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
+import com.example.lazyco.backend.core.Exceptions.UnauthorizedException;
 import com.example.lazyco.backend.entities.User.JwtUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -42,13 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         requestURI.startsWith(contextPath)
             ? requestURI.substring(contextPath.length())
             : requestURI;
-    // Always skip JWT logic for public endpoints and static resources, even if jwt_token cookie
-    // exists
-    if (isStaticResource(normalizedURI) || isPublicEndpoint(normalizedURI)) {
-      logger.info("Skipping JWT filter for public/static endpoint: {}", normalizedURI);
-      filterChain.doFilter(request, response);
-      return;
-    }
     try {
       // Check if authentication is already set to prevent duplicate processing
       if (SecurityContextHolder.getContext().getAuthentication() != null) {
@@ -82,28 +76,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       SecurityContextHolder.clearContext();
       // Continue to let Spring Security handle unauthorized access
       filterChain.doFilter(request, response);
+    } catch (UnauthorizedException e) {
+      logger.error("Unauthorized access: {}", e.getMessage());
 
+      filterChain.doFilter(request, response);
     } catch (Exception e) {
       logger.error("Unexpected error in JWT filter: {}", e.getMessage(), e);
       SecurityContextHolder.clearContext();
-      filterChain.doFilter(request, response);
+      throw new UnauthorizedException("Failed to process JWT authentication");
     } finally {
       // Clean up session data after request processing
       jwtUtil.clearSessionData();
     }
-  }
-
-  /**
-   * Performance optimization: Check if the request is for static resources that don't need JWT
-   * validation.
-   */
-  private boolean isStaticResource(String requestURI) {
-    return requestURI.startsWith("/css/")
-        || requestURI.startsWith("/js/")
-        || requestURI.startsWith("/images/")
-        || requestURI.startsWith("/static/")
-        || requestURI.equals("/health")
-        || requestURI.equals("/actuator/health");
   }
 
   /**
@@ -116,19 +100,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       logger.error("Error loading user details for: {}", username, e);
       return null;
     }
-  }
-
-  private boolean isPublicEndpoint(String requestURI) {
-    // Adjust for context path
-    return requestURI.startsWith("/user_verification/")
-        || requestURI.startsWith("/course_requisite/")
-        || requestURI.equals("/graduation_student_credential/get_by_uuid")
-        || requestURI.equals("/department/get_without_login")
-        || requestURI.startsWith("/connector/sso")
-        || requestURI.startsWith("/loan/")
-        || requestURI.startsWith("/project/kos_version")
-        || requestURI.startsWith("/payment_gateway/validate_payment_url")
-        || requestURI.startsWith("/ping")
-        || requestURI.startsWith("/version");
   }
 }

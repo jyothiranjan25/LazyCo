@@ -37,14 +37,14 @@ import org.hibernate.envers.Audited;
 public class UserRole extends AbstractModel {
 
   @ManyToOne
-  @JoinColumn(name = "app_user_id", columnDefinition = "Reference to the user")
+  @JoinColumn(name = "app_user_id", comment = "Reference to the user")
   private AppUser appUser;
 
   @ManyToOne
-  @JoinColumn(name = "role_id", columnDefinition = "Reference to the role")
+  @JoinColumn(name = "role_id", comment = "Reference to the role")
   private Role role;
 
   @ManyToOne
-  @JoinColumn(name = "user_group_id", columnDefinition = "Reference to the user group")
+  @JoinColumn(name = "user_group_id", comment = "Reference to the user group")
   private UserGroup userGroup;
 }
