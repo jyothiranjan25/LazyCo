@@ -1,9 +1,5 @@
 package com.example.lazyco.backend.entities.User;
 
-import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
-
-import com.example.lazyco.backend.core.AbstractAction;
-import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstrains;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
@@ -18,25 +14,38 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JwtUtil {
 
+  private final UserService userService;
+  private final UserRoleService userRoleService;
+
+  public JwtUtil(UserService userService, UserRoleService userRoleService) {
+    this.userRoleService = userRoleService;
+    this.userService = userService;
+  }
+
+  @Value("${cookie.safe:false}")
+  private boolean cookieSafe;
+
   /** Secret key for signing JWTs. */
-  private static final SecretKey SECRET_KEY = JwtSecretKeyProvider.loadOrCreateSecretKey();
+  private final SecretKey SECRET_KEY = JwtSecretKeyProvider.loadOrCreateSecretKey();
 
   /** Expiration time for JWT tokens (in milliseconds). */
-  private static final long TOKEN_EXPIRATION_TIME = 86400000;
+  private final long TOKEN_EXPIRATION_TIME = 86400000;
 
   /** Name of the JWT cookie. */
-  private static final String JWT_COOKIE_NAME = "jwt_token";
+  private final String JWT_COOKIE_NAME = "jwt_token";
 
   /** ThreadLocal to hold session data. */
-  private static final ThreadLocal<Map<String, Object>> SESSION_DATA =
+  private final ThreadLocal<Map<String, Object>> SESSION_DATA =
       ThreadLocal.withInitial(HashMap::new);
 
   /** Map to hold invalidated tokens. */
-  private static final ConcurrentHashMap<String, Date> invalidatedTokens =
-      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Date> invalidatedTokens = new ConcurrentHashMap<>();
 
   /**
    * Generates a JWT token with the given subject and empty claims.
@@ -44,7 +53,7 @@ public class JwtUtil {
    * @param subject The subject of the token.
    * @return The generated JWT token.
    */
-  public static String generateToken(String subject) {
+  public String generateToken(String subject) {
     return generateToken(subject, new HashMap<>());
   }
 
@@ -55,7 +64,7 @@ public class JwtUtil {
    * @param claims Additional claims to include in the token.
    * @return The generated JWT token.
    */
-  public static String generateToken(String subject, Map<String, Object> claims) {
+  public String generateToken(String subject, Map<String, Object> claims) {
     return Jwts.builder()
         .header()
         .type("JWT")
@@ -75,12 +84,11 @@ public class JwtUtil {
    * @param criteria The criteria for validating the request.
    * @return True if the request is invalid, otherwise false.
    */
-  public static boolean requestIsInvalid(HttpServletRequest request, String criteria) {
+  public boolean requestIsInvalid(HttpServletRequest request, String criteria) {
     return requestIsInvalid(request, criteria, null);
   }
 
-  public static boolean requestIsInvalid(
-      HttpServletRequest request, String criteria, String token) {
+  public boolean requestIsInvalid(HttpServletRequest request, String criteria, String token) {
     return switch (criteria) {
       case CommonConstrains.LOGGED_USER -> {
         UserDTO user = checkAndGetUser(request, token);
@@ -98,7 +106,10 @@ public class JwtUtil {
         }
         yield true;
       }
-      default -> Objects.isNull(getClaimsFromRequest(request));
+      default -> {
+        Claims claims = getClaimsFromRequest(request, token);
+        yield Objects.isNull(claims);
+      }
     };
   }
 
@@ -108,11 +119,11 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The user extracted from the JWT token.
    */
-  public static UserDTO checkAndGetUser(HttpServletRequest request, String token) {
+  public UserDTO checkAndGetUser(HttpServletRequest request, String token) {
     Claims claims = getClaimsFromRequest(request, token);
     if (Objects.isNull(claims)) return null;
     String userId = claims.getSubject();
-    return getBean(UserService.class).getUser(userId);
+    return userService.getUser(userId);
   }
 
   /**
@@ -121,7 +132,7 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The user role extracted from the JWT token.
    */
-  public static UserRoleDTO checkAndGetUserRole(HttpServletRequest request, String token) {
+  public UserRoleDTO checkAndGetUserRole(HttpServletRequest request, String token) {
     Claims claims = getClaimsFromRequest(request, token);
     return checkAndGetUserRole(claims);
   }
@@ -132,7 +143,7 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The claims extracted from the JWT token.
    */
-  private static Claims getClaimsFromRequest(HttpServletRequest request) {
+  private Claims getClaimsFromRequest(HttpServletRequest request) {
     return getClaimsFromRequest(request, null);
   }
 
@@ -142,7 +153,7 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The claims extracted from the JWT token, or null if the token is invalid or expired.
    */
-  private static Claims getClaimsFromRequest(HttpServletRequest request, String token) {
+  private Claims getClaimsFromRequest(HttpServletRequest request, String token) {
     if (token == null) {
       token = extractTokenFromRequest(request);
     }
@@ -161,28 +172,77 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The extracted JWT token, or null if not found.
    */
-  public static String extractTokenFromRequest(HttpServletRequest request) {
-
+  public String extractTokenFromRequest(HttpServletRequest request) {
     String token = null;
 
-    // Retrieve the Authorization header from the request
+    // Check Authorization header first
     String authorizationHeader = request.getHeader("Authorization");
-
-    // Check if the Authorization header is present and starts with "Bearer "
     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-      // If present, extract the token part after "Bearer " and return
       token = authorizationHeader.substring(7);
     }
 
-    // If the token is not found in the Authorization header, check for it in cookies
+    // Check cookies if not in header
     if (token == null) {
       token = extractJWTTokenFromCookie(request);
     }
 
+    // Return token if valid, otherwise return null (don't throw exception)
     if (token != null && validateJwtToken(token)) {
       return token;
+    }
+
+    return null; // Changed from throwing exception
+  }
+
+  /**
+   * Adds the JWT token to the HTTP response as a cookie.
+   *
+   * @param response The HTTP servlet response.
+   * @param token The JWT token to add.
+   */
+  public void addToCookie(HttpServletResponse response, String token) {
+    Cookie cookie = new Cookie(JWT_COOKIE_NAME, token);
+
+    boolean isSafe = cookieSafe;
+
+    // Always set HttpOnly to prevent XSS attacks
+    cookie.setHttpOnly(true);
+
+    // Set Secure flag based on configuration (true for production)
+    cookie.setSecure(isSafe);
+
+    // Set SameSite attribute via response header (since Cookie class doesn't support it directly)
+    if (isSafe) {
+      // For production: SameSite=None requires Secure=true
+      response.addHeader(
+          "Set-Cookie",
+          String.format(
+              "%s=%s; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=%d",
+              JWT_COOKIE_NAME, token, TOKEN_EXPIRATION_TIME / 1000));
     } else {
-      throw new ExceptionWrapper("Authorization token is missing or invalid");
+      // For development: SameSite=Lax
+      response.addHeader(
+          "Set-Cookie",
+          String.format(
+              "%s=%s; Path=/; HttpOnly; SameSite=Lax; Max-Age=%d",
+              JWT_COOKIE_NAME, token, TOKEN_EXPIRATION_TIME / 1000));
+    }
+  }
+
+  public void clearCookie(HttpServletResponse response) {
+    boolean isSafe = cookieSafe;
+
+    if (isSafe) {
+      // Production: must match exact cookie attributes
+      response.addHeader(
+          "Set-Cookie",
+          String.format(
+              "%s=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0", JWT_COOKIE_NAME));
+    } else {
+      // Development
+      response.addHeader(
+          "Set-Cookie",
+          String.format("%s=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0", JWT_COOKIE_NAME));
     }
   }
 
@@ -192,7 +252,7 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The extracted JWT token, or null if not found.
    */
-  public static String extractJWTTokenFromCookie(HttpServletRequest request) {
+  public String extractJWTTokenFromCookie(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {
@@ -216,7 +276,7 @@ public class JwtUtil {
    * @param token The JWT token to check.
    * @return True if the token is expired, otherwise false.
    */
-  private static boolean isTokenExpired(String token) throws JwtException {
+  private boolean isTokenExpired(String token) throws JwtException {
     return extractExpiration(token).before(new Date());
   }
 
@@ -226,7 +286,7 @@ public class JwtUtil {
    * @param token The JWT token to extract the expiration date from.
    * @return The expiration date of the token.
    */
-  public static Date extractExpiration(String token) throws JwtException {
+  public Date extractExpiration(String token) throws JwtException {
     return extractClaim(token, Claims::getExpiration);
   }
 
@@ -237,52 +297,9 @@ public class JwtUtil {
    * @param claimsResolver A function to resolve the claim.
    * @return The extracted claim.
    */
-  public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver)
-      throws JwtException {
+  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) throws JwtException {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
-  }
-
-  /**
-   * Adds the JWT token to the HTTP response as a cookie.
-   *
-   * @param response The HTTP servlet response.
-   * @param token The JWT token to add.
-   */
-  public static void addToCookie(HttpServletResponse response, String token) {
-    // Create a new cookie with the JWT token and specified name
-    Cookie cookie = new Cookie(JWT_COOKIE_NAME, token);
-
-    // Retrieve the service responsible for managing configurations
-    boolean isSafe = fetchSafetyFromDatabase();
-
-    // Set the HTTP-only flag to prevent JavaScript access to the cookie
-    cookie.setHttpOnly(isSafe);
-
-    // Set the secure flag to true if cookies should only be sent over HTTPS
-    cookie.setSecure(isSafe);
-
-    // Set the cookie path to "/" to make it accessible across the entire application
-    cookie.setPath("/");
-
-    // Add the cookie to the HTTP response
-    response.addCookie(cookie);
-  }
-
-  private static boolean fetchSafetyFromDatabase() {
-    // Determine if cookies should be set as HTTP-only and secure based on configuration
-    boolean isSafe = false; // Default value for safety
-    /*
-     *  need to work on this part
-     *  if the value is true then it fails the login
-     *  don't set true until you are using the separate app for frontend
-     */
-    String configValue = AbstractAction.getConfigProperties("cookie.safe");
-    if (Objects.nonNull(configValue)) {
-      // If configuration value exists, parse it to boolean
-      isSafe = Boolean.parseBoolean(configValue);
-    }
-    return isSafe;
   }
 
   /**
@@ -290,11 +307,11 @@ public class JwtUtil {
    *
    * @return The logged-in user.
    */
-  public static UserDTO getLoggedInUser() {
+  public UserDTO getLoggedInUser() {
     return (UserDTO) SESSION_DATA.get().get(CommonConstrains.LOGGED_USER);
   }
 
-  public static void setLoggedInUser(UserDTO user) {
+  public void setLoggedInUser(UserDTO user) {
     SESSION_DATA.get().put(CommonConstrains.LOGGED_USER, user);
   }
 
@@ -303,57 +320,51 @@ public class JwtUtil {
    *
    * @return The logged-in user role.
    */
-  public static UserRoleDTO getLoggedInUserRole() {
+  public UserRoleDTO getLoggedInUserRole() {
     return (UserRoleDTO) SESSION_DATA.get().get(CommonConstrains.LOGGED_USER_ROLE);
   }
 
-  public static void setLoggedInUserRole(UserRoleDTO userRole) {
+  public void setLoggedInUserRole(UserRoleDTO userRole) {
     SESSION_DATA.get().put(CommonConstrains.LOGGED_USER_ROLE, userRole);
   }
 
-  public static Map<String, Object> getSessionData() {
+  public Map<String, Object> getSessionData() {
     return SESSION_DATA.get();
   }
 
-  public static void setSessionData(Map<String, Object> sessionData) {
+  public void setSessionData(Map<String, Object> sessionData) {
     SESSION_DATA.set(sessionData);
   }
 
   /** Clears the session data. */
-  public static void clearSessionData() {
+  public void clearSessionData() {
     SESSION_DATA.get().clear();
     SESSION_DATA.remove();
   }
 
-  private static UserRoleDTO checkAndGetUserRole(Claims claims) {
+  private UserRoleDTO checkAndGetUserRole(Claims claims) {
     if (Objects.isNull(claims) || !claims.containsKey(CommonConstrains.LOGGED_USER_ROLE))
       return null;
     UserRoleDTO filter = new UserRoleDTO();
     filter.setId(Long.valueOf(claims.get(CommonConstrains.LOGGED_USER_ROLE).toString()));
-    List<UserRoleDTO> roles = getBean(UserRoleService.class).get(filter);
-    if (roles.isEmpty()) {
-      return null;
-    } else {
-      return roles.get(0);
-    }
+    return userRoleService.getSingle(filter);
   }
 
-  public static String extractUsername(String token) throws JwtException {
+  public String extractUsername(String token) throws JwtException {
     return extractClaim(token, Claims::getSubject);
   }
 
-  public static String extractUsername(HttpServletRequest request) throws JwtException {
+  public String extractUsername(HttpServletRequest request) throws JwtException {
     String token = extractTokenFromRequest(request);
     return extractUsername(token);
   }
 
-  private static boolean isTokenExpired(HttpServletRequest request) throws JwtException {
+  private boolean isTokenExpired(HttpServletRequest request) throws JwtException {
     String token = extractTokenFromRequest(request);
     return isTokenExpired(token);
   }
 
-  public static Boolean validateToken(HttpServletRequest request, String username)
-      throws JwtException {
+  public Boolean validateToken(HttpServletRequest request, String username) throws JwtException {
     final String tokenUsername = extractUsername(request);
     return (username.equals(tokenUsername)) && !isTokenExpired(request);
   }
@@ -364,21 +375,13 @@ public class JwtUtil {
     return (username.equals(user.getUsername()) && !isTokenExpired(token));
   }
 
-  // Cookie methods
-  public static void clearCookie(HttpServletResponse response) {
-    Cookie cookie = new Cookie(JWT_COOKIE_NAME, null);
-    cookie.setMaxAge(0);
-    cookie.setPath("/");
-    response.addCookie(cookie);
-  }
-
   // Blacklist methods
   /**
    * Invalidates the JWT token by adding it to the blacklist.
    *
    * @param token The JWT token to invalidate.
    */
-  public static void invalidateToken(String token) {
+  public void invalidateToken(String token) {
     Date expiration = extractExpiration(token);
     addTokenToBlacklist(token, expiration);
   }
@@ -389,7 +392,7 @@ public class JwtUtil {
    * @param token The JWT token to add to the blacklist.
    * @param expiration The expiration date of the token.
    */
-  public static void addTokenToBlacklist(String token, Date expiration) {
+  public void addTokenToBlacklist(String token, Date expiration) {
     invalidatedTokens.put(token, expiration);
   }
 
@@ -399,7 +402,7 @@ public class JwtUtil {
    * @param token The JWT token to check.
    * @return True if the token is invalidated, otherwise false.
    */
-  public static boolean isTokenInvalidated(String token) {
+  public boolean isTokenInvalidated(String token) {
     return isTokenBlacklisted(token);
   }
 
@@ -409,13 +412,13 @@ public class JwtUtil {
    * @param token The JWT token to check.
    * @return True if the token is blacklisted, otherwise false.
    */
-  public static boolean isTokenBlacklisted(String token) {
+  public boolean isTokenBlacklisted(String token) {
     Date expiration = invalidatedTokens.get(token);
     return expiration != null && expiration.after(new Date());
   }
 
   /** Removes expired tokens from the blocklist. */
-  public static void removeExpiredTokens() {
+  public void removeExpiredTokens() {
     invalidatedTokens.entrySet().removeIf(entry -> entry.getValue().before(new Date()));
   }
 
@@ -430,7 +433,7 @@ public class JwtUtil {
   }
 
   // Validate JWT token
-  public static boolean validateJwtToken(String token) {
+  public boolean validateJwtToken(String token) {
     try {
       Jwts.parser().verifyWith(SECRET_KEY).build().parseSignedClaims(token);
       return true;
@@ -458,7 +461,7 @@ public class JwtUtil {
    * @param token The JWT token to extract claims from.
    * @return The extracted claims.
    */
-  private static Claims extractAllClaims(String token) throws JwtException {
+  private Claims extractAllClaims(String token) throws JwtException {
     // Parse the JWT token and extract the claims
     try {
       Jws<Claims> jws = Jwts.parser().verifyWith(SECRET_KEY).build().parseSignedClaims(token);
@@ -487,7 +490,7 @@ public class JwtUtil {
    * @param claims The additional claims to add.
    * @return The regenerated token with additional claims.
    */
-  public static String addClaimsAndRegenerateToken(Map<String, Object> claims) {
+  public String addClaimsAndRegenerateToken(Map<String, Object> claims) {
     Claims existingClaims = getClaimsFromRequest(null);
     if (Objects.isNull(existingClaims)) return null;
     existingClaims.forEach(claims::putIfAbsent);

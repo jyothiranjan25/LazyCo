@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.Entity;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
@@ -11,8 +13,8 @@ public class AbstractModelListener {
 
   @PrePersist
   public void prePersist(AbstractModel source) {
-    AppUserDTO appUserDTO = AbstractAction.getLoggedInUser();
-    UserGroupDTO userGroupDTO = AbstractAction.loggedInUserGroup();
+    AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
+    UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
 
     if (source instanceof AbstractRBACModel modelBase) {
       if (modelBase.getUserGroup() == null) {
@@ -25,7 +27,7 @@ public class AbstractModelListener {
 
   @PreUpdate
   public void preUpdate(AbstractModel source) {
-    AppUserDTO appUserDTO = AbstractAction.getLoggedInUser();
+    AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
     source.setUpdatedBy(appUserDTO.getUserId());
     source.setCreatedAt(DateTimeZoneUtils.getCurrentDate());
   }

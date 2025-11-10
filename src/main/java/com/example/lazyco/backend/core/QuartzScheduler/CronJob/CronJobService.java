@@ -20,12 +20,16 @@ public class CronJobService {
 
   private Scheduler scheduler;
   private CronJobScheduleService cronJobScheduleService;
+  private AbstractAction abstractAction;
 
   @Autowired
   public void injectDependencies(
-      QuartzConfig quartzConfig, CronJobScheduleService cronJobScheduleService) {
+      QuartzConfig quartzConfig,
+      CronJobScheduleService cronJobScheduleService,
+      AbstractAction abstractAction) {
     this.scheduler = quartzConfig.schedulerFactoryBean().getScheduler();
     this.cronJobScheduleService = cronJobScheduleService;
+    this.abstractAction = abstractAction;
   }
 
   public static String getGroupId(Long cronJobScheduleId) {
@@ -79,7 +83,7 @@ public class CronJobService {
   /** method to run at the startup, that will start all the active cronJobSchedules */
   @EventListener(ContextRefreshedEvent.class)
   public void startAllActiveCronJobs() {
-    AbstractAction.setBypassRBAC(true);
+    abstractAction.setBypassRBAC(true);
     try {
       // get all the active cronJobSchedules
       CronJobScheduleDTO cronJobScheduleDTO = new CronJobScheduleDTO();
@@ -96,7 +100,7 @@ public class CronJobService {
         addCronJob(jobClass, cronJobSchedule);
       }
     } finally {
-      AbstractAction.setBypassRBAC(false);
+      abstractAction.setBypassRBAC(false);
     }
   }
 

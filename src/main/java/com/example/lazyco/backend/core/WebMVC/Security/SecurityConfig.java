@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
+import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +24,7 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        // Use the lambda-based cors configurer instead of deprecated cors()
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -56,12 +55,29 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    // ✅ IMPORTANT: cannot use "*" when allowCredentials=true (browser blocks)
+    // IMPORTANT: Cannot use "*" when allowCredentials=true
+    // Add all frontend origins that need to access the API
     configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-    configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
+
+    // Allow all standard HTTP methods
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    // CRITICAL: Must be true to send cookies cross-origin
     configuration.setAllowCredentials(true);
-    configuration.setAllowedHeaders(List.of("*"));
-    configuration.setExposedHeaders(List.of("*"));
+    // Allow all headers (or specify exact headers if needed)
+    configuration.setAllowedHeaders(
+        Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Origin",
+            "X-Requested-With",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"));
+    // Expose headers to frontend
+    configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
+    // Cache preflight requests for 1 hour
+    configuration.setMaxAge(3600L);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;

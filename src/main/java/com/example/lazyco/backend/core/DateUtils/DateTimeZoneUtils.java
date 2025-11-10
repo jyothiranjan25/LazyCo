@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.DateUtils;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.time.*;
@@ -46,7 +48,7 @@ public final class DateTimeZoneUtils {
 
   /** Centralized "now" supplier respecting test mode */
   private static Instant nowInstant() {
-    return AbstractAction.isTestEnvironment() ? fixedInstant() : Instant.now();
+    return getBean(AbstractAction.class).isTestEnvironment() ? fixedInstant() : Instant.now();
   }
 
   /**

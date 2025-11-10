@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
   private final AuthenticationManager authenticationManager;
+  private final JwtUtil jwtUtil;
 
-  public AuthenticationService(@Lazy AuthenticationManager authenticationManager) {
+  public AuthenticationService(@Lazy AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
     super();
     this.authenticationManager = authenticationManager;
+    this.jwtUtil = jwtUtil;
   }
 
   public String loginAndGetToken(UserDTO userDTO) {
@@ -25,7 +27,7 @@ public class AuthenticationService {
               new UsernamePasswordAuthenticationToken(
                   userDTO.getUsername(), userDTO.getPassword()));
       if (authentication.isAuthenticated()) {
-        return JwtUtil.generateToken(userDTO.getUsername());
+        return jwtUtil.generateToken(userDTO.getUsername());
       } else {
         throw new UnauthorizedException(UserMessage.INCORRECT_PASSWORD);
       }

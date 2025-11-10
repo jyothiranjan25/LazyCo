@@ -2,6 +2,7 @@ package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AuthorityEnum;
+import com.google.gson.annotations.Expose;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
@@ -13,9 +14,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   private String username;
+
+  @Expose(serialize = false)
   private String password;
+
   private String email;
   private List<AuthorityEnum> authorities;
+  private String token;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return authorities.stream().map(role -> (GrantedAuthority) role::name).toList();

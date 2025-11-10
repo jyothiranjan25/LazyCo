@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
@@ -200,7 +202,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     String userGroup;
     try {
-      UserGroupDTO userGroupDTO = AbstractAction.loggedInUserGroup();
+      UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
       if (userGroupDTO == null || userGroupDTO.getFullyQualifiedName() == null) {
         ApplicationLogger.error(
             "Logged in user's group is null, adding none-possible RBSEC filters");

@@ -10,8 +10,10 @@ import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 public class ThreadLocalCleanupFilter extends OncePerRequestFilter {
+
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -21,7 +23,7 @@ public class ThreadLocalCleanupFilter extends OncePerRequestFilter {
     } finally {
       ApplicationLogger.info("Request completed, cleaning up ThreadLocal variables");
       // Clean up ThreadLocal variables to prevent memory leaks
-      AbstractAction.clearThreadLocals();
+      getBean(AbstractAction.class).clearThreadLocals();
     }
   }
 }

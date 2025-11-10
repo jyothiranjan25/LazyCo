@@ -22,10 +22,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
+  private JwtUtil jwtUtil;
   private UserDetailsService userDetailsService;
 
   @Autowired
-  public void setUserDetailsService(UserDetailsService userDetailsService) {
+  public void setUserDetailsService(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+    this.jwtUtil = jwtUtil;
     this.userDetailsService = userDetailsService;
   }
 
@@ -54,12 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return;
       }
 
-      String username = JwtUtil.extractUsername(request);
+      String username = jwtUtil.extractUsername(request);
       if (username != null) {
         // Performance optimization: Use cached user details instead of repeated DB calls
         UserDetails userDetails = getCachedUserDetails(username);
 
-        if (userDetails != null && JwtUtil.validateToken(request, username)) {
+        if (userDetails != null && jwtUtil.validateToken(request, username)) {
           UsernamePasswordAuthenticationToken authenticationToken =
               new UsernamePasswordAuthenticationToken(
                   userDetails, null, userDetails.getAuthorities());
@@ -76,17 +78,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (JwtException e) {
       logger.error("JWT authentication error: {}", e.getMessage());
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      //            SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
-      //            simpleResponseDTO.setMessage("Authentication failed: " + e.getMessage());
-      //
-      // response.getWriter().write(GsonSingleton.convertObjectToJSONString(simpleResponseDTO));
-    } catch (Exception e) {
-      logger.error("Unexpected error in JWT filter: {}", e.getMessage());
-      // Continue with the filter chain even if JWT processing fails
+      // Clear any partial authentication
+      SecurityContextHolder.clearContext();
+      // Continue to let Spring Security handle unauthorized access
       filterChain.doFilter(request, response);
+
+    } catch (Exception e) {
+      logger.error("Unexpected error in JWT filter: {}", e.getMessage(), e);
+      SecurityContextHolder.clearContext();
+      filterChain.doFilter(request, response);
+    } finally {
+      // Clean up session data after request processing
+      jwtUtil.clearSessionData();
     }
   }
 
@@ -110,6 +113,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       return userDetailsService.loadUserByUsername(username);
     } catch (Exception e) {
+      logger.error("Error loading user details for: {}", username, e);
       return null;
     }
   }

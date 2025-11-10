@@ -17,60 +17,60 @@ public class AbstractAction implements CommonConstrains {
   private String environment;
 
   /** ThreadLocal storage to indicate if RBAC checks should be bypassed for the current thread. */
-  private static final ThreadLocal<Boolean> BYPASS_RBAC = ThreadLocal.withInitial(() -> false);
+  private final ThreadLocal<Boolean> BYPASS_RBAC = ThreadLocal.withInitial(() -> false);
 
-  public static void setBypassRBAC(boolean bypassRBAC) {
+  public void setBypassRBAC(boolean bypassRBAC) {
     BYPASS_RBAC.set(bypassRBAC);
   }
 
-  public static boolean isBypassRBAC() {
+  public boolean isBypassRBAC() {
     return BYPASS_RBAC.get();
   }
 
   /** ThreadLocal storage to indicate if the current job is a system job. */
-  private static final ThreadLocal<Boolean> SYSTEM_JOB = ThreadLocal.withInitial(() -> false);
+  private final ThreadLocal<Boolean> SYSTEM_JOB = ThreadLocal.withInitial(() -> false);
 
-  public static void setSystemJob(boolean systemJob) {
+  public void setSystemJob(boolean systemJob) {
     SYSTEM_JOB.set(systemJob);
   }
 
-  public static boolean isSystemJob() {
+  public boolean isSystemJob() {
     return SYSTEM_JOB.get();
   }
 
   /** Configuration properties loaded from application settings */
-  private static volatile Properties properties = new Properties();
+  private volatile Properties properties = new Properties();
 
-  public static String getConfigProperties(String key) {
+  public String getConfigProperties(String key) {
     return properties.getProperty(key, null);
   }
 
   private void setProperties(Properties properties) {
-    AbstractAction.properties = properties;
+    this.properties = properties;
   }
 
   /*  Environment Checkers */
-  public static boolean isTestEnvironment() {
+  public boolean isTestEnvironment() {
     return TEST_MODE.equals(System.getProperty("environment", "").toLowerCase());
   }
 
-  public static boolean isDevelopmentEnvironment() {
+  public boolean isDevelopmentEnvironment() {
     return DEV_MODE.equals(System.getProperty("environment", "").toLowerCase());
   }
 
   /** ThreadLocal storage for per-thread properties */
-  private static final ThreadLocal<Properties> threadLocalProperties =
+  private final ThreadLocal<Properties> threadLocalProperties =
       ThreadLocal.withInitial(Properties::new);
 
-  public static void setThreadProperty(String key, String value) {
+  public void setThreadProperty(String key, String value) {
     threadLocalProperties.get().setProperty(key, value);
   }
 
-  public static String getThreadProperty(String key) {
+  public String getThreadProperty(String key) {
     return threadLocalProperties.get().getProperty(key);
   }
 
-  public static void clearThreadLocals() {
+  public void clearThreadLocals() {
     threadLocalProperties.remove();
     BYPASS_RBAC.remove();
     SYSTEM_JOB.remove();
@@ -90,13 +90,13 @@ public class AbstractAction implements CommonConstrains {
     }
   }
 
-  public static AppUserDTO getLoggedInUser() {
+  public AppUserDTO getLoggedInUser() {
     AppUserDTO appUserDTO = new AppUserDTO();
     appUserDTO.setUserId("JO");
     return appUserDTO;
   }
 
-  public static UserGroupDTO loggedInUserGroup() {
+  public UserGroupDTO loggedInUserGroup() {
     UserGroupDTO userGroupDTO = new UserGroupDTO();
     userGroupDTO.setFullyQualifiedName("DEFAULT");
     return userGroupDTO;
