@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
-import com.example.lazyco.backend.entities.User.JwtAuthenticationEntryPoint;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;

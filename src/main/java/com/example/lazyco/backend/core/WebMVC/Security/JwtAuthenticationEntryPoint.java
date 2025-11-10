@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.backend.core.WebMVC.Security;
 
 import com.example.lazyco.backend.core.Exceptions.SimpleResponseDTO;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
