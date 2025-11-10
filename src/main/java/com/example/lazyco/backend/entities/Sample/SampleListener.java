@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.Sample;
+package com.example.lazyco.backend.entities.Sample;
 
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;

@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.Sample;
+package com.example.lazyco.backend.entities.Sample;
 
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import jakarta.persistence.Entity;
