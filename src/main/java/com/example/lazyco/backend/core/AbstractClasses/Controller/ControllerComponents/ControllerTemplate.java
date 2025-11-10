@@ -4,6 +4,7 @@ import com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerTemp
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterService;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

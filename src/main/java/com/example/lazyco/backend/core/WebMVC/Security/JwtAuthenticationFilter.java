@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
+import com.example.lazyco.backend.entities.User.JwtUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

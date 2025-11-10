@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.WebMVC.Security;
+package com.example.lazyco.backend.entities.User;
 
 import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
@@ -6,8 +6,6 @@ import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstrains;
-import com.example.lazyco.backend.entities.User.UserDTO;
-import com.example.lazyco.backend.entities.User.UserService;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleService;
 import io.jsonwebtoken.*;

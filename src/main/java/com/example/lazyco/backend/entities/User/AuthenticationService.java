@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.Exceptions.UnauthorizedException;
-import com.example.lazyco.backend.core.WebMVC.Security.JwtUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,14 +18,14 @@ public class AuthenticationService {
     this.authenticationManager = authenticationManager;
   }
 
-  public String loginAndGetToken(AuthenticationRequestDTO authenticationRequestDTO) {
+  public String loginAndGetToken(UserDTO userDTO) {
     try {
       Authentication authentication =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(
-                  authenticationRequestDTO.getUsername(), authenticationRequestDTO.getSecretKey()));
+                  userDTO.getUsername(), userDTO.getPassword()));
       if (authentication.isAuthenticated()) {
-        return JwtUtil.generateToken(authenticationRequestDTO.getUsername());
+        return JwtUtil.generateToken(userDTO.getUsername());
       } else {
         throw new UnauthorizedException(UserMessage.INCORRECT_PASSWORD);
       }

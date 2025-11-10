@@ -1,7 +1,8 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
+import com.example.lazyco.backend.entities.User.JwtAuthenticationEntryPoint;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,20 +16,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@AllArgsConstructor
 public class SecurityConfig {
   private final AuthenticationProvider authenticationProvider;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
-  @Autowired
-  public SecurityConfig(
-      AuthenticationProvider authenticationProvider,
-      JwtAuthenticationFilter jwtAuthenticationFilter,
-      JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
-    this.authenticationProvider = authenticationProvider;
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-  }
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

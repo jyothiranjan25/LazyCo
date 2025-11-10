@@ -109,8 +109,7 @@ public class AsyncTaskExecutorConfig implements AsyncConfigurer, DisposableBean 
     }
   }
 
-  private static class CustomSecurityContextAsyncTaskExecutor
-      implements org.springframework.core.task.AsyncTaskExecutor {
+  private static class CustomSecurityContextAsyncTaskExecutor implements AsyncTaskExecutor {
     private final org.springframework.core.task.AsyncTaskExecutor delegate;
 
     public CustomSecurityContextAsyncTaskExecutor(

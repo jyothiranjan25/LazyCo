@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.WebMVC.Security;
+package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.security.MessageDigest;
