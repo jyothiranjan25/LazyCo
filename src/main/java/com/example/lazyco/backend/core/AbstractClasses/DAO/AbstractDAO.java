@@ -138,8 +138,9 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     // Add filter for userGroup if the entity has userGroup field
-    if (criteriaBuilderWrapper.getFilter().getUserGroup() != null) {
-      addRBSECFilters(criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserGroup());
+    if (criteriaBuilderWrapper.getFilter().getUserModifiedGroup() != null) {
+      addRBSECFilters(
+          criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserModifiedGroup());
     }
     addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);

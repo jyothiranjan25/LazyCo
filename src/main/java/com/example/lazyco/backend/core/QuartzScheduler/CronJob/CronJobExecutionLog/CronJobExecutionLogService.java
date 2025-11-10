@@ -37,7 +37,7 @@ public class CronJobExecutionLogService
     CronJobExecutionLogDTO dto = new CronJobExecutionLogDTO();
     dto.setCronJobScheduleId(cronJobScheduleDTO.getId());
     dto.setStatus(CronJobStatusEnum.IN_PROGRESS);
-    dto.setUserGroup(cronJobScheduleDTO.getUserGroup());
+    dto.setUserModifiedGroup(cronJobScheduleDTO.getUserModifiedGroup());
     dto.setCreatedBy("SYSTEM");
     dto.setStartTime(new java.util.Date());
 

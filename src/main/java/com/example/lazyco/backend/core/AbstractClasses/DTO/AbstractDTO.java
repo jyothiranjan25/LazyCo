@@ -38,7 +38,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // Audit fields
   @Expose(serialize = false, deserialize = false)
-  private String userGroup;
+  private String userModifiedGroup;
 
   @Expose(serialize = false, deserialize = false)
   private Date createdAt;

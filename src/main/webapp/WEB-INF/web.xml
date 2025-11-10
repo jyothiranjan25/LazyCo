@@ -4,7 +4,9 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <!-- Spring Dispatcher Servlet Configuration -->
+    <display-name>Spring</display-name>
+
+    <!-- Spring MVC Configuration -->
     <servlet>
         <servlet-name>springDispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -30,7 +32,16 @@
         <servlet-name>springDispatcher</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
-    <!-- End of Spring Dispatcher Servlet Configuration -->
+
+    <!-- Spring Security Configuration -->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
 
     <!-- ThreadLocal cleanup filter -->
     <filter>
@@ -41,16 +52,15 @@
         <filter-name>threadLocalCleanupFilter</filter-name>
         <url-pattern>/api/*</url-pattern>
     </filter-mapping>
-    <!-- End of ThreadLocal cleanup filter -->
 
-    <!-- Spring Security Filter Configuration -->
-    <!--    <filter>-->
-    <!--        <filter-name>springSecurityFilterChain</filter-name>-->
-    <!--        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
-    <!--    </filter>-->
-    <!--    <filter-mapping>-->
-    <!--        <filter-name>springSecurityFilterChain</filter-name>-->
-    <!--        <url-pattern>/api/*</url-pattern>-->
-    <!--    </filter-mapping>-->
-    <!-- End of Spring Security Filter Configuration -->
+    <!-- Spring Request Caching Filter -->
+<!--    <filter>-->
+<!--        <filter-name>requestCachingFilter</filter-name>-->
+<!--        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>requestCachingFilter</filter-name>-->
+<!--        <url-pattern>/api/*</url-pattern>-->
+<!--    </filter-mapping>-->
+    <!-- END of Spring MVC Configuration -->
 </web-app>

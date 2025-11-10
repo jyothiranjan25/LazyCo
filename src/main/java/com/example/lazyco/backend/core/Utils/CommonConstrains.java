@@ -21,4 +21,8 @@ public interface CommonConstrains {
   String UPLOADS_LOCATION = TOMCAT_HOME.concat("uploads/");
 
   String BATCH_AUDIT_UPLOAD_LOCATION = UPLOADS_LOCATION.concat("batch_audit/");
+
+  // Add more common constraints as needed
+  String LOGGED_USER = "loggedUser";
+  String LOGGED_USER_ROLE = "loggedUserRole";
 }
