@@ -49,7 +49,7 @@ public class SecurityConfig {
   }
 
   private List<String> getPublicEndpoints() {
-    return List.of("/public/**");
+    return List.of("/user/**");
   }
 
   @Bean

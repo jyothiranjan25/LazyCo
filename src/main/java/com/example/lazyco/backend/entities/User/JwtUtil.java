@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.entities.User;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstrains;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
@@ -11,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,10 +22,13 @@ public class JwtUtil {
 
   private final UserService userService;
   private final UserRoleService userRoleService;
+  private final AbstractAction abstractAction;
 
-  public JwtUtil(UserService userService, UserRoleService userRoleService) {
+  public JwtUtil(
+      UserService userService, UserRoleService userRoleService, AbstractAction abstractAction) {
     this.userRoleService = userRoleService;
     this.userService = userService;
+    this.abstractAction = abstractAction;
   }
 
   @Value("${cookie.safe:false}")
@@ -40,13 +43,6 @@ public class JwtUtil {
   /** Name of the JWT cookie. */
   private final String JWT_COOKIE_NAME = "jwt_token";
 
-  /** ThreadLocal to hold session data. */
-  private final ThreadLocal<Map<String, Object>> SESSION_DATA =
-      ThreadLocal.withInitial(HashMap::new);
-
-  /** Map to hold invalidated tokens. */
-  private final ConcurrentHashMap<String, Date> invalidatedTokens = new ConcurrentHashMap<>();
-
   /**
    * Generates a JWT token with the given subject and empty claims.
    *
@@ -55,6 +51,19 @@ public class JwtUtil {
    */
   public String generateToken(String subject) {
     return generateToken(subject, new HashMap<>());
+  }
+
+  /**
+   * Adds additional claims to an existing token and regenerates it.
+   *
+   * @param claims The additional claims to add.
+   * @return The regenerated token with additional claims.
+   */
+  public String addClaimsAndRegenerateToken(Map<String, Object> claims) {
+    Claims existingClaims = getClaimsFromRequest(null);
+    if (Objects.isNull(existingClaims)) return null;
+    existingClaims.forEach(claims::putIfAbsent);
+    return generateToken(existingClaims.getSubject(), claims);
   }
 
   /**
@@ -93,7 +102,7 @@ public class JwtUtil {
       case CommonConstrains.LOGGED_USER -> {
         UserDTO user = checkAndGetUser(request, token);
         if (Objects.nonNull(user)) {
-          SESSION_DATA.get().put(criteria, user);
+          abstractAction.setLoggedAppUser(user);
           yield false;
         }
         yield true;
@@ -101,7 +110,7 @@ public class JwtUtil {
       case CommonConstrains.LOGGED_USER_ROLE -> {
         UserRoleDTO role = checkAndGetUserRole(request, token);
         if (Objects.nonNull(role)) {
-          SESSION_DATA.get().put(criteria, role);
+          abstractAction.setLoggedUserRole(role);
           yield false;
         }
         yield true;
@@ -159,7 +168,7 @@ public class JwtUtil {
     }
 
     try {
-      if (isTokenExpired(token) || isTokenInvalidated(token)) return null;
+      if (isTokenExpired(token)) return null;
       return extractAllClaims(token);
     } catch (JwtException e) {
       return null;
@@ -302,46 +311,6 @@ public class JwtUtil {
     return claimsResolver.apply(claims);
   }
 
-  /**
-   * Retrieves the logged-in user from the session data.
-   *
-   * @return The logged-in user.
-   */
-  public UserDTO getLoggedInUser() {
-    return (UserDTO) SESSION_DATA.get().get(CommonConstrains.LOGGED_USER);
-  }
-
-  public void setLoggedInUser(UserDTO user) {
-    SESSION_DATA.get().put(CommonConstrains.LOGGED_USER, user);
-  }
-
-  /**
-   * Retrieves the logged-in user role from the session data.
-   *
-   * @return The logged-in user role.
-   */
-  public UserRoleDTO getLoggedInUserRole() {
-    return (UserRoleDTO) SESSION_DATA.get().get(CommonConstrains.LOGGED_USER_ROLE);
-  }
-
-  public void setLoggedInUserRole(UserRoleDTO userRole) {
-    SESSION_DATA.get().put(CommonConstrains.LOGGED_USER_ROLE, userRole);
-  }
-
-  public Map<String, Object> getSessionData() {
-    return SESSION_DATA.get();
-  }
-
-  public void setSessionData(Map<String, Object> sessionData) {
-    SESSION_DATA.set(sessionData);
-  }
-
-  /** Clears the session data. */
-  public void clearSessionData() {
-    SESSION_DATA.get().clear();
-    SESSION_DATA.remove();
-  }
-
   private UserRoleDTO checkAndGetUserRole(Claims claims) {
     if (Objects.isNull(claims) || !claims.containsKey(CommonConstrains.LOGGED_USER_ROLE))
       return null;
@@ -356,12 +325,19 @@ public class JwtUtil {
 
   public String extractUsername(HttpServletRequest request) throws JwtException {
     String token = extractTokenFromRequest(request);
+    if (token == null) {
+      return null;
+    }
     return extractUsername(token);
   }
 
   private boolean isTokenExpired(HttpServletRequest request) throws JwtException {
     String token = extractTokenFromRequest(request);
     return isTokenExpired(token);
+  }
+
+  public Boolean validateToken(String token) throws JwtException {
+    return validateJwtToken(token);
   }
 
   public Boolean validateToken(HttpServletRequest request, String username) throws JwtException {
@@ -373,53 +349,6 @@ public class JwtUtil {
   public Boolean validateToken(String token, UserDTO user) {
     final String username = extractUsername(token);
     return (username.equals(user.getUsername()) && !isTokenExpired(token));
-  }
-
-  // Blacklist methods
-  /**
-   * Invalidates the JWT token by adding it to the blacklist.
-   *
-   * @param token The JWT token to invalidate.
-   */
-  public void invalidateToken(String token) {
-    Date expiration = extractExpiration(token);
-    addTokenToBlacklist(token, expiration);
-  }
-
-  /**
-   * Adds the JWT token to the blacklist with the specified expiration date.
-   *
-   * @param token The JWT token to add to the blacklist.
-   * @param expiration The expiration date of the token.
-   */
-  public void addTokenToBlacklist(String token, Date expiration) {
-    invalidatedTokens.put(token, expiration);
-  }
-
-  /**
-   * Checks if the JWT token is invalidated (blacklisted).
-   *
-   * @param token The JWT token to check.
-   * @return True if the token is invalidated, otherwise false.
-   */
-  public boolean isTokenInvalidated(String token) {
-    return isTokenBlacklisted(token);
-  }
-
-  /**
-   * Checks if the JWT token is blacklisted.
-   *
-   * @param token The JWT token to check.
-   * @return True if the token is blacklisted, otherwise false.
-   */
-  public boolean isTokenBlacklisted(String token) {
-    Date expiration = invalidatedTokens.get(token);
-    return expiration != null && expiration.after(new Date());
-  }
-
-  /** Removes expired tokens from the blocklist. */
-  public void removeExpiredTokens() {
-    invalidatedTokens.entrySet().removeIf(entry -> entry.getValue().before(new Date()));
   }
 
   // Get username from JWT token
@@ -482,18 +411,5 @@ public class JwtUtil {
       ApplicationLogger.warn("JWT token is invalid: " + e.getMessage());
     }
     return null;
-  }
-
-  /**
-   * Adds additional claims to an existing token and regenerates it.
-   *
-   * @param claims The additional claims to add.
-   * @return The regenerated token with additional claims.
-   */
-  public String addClaimsAndRegenerateToken(Map<String, Object> claims) {
-    Claims existingClaims = getClaimsFromRequest(null);
-    if (Objects.isNull(existingClaims)) return null;
-    existingClaims.forEach(claims::putIfAbsent);
-    return generateToken(existingClaims.getSubject(), claims);
   }
 }

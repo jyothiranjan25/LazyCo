@@ -2,7 +2,7 @@ package com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobSchedule;
 
 import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
-import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
+import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobMessages;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobService;
@@ -24,7 +24,7 @@ public class CronJobScheduleListener {
     List<CronJobScheduleDTO> dtos = service.get(filter);
     // check if the record already exists
     if (dtos != null && !dtos.isEmpty()) {
-      throw new ApplicationExemption(CommonMessage.DUPLICATE_RECORD);
+      throw new ApplicationException(CommonMessage.DUPLICATE_RECORD);
     }
     // validate cron expression
     isValidCronExpression(entity.getCronExpression());
@@ -60,7 +60,7 @@ public class CronJobScheduleListener {
 
   public boolean isValidCronExpression(String cronExpression) {
     if (!CronExpression.isValidExpression(cronExpression)) {
-      throw new ApplicationExemption(
+      throw new ApplicationException(
           CronJobMessages.INVALID_CRON_EXPRESSION, new Object[] {cronExpression});
     }
     return true;

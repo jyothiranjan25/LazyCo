@@ -2,7 +2,7 @@ package com.example.lazyco.backend.core.Enum.EnumDisplayValue;
 
 import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
-import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
+import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ public class EnumDisplayValueListener {
 
     if (getBean(IEnumDisplayValueService.class).getCount(filter) > 0) {
       Object[] args = {enumDisplayValueDTO.getEnumCode(), enumDisplayValueDTO.getCategory()};
-      throw new ApplicationExemption(EnumDisplayValueMessage.DUPLICATE_ENUM_CODE, args);
+      throw new ApplicationException(EnumDisplayValueMessage.DUPLICATE_ENUM_CODE, args);
     }
   }
 
@@ -48,7 +48,7 @@ public class EnumDisplayValueListener {
 
     if (getBean(IEnumDisplayValueService.class).getCount(filter) > 0) {
       Object[] args = {enumDisplayValueDTO.getDisplayValue(), enumDisplayValueDTO.getCategory()};
-      throw new ApplicationExemption(EnumDisplayValueMessage.DUPLICATE_DISPLAY_VALUE, args);
+      throw new ApplicationException(EnumDisplayValueMessage.DUPLICATE_DISPLAY_VALUE, args);
     }
 
     displayValueShouldNotMatchOtherDefaultDisplayValue(enumDisplayValueDTO);
@@ -73,7 +73,7 @@ public class EnumDisplayValueListener {
         Object[] args = {
           enumDisplayValueDTO.getDisplayValue(), enumDisplayValueDTO.getEnumCode(),
         };
-        throw new ApplicationExemption(EnumDisplayValueMessage.DUPLICATE_DISPLAY_VALUE, args);
+        throw new ApplicationException(EnumDisplayValueMessage.DUPLICATE_DISPLAY_VALUE, args);
       }
     }
   }
@@ -82,7 +82,7 @@ public class EnumDisplayValueListener {
     if (enumDisplayValueDTO.getCategory() == null
         || enumDisplayValueDTO.getEnumCode() == null
         || enumDisplayValueDTO.getDisplayValue() == null) {
-      throw new ApplicationExemption(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
+      throw new ApplicationException(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
     }
   }
 
@@ -91,7 +91,7 @@ public class EnumDisplayValueListener {
         .map(Enum::toString)
         .noneMatch(enumDisplayValueDTO.getEnumCode()::equals)) {
       Object[] args = {enumDisplayValueDTO.getEnumCode(), enumDisplayValueDTO.getCategory()};
-      throw new ApplicationExemption(EnumDisplayValueMessage.INVALID_ENUM_CODE, args);
+      throw new ApplicationException(EnumDisplayValueMessage.INVALID_ENUM_CODE, args);
     }
   }
 

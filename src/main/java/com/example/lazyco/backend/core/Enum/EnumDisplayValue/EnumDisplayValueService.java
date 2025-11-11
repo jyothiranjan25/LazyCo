@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core.Enum.EnumDisplayValue;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
+import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class EnumDisplayValueService extends AbstractService<EnumDisplayValueDTO
 
   protected void preCreate(EnumDisplayValueDTO dtoToCreate, EnumDisplayValue entityToCreate) {
     if (dtoToCreate.getCategory() == null || dtoToCreate.getEnumCode() == null) {
-      throw new ApplicationExemption(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
+      throw new ApplicationException(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
     }
     checkDuplicateRecord(dtoToCreate);
   }
@@ -35,7 +35,7 @@ public class EnumDisplayValueService extends AbstractService<EnumDisplayValueDTO
       EnumDisplayValue entityBeforeUpdates,
       EnumDisplayValue entityAfterUpdates) {
     if (entityAfterUpdates.getCategory() == null || entityAfterUpdates.getEnumCode() == null) {
-      throw new ApplicationExemption(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
+      throw new ApplicationException(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);
     }
     checkDuplicateRecord(enumDisplayValueMapper.map(entityAfterUpdates));
   }
@@ -48,7 +48,7 @@ public class EnumDisplayValueService extends AbstractService<EnumDisplayValueDTO
       filter.setIdsNotIn(List.of(dto.getId()));
     }
     if (getCount(filter) > 0) {
-      throw new ApplicationExemption(EnumDisplayValueMessage.DUPLICATE_ENUM_CODE);
+      throw new ApplicationException(EnumDisplayValueMessage.DUPLICATE_ENUM_CODE);
     }
   }
 

@@ -9,6 +9,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 public class ResolveException {
 
@@ -62,6 +63,9 @@ public class ResolveException {
     } else if (e instanceof HttpRequestMethodNotSupportedException httpEx) {
       defaultMessage = httpEx.getMessage();
       status = (HttpStatus) httpEx.getStatusCode();
+    } else if (e instanceof NoHandlerFoundException noHandlerEx) {
+      defaultMessage = noHandlerEx.getMessage();
+      status = HttpStatus.NOT_FOUND;
     }
 
     simpleResponseDTO.setMessage(defaultMessage);

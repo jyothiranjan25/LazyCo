@@ -5,9 +5,9 @@ import com.example.lazyco.backend.core.AbstractClasses.DAO.IAbstractDAO;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.backend.core.Exceptions.ApplicationExemption;
+import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
-import com.example.lazyco.backend.core.Exceptions.EntityNotFoundExemption;
+import com.example.lazyco.backend.core.Exceptions.EntityNotFoundException;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -99,7 +99,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO is not null
     if (dtoToCreate == null) {
-      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
+      throw new ApplicationException(CommonMessage.OBJECT_REQUIRED);
     }
 
     // validate before update
@@ -166,7 +166,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO has an ID
     if (Objects.isNull(dtoToUpdate) || Objects.isNull(dtoToUpdate.getId())) {
-      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
+      throw new ApplicationException(CommonMessage.OBJECT_REQUIRED);
     }
 
     // validate before update
@@ -248,7 +248,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
     // Validate that the DTO has an ID
     if (Objects.isNull(dtoToDelete) || Objects.isNull(dtoToDelete.getId())) {
-      throw new ApplicationExemption(CommonMessage.OBJECT_REQUIRED);
+      throw new ApplicationException(CommonMessage.OBJECT_REQUIRED);
     }
 
     // Retrieve existing entity
@@ -319,16 +319,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Transactional(readOnly = true)
   public D getById(Long id) {
     if (id == null) {
-      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
+      throw new ApplicationException(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       return getSingle(criteria);
-    } catch (ApplicationExemption e) {
+    } catch (ApplicationException e) {
       throw e;
     } catch (Exception e) {
-      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
+      throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
 
@@ -354,16 +354,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Transactional(readOnly = true)
   public E getEntityById(Long id) {
     if (id == null) {
-      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
+      throw new ApplicationException(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       return getSingleEntity(criteria);
-    } catch (ApplicationExemption e) {
+    } catch (ApplicationException e) {
       throw e;
     } catch (Exception e) {
-      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
+      throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
 
@@ -376,18 +376,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   // Uses pre-fetching via DAO to ensure filters and RBAC are applied
   private E assertEntityByIdPre(Long id) {
     if (id == null) {
-      throw new ApplicationExemption(CommonMessage.ID_REQUIRED);
+      throw new ApplicationException(CommonMessage.ID_REQUIRED);
     }
     try {
       D criteria = createFilterDto();
       criteria.setId(id);
       E result = getSingleEntity(criteria);
-      if (result == null) throw new EntityNotFoundExemption(CommonMessage.OBJECT_NOT_FOUND);
+      if (result == null) throw new EntityNotFoundException(CommonMessage.OBJECT_NOT_FOUND);
       return result;
-    } catch (ApplicationExemption | EntityNotFoundExemption e) {
+    } catch (ApplicationException | EntityNotFoundException e) {
       throw e;
     } catch (Exception e) {
-      throw new ApplicationExemption(CommonMessage.APPLICATION_ERROR);
+      throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
 

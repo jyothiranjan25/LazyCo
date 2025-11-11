@@ -2,8 +2,10 @@ package com.example.lazyco.backend.core;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.entities.User.UserDTO;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
+import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -38,6 +40,28 @@ public class AbstractAction implements CommonConstrains {
     return SYSTEM_JOB.get();
   }
 
+  /** ThreadLocal storage for logged-in user information */
+  private final ThreadLocal<UserDTO> THREAD_LOCAL_USER = new ThreadLocal<>();
+
+  public void setLoggedAppUser(UserDTO userDTO) {
+    THREAD_LOCAL_USER.set(userDTO);
+  }
+
+  public UserDTO getLoggedAppUser() {
+    return THREAD_LOCAL_USER.get();
+  }
+
+  /** ThreadLocal storage for logged-in user role information */
+  private final ThreadLocal<UserRoleDTO> THREAD_LOCAL_USER_ROLE = new ThreadLocal<>();
+
+  public void setLoggedUserRole(UserRoleDTO userRoleDTO) {
+    THREAD_LOCAL_USER_ROLE.set(userRoleDTO);
+  }
+
+  public UserRoleDTO getLoggedUserRole() {
+    return THREAD_LOCAL_USER_ROLE.get();
+  }
+
   /** Configuration properties loaded from application settings */
   private volatile Properties properties = new Properties();
 
@@ -59,21 +83,23 @@ public class AbstractAction implements CommonConstrains {
   }
 
   /** ThreadLocal storage for per-thread properties */
-  private final ThreadLocal<Properties> threadLocalProperties =
+  private final ThreadLocal<Properties> THREAD_LOCAL_PROPERTIES =
       ThreadLocal.withInitial(Properties::new);
 
   public void setThreadProperty(String key, String value) {
-    threadLocalProperties.get().setProperty(key, value);
+    THREAD_LOCAL_PROPERTIES.get().setProperty(key, value);
   }
 
   public String getThreadProperty(String key) {
-    return threadLocalProperties.get().getProperty(key);
+    return THREAD_LOCAL_PROPERTIES.get().getProperty(key);
   }
 
   public void clearThreadLocals() {
-    threadLocalProperties.remove();
     BYPASS_RBAC.remove();
     SYSTEM_JOB.remove();
+    THREAD_LOCAL_USER.remove();
+    THREAD_LOCAL_USER_ROLE.remove();
+    THREAD_LOCAL_PROPERTIES.remove();
   }
 
   @EventListener(ContextRefreshedEvent.class)

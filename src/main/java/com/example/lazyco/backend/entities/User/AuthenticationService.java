@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.Exceptions.UnauthorizedException;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,8 +13,7 @@ public class AuthenticationService {
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
 
-  public AuthenticationService(@Lazy AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-    super();
+  public AuthenticationService(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
     this.authenticationManager = authenticationManager;
     this.jwtUtil = jwtUtil;
   }

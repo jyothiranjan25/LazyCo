@@ -39,9 +39,6 @@ public class UserController {
     // Clear the JWT cookie
     jwtUtil.clearCookie(response);
 
-    // Clear session data
-    jwtUtil.clearSessionData();
-
     SimpleResponseDTO responseDTO = new SimpleResponseDTO();
     responseDTO.setMessage("Logged out successfully");
     return ResponseEntity.ok(responseDTO);

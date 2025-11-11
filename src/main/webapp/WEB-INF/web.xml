@@ -30,7 +30,8 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>springDispatcher</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <!-- for Root Context / else /api/ -->
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
 
     <!-- Spring Security Configuration -->
@@ -40,6 +41,7 @@
     </filter>
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
+        <!-- for Root Context /* else /api/*-->
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -50,6 +52,7 @@
     </filter>
     <filter-mapping>
         <filter-name>threadLocalCleanupFilter</filter-name>
+        <!-- for Root Context /* else /api/*-->
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -60,6 +63,7 @@
 <!--    </filter>-->
 <!--    <filter-mapping>-->
 <!--        <filter-name>requestCachingFilter</filter-name>-->
+<!--        &lt;!&ndash;     for Root Context /* else /api/*&ndash;&gt;-->
 <!--        <url-pattern>/api/*</url-pattern>-->
 <!--    </filter-mapping>-->
     <!-- END of Spring MVC Configuration -->

@@ -7,6 +7,7 @@ import java.util.Base64;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class CustomPasswordEncoder implements PasswordEncoder {
+
   @Override
   public String encode(CharSequence rawPassword) {
     return encode(rawPassword.toString());
@@ -38,7 +39,6 @@ public class CustomPasswordEncoder implements PasswordEncoder {
   }
 
   public static String normalize(String aSource) {
-
     return ((aSource == null) ? "" : aSource.trim());
   }
 }
