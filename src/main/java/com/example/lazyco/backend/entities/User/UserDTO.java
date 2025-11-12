@@ -23,15 +23,18 @@ public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   private String token;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
+    if (authorities == null) {
+      return List.of();
+    }
     return authorities.stream().map(role -> (GrantedAuthority) role::name).toList();
   }
 
   public boolean isAccountNonExpired() {
-    return false;
+    return true;
   }
 
   public boolean isAccountNonLocked() {
-    return false;
+    return true;
   }
 
   public boolean isCredentialsNonExpired() {

@@ -49,6 +49,10 @@ public class UserService implements UserDetailsService {
     userDTO.setUsername(appUserDTO.getUserId());
     userDTO.setPassword(appUserDTO.getPassword());
     userDTO.setEmail(appUserDTO.getEmail());
-    userDTO.setAuthorities(new ArrayList<>(appUserDTO.getAuthorities()));
+    if (appUserDTO.getAuthorities() == null) {
+      appUserDTO.setAuthorities(new ArrayList<>());
+    } else {
+      userDTO.setAuthorities(new ArrayList<>(appUserDTO.getAuthorities()));
+    }
   }
 }

@@ -312,11 +312,14 @@
         </dependency>
         <!-- /MapStruct dependencies -->
 
+        <!-- AspectJ dependency -->
+        <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>1.9.22</version>
         </dependency>
+        <!-- /AspectJ dependency -->
 
         <!-- Json dependencies -->
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
@@ -505,6 +508,12 @@
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>
             <version>4.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.82</version>
         </dependency>
         <!-- /Miscellaneous dependencies -->
 

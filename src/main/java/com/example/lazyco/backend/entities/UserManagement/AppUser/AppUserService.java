@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,8 +9,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     implements IAppUserService {
-  protected AppUserService(AppUserMapper appUserMapper) {
+
+  private final PasswordEncoder passwordEncoder;
+
+  protected AppUserService(AppUserMapper appUserMapper, PasswordEncoder passwordEncoder) {
     super(appUserMapper);
+    this.passwordEncoder = passwordEncoder;
+  }
+
+  protected void preCreate(AppUserDTO dtoToCreate, AppUser entityToCreate) {
+    if (entityToCreate.getPassword() != null) {
+      String encodedPassword = passwordEncoder.encode(dtoToCreate.getPassword());
+      entityToCreate.setPassword(encodedPassword);
+    }
+  }
+
+  protected void preUpdate(
+      AppUserDTO dtoToUpdate, AppUser entityBeforeUpdates, AppUser entityAfterUpdates) {
+    if (dtoToUpdate.getPassword() != null) {
+      String encodedPassword = passwordEncoder.encode(dtoToUpdate.getPassword());
+      entityAfterUpdates.setPassword(encodedPassword);
+    }
   }
 
   public AppUserDTO getUserByUserIdOrEmail(String userIdOrEmail) {
