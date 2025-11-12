@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
+import com.example.lazyco.backend.core.WebMVC.PublicEndpoints;
 import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class SecurityConfig {
   private final AuthenticationProvider authenticationProvider;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+  private final PublicEndpoints publicEndpoints;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,7 +32,7 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(getPublicEndpoints().toArray(new String[0]))
+                auth.requestMatchers(publicEndpoints.getEndpoints().toArray(new String[0]))
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -46,10 +48,6 @@ public class SecurityConfig {
                         jwtAuthenticationEntryPoint) // Handle access denied requests
             ); // Handle unauthorized requests
     return http.build();
-  }
-
-  private List<String> getPublicEndpoints() {
-    return List.of("/user/**", "/app_user/**");
   }
 
   @Bean

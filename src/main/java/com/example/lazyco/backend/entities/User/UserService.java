@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.entities.User;
 
+import com.example.lazyco.backend.core.Messages.CustomMessage;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
 import java.util.ArrayList;
@@ -25,7 +26,8 @@ public class UserService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     UserDTO user = getUser(username);
     if (user == null) {
-      throw new UsernameNotFoundException("could not find user..!!");
+      throw new UsernameNotFoundException(
+          CustomMessage.getMessageString(UserMessage.USER_NOT_FOUND, username));
     }
     return user;
   }

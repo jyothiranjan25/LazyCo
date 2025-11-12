@@ -5,11 +5,12 @@ import lombok.Getter;
 
 @Getter
 public enum UserMessage implements MessageCodes {
-  USER_NOT_FOUND("User not found"),
-  INCORRECT_PASSWORD("Invalid credentials"),
-  ACCOUNT_LOCKED("Account is locked"),
-  PASSWORD_EXPIRED("Password has expired");
-
+  USER_NOT_FOUND("USER_MODULES.USER_NOT_FOUND"),
+  INCORRECT_PASSWORD("USER_MODULES.INCORRECT_PASSWORD"),
+  USER_ID_OR_PASSWORD_INCORRECT("USER_MODULES.USER_ID_OR_PASSWORD_INCORRECT"),
+  ACCOUNT_LOCKED("USER_MODULES.ACCOUNT_LOCKED"),
+  PASSWORD_EXPIRED("USER_MODULES.PASSWORD_EXPIRED"),
+  ;
   private final String value;
 
   UserMessage(String value) {

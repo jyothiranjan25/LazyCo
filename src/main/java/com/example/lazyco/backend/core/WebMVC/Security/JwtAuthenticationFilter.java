@@ -1,29 +1,50 @@
 package com.example.lazyco.backend.core.WebMVC.Security;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.WebMVC.PublicEndpoints;
 import com.example.lazyco.backend.entities.User.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
+@AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
   private final UserDetailsService userDetailsService;
+  private final PublicEndpoints publicEndpoints;
 
-  public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-    this.jwtUtil = jwtUtil;
-    this.userDetailsService = userDetailsService;
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    try {
+      String uri = request.getRequestURI();
+      String contextPath = request.getContextPath();
+
+      // Strip the context path from the URI if present
+      if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+        uri = uri.substring(contextPath.length());
+      }
+      AntPathMatcher matcher = new AntPathMatcher();
+
+      String finalUri = uri;
+      return publicEndpoints.getEndpoints().stream()
+          .anyMatch(pattern -> matcher.match(pattern, finalUri));
+    } catch (Exception e) {
+      ApplicationLogger.error("Error in shouldNotFilter method of JwtAuthenticationFilter", e);
+      return false;
+    }
   }
 
   @Override

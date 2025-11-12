@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.entities.User;
 
-import com.example.lazyco.backend.core.Exceptions.ApplicationException;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,13 +24,14 @@ public class AuthenticationService {
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(
                   userDTO.getUsername(), userDTO.getPassword()));
+      UserDTO user = (UserDTO) authentication.getPrincipal();
       if (authentication.isAuthenticated()) {
-        return jwtUtil.generateToken(userDTO.getUsername());
+        return jwtUtil.generateToken(user.getUsername());
       } else {
-        throw new ApplicationException(UserMessage.INCORRECT_PASSWORD);
+        throw new ExceptionWrapper(UserMessage.INCORRECT_PASSWORD);
       }
     } catch (BadCredentialsException e) {
-      throw new ApplicationException(UserMessage.USER_NOT_FOUND);
+      throw new ExceptionWrapper(UserMessage.USER_ID_OR_PASSWORD_INCORRECT);
     }
   }
 }

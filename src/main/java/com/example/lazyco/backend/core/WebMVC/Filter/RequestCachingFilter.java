@@ -27,7 +27,7 @@ public class RequestCachingFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     ApplicationLogger.info(
-        "Starting request processing [method={}, uri={}]",
+        "Starting request processing Method: {}, URI: {}",
         request.getMethod(),
         request.getRequestURI());
     ContentCachingRequestWrapper cachingRequest = new ContentCachingRequestWrapper(request);
@@ -58,15 +58,11 @@ public class RequestCachingFilter extends OncePerRequestFilter {
         fullUrl += "?" + request.getQueryString();
       }
       ApplicationLogger.info(
-          "Request Method: {}, URI: {}{}Body: {}",
+          "Completed request processing Method: {}, URI: {}{}Body: {}",
           request.getMethod(),
           fullUrl,
           System.lineSeparator(),
           body);
-      ApplicationLogger.info(
-          "Completed request processing [method={}, uri={}]",
-          request.getMethod(),
-          request.getRequestURI());
       // Clean up ThreadLocals and MDC (for safety)
       abstractAction.clearThreadLocals();
       MDC.clear();

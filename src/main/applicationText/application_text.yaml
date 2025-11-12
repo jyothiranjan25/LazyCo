@@ -9,3 +9,10 @@ COMMON_MODULES:
   INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
   FIELD_MISSING : "The field '%1$s' is missing."
   DUPLICATE_FIELD : "The record '%1$s' already exists."
+
+USER_MODULES:
+  USER_NOT_FOUND: "We couldn’t find an account with that user ID. Please check and try again."
+  INCORRECT_PASSWORD: "The password you entered is incorrect. Please try again or reset your password."
+  USER_ID_OR_PASSWORD_INCORRECT: "Invalid user ID or password. Please check your credentials and try again."
+  ACCOUNT_LOCKED: "Your account has been locked,Please contact support Team."
+  PASSWORD_EXPIRED: "Your password has expired. Please reset your password to continue."

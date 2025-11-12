@@ -59,8 +59,9 @@ public class JwtUtil {
    * @param claims The additional claims to add.
    * @return The regenerated token with additional claims.
    */
-  public String addClaimsAndRegenerateToken(Map<String, Object> claims) {
-    Claims existingClaims = getClaimsFromRequest(null);
+  public String addClaimsAndRegenerateToken(
+      Map<String, Object> claims, HttpServletRequest request) {
+    Claims existingClaims = getClaimsFromRequest(request);
     if (Objects.isNull(existingClaims)) return null;
     existingClaims.forEach(claims::putIfAbsent);
     return generateToken(existingClaims.getSubject(), claims);
@@ -144,6 +145,14 @@ public class JwtUtil {
   public UserRoleDTO checkAndGetUserRole(HttpServletRequest request, String token) {
     Claims claims = getClaimsFromRequest(request, token);
     return checkAndGetUserRole(claims);
+  }
+
+  private UserRoleDTO checkAndGetUserRole(Claims claims) {
+    if (Objects.isNull(claims) || !claims.containsKey(CommonConstrains.LOGGED_USER_ROLE))
+      return null;
+    UserRoleDTO filter = new UserRoleDTO();
+    filter.setId(Long.valueOf(claims.get(CommonConstrains.LOGGED_USER_ROLE).toString()));
+    return userRoleService.getSingle(filter);
   }
 
   /**
@@ -309,14 +318,6 @@ public class JwtUtil {
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) throws JwtException {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
-  }
-
-  private UserRoleDTO checkAndGetUserRole(Claims claims) {
-    if (Objects.isNull(claims) || !claims.containsKey(CommonConstrains.LOGGED_USER_ROLE))
-      return null;
-    UserRoleDTO filter = new UserRoleDTO();
-    filter.setId(Long.valueOf(claims.get(CommonConstrains.LOGGED_USER_ROLE).toString()));
-    return userRoleService.getSingle(filter);
   }
 
   public String extractUsername(String token) throws JwtException {

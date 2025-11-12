@@ -1,6 +1,8 @@
 package com.example.lazyco.backend.entities.User;
 
+import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUser;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AuthorityEnum;
 import com.google.gson.annotations.Expose;
 import java.util.Collection;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @Setter
+@FilteredEntity(type = AppUser.class)
 public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   private String username;
 

@@ -3,7 +3,8 @@ package com.example.lazyco.backend.core.Messages.YamlConfig;
 public class ApplicationText {
   public static String get(String key, Language language) {
     String fileName = getFileByLanguage(language);
-    return YamlUtils.getValueForKey(key, fileName);
+    // @Todo: change null to language if needed in future
+    return YamlUtils.getValueForKey(key, fileName, null);
   }
 
   // add switch case to get file by language
