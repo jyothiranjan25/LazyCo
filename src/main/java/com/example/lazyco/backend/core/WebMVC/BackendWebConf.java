@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.WebMVC;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.APPLICATION_PROPERTIES;
 import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
 
+import com.example.lazyco.backend.core.WebMVC.Interceptor.RestControllerInterceptor;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsResolver;
@@ -10,7 +11,7 @@ import com.google.gson.Gson;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -37,24 +39,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(basePackages = {BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:" + APPLICATION_PROPERTIES)})
+@AllArgsConstructor
 public class BackendWebConf implements WebMvcConfigurer {
 
   private Gson gson;
   private QueryParamsResolver queryParamsResolver;
   private FileParamsResolver fileParamsResolver;
   private CsvParamsResolver csvParamsResolver;
-
-  @Autowired
-  public void injectDependencies(
-      Gson gson,
-      QueryParamsResolver queryParamsResolver,
-      FileParamsResolver fileParamsResolver,
-      CsvParamsResolver csvParamsResolver) {
-    this.gson = gson;
-    this.queryParamsResolver = queryParamsResolver;
-    this.fileParamsResolver = fileParamsResolver;
-    this.csvParamsResolver = csvParamsResolver;
-  }
+  private RestControllerInterceptor restControllerInterceptor;
 
   @Bean
   public StandardServletMultipartResolver multipartResolver() {
@@ -117,5 +109,11 @@ public class BackendWebConf implements WebMvcConfigurer {
     configurer.setIgnoreUnresolvablePlaceholders(false); // Ignore unresolvable placeholders
     configurer.setIgnoreResourceNotFound(false); // Ignore resource not found
     return configurer;
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    WebMvcConfigurer.super.addInterceptors(registry);
+    registry.addInterceptor(restControllerInterceptor);
   }
 }

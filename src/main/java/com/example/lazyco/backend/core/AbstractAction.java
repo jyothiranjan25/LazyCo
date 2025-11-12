@@ -95,6 +95,14 @@ public class AbstractAction implements CommonConstrains {
   }
 
   public void clearThreadLocals() {
+    ApplicationLogger.info("Cleaning ThreadLocal Variables to prevent memory leaks...");
+    ApplicationLogger.info(
+        "BYPASS_RBAC: {}, SYSTEM_JOB: {}, THREAD_LOCAL_USER: {}, THREAD_LOCAL_USER_ROLE: {}, THREAD_LOCAL_PROPERTIES: {}",
+        BYPASS_RBAC.get(),
+        SYSTEM_JOB.get(),
+        THREAD_LOCAL_USER.get(),
+        THREAD_LOCAL_USER_ROLE.get(),
+        THREAD_LOCAL_PROPERTIES.get());
     BYPASS_RBAC.remove();
     SYSTEM_JOB.remove();
     THREAD_LOCAL_USER.remove();

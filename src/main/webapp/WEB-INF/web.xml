@@ -33,6 +33,19 @@
         <!-- for Root Context / else /api/ -->
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+    <!-- End of Spring MVC Configuration -->
+
+    <!-- Request Caching Filter Configuration -->
+    <filter>
+        <filter-name>requestCachingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>requestCachingFilter</filter-name>
+        <!-- for Root Context /* else /api/*-->
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- End of Request Caching Filter Configuration -->
 
     <!-- Spring Security Configuration -->
     <filter>
@@ -44,27 +57,5 @@
         <!-- for Root Context /* else /api/*-->
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-    <!-- ThreadLocal cleanup filter -->
-    <filter>
-        <filter-name>threadLocalCleanupFilter</filter-name>
-        <filter-class>com.example.lazyco.backend.core.WebMVC.ThreadLocalCleanupFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>threadLocalCleanupFilter</filter-name>
-        <!-- for Root Context /* else /api/*-->
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-    <!-- Spring Request Caching Filter -->
-<!--    <filter>-->
-<!--        <filter-name>requestCachingFilter</filter-name>-->
-<!--        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
-<!--    </filter>-->
-<!--    <filter-mapping>-->
-<!--        <filter-name>requestCachingFilter</filter-name>-->
-<!--        &lt;!&ndash;     for Root Context /* else /api/*&ndash;&gt;-->
-<!--        <url-pattern>/api/*</url-pattern>-->
-<!--    </filter-mapping>-->
-    <!-- END of Spring MVC Configuration -->
+    <!-- End of Spring Security Configuration -->
 </web-app>
