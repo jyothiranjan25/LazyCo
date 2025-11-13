@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PublicEndpoints {
-  public List<String> getEndpoints() {
+public class Endpoints {
+  public List<String> getPublicEndpoints() {
     return List.of("/user/**", "/app_user/**");
   }
 }

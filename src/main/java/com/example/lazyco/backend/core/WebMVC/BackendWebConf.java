@@ -47,7 +47,7 @@ public class BackendWebConf implements WebMvcConfigurer {
   private FileParamsResolver fileParamsResolver;
   private CsvParamsResolver csvParamsResolver;
   private RestControllerInterceptor restControllerInterceptor;
-  private final PublicEndpoints publicEndpoints;
+  private final Endpoints endpoints;
 
   @Bean
   public StandardServletMultipartResolver multipartResolver() {
