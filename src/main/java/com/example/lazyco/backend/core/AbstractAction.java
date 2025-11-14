@@ -1,8 +1,7 @@
 package com.example.lazyco.backend.core;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
-import com.example.lazyco.backend.entities.User.UserDTO;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
@@ -13,7 +12,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AbstractAction implements CommonConstrains {
+public class AbstractAction implements CommonConstants {
 
   @Value("${app.environment:development}")
   private String environment;
@@ -41,13 +40,13 @@ public class AbstractAction implements CommonConstrains {
   }
 
   /** ThreadLocal storage for logged-in user information */
-  private final ThreadLocal<UserDTO> THREAD_LOCAL_USER = new ThreadLocal<>();
+  private final ThreadLocal<AppUserDTO> THREAD_LOCAL_USER = new ThreadLocal<>();
 
-  public void setLoggedAppUser(UserDTO userDTO) {
-    THREAD_LOCAL_USER.set(userDTO);
+  public void setLoggedAppUser(AppUserDTO appUserDTO) {
+    THREAD_LOCAL_USER.set(appUserDTO);
   }
 
-  public UserDTO getLoggedAppUser() {
+  public AppUserDTO getLoggedAppUser() {
     return THREAD_LOCAL_USER.get();
   }
 
@@ -98,10 +97,10 @@ public class AbstractAction implements CommonConstrains {
     ApplicationLogger.info("Cleaning ThreadLocal Variables to prevent memory leaks...");
     ApplicationLogger.info(
         "BYPASS_RBAC: {}, SYSTEM_JOB: {}, THREAD_LOCAL_USER: {}, THREAD_LOCAL_USER_ROLE: {}, THREAD_LOCAL_PROPERTIES: {}",
-        BYPASS_RBAC.get(),
-        SYSTEM_JOB.get(),
-        THREAD_LOCAL_USER.get(),
-        THREAD_LOCAL_USER_ROLE.get(),
+        isBypassRBAC(),
+        isSystemJob(),
+        getLoggedInUser() != null ? getLoggedInUser().getUserId() : null,
+        getLoggedInUserRole() != null ? getLoggedInUserRole().getRole().getName() : null,
         THREAD_LOCAL_PROPERTIES.get());
     BYPASS_RBAC.remove();
     SYSTEM_JOB.remove();
@@ -125,14 +124,18 @@ public class AbstractAction implements CommonConstrains {
   }
 
   public AppUserDTO getLoggedInUser() {
-    AppUserDTO appUserDTO = new AppUserDTO();
-    appUserDTO.setUserId("JO");
-    return appUserDTO;
+    return getLoggedAppUser();
   }
 
-  public UserGroupDTO loggedInUserGroup() {
-    UserGroupDTO userGroupDTO = new UserGroupDTO();
-    userGroupDTO.setFullyQualifiedName("DEFAULT");
-    return userGroupDTO;
+  public UserRoleDTO getLoggedInUserRole() {
+    return getLoggedUserRole();
+  }
+
+  public UserGroupDTO getLoggedInUserGroup() {
+    UserRoleDTO userRoleDTO = getLoggedInUserRole();
+    if (userRoleDTO == null) {
+      return null;
+    }
+    return userRoleDTO.getUserGroup();
   }
 }

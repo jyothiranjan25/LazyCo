@@ -5,6 +5,7 @@ import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredE
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterableField;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
+import com.google.gson.annotations.Expose;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 1)
   private String userId;
 
+  @Expose(serialize = false)
   @InternalFilterableField
   @CsvField(order = 3)
   private String password;

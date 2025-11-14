@@ -1,6 +1,9 @@
 package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
+import java.util.Map;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,17 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class AuthenticationService {
 
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
 
-  public AuthenticationService(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-    this.authenticationManager = authenticationManager;
-    this.jwtUtil = jwtUtil;
-  }
-
-  public String loginAndGetToken(UserDTO userDTO) {
+  public UserDTO loginAndGetToken(UserDTO userDTO) {
     try {
       Authentication authentication =
           authenticationManager.authenticate(
@@ -26,7 +25,11 @@ public class AuthenticationService {
                   userDTO.getUsername(), userDTO.getPassword()));
       UserDTO user = (UserDTO) authentication.getPrincipal();
       if (authentication.isAuthenticated()) {
-        return jwtUtil.generateToken(user.getUsername());
+        String token =
+            jwtUtil.generateToken(
+                user.getUsername(), Map.of(CommonConstants.LOGGED_USER, user.getId()));
+        user.setToken(token);
+        return user;
       } else {
         throw new ExceptionWrapper(UserMessage.INCORRECT_PASSWORD);
       }

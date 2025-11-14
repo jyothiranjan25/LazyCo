@@ -3,7 +3,7 @@ package com.example.lazyco.backend.core.File;
 import static org.apache.pdfbox.io.IOUtils.createTempFileOnlyStreamCache;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -35,7 +35,7 @@ public class FileService {
 
   // Helper method to create a temporary file with specified prefix and type.
   private static File createTempFile(String prefix, FileTypeEnum type) throws IOException {
-    return File.createTempFile(prefix, type.getExtension(), new File(CommonConstrains.TEMP_DIR));
+    return File.createTempFile(prefix, type.getExtension(), new File(CommonConstants.TEMP_DIR));
   }
 
   /**

@@ -1,7 +1,5 @@
 package com.example.lazyco.backend.core.AbstractClasses.DAO;
 
-import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
-
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
@@ -19,6 +17,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
@@ -34,8 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
 
-  public AbstractDAO(SessionFactory sessionFactory) {
+  private AbstractAction abstractAction;
+
+  public AbstractDAO(SessionFactory sessionFactory, AbstractAction abstractAction) {
     super(sessionFactory);
+    this.abstractAction = abstractAction;
   }
 
   public List<E> get(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters) {
@@ -200,19 +202,30 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+
+    if (abstractAction.isBypassRBAC()) {
+      ApplicationLogger.info("Bypass RBAC detected, skipping RBSEC filters");
+      return;
+    } else if (abstractAction.isSystemJob()) {
+      ApplicationLogger.info("System job detected, skipping RBSEC filters");
+      return;
+    }
+
     String userGroup;
     try {
-      UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
+      UserGroupDTO userGroupDTO = abstractAction.getLoggedInUserGroup();
       if (userGroupDTO == null || userGroupDTO.getFullyQualifiedName() == null) {
-        ApplicationLogger.error(
+        ApplicationLogger.warn(
             "Logged in user's group is null, adding none-possible RBSEC filters");
-        userGroup = "APPLY_NONE_POSSIBLE_FILTER";
+        // In case of null user group, set a random UUID to avoid data leakage
+        userGroup = UUID.randomUUID().toString();
       } else {
         userGroup = userGroupDTO.getFullyQualifiedName();
       }
     } catch (Exception e) {
       ApplicationLogger.error(e.getMessage(), e);
-      userGroup = "APPLY_NONE_POSSIBLE_FILTER";
+      // In case of any exception, set a random UUID to avoid data leakage
+      userGroup = UUID.randomUUID().toString();
     }
 
     addRBSECFilters(criteriaBuilderWrapper, userGroup);

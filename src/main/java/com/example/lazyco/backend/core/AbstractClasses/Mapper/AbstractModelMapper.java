@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.util.function.Consumer;
 import lombok.Getter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MappingContext;
 
@@ -35,24 +37,37 @@ public class AbstractModelMapper {
             });
   }
 
-  public <D, T> D map(T source, Class<D> destinationClass) {
-    return modelMapper.map(source, destinationClass);
-  }
-
-  public <D, T> D map(T source, D destination) {
+  public <D, S> D map(S source, D destination) {
     modelMapper.map(source, destination);
     return destination;
   }
 
-  public <S, D> void map(
-      Class<S> sourceClass,
-      Class<D> destinationClass,
-      java.util.function.Consumer<org.modelmapper.TypeMap<S, D>> configurer) {
-    org.modelmapper.TypeMap<S, D> typeMap = modelMapper.getTypeMap(sourceClass, destinationClass);
+  public <D, S> D map(S source, Class<D> destinationClass) {
+    return modelMapper.map(source, destinationClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <D, S> D map(S source, D destination, Consumer<TypeMap<S, D>> configurer) {
+    TypeMap<S, D> typeMap =
+        (TypeMap<S, D>) modelMapper.getTypeMap(source.getClass(), destination.getClass());
     if (typeMap == null) {
-      typeMap = modelMapper.createTypeMap(sourceClass, destinationClass);
+      typeMap =
+          (TypeMap<S, D>) modelMapper.createTypeMap(source.getClass(), destination.getClass());
     }
     configurer.accept(typeMap);
+    modelMapper.map(source, destination);
+    return destination;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <D, S> D map(S source, Class<D> destinationClass, Consumer<TypeMap<S, D>> configurer) {
+    TypeMap<S, D> typeMap =
+        (TypeMap<S, D>) modelMapper.getTypeMap(source.getClass(), destinationClass);
+    if (typeMap == null) {
+      typeMap = (TypeMap<S, D>) modelMapper.createTypeMap(source.getClass(), destinationClass);
+    }
+    configurer.accept(typeMap);
+    return modelMapper.map(source, destinationClass);
   }
 
   @SuppressWarnings("unchecked")

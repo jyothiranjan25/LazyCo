@@ -1,25 +1,28 @@
 package com.example.lazyco.backend.entities.User;
 
+import com.example.lazyco.backend.core.AbstractAction;
+import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractModelMapper;
 import com.example.lazyco.backend.core.Messages.CustomMessage;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
-import java.util.ArrayList;
+import java.util.function.Consumer;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
 public class UserService implements UserDetailsService {
 
   private AppUserService appUserService;
+  private AbstractAction abstractAction;
 
   @Autowired
-  public void injectDependencies(AppUserService appUserService) {
+  public void injectDependencies(AppUserService appUserService, AbstractAction abstractAction) {
     this.appUserService = appUserService;
+    this.abstractAction = abstractAction;
   }
 
   @Override
@@ -33,28 +36,41 @@ public class UserService implements UserDetailsService {
   }
 
   public UserDTO getUser(String userName) {
-    if (userName.isEmpty()) {
-      return null;
+    abstractAction.setBypassRBAC(true);
+    try {
+      if (userName.isEmpty()) {
+        return null;
+      }
+      AppUserDTO appUserDTO = appUserService.getUserByUserIdOrEmail(userName);
+      if (appUserDTO == null) {
+        return null;
+      }
+
+      return new AbstractModelMapper()
+          .map(
+              appUserDTO,
+              UserDTO.class,
+              (Consumer<TypeMap<AppUserDTO, UserDTO>>)
+                  typeMap -> {
+                    typeMap.addMappings(
+                        mapper -> {
+                          mapper.map(AppUserDTO::getUserId, UserDTO::setUsername);
+                        });
+                  });
+    } finally {
+      abstractAction.setBypassRBAC(false);
     }
-    AppUserDTO appUserDTO = appUserService.getUserByUserIdOrEmail(userName);
-    if (appUserDTO == null) {
-      return null;
-    }
-    UserDTO userDTO = new UserDTO();
-    mapUser(appUserDTO, userDTO);
-    return userDTO;
   }
 
-  // Map AppUserDTO to UserDTO
-  private void mapUser(AppUserDTO appUserDTO, UserDTO userDTO) {
-    userDTO.setId(appUserDTO.getId());
-    userDTO.setUsername(appUserDTO.getUserId());
-    userDTO.setPassword(appUserDTO.getPassword());
-    userDTO.setEmail(appUserDTO.getEmail());
-    if (appUserDTO.getAuthorities() == null) {
-      appUserDTO.setAuthorities(new ArrayList<>());
-    } else {
-      userDTO.setAuthorities(new ArrayList<>(appUserDTO.getAuthorities()));
+  public AppUserDTO getUserById(Long id) {
+    abstractAction.setBypassRBAC(true);
+    try {
+      if (id == null) {
+        return null;
+      }
+      return appUserService.getById(id);
+    } finally {
+      abstractAction.setBypassRBAC(false);
     }
   }
 }

@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.DatabaseConf;
 
-import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
+import static com.example.lazyco.backend.core.Utils.CommonConstants.BACKEND_PACKAGE;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

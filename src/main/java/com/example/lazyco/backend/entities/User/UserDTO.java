@@ -4,6 +4,7 @@ import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FilteredE
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUser;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AuthorityEnum;
+import com.example.lazyco.backend.entities.UserManagement.Role.RoleDTO;
 import com.google.gson.annotations.Expose;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +25,7 @@ public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   private String email;
   private List<AuthorityEnum> authorities;
   private String token;
+  private RoleDTO role;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     if (authorities == null) {

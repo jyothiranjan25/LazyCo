@@ -4,7 +4,7 @@ import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.JSONUtils.JSONUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,7 +125,7 @@ public class RequestHandlingHelper {
     String uniqueFileName = UUID.randomUUID().toString().concat("_").concat(originalFileName);
 
     // Create a temp file in a safe location
-    Path tempDir = Path.of(CommonConstrains.TOMCAT_TEMP);
+    Path tempDir = Path.of(CommonConstants.TOMCAT_TEMP);
     try {
       if (!Files.exists(tempDir)) {
         Files.createDirectories(tempDir);

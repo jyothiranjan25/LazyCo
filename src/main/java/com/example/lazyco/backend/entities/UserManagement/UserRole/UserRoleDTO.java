@@ -18,4 +18,6 @@ public class UserRoleDTO extends AbstractDTO<UserRoleDTO> {
   private RoleDTO role;
 
   private UserGroupDTO userGroup;
+
+  private Boolean fetchOnlyRole;
 }

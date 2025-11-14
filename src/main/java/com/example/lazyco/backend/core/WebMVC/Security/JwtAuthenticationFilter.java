@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return endpoints.getPublicEndpoints().stream()
           .anyMatch(pattern -> matcher.match(pattern, finalUri));
     } catch (Exception e) {
-      ApplicationLogger.error("Error in shouldNotFilter method of JwtAuthenticationFilter", e);
+      ApplicationLogger.error(e);
       return false;
     }
   }

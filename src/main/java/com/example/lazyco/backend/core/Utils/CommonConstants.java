@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.Utils;
 
-public interface CommonConstrains {
+public interface CommonConstants {
 
   // Base package for the backend application
   String BACKEND_PACKAGE = "com.example.lazyco.backend";
@@ -24,6 +24,6 @@ public interface CommonConstrains {
   String BATCH_AUDIT_UPLOAD_LOCATION = UPLOADS_LOCATION.concat("batch_audit/");
 
   // Add more common constraints as needed
-  String LOGGED_USER = "loggedUser";
-  String LOGGED_USER_ROLE = "loggedUserRole";
+  String LOGGED_USER = "logged_user_id";
+  String LOGGED_USER_ROLE = "logged_user_role_id";
 }

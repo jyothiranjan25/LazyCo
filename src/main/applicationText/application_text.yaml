@@ -16,3 +16,5 @@ USER_MODULES:
   USER_ID_OR_PASSWORD_INCORRECT: "Invalid user ID or password. Please check your credentials and try again."
   ACCOUNT_LOCKED: "Your account has been locked,Please contact support Team."
   PASSWORD_EXPIRED: "Your password has expired. Please reset your password to continue."
+  USER_NOT_AUTHORIZED : "You do not have the necessary permissions to access this resource."
+  ROLE_NOT_SELECTED : "No role has been selected for the user."

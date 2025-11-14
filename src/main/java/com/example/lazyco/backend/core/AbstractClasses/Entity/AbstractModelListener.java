@@ -14,7 +14,7 @@ public class AbstractModelListener {
   @PrePersist
   public void prePersist(AbstractModel source) {
     AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
-    UserGroupDTO userGroupDTO = getBean(AbstractAction.class).loggedInUserGroup();
+    UserGroupDTO userGroupDTO = getBean(AbstractAction.class).getLoggedInUserGroup();
 
     if (source instanceof AbstractRBACModel modelBase) {
       if (modelBase.getUserGroup() == null) {

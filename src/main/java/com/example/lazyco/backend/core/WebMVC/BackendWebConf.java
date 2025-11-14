@@ -1,9 +1,11 @@
 package com.example.lazyco.backend.core.WebMVC;
 
-import static com.example.lazyco.backend.core.Utils.CommonConstrains.APPLICATION_PROPERTIES;
-import static com.example.lazyco.backend.core.Utils.CommonConstrains.BACKEND_PACKAGE;
+import static com.example.lazyco.backend.core.Utils.CommonConstants.APPLICATION_PROPERTIES;
+import static com.example.lazyco.backend.core.Utils.CommonConstants.BACKEND_PACKAGE;
 
+import com.example.lazyco.backend.core.WebMVC.Interceptor.LoginControllerInterceptor;
 import com.example.lazyco.backend.core.WebMVC.Interceptor.RestControllerInterceptor;
+import com.example.lazyco.backend.core.WebMVC.Interceptor.RoleControllerInterceptor;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.FileParams.FileParamsResolver;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.QueryParams.QueryParamsResolver;
@@ -47,7 +49,9 @@ public class BackendWebConf implements WebMvcConfigurer {
   private FileParamsResolver fileParamsResolver;
   private CsvParamsResolver csvParamsResolver;
   private RestControllerInterceptor restControllerInterceptor;
-  private final Endpoints endpoints;
+  private LoginControllerInterceptor loginControllerInterceptor;
+  private RoleControllerInterceptor roleControllerInterceptor;
+  private Endpoints endpoints;
 
   @Bean
   public StandardServletMultipartResolver multipartResolver() {
@@ -114,7 +118,14 @@ public class BackendWebConf implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    WebMvcConfigurer.super.addInterceptors(registry);
     registry.addInterceptor(restControllerInterceptor);
+    registry
+        .addInterceptor(loginControllerInterceptor)
+        .addPathPatterns("/**")
+        .excludePathPatterns(endpoints.getPublicEndpoints());
+    registry
+        .addInterceptor(roleControllerInterceptor)
+        .addPathPatterns("/**")
+        .excludePathPatterns(endpoints.getExcludedRoleCheckEndpoints());
   }
 }

@@ -2,7 +2,8 @@ package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleService;
 import io.jsonwebtoken.*;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
@@ -26,8 +28,8 @@ public class JwtUtil {
 
   public JwtUtil(
       UserService userService, UserRoleService userRoleService, AbstractAction abstractAction) {
-    this.userRoleService = userRoleService;
     this.userService = userService;
+    this.userRoleService = userRoleService;
     this.abstractAction = abstractAction;
   }
 
@@ -38,7 +40,7 @@ public class JwtUtil {
   private final SecretKey SECRET_KEY = JwtSecretKeyProvider.loadOrCreateSecretKey();
 
   /** Expiration time for JWT tokens (in milliseconds). */
-  private final long TOKEN_EXPIRATION_TIME = 86400000;
+  private final long TOKEN_EXPIRATION_TIME = Duration.ofHours(12).toMillis();
 
   /** Name of the JWT cookie. */
   private final String JWT_COOKIE_NAME = "jwt_token";
@@ -63,8 +65,9 @@ public class JwtUtil {
       Map<String, Object> claims, HttpServletRequest request) {
     Claims existingClaims = getClaimsFromRequest(request);
     if (Objects.isNull(existingClaims)) return null;
-    existingClaims.forEach(claims::putIfAbsent);
-    return generateToken(existingClaims.getSubject(), claims);
+    Map<String, Object> mutableClaims = new HashMap<>(claims);
+    existingClaims.forEach(mutableClaims::putIfAbsent);
+    return generateToken(existingClaims.getSubject(), mutableClaims);
   }
 
   /**
@@ -100,15 +103,15 @@ public class JwtUtil {
 
   public boolean requestIsInvalid(HttpServletRequest request, String criteria, String token) {
     return switch (criteria) {
-      case CommonConstrains.LOGGED_USER -> {
-        UserDTO user = checkAndGetUser(request, token);
+      case CommonConstants.LOGGED_USER -> {
+        AppUserDTO user = checkAndGetUser(request, token);
         if (Objects.nonNull(user)) {
           abstractAction.setLoggedAppUser(user);
           yield false;
         }
         yield true;
       }
-      case CommonConstrains.LOGGED_USER_ROLE -> {
+      case CommonConstants.LOGGED_USER_ROLE -> {
         UserRoleDTO role = checkAndGetUserRole(request, token);
         if (Objects.nonNull(role)) {
           abstractAction.setLoggedUserRole(role);
@@ -129,11 +132,11 @@ public class JwtUtil {
    * @param request The HTTP servlet request.
    * @return The user extracted from the JWT token.
    */
-  public UserDTO checkAndGetUser(HttpServletRequest request, String token) {
+  public AppUserDTO checkAndGetUser(HttpServletRequest request, String token) {
     Claims claims = getClaimsFromRequest(request, token);
     if (Objects.isNull(claims)) return null;
-    String userId = claims.getSubject();
-    return userService.getUser(userId);
+    Long userId = Long.valueOf(claims.get(CommonConstants.LOGGED_USER).toString());
+    return userService.getUserById(userId);
   }
 
   /**
@@ -144,15 +147,10 @@ public class JwtUtil {
    */
   public UserRoleDTO checkAndGetUserRole(HttpServletRequest request, String token) {
     Claims claims = getClaimsFromRequest(request, token);
-    return checkAndGetUserRole(claims);
-  }
-
-  private UserRoleDTO checkAndGetUserRole(Claims claims) {
-    if (Objects.isNull(claims) || !claims.containsKey(CommonConstrains.LOGGED_USER_ROLE))
+    if (Objects.isNull(claims) || !claims.containsKey(CommonConstants.LOGGED_USER_ROLE))
       return null;
-    UserRoleDTO filter = new UserRoleDTO();
-    filter.setId(Long.valueOf(claims.get(CommonConstrains.LOGGED_USER_ROLE).toString()));
-    return userRoleService.getSingle(filter);
+    Long roleId = Long.valueOf(claims.get(CommonConstants.LOGGED_USER_ROLE).toString());
+    return userRoleService.getById(roleId);
   }
 
   /**
@@ -341,6 +339,16 @@ public class JwtUtil {
     return validateJwtToken(token);
   }
 
+  // Get username from JWT token
+  public String getUsernameFromToken(String token) {
+    return Jwts.parser()
+        .verifyWith(SECRET_KEY)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload()
+        .getSubject();
+  }
+
   public Boolean validateToken(HttpServletRequest request, String username) throws JwtException {
     final String tokenUsername = extractUsername(request);
     return (username.equals(tokenUsername)) && !isTokenExpired(request);
@@ -350,16 +358,6 @@ public class JwtUtil {
   public Boolean validateToken(String token, UserDTO user) {
     final String username = extractUsername(token);
     return (username.equals(user.getUsername()) && !isTokenExpired(token));
-  }
-
-  // Get username from JWT token
-  public String getUsernameFromToken(String token) {
-    return Jwts.parser()
-        .verifyWith(SECRET_KEY)
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .getSubject();
   }
 
   // Validate JWT token

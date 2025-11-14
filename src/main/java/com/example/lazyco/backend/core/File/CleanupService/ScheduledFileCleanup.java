@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.core.File.CleanupService;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ public class ScheduledFileCleanup {
   public void tempFile() {
     FileCleanupService fileCleanupService =
         new FileCleanupService(
-            CommonConstrains.TOMCAT_TEMP, // specify the directory path
+            CommonConstants.TOMCAT_TEMP, // specify the directory path
             30 // specify the days threshold
             );
     ApplicationLogger.info("Cleaning old temp files...");

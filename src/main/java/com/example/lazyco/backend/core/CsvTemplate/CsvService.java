@@ -5,7 +5,7 @@ import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvField;
 import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.CSVWriter;
@@ -102,7 +102,7 @@ public class CsvService {
         StringUtils.isNotEmpty(csvTemplateDTO.getCsvType())
             ? csvTemplateDTO.getCsvType()
             : "default";
-    String fileName = CommonConstrains.TOMCAT_TEMP + defaultFile + FileTypeEnum.CSV.getExtension();
+    String fileName = CommonConstants.TOMCAT_TEMP + defaultFile + FileTypeEnum.CSV.getExtension();
     File file = new File(fileName);
     try {
       try (CSVWriter writer = new CSVWriter(new FileWriter(file))) {

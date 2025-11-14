@@ -1,6 +1,6 @@
 package com.example.lazyco.backend.core.BatchJob;
 
-import static com.example.lazyco.backend.core.Utils.CommonConstrains.BATCH_AUDIT_UPLOAD_LOCATION;
+import static com.example.lazyco.backend.core.Utils.CommonConstants.BATCH_AUDIT_UPLOAD_LOCATION;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.SpringBatchAction;

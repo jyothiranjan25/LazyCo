@@ -1,7 +1,7 @@
 package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.core.Utils.CommonConstrains;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
@@ -13,12 +13,12 @@ import java.nio.file.Paths;
 import javax.crypto.SecretKey;
 
 public class JwtSecretKeyProvider {
-  private static final String KEY_FILE_PATH = CommonConstrains.TOMCAT_TEMP + "secret.key";
+  private static final String KEY_FILE_PATH = CommonConstants.TOMCAT_TEMP + "secret.key";
 
   public static SecretKey loadOrCreateSecretKey() {
     try {
       Path keyFilePath = Paths.get(KEY_FILE_PATH);
-      Path keyFolderPath = Paths.get(CommonConstrains.TOMCAT_TEMP);
+      Path keyFolderPath = Paths.get(CommonConstants.TOMCAT_TEMP);
 
       // Create the key folder if it doesn't exist
       if (Files.exists(keyFilePath)) {
