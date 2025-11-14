@@ -1,6 +1,5 @@
 package com.example.lazyco.backend.core.WebMVC.Filter;
 
-import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Exceptions.SimpleResponseDTO;
 import com.example.lazyco.backend.core.GosnConf.GsonSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
@@ -8,19 +7,12 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
 @Component
 public class RequestCachingFilter extends OncePerRequestFilter {
-
-  private final AbstractAction abstractAction;
-
-  public RequestCachingFilter(AbstractAction abstractAction) {
-    this.abstractAction = abstractAction;
-  }
 
   @Override
   protected void doFilterInternal(
@@ -51,21 +43,10 @@ public class RequestCachingFilter extends OncePerRequestFilter {
       response.getWriter().flush();
       return;
     } finally {
-      String body =
-          new String(cachingRequest.getContentAsByteArray(), cachingRequest.getCharacterEncoding());
-      String fullUrl = request.getRequestURI();
-      if (request.getQueryString() != null) {
-        fullUrl += "?" + request.getQueryString();
-      }
       ApplicationLogger.info(
-          "Completed request processing Method: {}, URI: {}{}Body: {}",
+          "Completed request processing Method: {}, URI: {}",
           request.getMethod(),
-          fullUrl,
-          System.lineSeparator(),
-          body);
-      // Clean up ThreadLocals and MDC (for safety)
-      abstractAction.clearThreadLocals();
-      MDC.clear();
+          request.getRequestURI());
     }
   }
 }
