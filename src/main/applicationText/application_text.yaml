@@ -11,7 +11,7 @@ COMMON_MODULES:
   DUPLICATE_FIELD : "The record '%1$s' already exists."
 
 USER_MODULES:
-  USER_NOT_FOUND: "We couldn’t find an account with that user ID. Please check and try again."
+  USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
   ROLE_NOT_FOUND : "Please select a valid role for the user."
   INCORRECT_PASSWORD: "The password you entered is incorrect. Please try again or reset your password."
   USER_ID_OR_PASSWORD_INCORRECT: "Invalid user ID or password. Please check your credentials and try again."
@@ -20,3 +20,4 @@ USER_MODULES:
   PASSWORD_EXPIRED: "Your password has expired. Please reset your password to continue."
   USER_NOT_AUTHORIZED : "You do not have the necessary permissions to access this resource."
   ROLE_NOT_SELECTED : "No role has been selected for the user."
+  LOGOUT_SUCCESS : "You have been successfully logged out."

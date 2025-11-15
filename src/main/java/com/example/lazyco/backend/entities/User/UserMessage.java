@@ -14,7 +14,8 @@ public enum UserMessage implements MessageCodes {
   PASSWORD_EXPIRED("USER_MODULES.PASSWORD_EXPIRED"),
   USER_NOT_AUTHORIZED("USER_MODULES.USER_NOT_AUTHORIZED"),
   ROLE_NOT_SELECTED("USER_MODULES.ROLE_NOT_SELECTED"),
-  ;
+
+  LOGOUT_SUCCESS("USER_MODULES.LOGOUT_SUCCESS");
   private final String value;
 
   UserMessage(String value) {

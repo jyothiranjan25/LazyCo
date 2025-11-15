@@ -72,9 +72,7 @@ public class AppUser extends AbstractRBACModel {
       columnDefinition = "boolean default false")
   private Boolean isLocked;
 
-  @Column(
-      name = "reset_password_token",
-      comment = "Token used for resetting the user password")
+  @Column(name = "reset_password_token", comment = "Token used for resetting the user password")
   private String resetPasswordToken;
 
   @Column(name = "reset_password_token_expiry", comment = "Reset password token expiry timestamp")
