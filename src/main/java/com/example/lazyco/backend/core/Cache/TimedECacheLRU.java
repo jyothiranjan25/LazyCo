@@ -20,6 +20,7 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
    * concurrent environments. It provides methods to get, put, invalidate, and clear cache entries.
    * It also tracks cache hits and misses for performance monitoring.
    */
+  private final CacheManager cacheManager;
   private final Cache<String, T> cache;
 
   private final AtomicLong hits = new AtomicLong(0);
@@ -32,21 +33,15 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
 
   // Constructor to initialize the cache using Ehcache
   public TimedECacheLRU(String cacheName, Class<T> valueType, Duration ttl, int maxSize) {
-    Cache<String, T> cache;
-    try (CacheManager cacheManager =
-        CacheManagerBuilder.newCacheManagerBuilder()
-            .withCache(
-                cacheName,
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                        String.class, valueType, ResourcePoolsBuilder.heap(maxSize))
-                    .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(ttl)))
-            .build(true)) {
-      cache = cacheManager.getCache(cacheName, String.class, valueType);
-    } catch (Exception e) {
-      ApplicationLogger.error("Error in initializing cache", e.getClass());
-      cache = null;
-    }
-    this.cache = cache;
+      this.cacheManager =
+              CacheManagerBuilder.newCacheManagerBuilder()
+                      .withCache(
+                              cacheName,
+                              CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                                              String.class, valueType, ResourcePoolsBuilder.heap(maxSize))
+                                      .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(ttl)))
+                      .build(true);
+    this.cache = cacheManager.getCache(cacheName, String.class, valueType);
   }
 
   public T get(String key) {

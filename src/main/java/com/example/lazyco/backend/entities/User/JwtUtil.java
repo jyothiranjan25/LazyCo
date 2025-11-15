@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.AbstractAction;
+import com.example.lazyco.backend.core.Cache.CacheSingleton;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
@@ -136,7 +137,10 @@ public class JwtUtil {
     Claims claims = getClaimsFromRequest(request, token);
     if (Objects.isNull(claims)) return null;
     Long userId = Long.valueOf(claims.get(CommonConstants.LOGGED_USER).toString());
-    return userService.getUserById(userId);
+    return CacheSingleton.getAppUserCache()
+        .get(
+            CommonConstants.LOGGED_USER.concat(":" + userId),
+            () -> userService.getUserById(userId));
   }
 
   /**
@@ -150,7 +154,10 @@ public class JwtUtil {
     if (Objects.isNull(claims) || !claims.containsKey(CommonConstants.LOGGED_USER_ROLE))
       return null;
     Long roleId = Long.valueOf(claims.get(CommonConstants.LOGGED_USER_ROLE).toString());
-    return userRoleService.getById(roleId);
+    return CacheSingleton.getUserRoleCache()
+        .get(
+            CommonConstants.LOGGED_USER_ROLE.concat(":" + roleId),
+            () -> userRoleService.getById(roleId));
   }
 
   /**

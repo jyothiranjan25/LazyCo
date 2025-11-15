@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.Cache;
 
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import java.time.Duration;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,4 +18,8 @@ public class CacheSingleton {
   @Getter
   private static final TimedECacheLRU<AppUserDTO> appUserCache =
       new TimedECacheLRU<>(AppUserDTO.class, TTL, MAX_CACHE_SIZE);
+
+  @Getter
+  private static final TimedECacheLRU<UserRoleDTO> userRoleCache =
+      new TimedECacheLRU<>(UserRoleDTO.class, TTL, MAX_CACHE_SIZE);
 }
