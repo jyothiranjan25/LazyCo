@@ -38,10 +38,21 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @CsvField(order = 6)
   private String lastName;
 
-  @CsvField(order = 7)
-  private Date lastLogin;
-
   @CsvField(order = 8)
   @FilterableField
   private List<AuthorityEnum> authorities;
+
+  private Boolean isAdmin;
+
+  private Boolean isActive;
+
+  private Boolean isLocked;
+
+  private String resetPasswordToken;
+
+  private Date resetPasswordTokenExpiry;
+
+  private Date lastLogin;
+
+  private String ipAddress;
 }

@@ -4,9 +4,7 @@ import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.util.Map;
 import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +33,10 @@ public class AuthenticationService {
       }
     } catch (BadCredentialsException e) {
       throw new ExceptionWrapper(UserMessage.USER_ID_OR_PASSWORD_INCORRECT);
+    } catch (LockedException e) {
+      throw new ExceptionWrapper(UserMessage.ACCOUNT_LOCKED);
+    } catch (DisabledException e) {
+      throw new ExceptionWrapper(UserMessage.ACCOUNT_DISABLED);
     }
   }
 }

@@ -26,6 +26,8 @@ public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   private List<AuthorityEnum> authorities;
   private String token;
   private RoleDTO role;
+  private Boolean isActive;
+  private Boolean isLocked;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     if (authorities == null) {
@@ -39,7 +41,7 @@ public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   }
 
   public boolean isAccountNonLocked() {
-    return true;
+    return !Boolean.TRUE.equals(isLocked);
   }
 
   public boolean isCredentialsNonExpired() {
@@ -47,6 +49,6 @@ public class UserDTO extends AbstractDTO<UserDTO> implements UserDetails {
   }
 
   public boolean isEnabled() {
-    return true;
+    return Boolean.TRUE.equals(isActive);
   }
 }
