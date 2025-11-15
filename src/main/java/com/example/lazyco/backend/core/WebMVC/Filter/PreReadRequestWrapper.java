@@ -10,17 +10,17 @@ import lombok.Getter;
 
 public class PreReadRequestWrapper extends HttpServletRequestWrapper {
 
-  @Getter private final byte[] cachedBody;
+  @Getter private final byte[] requestBody;
 
   public PreReadRequestWrapper(HttpServletRequest request) throws IOException {
     super(request);
     InputStream requestInputStream = request.getInputStream();
-    this.cachedBody = requestInputStream.readAllBytes();
+    this.requestBody = requestInputStream.readAllBytes();
   }
 
   @Override
   public ServletInputStream getInputStream() throws IOException {
-    ByteArrayInputStream byteStream = new ByteArrayInputStream(this.cachedBody);
+    ByteArrayInputStream byteStream = new ByteArrayInputStream(this.requestBody);
     return new ServletInputStream() {
       @Override
       public int read() throws IOException {

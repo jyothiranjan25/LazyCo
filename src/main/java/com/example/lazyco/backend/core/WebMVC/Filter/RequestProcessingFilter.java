@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.slf4j.MDC;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,25 +26,41 @@ public class RequestProcessingFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      // Wrap request and buffer body right here
-      PreReadRequestWrapper wrappedRequest = new PreReadRequestWrapper(request);
-      String body =
-          new String(wrappedRequest.getCachedBody(), wrappedRequest.getCharacterEncoding());
+      if (!MediaType.MULTIPART_FORM_DATA.includes(
+          MediaType.parseMediaType(request.getContentType()))) {
 
-      String fullUrl = request.getRequestURI();
-      if (request.getQueryString() != null) {
-        fullUrl += "?" + request.getQueryString();
+        // Wrap request and buffer body right here
+        PreReadRequestWrapper wrappedRequest = new PreReadRequestWrapper(request);
+        String body =
+            new String(wrappedRequest.getRequestBody(), wrappedRequest.getCharacterEncoding());
+
+        String fullUrl = request.getRequestURI();
+        if (request.getQueryString() != null) {
+          fullUrl += "?" + request.getQueryString();
+        }
+        ApplicationLogger.info(
+            "processing Request{}METHOD: {}{}Content Type: {}{}URI: {}{}Body: {}",
+            System.lineSeparator(),
+            request.getMethod(),
+            System.lineSeparator(),
+            request.getContentType(),
+            System.lineSeparator(),
+            fullUrl,
+            System.lineSeparator(),
+            body);
+
+        filterChain.doFilter(wrappedRequest, response);
+      } else {
+        ApplicationLogger.info(
+            "processing Multipart Request{}METHOD: {}{}Content Type: {}{}URI: {}",
+            System.lineSeparator(),
+            request.getMethod(),
+            System.lineSeparator(),
+            request.getContentType(),
+            System.lineSeparator(),
+            request.getRequestURI());
+        filterChain.doFilter(request, response);
       }
-      ApplicationLogger.info(
-          "processing Request{}METHOD: {}{}URI: {}{}Body: {}",
-          System.lineSeparator(),
-          request.getMethod(),
-          System.lineSeparator(),
-          fullUrl,
-          System.lineSeparator(),
-          body);
-
-      filterChain.doFilter(wrappedRequest, response);
     } finally {
       // Clean up ThreadLocals and MDC (for safety)
       abstractAction.clearThreadLocals();
