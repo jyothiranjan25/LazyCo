@@ -1,8 +1,10 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.util.*;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -30,6 +32,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   private AbstractStepListener stepListener;
   private AbstractChunkListener chunkListener;
   private CsvService csvService;
+  private AbstractAction abstractAction;
 
   @Autowired
   public void injectDependencies(
@@ -39,7 +42,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       AbstractJobListener jobListener,
       AbstractStepListener stepListener,
       AbstractChunkListener chunkListener,
-      CsvService csvService) {
+      CsvService csvService,
+      AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
     this.transactionManager = transactionManager;
@@ -47,6 +51,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     this.stepListener = stepListener;
     this.chunkListener = chunkListener;
     this.csvService = csvService;
+    this.abstractAction = abstractAction;
   }
 
   @SuppressWarnings("unchecked")
@@ -83,6 +88,9 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
           new JobParametersBuilder()
               .addString("batchJobName", batchJobName)
               .addLong("timestamp", System.currentTimeMillis())
+              .addLong(CommonConstants.LOGGED_USER, abstractAction.getLoggedInUser().getId())
+              .addLong(
+                  CommonConstants.LOGGED_USER_ROLE, abstractAction.getLoggedInUserRole().getId())
               .toJobParameters();
       ApplicationLogger.info(
           "Starting Spring Batch job: " + batchJobName + " with " + inputData.size() + " items");
@@ -112,7 +120,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
       if (userProcessor == null) ApplicationLogger.error("[BATCH] User processor is null!");
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
-      return new StepBuilder(jobName + "Step", jobRepository)
+      return new StepBuilder(jobName + "_Step", jobRepository)
           .<T, P>chunk(1, transactionManager)
           .listener(stepListener)
           .listener(chunkListener)

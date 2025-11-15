@@ -39,6 +39,6 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   }
 
   private void createTest(AppUserDTO dto) {
-    ApplicationLogger.info("Creating AppUser: " + dto);
+    appUserService.create(dto);
   }
 }
