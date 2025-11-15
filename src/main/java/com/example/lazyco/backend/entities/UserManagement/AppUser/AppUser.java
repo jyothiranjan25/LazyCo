@@ -50,13 +50,40 @@ public class AppUser extends AbstractRBACModel {
   @Column(name = "last_name", comment = "User last name")
   private String lastName;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "authorities", comment = "User authorities/roles")
+  private List<AuthorityEnum> authorities;
+
+  @Column(
+      name = "is_admin",
+      comment = "Indicates if the user has admin privileges",
+      columnDefinition = "boolean default false")
+  private Boolean isAdmin;
+
+  @Column(
+      name = "is_active",
+      comment = "Indicates if the user is active",
+      columnDefinition = "boolean default true")
+  private Boolean isActive;
+
+  @Column(
+      name = "is_locked",
+      comment = "Indicates if the user account is locked",
+      columnDefinition = "boolean default false")
+  private Boolean isLocked;
+
+  @Column(
+      name = "reset_password_token",
+      comment = "Indicates if a reset password token has been issued",
+      columnDefinition = "boolean default false")
+  private Boolean resetPasswordToken;
+
+  @Column(name = "reset_password_token_expiry", comment = "Reset password token expiry timestamp")
+  private Date resetPasswordTokenExpiry;
+
   @Column(name = "last_login", comment = "Timestamp of the last user login")
   private Date lastLogin;
 
   @Column(name = "ip_address", comment = "User IP address")
   private String ipAddress;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "authorities", comment = "User authorities/roles")
-  private List<AuthorityEnum> authorities;
 }
