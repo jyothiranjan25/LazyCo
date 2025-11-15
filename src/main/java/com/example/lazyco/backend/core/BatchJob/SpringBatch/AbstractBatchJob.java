@@ -157,10 +157,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   }
 
   protected ItemReader<T> ItemReader(List<T> inputData, String jobName) {
-    AbstractItemReader<T> reader =
-        new AbstractItemReader<>(inputData, "checkpoint_" + jobName + ".chk");
-    reader.resetCheckpoint(); // 👈 add this
-    return reader;
+      return new AbstractItemReader<>(inputData, "checkpoint_" + jobName + ".chk");
   }
 
   protected abstract ItemProcessor<T, P> createItemProcessor();
