@@ -20,6 +20,7 @@ public class AbstractChunkListener implements ChunkListener {
 
   @Override
   public void afterChunkError(ChunkContext context) {
-    ApplicationLogger.info("Finished Chunk in Step: " + context.getStepContext().getStepName());
+    ApplicationLogger.info(
+        "Finished Chunk in Step With Error: " + context.getStepContext().getStepName());
   }
 }
