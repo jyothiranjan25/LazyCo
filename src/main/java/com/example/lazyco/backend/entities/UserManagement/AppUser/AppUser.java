@@ -74,9 +74,8 @@ public class AppUser extends AbstractRBACModel {
 
   @Column(
       name = "reset_password_token",
-      comment = "Indicates if a reset password token has been issued",
-      columnDefinition = "boolean default false")
-  private Boolean resetPasswordToken;
+      comment = "Token used for resetting the user password")
+  private String resetPasswordToken;
 
   @Column(name = "reset_password_token_expiry", comment = "Reset password token expiry timestamp")
   private Date resetPasswordTokenExpiry;
