@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.BatchJob.BatchJob;
@@ -32,10 +34,6 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
   private PlatformTransactionManager transactionManager;
-  private AbstractJobListener jobListener;
-  private AbstractStepListener stepListener;
-  private AbstractChunkListener chunkListener;
-  private AbstractSkipListener skipListener;
   private BatchJobService batchJobService;
   private AbstractAction abstractAction;
 
@@ -44,19 +42,11 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       JobRepository jobRepository,
       JobLauncher jobLauncher,
       PlatformTransactionManager transactionManager,
-      AbstractJobListener jobListener,
-      AbstractStepListener stepListener,
-      AbstractChunkListener chunkListener,
-      AbstractSkipListener skipListener,
       BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
     this.transactionManager = transactionManager;
-    this.jobListener = jobListener;
-    this.stepListener = stepListener;
-    this.chunkListener = chunkListener;
-    this.skipListener = skipListener;
     this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
   }
@@ -121,9 +111,10 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   protected Job createJob(List<T> inputData, String jobName) {
     try {
+      AbstractBatchJobListener jobListener = getBean(AbstractBatchJobListener.class);
       return new JobBuilder(jobName, jobRepository)
-          .listener(jobListener)
-          .start(createProcessingStep(inputData, jobName))
+          .listener((JobExecutionListener) jobListener)
+          .start(createProcessingStep(inputData, jobName, jobListener))
           .build();
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in createJob: " + e.getMessage(), e);
@@ -131,7 +122,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     }
   }
 
-  protected Step createProcessingStep(List<T> inputData, String jobName) {
+  protected Step createProcessingStep(
+      List<T> inputData, String jobName, AbstractBatchJobListener jobListener) {
     try {
       ItemProcessor<T, P> userProcessor = createItemProcessor();
       ItemProcessor<T, P> compositeProcessor = createCompositeProcessor(userProcessor);
@@ -141,9 +133,10 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       if (userWriter == null) ApplicationLogger.error("[BATCH] Writer is null!");
       return new StepBuilder(jobName + "_Step", jobRepository)
           .<T, P>chunk(1, transactionManager)
-          .listener(stepListener)
-          .listener(chunkListener)
-          .listener(skipListener)
+          .listener((StepExecutionListener) jobListener)
+          .listener((ChunkListener) jobListener)
+          .listener((ItemWriteListener<Object>) jobListener)
+          .listener((SkipListener<Object, Object>) jobListener)
           .reader(ItemReader(inputData, jobName))
           .processor(compositeProcessor)
           .writer(compositeWriter)
@@ -177,7 +170,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   }
 
   protected ItemReader<T> ItemReader(List<T> inputData, String jobName) {
-    return new AbstractItemReader<>(inputData, "checkpoint_" + jobName + ".chk");
+    return new AbstractItemReader<>(inputData, jobName);
   }
 
   protected abstract ItemProcessor<T, P> createItemProcessor();

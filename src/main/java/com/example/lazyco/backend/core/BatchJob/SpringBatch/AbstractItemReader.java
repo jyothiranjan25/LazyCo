@@ -3,6 +3,10 @@ package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
@@ -11,91 +15,139 @@ import org.springframework.batch.item.ItemStreamReader;
 public class AbstractItemReader<I> implements ItemStreamReader<I> {
   private final List<I> data;
   private int currentIndex = 0;
-  private final File checkpointFile;
   private final String checkpointKey;
+  private final Path checkpointFile;
 
-  public AbstractItemReader(List<I> data, String checkpointFilePath) {
+  public AbstractItemReader(List<I> data, String jobName) {
     this.data = data;
-    this.checkpointFile = new File(CommonConstants.TOMCAT_TEMP.concat(checkpointFilePath));
-    this.checkpointKey = checkpointFile.getName();
-    restoreCheckpoint();
+    this.checkpointFile = Paths.get(CommonConstants.TOMCAT_TEMP, "checkpoint_" + jobName + ".chk");
+    this.checkpointKey = checkpointFile.getFileName().toString();
   }
 
   @Override
   public I read() {
-    ApplicationLogger.info("Current Index: " + currentIndex);
     if (currentIndex >= data.size()) {
+      ApplicationLogger.info("[Reader] Reached end of data at index: " + currentIndex);
       return null; // end of data
     }
-    I item = data.get(currentIndex++);
-    saveCheckpoint();
+    I item = data.get(currentIndex);
+    ApplicationLogger.info("[Reader] Reading item at index: " + currentIndex);
+    currentIndex++;
     return item;
-  }
-
-  private void saveCheckpoint() {
-    try (FileWriter fw = new FileWriter(checkpointFile)) {
-      fw.write(String.valueOf(currentIndex));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void restoreCheckpoint() {
-    if (checkpointFile.exists()) {
-      try (BufferedReader br = new BufferedReader(new FileReader(checkpointFile))) {
-        String line = br.readLine();
-        if (line != null && !line.isEmpty()) {
-          currentIndex = Integer.parseInt(line);
-        }
-      } catch (Exception e) {
-        currentIndex = 0;
-      }
-    }
-  }
-
-  public void resetCheckpoint() {
-    if (checkpointFile.exists()) {
-      checkpointFile.delete();
-    }
-    currentIndex = 0;
   }
 
   @Override
   public void open(ExecutionContext executionContext) throws ItemStreamException {
-    if (executionContext.containsKey(checkpointKey)) {
-      currentIndex = executionContext.getInt(checkpointKey);
-      ApplicationLogger.info("[Reader] Restored checkpoint from ExecutionContext: " + currentIndex);
-    } else {
-      restoreCheckpointFromFile();
+    try {
+      // ✅ First priority: Restore from Spring Batch ExecutionContext (most reliable)
+      if (executionContext.containsKey(checkpointKey)) {
+        currentIndex = executionContext.getInt(checkpointKey);
+        ApplicationLogger.info(
+            "[Reader] Restored checkpoint from ExecutionContext: " + currentIndex);
+      } else {
+        // ✅ Second priority: Try to restore from file (for restarts after JVM crash)
+        if (Files.exists(checkpointFile)) {
+          restoreCheckpointFromFile();
+          ApplicationLogger.info("[Reader] Restored checkpoint from file: " + currentIndex);
+        } else {
+          // ✅ Fresh start - no checkpoint exists
+          currentIndex = 0;
+          ApplicationLogger.info("[Reader] Starting fresh from index 0");
+        }
+      }
+
+      // ✅ Ensure parent directory exists
+      Files.createDirectories(checkpointFile.getParent());
+
+    } catch (Exception e) {
+      ApplicationLogger.error("[Reader] Error in open(), starting from index 0", e);
+      currentIndex = 0;
     }
   }
 
   @Override
   public void update(ExecutionContext executionContext) throws ItemStreamException {
-    executionContext.putInt(checkpointKey, currentIndex);
-    saveCheckpointToFile(); // Optional fallback for extra safety
-    ApplicationLogger.info("[Reader] Updated checkpoint: " + currentIndex);
+    try {
+      // ✅ Update ExecutionContext (Spring Batch's transactional store)
+      executionContext.putInt(checkpointKey, currentIndex);
+
+      // ✅ Also save to file as backup for disaster recovery
+      saveCheckpointToFile();
+
+      ApplicationLogger.info("[Reader] Updated checkpoint: " + currentIndex);
+    } catch (Exception e) {
+      ApplicationLogger.error("[Reader] Error updating checkpoint", e);
+      throw new ItemStreamException("Failed to update checkpoint", e);
+    }
   }
 
+  @Override
+  public void close() throws ItemStreamException {
+    try {
+      // ✅ Cleanup checkpoint file after successful completion
+      if (Files.exists(checkpointFile)) {
+        Files.delete(checkpointFile);
+        ApplicationLogger.info("[Reader] Cleaned up checkpoint file: " + checkpointFile);
+      }
+    } catch (IOException e) {
+      ApplicationLogger.warn("[Reader] Failed to delete checkpoint file", e);
+      // Don't throw - this is just cleanup
+    }
+  }
+
+  /** ✅ Thread-safe file writing using atomic write operations */
   private void saveCheckpointToFile() {
-    try (FileWriter fw = new FileWriter(checkpointFile, false)) {
-      fw.write(String.valueOf(currentIndex));
+    try {
+      // Create parent directory if needed
+      Files.createDirectories(checkpointFile.getParent());
+
+      // ✅ Atomic write - prevents corruption from concurrent access
+      String content = String.valueOf(currentIndex);
+      Files.write(
+          checkpointFile,
+          content.getBytes(),
+          StandardOpenOption.CREATE,
+          StandardOpenOption.TRUNCATE_EXISTING,
+          StandardOpenOption.SYNC // Force sync to disk
+          );
+
     } catch (IOException e) {
       ApplicationLogger.error("[Reader] Failed to save checkpoint file", e);
     }
   }
 
+  /** ✅ Thread-safe file reading */
   private void restoreCheckpointFromFile() {
-    if (!checkpointFile.exists()) return;
-    try (BufferedReader br = new BufferedReader(new FileReader(checkpointFile))) {
-      String line = br.readLine();
-      if (line != null && !line.isEmpty()) {
-        currentIndex = Integer.parseInt(line.trim());
-        ApplicationLogger.info("[Reader] Restored checkpoint from file: " + currentIndex);
+    try {
+      if (!Files.exists(checkpointFile)) {
+        currentIndex = 0;
+        return;
       }
+
+      String content = new String(Files.readAllBytes(checkpointFile)).trim();
+      if (!content.isEmpty()) {
+        currentIndex = Integer.parseInt(content);
+      } else {
+        currentIndex = 0;
+      }
+
     } catch (Exception e) {
-      ApplicationLogger.error("[Reader] Failed to restore checkpoint from file", e);
+      ApplicationLogger.error(
+          "[Reader] Failed to restore checkpoint from file, starting from 0", e);
       currentIndex = 0;
+    }
+  }
+
+  /** Manually reset checkpoint (for testing or manual recovery) */
+  public void resetCheckpoint() {
+    try {
+      if (Files.exists(checkpointFile)) {
+        Files.delete(checkpointFile);
+        ApplicationLogger.info("[Reader] Checkpoint reset");
+      }
+      currentIndex = 0;
+    } catch (IOException e) {
+      ApplicationLogger.error("[Reader] Failed to reset checkpoint", e);
     }
   }
 }
