@@ -34,6 +34,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   private AbstractJobListener jobListener;
   private AbstractStepListener stepListener;
   private AbstractChunkListener chunkListener;
+  private AbstractSkipListener skipListener;
   private BatchJobService batchJobService;
   private AbstractAction abstractAction;
 
@@ -45,6 +46,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       AbstractJobListener jobListener,
       AbstractStepListener stepListener,
       AbstractChunkListener chunkListener,
+      AbstractSkipListener skipListener,
       BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
@@ -53,6 +55,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     this.jobListener = jobListener;
     this.stepListener = stepListener;
     this.chunkListener = chunkListener;
+    this.skipListener = skipListener;
     this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
   }
@@ -138,6 +141,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
           .<T, P>chunk(1, transactionManager)
           .listener(stepListener)
           .listener(chunkListener)
+          .listener(skipListener)
           .reader(ItemReader(inputData, jobName))
           .processor(compositeProcessor)
           .writer(compositeWriter)
