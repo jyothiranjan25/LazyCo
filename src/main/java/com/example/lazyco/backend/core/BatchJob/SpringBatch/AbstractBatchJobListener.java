@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -175,11 +176,10 @@ public class AbstractBatchJobListener
       if (jobExecution != null) {
         String outputFilePath =
             jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
-
-        Object item = items.getItems().get(0);
-
         if (outputFilePath != null) {
-          writeSkippedItemToCsv(outputFilePath, item, null);
+            List<Object> chunkItems = (List<Object>) items.getItems();
+            for (Object item : chunkItems)
+                writeSkippedItemToCsv(outputFilePath, item, null);
         } else {
           ApplicationLogger.error(
               "Processed output file path is null, cannot write processed items");
