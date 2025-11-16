@@ -97,6 +97,15 @@ public class CsvService {
         .fromJson(GsonSingleton.getCsvInstance().toJson(objects), List.class);
   }
 
+  @SuppressWarnings("rawtypes")
+  public Map generateCsvRows(Object object) {
+    if (object == null) {
+      return Map.of();
+    }
+    return GsonSingleton.getCsvInstance()
+        .fromJson(GsonSingleton.getCsvInstance().toJson(object), Map.class);
+  }
+
   public FileDTO generateCsvFile(CsvTemplateDTO csvTemplateDTO) {
     String defaultFile =
         StringUtils.isNotEmpty(csvTemplateDTO.getCsvType())
@@ -219,6 +228,55 @@ public class CsvService {
       }
     } catch (Exception e) {
       throw new ExceptionWrapper("Failed to parse CSV into DTO: " + dtoType.getName(), e);
+    }
+  }
+
+  public CsvTemplateDTO generateCsvHeaders(Class<?> csvClass) {
+    CsvTemplateDTO csvTemplateDTO = new CsvTemplateDTO();
+    csvTemplateDTO.setCsvClass(csvClass);
+    return generateCsvHeaders(csvTemplateDTO);
+  }
+
+  public void appendSingleRowToCsv(CsvTemplateDTO csvTemplateDTO, String fileName) {
+
+    File file = new File(fileName);
+    boolean fileExists = file.exists() && file.length() > 0;
+
+    try (CSVWriter writer = new CSVWriter(new FileWriter(file, true))) { // append=true
+
+      // Generate headers if missing
+      if (csvTemplateDTO.getHeaders() == null || csvTemplateDTO.getHeaders().isEmpty()) {
+        csvTemplateDTO = generateCsvHeaders(csvTemplateDTO);
+      }
+      // write header row
+      List<String> headers = csvTemplateDTO.getHeaders();
+      headers.add("Message");
+
+      // --- WRITE HEADER + OPTIONS ONLY IF FILE IS NEW ---
+      if (!fileExists) {
+        writer.writeNext(headers.toArray(new String[0]));
+
+        // write option row (if any)
+        if (csvTemplateDTO.getOptionRows() != null && !csvTemplateDTO.getOptionRows().isEmpty()) {
+          String[] optionRow = new String[headers.size()];
+          for (int i = 0; i < optionRow.length; i++) {
+            String header = headers.get(i);
+            optionRow[i] =
+                csvTemplateDTO.getOptionRows().getOrDefault(header, "Ignore This Column");
+          }
+          writer.writeNext(optionRow);
+        }
+      }
+
+      // --- WRITE SINGLE DATA ROW ---
+      Map<String, String> rowMap = generateCsvRows(csvTemplateDTO.getData().get(0));
+      rowMap.put("Message", csvTemplateDTO.getErrorMessage());
+      String[] rowData =
+          headers.stream().map(h -> rowMap.getOrDefault(h, "")).toArray(String[]::new);
+
+      writer.writeNext(rowData);
+    } catch (IOException e) {
+      ApplicationLogger.warn("Failed to append single row to CSV: " + fileName, e);
     }
   }
 }

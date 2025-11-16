@@ -20,6 +20,7 @@ public class BatchJobDTO extends AbstractDTO<BatchJobDTO> {
   private Integer failedCount;
   private BatchJob.BatchJobStatus status;
   private BatchJob.BatchJobSessionType sessionType;
+  private String outputFilePath;
 
   public enum APIAction {
     TERMINATE,

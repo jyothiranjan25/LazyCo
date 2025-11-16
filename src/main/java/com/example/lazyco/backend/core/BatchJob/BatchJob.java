@@ -48,9 +48,6 @@ public class BatchJob extends AbstractRBACModel {
   @Enumerated(EnumType.STRING)
   private BatchJobSessionType sessionType;
 
-  @Column(name = "input_file_path", length = 2048)
-  private String inputFilePath;
-
   @Column(name = "output_file_path", length = 2048)
   private String outputFilePath;
 

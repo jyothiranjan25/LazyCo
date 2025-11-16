@@ -37,7 +37,7 @@ public class AbstractJobListener implements JobExecutionListener {
     setLoggedInUserContext(userId, RoleId);
 
     // Update batch job status to IN_PROGRESS
-    Long batchJobId = jobExecution.getJobParameters().getLong("batchJobId");
+    Long batchJobId = jobExecution.getJobParameters().getLong(CommonConstants.BATCH_JOB_ID);
     BatchJobDTO batchJobDTO = batchJobService.getById(batchJobId);
     batchJobDTO.setJobId(jobExecution.getJobId());
     batchJobDTO.setProcessedCount(0);
@@ -49,7 +49,7 @@ public class AbstractJobListener implements JobExecutionListener {
   public void afterJob(JobExecution jobExecution) {
 
     // Update batch job status based on job execution outcome
-    Long batchJobId = jobExecution.getJobParameters().getLong("batchJobId");
+    Long batchJobId = jobExecution.getJobParameters().getLong(CommonConstants.BATCH_JOB_ID);
     BatchJobDTO batchJobDTO = batchJobService.getById(batchJobId);
     if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
       batchJobDTO.setStatus(BatchJob.BatchJobStatus.COMPLETED);

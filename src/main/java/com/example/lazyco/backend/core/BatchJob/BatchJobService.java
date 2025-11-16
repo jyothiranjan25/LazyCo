@@ -1,18 +1,12 @@
 package com.example.lazyco.backend.core.BatchJob;
 
-import static com.example.lazyco.backend.core.Utils.CommonConstants.BATCH_AUDIT_UPLOAD_LOCATION;
-
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.SpringBatchAction;
 import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,26 +86,16 @@ public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
 
   @Override
   public FileDTO getCsvAuditFileForJob(Long batchJobId) {
+    if (batchJobId == null) {
+      throw new ApplicationException(CommonMessage.ID_REQUIRED);
+    }
+
     // Return null as this functionality is no longer needed
     BatchJobDTO batchJob = getById(batchJobId);
     if (batchJob == null) {
       return null;
     }
-    String startDate =
-        batchJob.getStartTime() != null
-            ? batchJob
-                .getStartTime()
-                .toInstant()
-                .atZone(java.time.ZoneId.systemDefault())
-                .toLocalDate()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            : LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    String fileName = "batch_audit_" + batchJobId + "_" + startDate + ".csv";
-    String csvFilePath = Paths.get(BATCH_AUDIT_UPLOAD_LOCATION, fileName).toString();
-    Path filePath = Paths.get(csvFilePath);
-    if (!Files.exists(filePath)) {
-      throw new ApplicationException(CommonMessage.RECORD_NOT_FOUND);
-    }
-    return new FileDTO(filePath.toString());
+    String fullPath = CommonConstants.TOMCAT_HOME + batchJob.getOutputFilePath();
+    return new FileDTO(fullPath);
   }
 }

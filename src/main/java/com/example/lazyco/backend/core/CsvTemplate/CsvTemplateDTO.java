@@ -23,6 +23,8 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
   private List<String> headers;
   private Map<String, String> optionRows;
   private List<Map<String, String>> rows;
+  private Map<String, String> row;
+  private String errorMessage;
 
   // Setters with processing logic
   public void setHeaders(List<String> headers) {
@@ -64,6 +66,19 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
                                             e.getKey()), // <-- call fieldNamingStrategy correctly
                                     Map.Entry::getValue)))
                 .collect(Collectors.toList());
+  }
+
+  public void setRow(Map<String, String> row) {
+    this.row =
+        row == null
+            ? null
+            : row.entrySet().stream()
+                .collect(
+                    Collectors.toMap(
+                        e ->
+                            CsvStrategies.fieldNamingStrategy(
+                                e.getKey()), // <-- call fieldNamingStrategy correctly
+                        Map.Entry::getValue));
   }
 
   @Override

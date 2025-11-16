@@ -19,11 +19,16 @@ public interface CommonConstants {
   String TOMCAT_TEMP = TEMP_DIR.concat("/"); // Tomcat temp directory
 
   // File Storage Locations
-  String UPLOADS_LOCATION = TOMCAT_HOME.concat("uploads/");
-
+  String UPLOADS_LOCATION = "uploads/";
   String BATCH_AUDIT_UPLOAD_LOCATION = UPLOADS_LOCATION.concat("batch_audit/");
 
-  // Add more common constraints as needed
+  // logged-in user constants
   String LOGGED_USER = "logged_user_id";
   String LOGGED_USER_ROLE = "logged_user_role_id";
+
+  // batch jon constants
+  String BATCH_JOB_ID = "batch_job_id";
+  String BATCH_JOB_NAME = "batch_job_name";
+  String BATCH_JOB_FILE_PATH = "batch_job_file_path";
+  String Batch_JOB_TIME_STAMP = "batch_job_time_stamp";
 }

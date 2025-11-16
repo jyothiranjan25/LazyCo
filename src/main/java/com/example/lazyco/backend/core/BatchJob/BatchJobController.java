@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.BatchJob;
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.AbstractController;
+import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.Utils.CRUDEnums;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import java.util.List;
@@ -37,6 +38,12 @@ public class BatchJobController extends AbstractController<BatchJobDTO> {
         batchJobDTO = batchJobService.update(batchJobDTO);
     }
     return ResponseUtils.sendResponse(batchJobDTO);
+  }
+
+  @PostMapping("/audit_logs")
+  public ResponseEntity<?> getAuditLogs(@RequestBody BatchJobDTO batchJobDTO) {
+    FileDTO fileDTO = batchJobService.getCsvAuditFileForJob(batchJobDTO.getId());
+    return ResponseUtils.sendResponse(fileDTO);
   }
 
   public List<CRUDEnums> restrictCRUDAction() {

@@ -6,6 +6,7 @@ import com.example.lazyco.backend.core.BatchJob.BatchJob;
 import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
 import com.example.lazyco.backend.core.BatchJob.BatchJobService;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
+import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.util.*;
@@ -95,9 +96,10 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       // add batchJobId and logged in user details to job parameters
       JobParameters jobParameters =
           new JobParametersBuilder()
-              .addLong("batchJobId", batchJobDTO.getId())
-              .addString("batchJobName", batchJobName)
-              .addLong("timestamp", System.currentTimeMillis())
+              .addLong(CommonConstants.BATCH_JOB_ID, batchJobDTO.getId())
+              .addString(CommonConstants.BATCH_JOB_NAME, batchJobName)
+              .addString(CommonConstants.BATCH_JOB_FILE_PATH, batchJobDTO.getOutputFilePath())
+              .addLong(CommonConstants.Batch_JOB_TIME_STAMP, System.currentTimeMillis())
               .addLong(CommonConstants.LOGGED_USER, abstractAction.getLoggedInUser().getId())
               .addLong(
                   CommonConstants.LOGGED_USER_ROLE, abstractAction.getLoggedInUserRole().getId())
@@ -197,6 +199,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     batchJobDTO.setTotalItemCount(totalItemCount);
     batchJobDTO.setStatus(BatchJob.BatchJobStatus.INITIALIZED);
     batchJobDTO.setSessionType(BatchJob.BatchJobSessionType.SINGLE_OBJECT_COMMIT);
+    batchJobDTO.setOutputFilePath(
+        CommonConstants.BATCH_AUDIT_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
     batchJobDTO = batchJobService.create(batchJobDTO);
     return batchJobDTO;
   }
