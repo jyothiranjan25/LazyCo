@@ -33,6 +33,10 @@ public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
       existing.setStatus(updateObject.getStatus());
     }
 
+    if (updateObject.getJobId() != null) {
+      existing.setJobId(updateObject.getJobId());
+    }
+
     if (updateObject.getProcessedCount() != null) {
       existing.setProcessedCount(updateObject.getProcessedCount());
     }

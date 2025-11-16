@@ -39,6 +39,6 @@ public class AbstractModelListener {
       throw new ExceptionWrapper("Cannot proceed: user information is missing.");
     }
     source.setUpdatedBy(appUserDTO.getUserId());
-    source.setCreatedAt(DateTimeZoneUtils.getCurrentDate());
+    source.setUpdatedAt(DateTimeZoneUtils.getCurrentDate());
   }
 }

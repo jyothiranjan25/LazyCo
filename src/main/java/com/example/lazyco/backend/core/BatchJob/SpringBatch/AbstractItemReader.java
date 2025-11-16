@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.io.*;
 import java.util.List;
 import org.springframework.batch.item.ExecutionContext;
@@ -15,7 +16,7 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
 
   public AbstractItemReader(List<I> data, String checkpointFilePath) {
     this.data = data;
-    this.checkpointFile = new File(checkpointFilePath);
+    this.checkpointFile = new File(CommonConstants.TOMCAT_TEMP.concat(checkpointFilePath));
     this.checkpointKey = checkpointFile.getName();
     restoreCheckpoint();
   }

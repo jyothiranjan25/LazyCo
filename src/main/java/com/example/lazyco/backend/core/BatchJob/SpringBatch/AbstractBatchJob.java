@@ -2,7 +2,10 @@ package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.CsvTemplate.CsvService;
+import com.example.lazyco.backend.core.BatchJob.BatchJob;
+import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
+import com.example.lazyco.backend.core.BatchJob.BatchJobService;
+import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.util.*;
@@ -31,7 +34,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   private AbstractJobListener jobListener;
   private AbstractStepListener stepListener;
   private AbstractChunkListener chunkListener;
-  private CsvService csvService;
+  private BatchJobService batchJobService;
   private AbstractAction abstractAction;
 
   @Autowired
@@ -42,7 +45,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       AbstractJobListener jobListener,
       AbstractStepListener stepListener,
       AbstractChunkListener chunkListener,
-      CsvService csvService,
+      BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
@@ -50,15 +53,14 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     this.jobListener = jobListener;
     this.stepListener = stepListener;
     this.chunkListener = chunkListener;
-    this.csvService = csvService;
+    this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
   }
 
   @SuppressWarnings("unchecked")
   public void executeJob(T inputData) {
     try {
-      List<T> listDate =
-          (List<T>) csvService.generateCsvToList(inputData.getFile(), inputData.getClass());
+      List<T> listDate = (List<T>) inputData.getObjects();
       String uniqueJobName =
           this.getClass().getSimpleName() + "_" + UUID.randomUUID(); // 👈 unique per run
       if (!listDate.isEmpty()) {
@@ -82,21 +84,33 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   }
 
   private void executeJobInBackground(List<T> inputData, String batchJobName) {
+    // create BatchJob entry
+    BatchJobDTO batchJobDTO = createBatchJob(batchJobName, inputData.size());
     try {
+      // create and launch job
       Job job = createJob(inputData, batchJobName);
+      // add batchJobId and logged in user details to job parameters
       JobParameters jobParameters =
           new JobParametersBuilder()
+              .addLong("batchJobId", batchJobDTO.getId())
               .addString("batchJobName", batchJobName)
               .addLong("timestamp", System.currentTimeMillis())
               .addLong(CommonConstants.LOGGED_USER, abstractAction.getLoggedInUser().getId())
               .addLong(
                   CommonConstants.LOGGED_USER_ROLE, abstractAction.getLoggedInUserRole().getId())
               .toJobParameters();
-      ApplicationLogger.info(
-          "Starting Spring Batch job: " + batchJobName + " with " + inputData.size() + " items");
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+      ApplicationLogger.info(
+          "Starting Spring Batch job: "
+              + batchJobName
+              + " with "
+              + inputData.size()
+              + " items to process. JobExecution ID: "
+              + jobExecution.getId());
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in executeJob: " + e.getMessage(), e);
+      // update BatchJob entry as FAILED
+      updateBatchJob(batchJobDTO);
     }
   }
 
@@ -170,5 +184,24 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
           "[BATCH] Skipping failed item (skip count: " + skipCount + ") due to: " + t.getMessage());
       return true;
     };
+  }
+
+  private BatchJobDTO createBatchJob(String jobName, int totalItemCount) {
+    BatchJobDTO batchJobDTO = new BatchJobDTO();
+    batchJobDTO.setName(jobName);
+    batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
+    batchJobDTO.setTotalItemCount(totalItemCount);
+    batchJobDTO.setStatus(BatchJob.BatchJobStatus.INITIALIZED);
+    batchJobDTO.setSessionType(BatchJob.BatchJobSessionType.SINGLE_OBJECT_COMMIT);
+    batchJobDTO = batchJobService.create(batchJobDTO);
+    return batchJobDTO;
+  }
+
+  private void updateBatchJob(BatchJobDTO batchJobDTO) {
+    batchJobDTO.setEndTime(DateTimeZoneUtils.getCurrentDate());
+    batchJobDTO.setProcessedCount(0);
+    batchJobDTO.setFailedCount(0);
+    batchJobDTO.setStatus(BatchJob.BatchJobStatus.FAILED);
+    batchJobService.update(batchJobDTO);
   }
 }
