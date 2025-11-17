@@ -111,6 +111,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   protected Job createJob(List<T> inputData, String jobName) {
     try {
+        // use getBean to ensure new instance of listener per job
       AbstractBatchJobListener jobListener = getBean(AbstractBatchJobListener.class);
       return new JobBuilder(jobName, jobRepository)
           .listener((JobExecutionListener) jobListener)
