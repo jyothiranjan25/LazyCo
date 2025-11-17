@@ -1,0 +1,44 @@
+package com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.EmailSettings;
+
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
+import com.example.lazyco.backend.core.Utils.FieldInputType;
+
+public enum SMTPAccountSettingsMetaData implements SystemSettingsMetaData {
+  SMTP_EMAIL_CLIENT(
+      "SMTP Email Client",
+      "Your SMTP email client is the email address that you will use to send emails from.",
+      SystemSettingsKeys.SMTP_EMAIL_CLIENT.getValue(),
+      FieldInputType.TEXT,
+      "username@example.com"),
+  SMTP_USERNAME(
+      "SMTP Username",
+      "Your SMTP username is your email address that you can use to sign in to your account.",
+      SystemSettingsKeys.SMTP_USERNAME.getValue(),
+      FieldInputType.TEXT,
+      "username@example.com"),
+  SMTP_PASSWORD(
+      "SMTP Password",
+      "Your password must have 8 characters and meet the following criteria: 1 Capital Letter | 1 Small Letter | 1 Number | 1 Symbol",
+      SystemSettingsKeys.SMTP_PASSWORD.getValue(),
+      FieldInputType.TEXT,
+      "SMTP password");
+
+  private final SystemSettingsMetaDataDTO metaData;
+
+  SMTPAccountSettingsMetaData(
+      String name,
+      String description,
+      String configKey,
+      FieldInputType inputType,
+      String placeholder) {
+    this.metaData =
+        new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);
+  }
+
+  @Override
+  public SystemSettingsMetaDataDTO getMetaData() {
+    return metaData;
+  }
+}

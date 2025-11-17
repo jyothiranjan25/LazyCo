@@ -6,6 +6,7 @@ import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import java.util.Properties;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -62,7 +63,7 @@ public class AbstractAction implements CommonConstants {
   }
 
   /** Configuration properties loaded from application settings */
-  private volatile Properties properties = new Properties();
+  @Getter private volatile Properties properties = new Properties();
 
   public String getConfigProperties(String key) {
     return properties.getProperty(key, null);

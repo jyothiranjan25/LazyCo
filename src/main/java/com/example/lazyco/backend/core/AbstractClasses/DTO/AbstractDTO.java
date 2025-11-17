@@ -6,6 +6,7 @@ import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterFieldMetadat
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.core.Utils.CrudActionType;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
@@ -67,6 +68,10 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   @Expose(serialize = false, deserialize = false)
   private FileDTO file;
+
+  // this fields holds the operation type and notification preference for batch Jobs
+  private CrudActionType operationType;
+  private Boolean sendNotification;
 
   // filtering fields
   @Expose(serialize = false, deserialize = false)

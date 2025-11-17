@@ -21,6 +21,8 @@ public class BatchJobDTO extends AbstractDTO<BatchJobDTO> {
   private BatchJob.BatchJobStatus status;
   private BatchJob.BatchJobSessionType sessionType;
   private String outputFilePath;
+  private Boolean notifyOnCompletion;
+  private BatchJob.NotifyStatus notifyStatus;
 
   public enum APIAction {
     TERMINATE,

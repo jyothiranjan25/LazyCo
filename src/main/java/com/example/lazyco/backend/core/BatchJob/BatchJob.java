@@ -51,6 +51,12 @@ public class BatchJob extends AbstractRBACModel {
   @Column(name = "output_file_path", length = 2048)
   private String outputFilePath;
 
+  @Column(name = "notify_on_completion")
+  private Boolean notifyOnCompletion;
+
+  @Column(name = "notify_status")
+  private NotifyStatus notifyStatus;
+
   public enum BatchJobStatus {
     INITIALIZED("STARTING"),
     RUNNING("STARTED"),
@@ -88,6 +94,13 @@ public class BatchJob extends AbstractRBACModel {
       set.add(RESTARTED);
       return set;
     }
+  }
+
+  @Getter
+  public enum NotifyStatus {
+    NOT_SENT,
+    SENT_SUCCESS,
+    SENT_FAILURE
   }
 
   @Getter

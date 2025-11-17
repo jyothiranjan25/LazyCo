@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -118,6 +117,17 @@ public class AbstractBatchJobListener
               .mapToLong(StepExecution::getWriteSkipCount)
               .sum();
       batchJobDTO.setFailedCount(Math.toIntExact(failedCount));
+
+      BatchJob.NotifyStatus notifyStatus;
+      if (batchJobDTO.getNotifyOnCompletion() != null && batchJobDTO.getNotifyOnCompletion()) {
+        if (batchJobService.sendNotificationToUser(batchJobDTO))
+          notifyStatus = BatchJob.NotifyStatus.SENT_SUCCESS;
+        else notifyStatus = BatchJob.NotifyStatus.SENT_FAILURE;
+      } else {
+        notifyStatus = BatchJob.NotifyStatus.NOT_SENT;
+      }
+
+      batchJobDTO.setNotifyStatus(notifyStatus);
       batchJobService.update(batchJobDTO);
       ApplicationLogger.info(
           "Spring Batch job completed: " + jobExecution.getJobInstance().getJobName());
@@ -177,9 +187,8 @@ public class AbstractBatchJobListener
         String outputFilePath =
             jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
         if (outputFilePath != null) {
-            List<Object> chunkItems = (List<Object>) items.getItems();
-            for (Object item : chunkItems)
-                writeSkippedItemToCsv(outputFilePath, item, null);
+          List<Object> chunkItems = (List<Object>) items.getItems();
+          for (Object item : chunkItems) writeSkippedItemToCsv(outputFilePath, item, null);
         } else {
           ApplicationLogger.error(
               "Processed output file path is null, cannot write processed items");

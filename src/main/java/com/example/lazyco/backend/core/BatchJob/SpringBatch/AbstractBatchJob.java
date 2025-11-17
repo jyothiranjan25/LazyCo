@@ -64,7 +64,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
                 + " with input object containing "
                 + listDate.size()
                 + " items");
-        this.executeJobInBackground(listDate, uniqueJobName);
+        this.executeJobInBackground(listDate, uniqueJobName, inputData.getSendNotification());
       } else {
         ApplicationLogger.info(
             "No input objects found in the provided DTO for job: "
@@ -77,9 +77,10 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     }
   }
 
-  private void executeJobInBackground(List<T> inputData, String batchJobName) {
+  private void executeJobInBackground(
+      List<T> inputData, String batchJobName, boolean sendNotification) {
     // create BatchJob entry
-    BatchJobDTO batchJobDTO = createBatchJob(batchJobName, inputData.size());
+    BatchJobDTO batchJobDTO = createBatchJob(batchJobName, inputData.size(), sendNotification);
     try {
       // create and launch job
       Job job = createJob(inputData, batchJobName);
@@ -111,7 +112,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   protected Job createJob(List<T> inputData, String jobName) {
     try {
-        // use getBean to ensure new instance of listener per job
+      // use getBean to ensure new instance of listener per job
       AbstractBatchJobListener jobListener = getBean(AbstractBatchJobListener.class);
       return new JobBuilder(jobName, jobRepository)
           .listener((JobExecutionListener) jobListener)
@@ -186,7 +187,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     };
   }
 
-  private BatchJobDTO createBatchJob(String jobName, int totalItemCount) {
+  private BatchJobDTO createBatchJob(String jobName, int totalItemCount, boolean sendNotification) {
     BatchJobDTO batchJobDTO = new BatchJobDTO();
     batchJobDTO.setName(jobName);
     batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
@@ -195,6 +196,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     batchJobDTO.setSessionType(BatchJob.BatchJobSessionType.SINGLE_OBJECT_COMMIT);
     batchJobDTO.setOutputFilePath(
         CommonConstants.BATCH_AUDIT_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
+    batchJobDTO.setNotifyOnCompletion(sendNotification);
     batchJobDTO = batchJobService.create(batchJobDTO);
     return batchJobDTO;
   }
