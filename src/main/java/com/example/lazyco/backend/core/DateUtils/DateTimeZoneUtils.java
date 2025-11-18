@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.DateUtils;
 import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.AbstractAction;
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +25,7 @@ public final class DateTimeZoneUtils {
    * Defaults to current instant if the property is absent or invalid.
    */
   private static Instant fixedInstant() {
-    String value = System.getProperty("TEST_FIXED_TIME");
+    String value = System.getProperty(SystemSettingsKeys.TEST_FROZEN_TIME.getValue());
     if (value == null || value.trim().isEmpty()) {
       return Instant.now();
     }
@@ -56,7 +57,7 @@ public final class DateTimeZoneUtils {
    * ways to configure timezone for different deployment environments.
    */
   public static ZoneId getClientTimezone() {
-    String timezoneProperty = System.getProperty("CLIENT_TIMEZONE");
+    String timezoneProperty = System.getProperty(SystemSettingsKeys.CLIENT_TIMEZONE.getValue());
     return DateTimeProps.getSystemTimezone(timezoneProperty);
   }
 

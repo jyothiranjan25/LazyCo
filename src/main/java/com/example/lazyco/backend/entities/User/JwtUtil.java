@@ -2,6 +2,7 @@ package com.example.lazyco.backend.entities.User;
 
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Cache.CacheSingleton;
+import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
@@ -85,8 +86,8 @@ public class JwtUtil {
         .and()
         .subject(subject)
         .claims(claims)
-        .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
+        .issuedAt(DateTimeZoneUtils.getCurrentDate())
+        .expiration(new Date(DateTimeZoneUtils.getCurrentDate().getTime() + TOKEN_EXPIRATION_TIME))
         .signWith(SECRET_KEY, Jwts.SIG.HS256)
         .compact();
   }
@@ -300,7 +301,7 @@ public class JwtUtil {
    * @return True if the token is expired, otherwise false.
    */
   private boolean isTokenExpired(String token) throws JwtException {
-    return extractExpiration(token).before(new Date());
+    return extractExpiration(token).before(DateTimeZoneUtils.getCurrentDate());
   }
 
   /**

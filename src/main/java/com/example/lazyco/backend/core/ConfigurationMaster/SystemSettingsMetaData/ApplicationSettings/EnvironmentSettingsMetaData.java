@@ -11,13 +11,21 @@ public enum EnvironmentSettingsMetaData implements SystemSettingsMetaData {
       "System Timezone",
       SystemSettingsKeys.SYSTEM_TIMEZONE.getValue(),
       FieldInputType.TEXT,
-      "GMT"),
+      "UTC"),
+
   CLIENT_TIMEZONE(
       "Client Timezone",
       "Client Timezone",
       SystemSettingsKeys.CLIENT_TIMEZONE.getValue(),
       FieldInputType.TEXT,
-      "GMT"),
+      "UTC"),
+
+  TEST_FROZEN_TIME(
+      "Test Frozen Time",
+      "Set a frozen time for testing purposes. Format: YYYY-MM-DD HH:MM:SS",
+      SystemSettingsKeys.TEST_FROZEN_TIME.getValue(),
+      FieldInputType.DATETIME,
+      "2024-01-01 00:00:00"),
   ;
   private final SystemSettingsMetaDataDTO metaData;
 

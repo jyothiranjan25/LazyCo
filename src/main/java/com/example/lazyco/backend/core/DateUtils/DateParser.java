@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.DateUtils;
 
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.sql.Time;
 import java.text.ParseException;
@@ -34,7 +35,7 @@ public class DateParser {
    * ways to configure timezone for different deployment environments.
    */
   public static ZoneId getSystemTimezone() {
-    String timezoneProperty = System.getProperty("SYSTEM_TIMEZONE");
+    String timezoneProperty = System.getProperty(SystemSettingsKeys.SYSTEM_TIMEZONE.getValue());
     return DateTimeProps.getSystemTimezone(timezoneProperty);
   }
 

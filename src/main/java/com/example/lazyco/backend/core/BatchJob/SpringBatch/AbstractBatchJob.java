@@ -64,7 +64,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
                 + " with input object containing "
                 + listDate.size()
                 + " items");
-        this.executeJobInBackground(listDate, uniqueJobName, inputData.getSendNotification());
+        boolean sendNotification = Boolean.TRUE.equals(inputData.getSendNotification());
+        this.executeJobInBackground(listDate, uniqueJobName, sendNotification);
       } else {
         ApplicationLogger.info(
             "No input objects found in the provided DTO for job: "

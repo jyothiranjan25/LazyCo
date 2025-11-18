@@ -21,6 +21,6 @@ public class ConfigurationMasterService
     if (filter == null) {
       return null;
     }
-    return filter.getConfigValue();
+    return filter.getSensitive() ? filter.getSensitiveConfigValue() : filter.getConfigValue();
   }
 }

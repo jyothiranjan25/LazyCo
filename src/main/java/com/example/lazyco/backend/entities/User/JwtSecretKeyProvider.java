@@ -27,7 +27,7 @@ public class JwtSecretKeyProvider {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(base64Key));
       }
       ApplicationLogger.warn(
-          "JWT secret.key file was missing — a new key has been generated. All existing tokens are now invalid!");
+          "JWT secret file was missing — a new key has been generated. All existing tokens are now invalid!");
 
       // Create a folder if it doesn't exist
       Files.createDirectories(keyFolderPath);

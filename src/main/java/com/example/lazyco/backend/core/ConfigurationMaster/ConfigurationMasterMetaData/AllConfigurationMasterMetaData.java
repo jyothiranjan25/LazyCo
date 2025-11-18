@@ -3,46 +3,6 @@ package com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterM
 import com.example.lazyco.backend.core.Utils.FieldInputType;
 
 public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaData {
-  AWS_ACCESS_KEY(
-      "AWS Access Key",
-      "The AWS Access Key are used to authenticate your AWS account.",
-      ConfigurationMasterKeys.AWS_ACCESS_KEY.getKey(),
-      FieldInputType.TEXT,
-      false,
-      "Enter AWS Access Key"),
-
-  AWS_SECRET_KEY(
-      "AWS Secret Key",
-      "The AWS Access Key are used to authenticate your AWS account.",
-      ConfigurationMasterKeys.AWS_SECRET_KEY.getKey(),
-      FieldInputType.TEXT,
-      true,
-      "Enter AWS Secret Key"),
-
-  AWS_REGION(
-      "AWS Region",
-      "The AWS Region where the S3 bucket is located.",
-      ConfigurationMasterKeys.AWS_REGION.getKey(),
-      FieldInputType.TEXT,
-      false,
-      "Enter AWS Region"),
-
-  AWS_S3_BUCKET(
-      "AWS S3 Bucket",
-      "The AWS S3 Bucket where the files are stored.",
-      ConfigurationMasterKeys.AWS_S3_BUCKET.getKey(),
-      FieldInputType.TEXT,
-      false,
-      "Enter AWS S3 Bucket"),
-
-  AWS_SES_FROM(
-      "AWS SES From",
-      "The email address from which the emails are sent.",
-      ConfigurationMasterKeys.AWS_SES_FROM.getKey(),
-      FieldInputType.TEXT,
-      false,
-      "Enter AWS SES From"),
-
   SMTP_USERNAME(
       "SMTP Username",
       "The username used to authenticate the SMTP server.",
@@ -110,10 +70,10 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "TRUE",
       new String[] {"TRUE", "FALSE"}),
 
-  EMAIL_CLIENT(
+  EMAIL_PROVIDER(
       "SMTP Client",
       "The email client used to send emails.",
-      ConfigurationMasterKeys.EMAIL_CLIENT.getKey(),
+      ConfigurationMasterKeys.EMAIL_PROVIDER.getKey(),
       FieldInputType.SELECT,
       false,
       "",

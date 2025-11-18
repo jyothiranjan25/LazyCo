@@ -4,14 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ConfigurationMasterKeys {
-
-  // AWS Configuration
-  AWS_ACCESS_KEY("AWS_ACCESS_KEY"),
-  AWS_SECRET_KEY("AWS_SECRET_KEY"),
-  AWS_REGION("AWS_REGION"),
-  AWS_S3_BUCKET("AWS_S3_BUCKET"),
-  AWS_SES_FROM("AWS_SES_FROM"),
-
   // SMTP Configuration
   SMTP_USERNAME("SMTP_USERNAME"),
   SMTP_PASSWORD("SMTP_PASSWORD"),
@@ -21,10 +13,7 @@ public enum ConfigurationMasterKeys {
   SMTP_PORT("SMTP_PORT"),
   SMTP_SSL_PROTOCOL("SMTP_SSL_PROTOCOL"),
   SMTP_DEBUG("SMTP_DEBUG"),
-  CLIENT_EMAIL("CLIENT_EMAIL"),
-
-  // Other Configuration
-  EMAIL_CLIENT("EMAIL_CLIENT"),
+  EMAIL_PROVIDER("EMAIL_PROVIDER"),
   ;
   private final String key;
 

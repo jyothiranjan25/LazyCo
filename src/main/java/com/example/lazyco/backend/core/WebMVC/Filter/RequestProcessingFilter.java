@@ -26,8 +26,9 @@ public class RequestProcessingFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      if (!MediaType.MULTIPART_FORM_DATA.includes(
-          MediaType.parseMediaType(request.getContentType()))) {
+      if (request.getContentType() != null
+          && !MediaType.MULTIPART_FORM_DATA.includes(
+              MediaType.parseMediaType(request.getContentType()))) {
 
         // Wrap request and buffer body right here
         PreReadRequestWrapper wrappedRequest = new PreReadRequestWrapper(request);

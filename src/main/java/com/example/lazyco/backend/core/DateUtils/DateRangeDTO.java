@@ -20,7 +20,7 @@ public class DateRangeDTO {
 
   /** Default constructor creates a range for the current day (start of day to end of day). */
   public DateRangeDTO() {
-    Date now = new Date();
+    Date now = DateTimeZoneUtils.getCurrentDate();
     this.start = DateTimeZoneUtils.startOfDay(now);
     this.end = DateTimeZoneUtils.endOfDay(now);
   }

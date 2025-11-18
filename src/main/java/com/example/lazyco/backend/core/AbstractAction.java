@@ -1,10 +1,15 @@
 package com.example.lazyco.backend.core;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
+import com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterDTO;
+import com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterService;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import java.util.List;
 import java.util.Properties;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,11 +80,11 @@ public class AbstractAction implements CommonConstants {
 
   /*  Environment Checkers */
   public boolean isTestEnvironment() {
-    return TEST_MODE.equals(System.getProperty("environment", "").toLowerCase());
+    return TEST_MODE.equalsIgnoreCase(environment);
   }
 
   public boolean isDevelopmentEnvironment() {
-    return DEV_MODE.equals(System.getProperty("environment", "").toLowerCase());
+    return DEV_MODE.equalsIgnoreCase(environment);
   }
 
   /** ThreadLocal storage for per-thread properties */
@@ -115,11 +120,41 @@ public class AbstractAction implements CommonConstants {
     setBypassRBAC(true);
     try {
       Properties properties = new Properties();
-      properties.setProperty("environment", environment);
-      // @TODO Load properties from configuration source
+      // Load application properties from classpath
+      try {
+        ApplicationLogger.info("Loading application properties from classpath...");
+        properties.load(
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(APPLICATION_PROPERTIES));
+
+      } catch (Exception e) {
+        ApplicationLogger.error("Error loading application properties: ", e);
+      }
+
+      // load CConfiguration Master properties from database
+      try {
+        ApplicationLogger.info("Loading Configuration Master properties from database...");
+        ConfigurationMasterService configurationMasterService =
+            getBean(ConfigurationMasterService.class);
+        List<ConfigurationMasterDTO> configMasterProperties =
+            configurationMasterService.get(new ConfigurationMasterDTO());
+
+        for (ConfigurationMasterDTO configMasterDTO : configMasterProperties) {
+          String configKey = configMasterDTO.getConfigKey();
+          String configValue;
+          if (Boolean.TRUE.equals(configMasterDTO.getSensitive())) {
+            configValue = configMasterDTO.getSensitiveConfigValue();
+          } else {
+            configValue = configMasterDTO.getConfigValue();
+          }
+          if (configKey != null && configValue != null) properties.put(configKey, configValue);
+        }
+      } catch (Exception e) {
+        ApplicationLogger.error("Error loading Configuration Master properties: ", e);
+      }
       setProperties(properties);
     } finally {
-      ApplicationLogger.info("Initializing application properties...");
       setBypassRBAC(false);
     }
   }

@@ -24,6 +24,9 @@ public class ConfigurationMaster extends AbstractRBACModel {
   @Column(name = "config_value", comment = "Store configuration value")
   private String configValue;
 
+  @Column(name = "sensitive_config_value", comment = "Store sensitive configuration value")
+  private String sensitiveConfigValue;
+
   @Column(name = "description", comment = "Store configuration description")
   private String description;
 

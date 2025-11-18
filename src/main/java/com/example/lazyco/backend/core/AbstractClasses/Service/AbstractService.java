@@ -128,13 +128,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before creation
-  protected void updateDtoBeforeCreate(D dtoToCreate) {}
+  protected void updateDtoBeforeCreate(D requestDTO) {}
 
   // Hook called before the entity is persisted
-  protected void preCreate(D dtoToCreate, E entityToCreate) {}
+  protected void preCreate(D requestDTO, E entityToCreate) {}
 
   // Hook called after the entity is persisted
-  protected void postCreate(D dtoToCreate, E createdEntity) {}
+  protected void postCreate(D requestDTO, E createdEntity) {}
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
@@ -210,13 +210,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook called before the entity is updated
-  protected void preUpdate(D dtoToUpdate, E entityBeforeUpdates, E entityAfterUpdates) {}
+  protected void preUpdate(D requestDTO, E entityBeforeUpdates, E entityAfterUpdates) {}
 
   // Hook called after the entity is updated
-  protected void postUpdate(D dtoToUpdate, E entityBeforeUpdate, E updatedEntity) {}
+  protected void postUpdate(D requestDTO, E entityBeforeUpdate, E updatedEntity) {}
 
   // Hook to validate DTO before create or update
-  protected void validateBeforeCreateOrUpdate(D dtoToCheck) {}
+  protected void validateBeforeCreateOrUpdate(D requestDTO) {}
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
@@ -268,13 +268,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before deletion
-  protected void updateDtoBeforeDelete(D dtoToDelete) {}
+  protected void updateDtoBeforeDelete(D requestDTO) {}
 
   // Hook called before the entity is deleted
-  protected void preDelete(D dtoToDelete, E entityToDelete) {}
+  protected void preDelete(D requestDTO, E entityToDelete) {}
 
   // Hook called after the entity is deleted
-  protected void postDelete(D dtoToDelete, E deletedEntity) {}
+  protected void postDelete(D requestDTO, E deletedEntity) {}
 
   // Get count of entity records matching the filter
   @Transactional(readOnly = true)
