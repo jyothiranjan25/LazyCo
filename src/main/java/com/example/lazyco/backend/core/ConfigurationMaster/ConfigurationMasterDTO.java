@@ -22,14 +22,4 @@ public class ConfigurationMasterDTO extends AbstractDTO<ConfigurationMasterDTO> 
 
   @Expose(serialize = false, deserialize = false)
   private String sensitiveConfigValue;
-
-  // Encrypt the sensitiveConfigValue before setting it
-  public void setSensitiveConfigValue(String sensitiveConfigValue) {
-    this.sensitiveConfigValue = CryptoUtil.encrypt(sensitiveConfigValue);
-  }
-
-  // Decrypt the sensitiveConfigValue before returning it
-  public String getSensitiveConfigValue() {
-    return CryptoUtil.decrypt(sensitiveConfigValue);
-  }
 }

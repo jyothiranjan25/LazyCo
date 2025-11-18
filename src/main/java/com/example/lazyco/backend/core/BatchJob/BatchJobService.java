@@ -7,10 +7,8 @@ import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.File.FileDTO;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
     implements IBatchJobService {
 

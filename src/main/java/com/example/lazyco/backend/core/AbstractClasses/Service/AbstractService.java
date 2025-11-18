@@ -286,7 +286,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   private List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
     List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
-    return modifyGetResult(result, filter);
+    // Clone each DTO to avoid side effects
+    @SuppressWarnings("unchecked")
+    List<D> clonedResult = result.stream().map(dto -> (D) dto.clone()).toList();
+    return modifyGetResult(clonedResult, filter);
   }
 
   // Hook to modify the filter before fetching records

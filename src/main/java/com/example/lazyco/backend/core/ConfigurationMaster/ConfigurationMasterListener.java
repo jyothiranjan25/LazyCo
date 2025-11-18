@@ -3,24 +3,24 @@ package com.example.lazyco.backend.core.ConfigurationMaster;
 import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.AbstractAction;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ConfigurationMasterListener {
 
-  @PrePersist
-  public void PrePersist(ConfigurationMaster configurationMaster) {
+  @PostPersist
+  public void PostPersist(ConfigurationMaster configurationMaster) {
     getBean(AbstractAction.class).initializeSystemProps();
   }
 
-  @PreUpdate
+  @PostUpdate
   public void PreUpdate(ConfigurationMaster configurationMaster) {
     getBean(AbstractAction.class).initializeSystemProps();
   }
 
-  @PreRemove
-  public void SuperRemoveListener(ConfigurationMaster configurationMaster) {
+  @PostRemove
+  public void PostRemove(ConfigurationMaster configurationMaster) {
     getBean(AbstractAction.class).initializeSystemProps();
   }
 }

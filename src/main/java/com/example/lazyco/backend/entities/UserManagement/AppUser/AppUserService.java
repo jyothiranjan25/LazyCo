@@ -3,10 +3,8 @@ package com.example.lazyco.backend.entities.UserManagement.AppUser;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     implements IAppUserService {
 

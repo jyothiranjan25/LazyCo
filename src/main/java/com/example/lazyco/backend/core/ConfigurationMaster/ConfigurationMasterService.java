@@ -1,17 +1,52 @@
 package com.example.lazyco.backend.core.ConfigurationMaster;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class ConfigurationMasterService
     extends AbstractService<ConfigurationMasterDTO, ConfigurationMaster>
     implements IConfigurationMasterService {
 
   public ConfigurationMasterService(ConfigurationMasterMapper mapper) {
     super(mapper);
+  }
+
+  private final String MASKED_VALUE = "***********";
+
+  @Override
+  protected List<ConfigurationMasterDTO> modifyGetResult(
+      List<ConfigurationMasterDTO> result, ConfigurationMasterDTO filter) {
+    for (ConfigurationMasterDTO dto : result) {
+      if (dto.getSensitiveConfigValue() != null) {
+        dto.setSensitiveConfigValue(CryptoUtil.decrypt(dto.getSensitiveConfigValue()));
+      }
+    }
+    return result;
+  }
+
+  @Override
+  protected void preCreate(ConfigurationMasterDTO requestDTO, ConfigurationMaster entityToCreate) {
+    if (Boolean.TRUE.equals(requestDTO.getSensitive())) {
+      entityToCreate.setConfigValue(MASKED_VALUE);
+      entityToCreate.setSensitiveConfigValue(CryptoUtil.encrypt(requestDTO.getConfigValue()));
+    }
+  }
+
+  @Override
+  protected void preUpdate(
+      ConfigurationMasterDTO requestDTO,
+      ConfigurationMaster entityBeforeUpdates,
+      ConfigurationMaster entityAfterUpdates) {
+    if (Boolean.TRUE.equals(requestDTO.getSensitive())
+        && !requestDTO.getConfigValue().equals(MASKED_VALUE)) {
+      entityAfterUpdates.setConfigValue(MASKED_VALUE);
+      entityAfterUpdates.setSensitiveConfigValue(CryptoUtil.encrypt(requestDTO.getConfigValue()));
+    }
   }
 
   public String getValue(String key) {
