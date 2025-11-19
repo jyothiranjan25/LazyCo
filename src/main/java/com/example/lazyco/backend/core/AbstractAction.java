@@ -4,6 +4,7 @@ import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterDTO;
 import com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterService;
+import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AbstractAction implements CommonConstants {
 
-  @Value("${app.environment:development}")
+  @Value("${app.environment:production}")
   private String environment;
 
   /** ThreadLocal storage to indicate if RBAC checks should be bypassed for the current thread. */
@@ -69,6 +70,10 @@ public class AbstractAction implements CommonConstants {
 
   /** Configuration properties loaded from application settings */
   @Getter private volatile Properties properties = new Properties();
+
+  public static String getConfigProperties(SystemSettingsKeys key) {
+    return getBean(AbstractAction.class).getConfigProperties(key.getValue());
+  }
 
   public String getConfigProperties(String key) {
     return properties.getProperty(key, null);
@@ -132,7 +137,7 @@ public class AbstractAction implements CommonConstants {
         ApplicationLogger.error("Error loading application properties: ", e);
       }
 
-      // load CConfiguration Master properties from database
+      // load Configuration Master properties from database
       try {
         ApplicationLogger.info("Loading Configuration Master properties from database...");
         ConfigurationMasterService configurationMasterService =

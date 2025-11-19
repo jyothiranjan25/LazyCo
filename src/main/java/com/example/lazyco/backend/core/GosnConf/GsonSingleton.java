@@ -391,7 +391,7 @@ public class GsonSingleton {
       }
 
       try {
-        ZoneId currentZone = DateParser.getSystemTimezone();
+        ZoneId currentZone = DateParser.getSystemZoneId();
         SimpleDateFormat sdf = dateFormat.get();
         sdf.setTimeZone(TimeZone.getTimeZone(currentZone));
         String dateString = sdf.format(date);

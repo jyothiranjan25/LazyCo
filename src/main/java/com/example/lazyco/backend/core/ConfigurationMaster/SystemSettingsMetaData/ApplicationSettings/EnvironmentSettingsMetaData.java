@@ -3,9 +3,20 @@ package com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaDa
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
+import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.core.Utils.FieldInputType;
 
 public enum EnvironmentSettingsMetaData implements SystemSettingsMetaData {
+  APPLICATION_ENVIRONMENT(
+      "Application Environment",
+      "The current environment in which the application is running.",
+      SystemSettingsKeys.APPLICATION_ENVIRONMENT.getValue(),
+      FieldInputType.SELECT,
+      "development",
+      new String[] {
+        CommonConstants.TEST_MODE, CommonConstants.DEV_MODE, CommonConstants.PROD_MODE
+      }),
+
   SYSTEM_TIMEZONE(
       "System Timezone",
       "System Timezone",

@@ -7,7 +7,7 @@ public interface CommonConstants {
   String APPLICATION_PROPERTIES = "application.properties";
 
   // Environment Variables
-  String TEST_MODE = "Test";
+  String TEST_MODE = "Testing";
   String DEV_MODE = "Development";
   String PROD_MODE = "Production";
 

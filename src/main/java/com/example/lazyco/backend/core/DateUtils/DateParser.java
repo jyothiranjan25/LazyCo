@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.core.DateUtils;
 
+import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.sql.Time;
@@ -34,14 +35,15 @@ public class DateParser {
    * Get system timezone from system property, environment variable, or default. Supports multiple
    * ways to configure timezone for different deployment environments.
    */
-  public static ZoneId getSystemTimezone() {
-    String timezoneProperty = System.getProperty(SystemSettingsKeys.SYSTEM_TIMEZONE.getValue());
+  public static ZoneId getSystemZoneId() {
+    String timezoneProperty =
+        AbstractAction.getConfigProperties(SystemSettingsKeys.SYSTEM_TIMEZONE);
     return DateTimeProps.getSystemTimezone(timezoneProperty);
   }
 
   /** Get legacy TimeZone for backwards compatibility. */
   public static TimeZone getSystemTimeZone() {
-    return TimeZone.getTimeZone(getSystemTimezone());
+    return TimeZone.getTimeZone(getSystemZoneId());
   }
 
   /**
@@ -52,7 +54,7 @@ public class DateParser {
    * @return the parsed Date object, or null if parsing fails
    */
   public static Date deserializeDate(String dateString) {
-    return deserializeDate(dateString, getSystemTimezone());
+    return deserializeDate(dateString, getSystemZoneId());
   }
 
   /**
@@ -201,7 +203,7 @@ public class DateParser {
 
     try {
       SimpleDateFormat sdf = getThreadSafeDateFormat(pattern);
-      sdf.setTimeZone(TimeZone.getTimeZone(zoneId != null ? zoneId : getSystemTimezone()));
+      sdf.setTimeZone(TimeZone.getTimeZone(zoneId != null ? zoneId : getSystemZoneId()));
       return sdf.format(date);
     } catch (Exception e) {
       ApplicationLogger.warn(
@@ -223,7 +225,7 @@ public class DateParser {
       return date;
     }
 
-    ZoneId sourceZone = fromZone != null ? fromZone : getSystemTimezone();
+    ZoneId sourceZone = fromZone != null ? fromZone : getSystemZoneId();
 
     if (sourceZone.equals(toZone)) {
       return date; // No conversion needed

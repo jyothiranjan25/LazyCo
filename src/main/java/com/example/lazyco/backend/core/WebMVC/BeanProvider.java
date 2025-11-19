@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.WebMVC;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,5 +33,9 @@ public class BeanProvider implements ApplicationContextAware {
 
   public static Object getBean(String beanName) {
     return context.getBean(beanName);
+  }
+
+  public static ApplicationEventPublisher getPublisher() {
+    return context;
   }
 }

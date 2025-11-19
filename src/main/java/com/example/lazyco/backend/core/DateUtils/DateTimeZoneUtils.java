@@ -25,7 +25,7 @@ public final class DateTimeZoneUtils {
    * Defaults to current instant if the property is absent or invalid.
    */
   private static Instant fixedInstant() {
-    String value = System.getProperty(SystemSettingsKeys.TEST_FROZEN_TIME.getValue());
+    String value = AbstractAction.getConfigProperties(SystemSettingsKeys.TEST_FROZEN_TIME);
     if (value == null || value.trim().isEmpty()) {
       return Instant.now();
     }
@@ -57,12 +57,13 @@ public final class DateTimeZoneUtils {
    * ways to configure timezone for different deployment environments.
    */
   public static ZoneId getClientTimezone() {
-    String timezoneProperty = System.getProperty(SystemSettingsKeys.CLIENT_TIMEZONE.getValue());
+    String timezoneProperty =
+        AbstractAction.getConfigProperties(SystemSettingsKeys.CLIENT_TIMEZONE);
     return DateTimeProps.getSystemTimezone(timezoneProperty);
   }
 
   private static ZoneId systemZone() {
-    return DateParser.getSystemTimezone();
+    return DateParser.getSystemZoneId();
   }
 
   public static Instant now() {
@@ -70,7 +71,7 @@ public final class DateTimeZoneUtils {
   }
 
   public static Date getCurrentDate() {
-    return Date.from(nowInstant());
+    return Date.from(nowInstant().atZone(systemZone()).toInstant());
   }
 
   public static LocalDate currentDate() {
