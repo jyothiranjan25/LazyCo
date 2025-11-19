@@ -74,8 +74,14 @@ public class PostgresConfig {
   @Value("${hibernate.show_sql:false}")
   private boolean showSql;
 
+  @Value("${hibernate.format_sql:false}")
+  private boolean formatSql;
+
   @Value("${hibernate.hbm2ddl.auto:validate}")
   private String hibernateHbm2ddlAuto;
+
+  @Value("${hibernate.jdbc.time_zone:UTC}")
+  private String hibernateTimezone;
 
   @Value("${hibernate.use_second_level_cache:false}")
   private boolean useSecondLevelCache;
@@ -85,6 +91,9 @@ public class PostgresConfig {
 
   @Value("${hibernate.cache_region_factory_class:}")
   private String hibernateCacheRegionFactory;
+
+  @Value("${hibernate.cache_provider_class:}")
+  private String hibernateCacheProviderClass;
 
   // ==============================
   // Hibernate Envers (audit) settings
@@ -197,7 +206,7 @@ public class PostgresConfig {
     // Optimize update batching by ordering updates by entity
     properties.put(AvailableSettings.ORDER_UPDATES, "true");
     // Store timestamps consistently in UTC
-    properties.put(AvailableSettings.JDBC_TIME_ZONE, "UTC");
+    properties.put(AvailableSettings.JDBC_TIME_ZONE, hibernateTimezone);
 
     // Enable savepoint support for nested transactions
     properties.put("hibernate.boot.allow_jdbc_metadata_access", "false");
@@ -219,13 +228,15 @@ public class PostgresConfig {
     properties.put(AvailableSettings.USE_QUERY_CACHE, useQueryCache);
     // Cache region factory class implementation
     properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
+    // Cache provider class implementation
+    properties.put("hibernate.cache.provider_class", hibernateCacheProviderClass);
 
     // Disable runtime statistics collection (expensive in production)
     properties.put(AvailableSettings.GENERATE_STATISTICS, "false");
     // Log SQL statements if enabled
     properties.put(AvailableSettings.SHOW_SQL, showSql);
     // Don’t pretty-print SQL (faster logging, smaller output)
-    properties.put(AvailableSettings.FORMAT_SQL, "false");
+    properties.put(AvailableSettings.FORMAT_SQL, formatSql);
 
     // Strategy for schema generation/validation (validate, update, create, create-drop)
     properties.put(AvailableSettings.HBM2DDL_AUTO, hibernateHbm2ddlAuto);

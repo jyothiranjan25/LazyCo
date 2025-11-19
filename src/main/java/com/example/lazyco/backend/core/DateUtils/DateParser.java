@@ -298,7 +298,7 @@ public class DateParser {
 
     // Handle Z (UTC)
     if (dateString.endsWith("Z")) {
-      return ZoneId.of("UTC");
+      return DateTimeProps.UTC_ZONE_ID;
     }
 
     // Handle +/-HH:MM or +/-HHMM

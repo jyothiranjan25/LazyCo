@@ -2,14 +2,16 @@ package com.example.lazyco.backend.core.DateUtils;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.time.ZoneId;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateTimeProps {
 
+  private static final Map<String, String> ZONE_SHORT_IDS = ZoneId.SHORT_IDS;
   // Default fallback timezone
-  private static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("UTC");
+  public static final ZoneId UTC_ZONE_ID = ZoneId.of("UTC");
 
   // Base date only
   public static final String YYYY_MM_DD = "yyyy-MM-dd";
@@ -182,7 +184,7 @@ public final class DateTimeProps {
       return ZoneId.systemDefault();
     } catch (Exception e) {
       ApplicationLogger.warn("Failed to get system default timezone, falling back to UTC");
-      return DEFAULT_ZONE_ID;
+      return UTC_ZONE_ID;
     }
   }
 }
