@@ -12,16 +12,6 @@ public enum URLSettingsMetaData implements SystemSettingsMetaData {
       SystemSettingsKeys.APP_URL.getValue(),
       FieldInputType.TEXT,
       "https://example.com"),
-
-  ENV(
-      "APP Environment",
-      "Env of the web application.",
-      SystemSettingsKeys.APP_URL.getValue(),
-      FieldInputType.TEXT,
-      "Production",
-      new String[] {
-        "Production", "Testing",
-      }),
   ;
   private final SystemSettingsMetaDataDTO metaData;
 

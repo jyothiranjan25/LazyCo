@@ -3,6 +3,8 @@ package com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaDa
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
+import com.example.lazyco.backend.core.DateUtils.DateTimeProps;
+import com.example.lazyco.backend.core.Messages.YamlConfig.ApplicationText;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.core.Utils.FieldInputType;
 
@@ -17,19 +19,29 @@ public enum EnvironmentSettingsMetaData implements SystemSettingsMetaData {
         CommonConstants.TEST_MODE, CommonConstants.DEV_MODE, CommonConstants.PROD_MODE
       }),
 
+  APPLICATION_LANGUAGE(
+      "Application Language",
+      "The default language for the application interface.",
+      SystemSettingsKeys.APPLICATION_LANGUAGE.getValue(),
+      FieldInputType.SELECT,
+      "EN",
+      ApplicationText.Language.get().toArray(new String[0])),
+
   SYSTEM_TIMEZONE(
       "System Timezone",
       "System Timezone",
       SystemSettingsKeys.SYSTEM_TIMEZONE.getValue(),
-      FieldInputType.TEXT,
-      "UTC"),
+      FieldInputType.SELECT,
+      "UTC",
+      DateTimeProps.ZONE_SHORT_IDS.keySet().toArray(new String[0])),
 
   CLIENT_TIMEZONE(
       "Client Timezone",
       "Client Timezone",
       SystemSettingsKeys.CLIENT_TIMEZONE.getValue(),
-      FieldInputType.TEXT,
-      "UTC"),
+      FieldInputType.SELECT,
+      "UTC",
+      DateTimeProps.ZONE_SHORT_IDS.keySet().toArray(new String[0])),
 
   TEST_FROZEN_TIME(
       "Test Frozen Time",

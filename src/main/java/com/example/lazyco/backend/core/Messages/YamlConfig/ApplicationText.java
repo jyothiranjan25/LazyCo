@@ -1,5 +1,8 @@
 package com.example.lazyco.backend.core.Messages.YamlConfig;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ApplicationText {
   public static String get(String key, Language language) {
     String fileName = getFileByLanguage(language);
@@ -28,6 +31,10 @@ public class ApplicationText {
         }
       }
       return EN; // Default to English if no match found
+    }
+
+    public static List<String> get() {
+      return Arrays.stream(values()).map(Enum::name).toList();
     }
   }
 }

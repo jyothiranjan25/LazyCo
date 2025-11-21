@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateTimeProps {
 
-  private static final Map<String, String> ZONE_SHORT_IDS = ZoneId.SHORT_IDS;
+  public static final Map<String, String> ZONE_SHORT_IDS = ZoneId.SHORT_IDS;
   // Default fallback timezone
   public static final ZoneId UTC_ZONE_ID = ZoneId.of("UTC");
 

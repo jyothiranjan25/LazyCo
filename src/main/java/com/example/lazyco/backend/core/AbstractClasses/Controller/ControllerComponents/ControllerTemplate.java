@@ -16,11 +16,12 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
   }
 
   public ResponseEntity<?> template(D incomingRequestDTO) {
+    @SuppressWarnings("unchecked")
+    D safetyClone = (D) incomingRequestDTO.clone();
+
     if (incomingRequestDTO.getApiAction() != null && !incomingRequestDTO.getApiAction().isEmpty()) {
       return resolveActionByMethod(incomingRequestDTO);
     } else {
-      @SuppressWarnings("unchecked")
-      D safetyClone = (D) incomingRequestDTO.clone();
       D processed = execute(incomingRequestDTO);
 
       // common error handling

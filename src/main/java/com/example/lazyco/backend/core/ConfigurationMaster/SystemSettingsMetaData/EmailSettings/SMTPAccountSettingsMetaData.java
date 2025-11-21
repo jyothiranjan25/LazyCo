@@ -20,7 +20,7 @@ public enum SMTPAccountSettingsMetaData implements SystemSettingsMetaData {
       "username@example.com"),
   SMTP_PASSWORD(
       "SMTP Password",
-      "Your password must have 8 characters and meet the following criteria: 1 Capital Letter | 1 Small Letter | 1 Number | 1 Symbol",
+      "Your SMTP password is the password for your email account that you will use to sign in.",
       SystemSettingsKeys.SMTP_PASSWORD.getValue(),
       FieldInputType.TEXT,
       "SMTP password");

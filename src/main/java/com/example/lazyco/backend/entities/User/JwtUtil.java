@@ -86,8 +86,8 @@ public class JwtUtil {
         .and()
         .subject(subject)
         .claims(claims)
-        .issuedAt(DateTimeZoneUtils.getCurrentDate())
-        .expiration(new Date(DateTimeZoneUtils.getCurrentDate().getTime() + TOKEN_EXPIRATION_TIME))
+        .issuedAt(new Date())
+        .expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
         .signWith(SECRET_KEY, Jwts.SIG.HS256)
         .compact();
   }
