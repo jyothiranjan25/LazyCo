@@ -55,16 +55,13 @@ public class GsonSingleton {
   }
 
   private static void registerTypeAdapter(GsonBuilder gsonBuilder) {
-    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
-    gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
-    gsonBuilder.registerTypeAdapter(Time.class, new TimeDeserializer());
-    gsonBuilder.registerTypeAdapter(Time.class, new TimeSerializer());
-    gsonBuilder.registerTypeAdapter(String.class, new StringDeserializer());
-    gsonBuilder.registerTypeAdapter(String.class, new StringSerializer());
+    gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+    gsonBuilder.registerTypeAdapter(Time.class, new TimeTypeAdapter());
+    gsonBuilder.registerTypeAdapter(String.class, new StringTypeAdapter());
     gsonBuilder.serializeSpecialFloatingPointValues();
-    gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberDeserializer());
-    gsonBuilder.registerTypeAdapter(Number.class, new LenientNumberSerializer());
+    gsonBuilder.registerTypeAdapter(Number.class, new NumberTypeAdapter());
     gsonBuilder.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
+    gsonBuilder.registerTypeAdapter(Class.class, new ClassTypeAdapter());
   }
 
   // this instance is used for CSV parsing where we want to ignore nulls
@@ -122,6 +119,7 @@ public class GsonSingleton {
     return getGson().fromJson(jsonObject.toString(), classOfT);
   }
 
+  // Exclusion strategies for @Expose annotation
   private static class DeserializationExclusionStrategy implements ExclusionStrategy {
 
     @Override
@@ -136,6 +134,7 @@ public class GsonSingleton {
     }
   }
 
+  // Exclusion strategies for @Expose annotation
   private static class SerializationExclusionStrategy implements ExclusionStrategy {
 
     @Override
@@ -150,6 +149,7 @@ public class GsonSingleton {
     }
   }
 
+  // Exclusion strategy for CSV fields
   private static class CsvExclusionStrategy implements ExclusionStrategy {
 
     @Override
@@ -163,6 +163,7 @@ public class GsonSingleton {
     }
   }
 
+  // Field naming strategy for CSV fields
   public static class CsvFieldNamingStrategy extends PropertyNamingStrategy
       implements FieldNamingStrategy {
     @Override
@@ -171,10 +172,11 @@ public class GsonSingleton {
     }
   }
 
+  // Type adapter factory for CSV List handling
   private static class CsvTypeAdapterFactory implements TypeAdapterFactory {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+    public <T> com.google.gson.TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
       Class<T> rawType = (Class<T>) typeToken.getRawType();
 
       if (!List.class.isAssignableFrom(rawType)) {
@@ -192,16 +194,17 @@ public class GsonSingleton {
       }
 
       // Get the delegate adapter for normal JSON array handling
-      final TypeAdapter<T> delegateAdapter = gson.getDelegateAdapter(this, typeToken);
+      final com.google.gson.TypeAdapter<T> delegateAdapter =
+          gson.getDelegateAdapter(this, typeToken);
 
-      return (TypeAdapter<T>) new CsvListAdapter(elementType, delegateAdapter);
+      return (com.google.gson.TypeAdapter<T>) new CsvListAdapter(elementType, delegateAdapter);
     }
 
-    private static class CsvListAdapter<T> extends TypeAdapter<List<?>> {
+    private static class CsvListAdapter<T> extends com.google.gson.TypeAdapter<List<?>> {
       private final Type elementType;
-      private final TypeAdapter<T> delegateAdapter;
+      private final com.google.gson.TypeAdapter<T> delegateAdapter;
 
-      CsvListAdapter(Type elementType, TypeAdapter<T> delegateAdapter) {
+      CsvListAdapter(Type elementType, com.google.gson.TypeAdapter<T> delegateAdapter) {
         this.elementType = elementType;
         this.delegateAdapter = delegateAdapter;
       }
@@ -345,7 +348,31 @@ public class GsonSingleton {
     }
   }
 
-  public static class DateDeserializer implements JsonDeserializer<Date> {
+  // Date type adapter
+  public static class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
+    private final ThreadLocal<SimpleDateFormat> dateFormat =
+        ThreadLocal.withInitial(
+            () -> new SimpleDateFormat(DateTimeProps.YYYY_MM_DD_T_HH_MM_SS_SSS_XXX));
+
+    @Override
+    public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
+      if (date == null) {
+        return JsonNull.INSTANCE;
+      }
+
+      try {
+        ZoneId currentZone = DateParser.getSystemZoneId();
+        SimpleDateFormat sdf = dateFormat.get();
+        sdf.setTimeZone(TimeZone.getTimeZone(currentZone));
+        String dateString = sdf.format(date);
+        return new JsonPrimitive(dateString);
+      } catch (Exception e) {
+        ApplicationLogger.error("Error serializing date: {}", date);
+        // Fallback to timestamp
+        return new JsonPrimitive(date.getTime());
+      }
+    }
+
     @Override
     public Date deserialize(
         JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
@@ -378,33 +405,27 @@ public class GsonSingleton {
     }
   }
 
-  public static class DateSerializer implements JsonSerializer<Date> {
+  // Time type adapter
+  public static class TimeTypeAdapter implements JsonSerializer<Time>, JsonDeserializer<Time> {
 
-    private final ThreadLocal<SimpleDateFormat> dateFormat =
-        ThreadLocal.withInitial(
-            () -> new SimpleDateFormat(DateTimeProps.YYYY_MM_DD_T_HH_MM_SS_SSS_XXX));
+    private final ThreadLocal<DateFormat> timeFormat =
+        ThreadLocal.withInitial(() -> new SimpleDateFormat(DateTimeProps.HH_MM_SS_SSS));
 
     @Override
-    public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
-      if (date == null) {
+    public JsonElement serialize(Time time, Type typeOfSrc, JsonSerializationContext context) {
+      if (time == null) {
         return JsonNull.INSTANCE;
       }
 
       try {
-        ZoneId currentZone = DateParser.getSystemZoneId();
-        SimpleDateFormat sdf = dateFormat.get();
-        sdf.setTimeZone(TimeZone.getTimeZone(currentZone));
-        String dateString = sdf.format(date);
-        return new JsonPrimitive(dateString);
+        String timeString = timeFormat.get().format(time);
+        return new JsonPrimitive(timeString);
       } catch (Exception e) {
-        ApplicationLogger.error("Error serializing date: {}", date);
+        ApplicationLogger.error("Unable to parse time: {}", time);
         // Fallback to timestamp
-        return new JsonPrimitive(date.getTime());
+        return new JsonPrimitive(time.getTime());
       }
     }
-  }
-
-  public static class TimeDeserializer implements JsonDeserializer<Time> {
 
     @Override
     public Time deserialize(
@@ -439,30 +460,14 @@ public class GsonSingleton {
     }
   }
 
-  /** Thread-safe JSON serializer for Time objects. */
-  public static class TimeSerializer implements JsonSerializer<Time> {
-
-    private final ThreadLocal<DateFormat> timeFormat =
-        ThreadLocal.withInitial(() -> new SimpleDateFormat(DateTimeProps.HH_MM_SS_SSS));
-
+  // String type adapter that trims strings and converts empty strings to null
+  private static class StringTypeAdapter
+      implements JsonSerializer<String>, JsonDeserializer<String> {
     @Override
-    public JsonElement serialize(Time time, Type typeOfSrc, JsonSerializationContext context) {
-      if (time == null) {
-        return JsonNull.INSTANCE;
-      }
-
-      try {
-        String timeString = timeFormat.get().format(time);
-        return new JsonPrimitive(timeString);
-      } catch (Exception e) {
-        ApplicationLogger.error("Unable to parse time: {}", time);
-        // Fallback to timestamp
-        return new JsonPrimitive(time.getTime());
-      }
+    public JsonElement serialize(String src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src);
     }
-  }
 
-  private static class StringDeserializer implements JsonDeserializer<String> {
     @Override
     public String deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
@@ -476,38 +481,18 @@ public class GsonSingleton {
     }
   }
 
-  private static class StringSerializer implements JsonSerializer<String> {
+  // Lenient number serializer/deserializer
+  private static class NumberTypeAdapter
+      implements JsonSerializer<Number>, JsonDeserializer<Number> {
+
     @Override
-    public JsonElement serialize(String src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(src);
+    public JsonElement serialize(
+        Number number, Type type, JsonSerializationContext jsonSerializationContext) {
+      if (number == null) {
+        return null; // JSON null
+      }
+      return new JsonPrimitive(number);
     }
-  }
-
-  private static class LenientTypeAdapterFactory implements TypeAdapterFactory {
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
-      final TypeAdapter<T> delegate = gson.getDelegateAdapter(this, typeToken);
-      return new TypeAdapter<T>() {
-
-        @Override
-        public void write(JsonWriter jsonWriter, T t) throws IOException {
-          delegate.write(jsonWriter, t);
-        }
-
-        @Override
-        public T read(JsonReader jsonReader) throws IOException {
-          try {
-            return delegate.read(jsonReader);
-          } catch (IllegalStateException | JsonSyntaxException e) {
-            jsonReader.skipValue(); // Skip the bad value
-            return null;
-          }
-        }
-      };
-    }
-  }
-
-  private static class LenientNumberDeserializer implements JsonDeserializer<Number> {
 
     @Override
     public Number deserialize(
@@ -539,21 +524,11 @@ public class GsonSingleton {
     }
   }
 
-  public static class LenientNumberSerializer implements JsonSerializer<Number> {
-    @Override
-    public JsonElement serialize(
-        Number number, Type type, JsonSerializationContext jsonSerializationContext) {
-      if (number == null) {
-        return null; // JSON null
-      }
-      return new JsonPrimitive(number);
-    }
-  }
-
+  // Enum type adapter factory for case-insensitive enum deserialization
   private static class EnumTypeAdapterFactory implements TypeAdapterFactory {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+    public <T> com.google.gson.TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
       Class<T> rawType = (Class<T>) typeToken.getRawType();
       if (!Enum.class.isAssignableFrom(rawType) || rawType == Enum.class) {
         return null;
@@ -562,10 +537,33 @@ public class GsonSingleton {
       if (!rawType.isEnum()) {
         rawType = (Class<T>) rawType.getSuperclass();
       }
-      return (TypeAdapter<T>) new CaseInsensitiveEnumAdapter(rawType);
+      return (com.google.gson.TypeAdapter<T>) new CaseInsensitiveEnumAdapter(rawType);
     }
   }
 
+  // Class type adapter to serialize/deserialize Class<?> objects
+  public static class ClassTypeAdapter
+      implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
+    @Override
+    public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src.getSimpleName()); // serialize as fully-qualified class name
+    }
+
+    @Override
+    public Class<?> deserialize(
+        JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
+        throws JsonParseException {
+      String className = jsonElement.getAsString();
+      try {
+        return Class.forName(className);
+      } catch (ClassNotFoundException e) {
+        ApplicationLogger.error("Class not found during deserialization: {}", className);
+        return null;
+      }
+    }
+  }
+
+  // Case-insensitive enum adapter
   private static class CaseInsensitiveEnumAdapter<T extends Enum<T>> extends TypeAdapter<T> {
     private final Class<T> enumType;
 
@@ -593,6 +591,31 @@ public class GsonSingleton {
         }
       }
       return null;
+    }
+  }
+
+  // Lenient type adapter factory that skips bad values during deserialization
+  private static class LenientTypeAdapterFactory implements TypeAdapterFactory {
+    @Override
+    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+      final TypeAdapter<T> delegate = gson.getDelegateAdapter(this, typeToken);
+      return new TypeAdapter<T>() {
+
+        @Override
+        public void write(JsonWriter jsonWriter, T t) throws IOException {
+          delegate.write(jsonWriter, t);
+        }
+
+        @Override
+        public T read(JsonReader jsonReader) throws IOException {
+          try {
+            return delegate.read(jsonReader);
+          } catch (IllegalStateException | JsonSyntaxException e) {
+            jsonReader.skipValue(); // Skip the bad value
+            return null;
+          }
+        }
+      };
     }
   }
 }
