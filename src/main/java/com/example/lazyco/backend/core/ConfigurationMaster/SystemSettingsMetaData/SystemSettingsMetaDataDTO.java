@@ -19,6 +19,7 @@ public class SystemSettingsMetaDataDTO extends AbstractDTO<SystemSettingsMetaDat
   private String defaultValue;
   private String[] options;
   private transient Class<? extends SystemSettingsMetaData> groupEnumClass;
+
   private List<SystemSettingsMetaDataDTO> childrenMetaData;
 
   public SystemSettingsMetaDataDTO(

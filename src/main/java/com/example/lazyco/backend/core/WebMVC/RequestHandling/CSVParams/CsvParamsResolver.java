@@ -1,5 +1,7 @@
 package com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams;
 
+import static com.example.lazyco.backend.core.CsvTemplate.CsvService.generateCsvToList;
+
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileDTO;
@@ -16,7 +18,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 @Component
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class CsvParamsResolver implements HandlerMethodArgumentResolver {
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
@@ -68,6 +70,7 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       AbstractDTO dtoInstance =
           RequestHandlingHelper.populateDTOFromRequest(parameter, multipartRequest);
       dtoInstance.setFile(file);
+      dtoInstance.setObjects(generateCsvToList(file, dtoInstance.getClass()));
       return dtoInstance;
     } catch (Exception e) {
       throw new ExceptionWrapper("Failed to parse CSV", e);

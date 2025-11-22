@@ -106,6 +106,7 @@ public class CsvService {
         .fromJson(GsonSingleton.getCsvInstance().toJson(object), Map.class);
   }
 
+  @SuppressWarnings("unchecked")
   public FileDTO generateCsvFile(CsvTemplateDTO csvTemplateDTO) {
     String defaultFile =
         StringUtils.isNotEmpty(csvTemplateDTO.getCsvType())
@@ -185,7 +186,7 @@ public class CsvService {
     return Object.class;
   }
 
-  public <T> List<T> generateCsvToList(FileDTO file, Class<T> dtoType) {
+  public static List<?> generateCsvToList(FileDTO file, Class<?> dtoType) {
     try {
       try (InputStream fis = new FileInputStream(file.getFile());
           BOMInputStream bomInputStream =
@@ -218,11 +219,11 @@ public class CsvService {
           }
         }
 
-        List<T> dtoList = new ArrayList<>();
+        List<Object> dtoList = new ArrayList<>();
         for (Map<String, String> row : rows) {
           String json = GsonSingleton.getCsvInstance().toJson(row);
           Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
-          dtoList.add((T) dto);
+          dtoList.add(dto);
         }
         return dtoList;
       }
@@ -237,6 +238,7 @@ public class CsvService {
     return generateCsvHeaders(csvTemplateDTO);
   }
 
+  @SuppressWarnings("unchecked")
   public void appendSingleRowToCsv(CsvTemplateDTO csvTemplateDTO, String fileName) {
 
     File file = new File(fileName);

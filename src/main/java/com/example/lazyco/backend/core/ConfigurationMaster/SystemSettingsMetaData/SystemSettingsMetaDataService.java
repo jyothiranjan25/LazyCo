@@ -38,10 +38,9 @@ public class SystemSettingsMetaDataService {
     List<SystemSettingsMetaDataDTO> metaDataObjects = new ArrayList<>();
     for (SystemSettingsMetaData singleSetting : groupEnumClass.getEnumConstants()) {
 
-      SystemSettingsMetaDataDTO singleSettingMetaData =
-          (SystemSettingsMetaDataDTO) singleSetting.getMetaData().clone();
-      // if this setting itself is a settings group, then recursively get its children settings
-      // metadata objects
+      SystemSettingsMetaDataDTO singleSettingMetaData = singleSetting.getMetaData();
+      // if this setting itself is a settings group,
+      // then recursively get its children settings metadata objects
       if (singleSettingMetaData.getGroupEnumClass() != null) {
         singleSettingMetaData.setChildrenMetaData(
             getMetaDataObjects(singleSettingMetaData.getGroupEnumClass()));
