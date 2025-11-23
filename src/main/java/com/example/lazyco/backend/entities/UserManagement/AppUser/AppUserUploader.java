@@ -1,5 +1,6 @@
 package com.example.lazyco.backend.entities.UserManagement.AppUser;
 
+import com.example.lazyco.backend.core.BatchJob.BatchJobOperationType;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractBatchJob;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import org.springframework.batch.item.ItemProcessor;
@@ -34,7 +35,7 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   }
 
   @Override
-  protected ItemWriter<AppUserDTO> createItemWriter() {
+  protected ItemWriter<AppUserDTO> createItemWriter(BatchJobOperationType operationType) {
     return items -> items.forEach(this::createTest);
   }
 

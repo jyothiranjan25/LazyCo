@@ -18,11 +18,12 @@ public class BatchJobDTO extends AbstractDTO<BatchJobDTO> {
   private Integer totalItemCount;
   private Integer processedCount;
   private Integer failedCount;
-  private BatchJob.BatchJobStatus status;
-  private BatchJob.BatchJobSessionType sessionType;
+  private BatchJobOperationType operationType;
+  private BatchJobStatus status;
+  private BatchJobSessionType sessionType;
   private String outputFilePath;
   private Boolean notifyOnCompletion;
-  private BatchJob.NotifyStatus notifyStatus;
+  private NotifyStatus notifyStatus;
 
   public enum APIAction {
     TERMINATE,

@@ -1,9 +1,7 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import com.example.lazyco.backend.core.AbstractAction;
-import com.example.lazyco.backend.core.BatchJob.BatchJob;
-import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
-import com.example.lazyco.backend.core.BatchJob.BatchJobService;
+import com.example.lazyco.backend.core.BatchJob.*;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
 import com.example.lazyco.backend.core.CsvTemplate.CsvTemplateDTO;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
@@ -73,7 +71,7 @@ public class AbstractBatchJobListener
       BatchJobDTO batchJobDTO = batchJobService.getById(batchJobId);
       batchJobDTO.setJobId(jobExecution.getJobId());
       batchJobDTO.setProcessedCount(0);
-      batchJobDTO.setStatus(BatchJob.BatchJobStatus.RUNNING);
+      batchJobDTO.setStatus(BatchJobStatus.RUNNING);
       batchJobService.update(batchJobDTO);
     } catch (Exception e) {
       throw new ExceptionWrapper("Error in beforeJob of AbstractBatchJobListener", e);
@@ -100,11 +98,11 @@ public class AbstractBatchJobListener
       Long batchJobId = jobExecution.getJobParameters().getLong(CommonConstants.BATCH_JOB_ID);
       BatchJobDTO batchJobDTO = batchJobService.getById(batchJobId);
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-        batchJobDTO.setStatus(BatchJob.BatchJobStatus.COMPLETED);
+        batchJobDTO.setStatus(BatchJobStatus.COMPLETED);
       } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-        batchJobDTO.setStatus(BatchJob.BatchJobStatus.FAILED);
+        batchJobDTO.setStatus(BatchJobStatus.FAILED);
       } else {
-        batchJobDTO.setStatus(BatchJob.BatchJobStatus.TERMINATED);
+        batchJobDTO.setStatus(BatchJobStatus.TERMINATED);
       }
       batchJobDTO.setEndTime(DateTimeZoneUtils.getCurrentDate());
 
@@ -118,13 +116,13 @@ public class AbstractBatchJobListener
               .sum();
       batchJobDTO.setFailedCount(Math.toIntExact(failedCount));
 
-      BatchJob.NotifyStatus notifyStatus;
+      NotifyStatus notifyStatus;
       if (batchJobDTO.getNotifyOnCompletion() != null && batchJobDTO.getNotifyOnCompletion()) {
         if (batchJobService.sendNotificationToUser(batchJobDTO))
-          notifyStatus = BatchJob.NotifyStatus.SENT_SUCCESS;
-        else notifyStatus = BatchJob.NotifyStatus.SENT_FAILURE;
+          notifyStatus = NotifyStatus.SENT_SUCCESS;
+        else notifyStatus = NotifyStatus.SENT_FAILURE;
       } else {
-        notifyStatus = BatchJob.NotifyStatus.NOT_SENT;
+        notifyStatus = NotifyStatus.NOT_SENT;
       }
 
       batchJobDTO.setNotifyStatus(notifyStatus);
