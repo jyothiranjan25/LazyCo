@@ -1,7 +1,5 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
-import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
-
 import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.BatchJob.*;
@@ -17,6 +15,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.*;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,6 +27,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   private JobRepository jobRepository;
   private JobLauncher jobLauncher;
+  private ObjectProvider<AbstractBatchJobListener> batchJobListeners;
   private PlatformTransactionManager transactionManager;
   private BatchJobService batchJobService;
   private AbstractAction abstractAction;
@@ -36,11 +36,13 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   public void injectDependencies(
       JobRepository jobRepository,
       JobLauncher jobLauncher,
+      ObjectProvider<AbstractBatchJobListener> batchJobListeners,
       PlatformTransactionManager transactionManager,
       BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
     this.jobLauncher = jobLauncher;
+    this.batchJobListeners = batchJobListeners;
     this.transactionManager = transactionManager;
     this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
@@ -129,7 +131,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       BatchJobOperationType operationType) {
     try {
       // use getBean to ensure new instance of listener per job
-      AbstractBatchJobListener jobListener = getBean(AbstractBatchJobListener.class);
+      AbstractBatchJobListener jobListener = batchJobListeners.getObject();
       return new JobBuilder(jobName, jobRepository)
           .listener((JobExecutionListener) jobListener)
           .start(createProcessingStep(inputData, childData, jobName, jobListener, operationType))
@@ -156,7 +158,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       ItemWriter<P> userWriter = createItemWriter(operationType);
       ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
       return new StepBuilder(jobName + "_Step", jobRepository)
-              .<T, P>chunk(1, transactionManager)
+              .<T, P>chunk(Integer.MAX_VALUE, transactionManager)
               .listener((StepExecutionListener) jobListener)
               .listener((ChunkListener) jobListener)
               .listener((ItemProcessListener<Object, Object>) jobListener)
@@ -186,11 +188,14 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   protected ItemWriter<P> createCompositeWriter(ItemWriter<P> userWriter) {
     return items -> {
-      for (P item : items) {
-        if (userWriter != null) {
-          Chunk<P> singleItemChunk = new Chunk<>(Collections.singletonList(item));
-          userWriter.write(singleItemChunk);
-        }
+      //      for (P item : items) {
+      //        if (userWriter != null) {
+      //          Chunk<P> singleItemChunk = new Chunk<>(Collections.singletonList(item));
+      //          userWriter.write(singleItemChunk);
+      //        }
+      //      }
+      if (userWriter != null) {
+        userWriter.write(items);
       }
     };
   }

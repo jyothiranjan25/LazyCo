@@ -30,7 +30,7 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   protected ItemProcessor<AppUserDTO, AppUserDTO> createItemProcessor(
       BatchJobOperationType operationType, Map<Class<?>, ?> childData) {
     return item -> {
-        // Don't throw any exception here else the item will be retried based on retry policy
+      // Don't throw any exception here else the item will be retried based on retry policy
       ApplicationLogger.info("AppUserUploader: Processing AppUserDTO");
       return item;
     };
