@@ -141,82 +141,53 @@ public class AbstractBatchJobListener
   // ==================== STEP LISTENER ====================
 
   @Override
-  public void beforeStep(StepExecution stepExecution) {
-    ApplicationLogger.info("Starting Step: " + stepExecution.getStepName());
-  }
+  public void beforeStep(StepExecution stepExecution) {}
 
   @Override
   public ExitStatus afterStep(StepExecution stepExecution) {
-    ApplicationLogger.info(
-        "Completed Step: "
-            + stepExecution.getStepName()
-            + " with status: "
-            + stepExecution.getStatus());
     return stepExecution.getExitStatus();
   }
 
   // ==================== CHUNK LISTENER ====================
 
   @Override
-  public void beforeChunk(ChunkContext context) {
-    ApplicationLogger.info("Starting Chunk in Step: " + context.getStepContext().getStepName());
-  }
+  public void beforeChunk(ChunkContext context) {}
 
   @Override
-  public void afterChunk(ChunkContext context) {
-    ApplicationLogger.info("Finished Chunk in Step: " + context.getStepContext().getStepName());
-  }
+  public void afterChunk(ChunkContext context) {}
 
   @Override
-  public void afterChunkError(ChunkContext context) {
-    ApplicationLogger.info(
-        "Finished Chunk in Step With Error: " + context.getStepContext().getStepName());
-  }
+  public void afterChunkError(ChunkContext context) {}
 
   // ==================== ITEM READ LISTENER ====================
 
   @Override
-  public void beforeRead() {
-    ApplicationLogger.info("About to read an item.");
-  }
+  public void beforeRead() {}
 
   @Override
-  public void afterRead(Object item) {
-    ApplicationLogger.info("Successfully read item: " + item.toString());
-  }
+  public void afterRead(Object item) {}
 
   @Override
-  public void onReadError(Exception ex) {
-    ApplicationLogger.error("Error while reading item", ex);
-  }
+  public void onReadError(Exception ex) {}
 
   // ==================== ITEM PROCESS LISTENER ====================
 
   @Override
-  public void beforeProcess(Object item) {
-    ApplicationLogger.info("About to process item: " + item.toString());
-  }
+  public void beforeProcess(Object item) {}
 
   @Override
-  public void afterProcess(Object item, Object result) {
-    ApplicationLogger.info("Successfully processed item: " + item.toString());
-  }
+  public void afterProcess(Object item, Object result) {}
 
   @Override
-  public void onProcessError(Object item, Exception ex) {
-    ApplicationLogger.error("Error while processing item: " + item.toString(), ex);
-  }
+  public void onProcessError(Object item, Exception ex) {}
 
   // ==================== ITEM WRITE LISTENER ====================
 
   @Override
-  public void beforeWrite(Chunk<?> items) {
-    ApplicationLogger.info("About to write " + items.getItems().size() + " items.");
-  }
+  public void beforeWrite(Chunk<?> items) {}
 
   @Override
   public void afterWrite(Chunk<?> items) {
-    ApplicationLogger.info("Successfully written items: " + items.getItems().size());
     try {
       if (jobExecution != null) {
         String outputFilePath =
@@ -235,22 +206,15 @@ public class AbstractBatchJobListener
   }
 
   @Override
-  public void onWriteError(Exception exception, Chunk<?> items) {
-    ApplicationLogger.error("Error while writing items", exception);
-  }
+  public void onWriteError(Exception exception, Chunk<?> items) {}
 
   // ==================== SKIP LISTENER ====================
 
   @Override
-  public void onSkipInRead(Throwable t) {
-    ApplicationLogger.info("Item Skipped during Read due to: " + t.getMessage());
-  }
+  public void onSkipInRead(Throwable t) {}
 
   @Override
-  public void onSkipInProcess(Object item, Throwable t) {
-    ApplicationLogger.info(
-        "Item Skipped during Process. Item: " + item.toString() + " due to: " + t.getMessage());
-  }
+  public void onSkipInProcess(Object item, Throwable t) {}
 
   @Override
   public void onSkipInWrite(Object item, Throwable t) {
