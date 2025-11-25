@@ -30,6 +30,8 @@ public class AbstractBatchJobListener
     implements JobExecutionListener,
         StepExecutionListener,
         ChunkListener,
+        ItemReadListener<Object>,
+        ItemProcessListener<Object, Object>,
         ItemWriteListener<Object>,
         SkipListener<Object, Object> {
 
@@ -169,6 +171,40 @@ public class AbstractBatchJobListener
   public void afterChunkError(ChunkContext context) {
     ApplicationLogger.info(
         "Finished Chunk in Step With Error: " + context.getStepContext().getStepName());
+  }
+
+  // ==================== ITEM READ LISTENER ====================
+
+  @Override
+  public void beforeRead() {
+    ApplicationLogger.info("About to read an item.");
+  }
+
+  @Override
+  public void afterRead(Object item) {
+    ApplicationLogger.info("Successfully read item: " + item.toString());
+  }
+
+  @Override
+  public void onReadError(Exception ex) {
+    ApplicationLogger.error("Error while reading item", ex);
+  }
+
+  // ==================== ITEM PROCESS LISTENER ====================
+
+  @Override
+  public void beforeProcess(Object item) {
+    ApplicationLogger.info("About to process item: " + item.toString());
+  }
+
+  @Override
+  public void afterProcess(Object item, Object result) {
+    ApplicationLogger.info("Successfully processed item: " + item.toString());
+  }
+
+  @Override
+  public void onProcessError(Object item, Exception ex) {
+    ApplicationLogger.error("Error while processing item: " + item.toString(), ex);
   }
 
   // ==================== ITEM WRITE LISTENER ====================

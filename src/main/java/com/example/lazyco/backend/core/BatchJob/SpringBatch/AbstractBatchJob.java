@@ -136,18 +136,19 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       AbstractBatchJobListener jobListener,
       BatchJobOperationType operationType) {
     try {
+      //  create reader
+      ItemReader<T> reader = ItemReader(inputData, jobName);
       // create processor
       ItemProcessor<T, P> userProcessor = createItemProcessor();
       ItemProcessor<T, P> compositeProcessor = createCompositeProcessor(userProcessor);
       // create writer
       ItemWriter<P> userWriter = createItemWriter(operationType);
       ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
-      //  create reader
-      ItemReader<T> reader = ItemReader(inputData, jobName);
       return new StepBuilder(jobName + "_Step", jobRepository)
               .<T, P>chunk(1, transactionManager)
               .listener((StepExecutionListener) jobListener)
               .listener((ChunkListener) jobListener)
+              .listener((ItemProcessListener<Object, Object>) jobListener)
               .listener((ItemWriteListener<Object>) jobListener)
               .listener((SkipListener<Object, Object>) jobListener)
               .reader(reader)

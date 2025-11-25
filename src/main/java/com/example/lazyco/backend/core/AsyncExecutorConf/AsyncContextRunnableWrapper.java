@@ -1,5 +1,10 @@
 package com.example.lazyco.backend.core.AsyncExecutorConf;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
+import com.example.lazyco.backend.core.AbstractAction;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.MDC;
@@ -12,6 +17,10 @@ public final class AsyncContextRunnableWrapper implements Runnable {
 
   private final Runnable delegate;
   private final RequestAttributes taskRequestContext;
+  private final boolean isBypassRBAC;
+  private final boolean isSystemJob;
+  private final AppUserDTO appUserDTO;
+  private final UserRoleDTO userRoleDTO;
   private final Map<String, String> taskMappedDiagnosticContext;
 
   AsyncContextRunnableWrapper(Runnable delegate) {
@@ -27,6 +36,12 @@ public final class AsyncContextRunnableWrapper implements Runnable {
     }
     // Store the current request context
     this.taskRequestContext = RequestContextHolder.getRequestAttributes();
+    // Store Abstract Action context
+    AbstractAction abstractAction = getBean(AbstractAction.class);
+    this.isBypassRBAC = abstractAction.isBypassRBAC();
+    this.isSystemJob = abstractAction.isSystemJob();
+    this.appUserDTO = (AppUserDTO) abstractAction.getLoggedAppUser().clone();
+    this.userRoleDTO = (UserRoleDTO) abstractAction.getLoggedUserRole().clone();
     // Store the current mapped diagnostic context
     Map<String, String> mdc = MDC.getCopyOfContextMap();
     this.taskMappedDiagnosticContext = mdc != null ? new HashMap<>(mdc) : new HashMap<>();
@@ -36,14 +51,30 @@ public final class AsyncContextRunnableWrapper implements Runnable {
     // ThreadLocal variables to store the original values
     RequestAttributes originalRequestContext = RequestContextHolder.getRequestAttributes();
     Map<String, String> originalMappedDiagnosticContext = MDC.getCopyOfContextMap();
+    // Store Abstract Action original context
+    AbstractAction action = getBean(AbstractAction.class);
+    boolean originalBypassRBAC = action.isBypassRBAC();
+    boolean originalIsSystemJob = action.isSystemJob();
+    AppUserDTO originalAppUserDTO = action.getLoggedAppUser();
+    UserRoleDTO originalUserRoleDTO = action.getLoggedUserRole();
     try {
       RequestContextHolder.setRequestAttributes(this.taskRequestContext);
       MDC.setContextMap(this.taskMappedDiagnosticContext);
+      // Set Abstract Action context for the async task
+      action.setBypassRBAC(this.isBypassRBAC);
+      action.setSystemJob(this.isSystemJob);
+      action.setLoggedAppUser(this.appUserDTO);
+      action.setLoggedUserRole(this.userRoleDTO);
       this.delegate.run();
     } finally {
       // Restore the original values
       RequestContextHolder.setRequestAttributes(originalRequestContext);
       MDC.setContextMap(originalMappedDiagnosticContext);
+      // Restore Abstract Action original context
+      action.setBypassRBAC(originalBypassRBAC);
+      action.setSystemJob(originalIsSystemJob);
+      action.setLoggedAppUser(originalAppUserDTO);
+      action.setLoggedUserRole(originalUserRoleDTO);
     }
   }
 
