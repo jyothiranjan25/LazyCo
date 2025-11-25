@@ -27,11 +27,9 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
   @Override
   public I read() {
     if (currentIndex >= data.size()) {
-      ApplicationLogger.info("[Reader] Reached end of data at index: " + currentIndex);
       return null; // end of data
     }
     I item = data.get(currentIndex);
-    ApplicationLogger.info("[Reader] Reading item at index: " + currentIndex);
     currentIndex++;
     return item;
   }
@@ -42,17 +40,13 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
       // ✅ First priority: Restore from Spring Batch ExecutionContext (most reliable)
       if (executionContext.containsKey(checkpointKey)) {
         currentIndex = executionContext.getInt(checkpointKey);
-        ApplicationLogger.info(
-            "[Reader] Restored checkpoint from ExecutionContext: " + currentIndex);
       } else {
         // ✅ Second priority: Try to restore from file (for restarts after JVM crash)
         if (Files.exists(checkpointFile)) {
           restoreCheckpointFromFile();
-          ApplicationLogger.info("[Reader] Restored checkpoint from file: " + currentIndex);
         } else {
           // ✅ Fresh start - no checkpoint exists
           currentIndex = 0;
-          ApplicationLogger.info("[Reader] Starting fresh from index 0");
         }
       }
 
@@ -60,7 +54,7 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
       Files.createDirectories(checkpointFile.getParent());
 
     } catch (Exception e) {
-      ApplicationLogger.error("[Reader] Error in open(), starting from index 0", e);
+      ApplicationLogger.error("[Reader] Failed to open checkpoint", e);
       currentIndex = 0;
     }
   }
@@ -73,11 +67,8 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
 
       // ✅ Also save to file as backup for disaster recovery
       saveCheckpointToFile();
-
-      ApplicationLogger.info("[Reader] Updated checkpoint: " + currentIndex);
     } catch (Exception e) {
-      ApplicationLogger.error("[Reader] Error updating checkpoint", e);
-      throw new ItemStreamException("Failed to update checkpoint", e);
+      ApplicationLogger.error("[Reader] Failed to update checkpoint", e);
     }
   }
 
@@ -87,10 +78,8 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
       // ✅ Cleanup checkpoint file after successful completion
       if (Files.exists(checkpointFile)) {
         Files.delete(checkpointFile);
-        ApplicationLogger.info("[Reader] Cleaned up checkpoint file: " + checkpointFile);
       }
     } catch (IOException e) {
-      ApplicationLogger.warn("[Reader] Failed to delete checkpoint file", e);
       // Don't throw - this is just cleanup
     }
   }
@@ -143,7 +132,6 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
     try {
       if (Files.exists(checkpointFile)) {
         Files.delete(checkpointFile);
-        ApplicationLogger.info("[Reader] Checkpoint reset");
       }
       currentIndex = 0;
     } catch (IOException e) {

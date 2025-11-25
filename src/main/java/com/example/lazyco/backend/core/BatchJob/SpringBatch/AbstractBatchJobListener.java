@@ -243,11 +243,10 @@ public class AbstractBatchJobListener
       Path filePath = Paths.get(fullPath);
       Path parentDir = filePath.getParent();
 
-      if (parentDir != null) {
+      if (parentDir != null && !Files.exists(parentDir)) {
         try {
           Files.createDirectories(parentDir); // creates only directories, never files
           // If directories already exist, nothing happens (no exception)
-          ApplicationLogger.info("Ensured directory exists: " + parentDir);
         } catch (IOException e) {
           throw new RuntimeException("Cannot create output directory", e);
         }

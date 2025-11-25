@@ -158,7 +158,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       ItemWriter<P> userWriter = createItemWriter(operationType);
       ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
       return new StepBuilder(jobName + "_Step", jobRepository)
-              .<T, P>chunk(50, transactionManager)
+              .<T, P>chunk(3, transactionManager)
               .listener((StepExecutionListener) jobListener)
               .listener((ChunkListener) jobListener)
               .listener((ItemProcessListener<Object, Object>) jobListener)
