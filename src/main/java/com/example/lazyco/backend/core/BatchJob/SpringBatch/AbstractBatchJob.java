@@ -46,8 +46,12 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     this.abstractAction = abstractAction;
   }
 
-  @SuppressWarnings("unchecked")
   public void executeJob(T inputData) {
+    executeJob(inputData, Collections.emptyMap());
+  }
+
+  @SuppressWarnings("unchecked")
+  public void executeJob(T inputData, Map<Class<?>, ?> childData) {
     try {
       List<T> listDate = (List<T>) inputData.getObjects();
       String uniqueJobName =
@@ -66,7 +70,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
             inputData.getOperationType() != null
                 ? inputData.getOperationType()
                 : BatchJobOperationType.CREATE;
-        this.executeJobInBackground(listDate, uniqueJobName, actionType, sendNotification);
+        this.executeJobInBackground(
+            listDate, childData, uniqueJobName, actionType, sendNotification);
       } else {
         ApplicationLogger.info(
             "No input objects found in the provided DTO for job: "
@@ -81,6 +86,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   private void executeJobInBackground(
       List<T> inputData,
+      Map<Class<?>, ?> childData,
       String batchJobName,
       BatchJobOperationType operationType,
       boolean sendNotification) {
@@ -89,7 +95,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
         createBatchJob(batchJobName, inputData.size(), operationType, sendNotification);
     try {
       // create and launch job
-      Job job = createJob(inputData, batchJobName, operationType);
+      Job job = createJob(inputData, childData, batchJobName, operationType);
       // add batchJobId and logged in user details to job parameters
       JobParameters jobParameters =
           new JobParametersBuilder()
@@ -116,13 +122,17 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     }
   }
 
-  protected Job createJob(List<T> inputData, String jobName, BatchJobOperationType operationType) {
+  protected Job createJob(
+      List<T> inputData,
+      Map<Class<?>, ?> childData,
+      String jobName,
+      BatchJobOperationType operationType) {
     try {
       // use getBean to ensure new instance of listener per job
       AbstractBatchJobListener jobListener = getBean(AbstractBatchJobListener.class);
       return new JobBuilder(jobName, jobRepository)
           .listener((JobExecutionListener) jobListener)
-          .start(createProcessingStep(inputData, jobName, jobListener, operationType))
+          .start(createProcessingStep(inputData, childData, jobName, jobListener, operationType))
           .build();
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in createJob: " + e.getMessage(), e);
@@ -132,6 +142,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
 
   protected Step createProcessingStep(
       List<T> inputData,
+      Map<Class<?>, ?> childData,
       String jobName,
       AbstractBatchJobListener jobListener,
       BatchJobOperationType operationType) {
@@ -139,7 +150,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       //  create reader
       ItemReader<T> reader = ItemReader(inputData, jobName);
       // create processor
-      ItemProcessor<T, P> userProcessor = createItemProcessor();
+      ItemProcessor<T, P> userProcessor = createItemProcessor(operationType, childData);
       ItemProcessor<T, P> compositeProcessor = createCompositeProcessor(userProcessor);
       // create writer
       ItemWriter<P> userWriter = createItemWriter(operationType);
@@ -167,7 +178,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     }
   }
 
-  protected ItemProcessor<T, P> createCompositeProcessor(ItemProcessor<T, P> userProcessor) {
+  protected <Z> ItemProcessor<T, P> createCompositeProcessor(ItemProcessor<T, P> userProcessor) {
     return item -> {
       return userProcessor != null ? userProcessor.process(item) : null;
     };
@@ -188,7 +199,8 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     return new AbstractItemReader<>(inputData, jobName);
   }
 
-  protected abstract ItemProcessor<T, P> createItemProcessor();
+  protected abstract ItemProcessor<T, P> createItemProcessor(
+      BatchJobOperationType operationType, Map<Class<?>, ?> childData);
 
   protected abstract ItemWriter<P> createItemWriter(BatchJobOperationType operationType);
 

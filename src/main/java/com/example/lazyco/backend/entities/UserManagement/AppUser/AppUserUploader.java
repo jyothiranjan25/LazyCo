@@ -3,6 +3,7 @@ package com.example.lazyco.backend.entities.UserManagement.AppUser;
 import com.example.lazyco.backend.core.BatchJob.BatchJobOperationType;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractBatchJob;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import java.util.Map;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,11 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   }
 
   @Override
-  protected ItemProcessor<AppUserDTO, AppUserDTO> createItemProcessor() {
+  protected ItemProcessor<AppUserDTO, AppUserDTO> createItemProcessor(
+      BatchJobOperationType operationType, Map<Class<?>, ?> childData) {
     return item -> {
+        // Don't throw any exception here else the item will be retried based on retry policy
       ApplicationLogger.info("AppUserUploader: Processing AppUserDTO");
-      // Here you can implement any processing logic if needed
       return item;
     };
   }
@@ -40,6 +42,6 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   }
 
   private void createTest(AppUserDTO dto) {
-    appUserService.create(dto);
+    appUserService.executeCreateTransactional(dto);
   }
 }

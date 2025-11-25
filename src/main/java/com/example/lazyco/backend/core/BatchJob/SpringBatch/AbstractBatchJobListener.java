@@ -216,6 +216,7 @@ public class AbstractBatchJobListener
 
   @Override
   public void afterWrite(Chunk<?> items) {
+    ApplicationLogger.info("Successfully written items: " + items.getItems().size());
     try {
       if (jobExecution != null) {
         String outputFilePath =
