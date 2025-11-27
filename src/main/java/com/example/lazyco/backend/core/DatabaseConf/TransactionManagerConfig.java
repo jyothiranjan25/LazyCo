@@ -25,11 +25,11 @@ public class TransactionManagerConfig {
     HibernateTransactionManager transactionManager = new HibernateTransactionManager();
     transactionManager.setSessionFactory(sessionFactory);
     transactionManager.setDefaultTimeout(defaultTransactionTimeout);
-    transactionManager.setNestedTransactionAllowed(true); // savepoints
+    transactionManager.setNestedTransactionAllowed(true);
     return transactionManager;
   }
 
-  @Bean(name = "mongoTransactionManager")
+  //  @Bean(name = "mongoTransactionManager")
   public MongoTransactionManager mongoTransactionManager(
       MongoDatabaseFactory mongoDatabaseFactory) {
     return new MongoTransactionManager(mongoDatabaseFactory);

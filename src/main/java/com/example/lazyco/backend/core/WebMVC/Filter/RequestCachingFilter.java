@@ -22,7 +22,8 @@ public class RequestCachingFilter extends OncePerRequestFilter {
         "Starting request processing Method: {}, URI: {}",
         request.getMethod(),
         request.getRequestURI());
-    ContentCachingRequestWrapper cachingRequest = new ContentCachingRequestWrapper(request, 1024 * 1024);
+    ContentCachingRequestWrapper cachingRequest =
+        new ContentCachingRequestWrapper(request, 1024 * 1024);
     try {
       filterChain.doFilter(cachingRequest, response);
     } catch (Exception e) {

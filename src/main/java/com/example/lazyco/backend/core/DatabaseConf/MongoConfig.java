@@ -7,7 +7,6 @@ import com.mongodb.client.MongoClients;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -15,15 +14,6 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
 @Configuration
 public class MongoConfig {
-
-  @Value("${mongodb.username:}")
-  private String username;
-
-  @Value("${mongodb.password:}")
-  private String password;
-
-  @Value("${mongodb.authSource:}")
-  private String authSource;
 
   @Value("${mongodb.host:localhost}")
   private String host;
@@ -34,7 +24,15 @@ public class MongoConfig {
   @Value("${mongodb.database:test}")
   private String mongoDatabase;
 
-  @Bean
+  @Value("${mongodb.username:}")
+  private String username;
+
+  @Value("${mongodb.password:}")
+  private String password;
+
+  @Value("${mongodb.authSource:}")
+  private String authSource;
+
   public MongoClient mongoClient() {
     String uri;
     if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
@@ -68,12 +66,10 @@ public class MongoConfig {
     return MongoClients.create(settings);
   }
 
-  @Bean
   public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
     return new SimpleMongoClientDatabaseFactory(mongoClient, mongoDatabase);
   }
 
-  @Bean
   public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
     return new MongoTemplate(mongoDatabaseFactory);
   }
