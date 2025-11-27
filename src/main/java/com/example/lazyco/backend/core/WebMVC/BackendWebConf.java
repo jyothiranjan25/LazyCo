@@ -19,7 +19,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -73,7 +73,7 @@ public class BackendWebConf implements WebMvcConfigurer {
   }
 
   @Override
-  public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+  public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 
     // Add ByteArray converter for images and files
     final ByteArrayHttpMessageConverter arrayHttpMessageConverter =
@@ -85,18 +85,18 @@ public class BackendWebConf implements WebMvcConfigurer {
     list.add(MediaType.APPLICATION_OCTET_STREAM);
     list.add(new MediaType("text", "csv"));
     arrayHttpMessageConverter.setSupportedMediaTypes(list);
-    converters.add(arrayHttpMessageConverter);
+    builder.addCustomConverter(arrayHttpMessageConverter);
 
     // String converter for text support
-    converters.add(new StringHttpMessageConverter());
+    builder.addCustomConverter(new StringHttpMessageConverter());
 
     // add StringHttpMessageConverter with US_ASCII charset
     StringHttpMessageConverter asciiConverter =
         new StringHttpMessageConverter(StandardCharsets.US_ASCII);
-    converters.add(asciiConverter);
+    builder.addCustomConverter(asciiConverter);
 
     // Add Gson converter
-    converters.add(gsonHttpMessageConverter());
+    builder.addCustomConverter(gsonHttpMessageConverter());
   }
 
   @Bean

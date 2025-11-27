@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
 
 @Configuration
 public class PostgresConfig {
@@ -214,7 +214,7 @@ public class PostgresConfig {
     // Use Spring-managed session context
     properties.put(
         AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS,
-        "org.springframework.orm.hibernate5.SpringSessionContext");
+        "org.springframework.orm.jpa.hibernate.SpringSessionContext");
     // Disallow updates outside of a transaction
     properties.put(AvailableSettings.ALLOW_UPDATE_OUTSIDE_TRANSACTION, "false");
     // Set maximum depth for outer joins/fetching associations

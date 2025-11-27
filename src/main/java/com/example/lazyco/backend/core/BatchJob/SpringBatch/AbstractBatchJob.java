@@ -230,7 +230,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     batchJobDTO.setStatus(BatchJobStatus.INITIALIZED);
     batchJobDTO.setSessionType(BatchJobSessionType.SINGLE_OBJECT_COMMIT);
     batchJobDTO.setOutputFilePath(
-        CommonConstants.BATCH_AUDIT_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
+        CommonConstants.BATCH_JOB_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
     batchJobDTO.setNotifyOnCompletion(sendNotification);
     batchJobDTO = batchJobService.create(batchJobDTO);
     return batchJobDTO;

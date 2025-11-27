@@ -131,10 +131,21 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         getCriteriaBuilderWrapper(session, filter, addEntityFilters, Long.class);
     criteriaBuilderWrapper.clearOrderBy(); // Order by cannot be present in count query
-    criteriaBuilderWrapper
-        .getQuery()
-        .select(
-            criteriaBuilderWrapper.getCriteriaBuilder().count(criteriaBuilderWrapper.getRoot()));
+    if (criteriaBuilderWrapper.isDistinct()) {
+      // If distinct is applied, use countDistinct
+      criteriaBuilderWrapper
+          .getQuery()
+          .select(
+              criteriaBuilderWrapper
+                  .getCriteriaBuilder()
+                  .countDistinct(criteriaBuilderWrapper.getRoot()));
+    } else {
+      // Otherwise, use regular count
+      criteriaBuilderWrapper
+          .getQuery()
+          .select(
+              criteriaBuilderWrapper.getCriteriaBuilder().count(criteriaBuilderWrapper.getRoot()));
+    }
     Long count = (Long) session.createQuery(criteriaBuilderWrapper.getQuery()).getSingleResult();
     // If count is null, return 0
     return count != null ? count : 0L;

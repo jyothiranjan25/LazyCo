@@ -4,6 +4,10 @@ import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -107,6 +111,31 @@ public class FileDTO {
       return new FileReader(this.file, StandardCharsets.UTF_8);
     } catch (Exception e) {
       throw new ExceptionWrapper("FileDTO: Cannot open FileReader for " + this.absolutePath);
+    }
+  }
+
+  public FileDTO moveTo(String destinationPath) {
+    return moveTo(Paths.get(destinationPath));
+  }
+
+  public FileDTO moveTo(File destinationFile) {
+    return moveTo(destinationFile.toPath());
+  }
+
+  public FileDTO moveTo(Path destinationPath) {
+    try {
+      // Ensure parent folder exists
+      Path parent = destinationPath.getParent();
+      if (parent != null && !Files.exists(parent)) {
+        Files.createDirectories(parent);
+      }
+
+      // Move file (replace if exists)
+      Files.move(this.file.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+      return new FileDTO(destinationPath.toFile());
+    } catch (IOException e) {
+      ApplicationLogger.error(e);
+      throw new ExceptionWrapper("FileDTO: Error moving file to " + destinationPath, e);
     }
   }
 
