@@ -2,7 +2,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerCom
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerTemplateParam;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.CreateServiceComponent;
+import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.CreateServiceComponent;
 import org.springframework.http.ResponseEntity;
 
 public class CreateControllerComponent<D extends AbstractDTO<D>> {

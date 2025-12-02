@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     extends PersistenceDAO<E> implements IAbstractDAO<D, E> {
 
-  private AbstractAction abstractAction;
+  private final AbstractAction abstractAction;
 
   public AbstractDAO(SessionFactory sessionFactory, AbstractAction abstractAction) {
     super(sessionFactory);

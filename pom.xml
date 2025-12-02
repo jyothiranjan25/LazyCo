@@ -449,12 +449,6 @@
         <!-- /File Extraction dependency -->
 
         <!-- Miscellaneous dependencies -->
-        <!-- https://mvnrepository.com/artifact/org.checkerframework/checker -->
-        <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker</artifactId>
-            <version>3.49.5</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -655,7 +649,6 @@
                     </java>
                 </configuration>
             </plugin>
-
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

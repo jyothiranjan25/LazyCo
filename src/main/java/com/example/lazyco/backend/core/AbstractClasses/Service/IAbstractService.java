@@ -2,8 +2,8 @@ package com.example.lazyco.backend.core.AbstractClasses.Service;
 
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.ICRUDService;
-import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.TransactionalService;
+import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.ICRUDService;
+import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.TransactionalService;
 import java.util.List;
 
 public interface IAbstractService<D extends AbstractDTO<D>, E extends AbstractModel>

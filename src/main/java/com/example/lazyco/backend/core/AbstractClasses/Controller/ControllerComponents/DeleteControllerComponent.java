@@ -2,7 +2,7 @@ package com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerCom
 
 import com.example.lazyco.backend.core.AbstractClasses.Controller.ControllerTemplateParam;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.core.AbstractClasses.ServiceComponents.DeleteServiceComponent;
+import com.example.lazyco.backend.core.AbstractClasses.Service.ServiceComponents.DeleteServiceComponent;
 import org.springframework.http.ResponseEntity;
 
 public class DeleteControllerComponent<D extends AbstractDTO<D>> {
