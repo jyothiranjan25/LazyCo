@@ -27,9 +27,7 @@ import org.hibernate.envers.Audited;
     },
     uniqueConstraints = {
       @UniqueConstraint(name = "uk_app_user_user_id", columnNames = "user_id"),
-      @UniqueConstraint(
-          name = "uk_app_user_email",
-          columnNames = {"email"})
+      @UniqueConstraint(name = "uk_app_user_email", columnNames = "email")
     })
 @EntityListeners(AppUserListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

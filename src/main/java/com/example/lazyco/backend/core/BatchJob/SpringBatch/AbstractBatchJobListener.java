@@ -19,14 +19,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.item.Chunk;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.*;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class AbstractBatchJobListener
+public class AbstractBatchJobListener<T, P>
     implements JobExecutionListener,
         StepExecutionListener,
         ChunkListener,
@@ -71,7 +73,7 @@ public class AbstractBatchJobListener
       // Update batch job status to IN_PROGRESS
       Long batchJobId = jobExecution.getJobParameters().getLong(CommonConstants.BATCH_JOB_ID);
       BatchJobDTO batchJobDTO = batchJobService.getById(batchJobId);
-      batchJobDTO.setJobId(jobExecution.getJobId());
+      batchJobDTO.setJobId(jobExecution.getId());
       batchJobDTO.setProcessedCount(0);
       batchJobDTO.setStatus(BatchJobStatus.RUNNING);
       batchJobService.update(batchJobDTO);
@@ -151,13 +153,13 @@ public class AbstractBatchJobListener
   // ==================== CHUNK LISTENER ====================
 
   @Override
-  public void beforeChunk(ChunkContext context) {}
+  public void beforeChunk(Chunk chunk) {}
 
   @Override
-  public void afterChunk(ChunkContext context) {}
+  public void afterChunk(Chunk chunk) {}
 
   @Override
-  public void afterChunkError(ChunkContext context) {}
+  public void onChunkError(Exception exception, Chunk chunk) {}
 
   // ==================== ITEM READ LISTENER ====================
 
@@ -194,7 +196,7 @@ public class AbstractBatchJobListener
             jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
         if (outputFilePath != null) {
           List<Object> chunkItems = (List<Object>) items.getItems();
-          for (Object item : chunkItems) writeSkippedItemToCsv(outputFilePath, item, null);
+          for (Object item : chunkItems) writeItemToCsv(outputFilePath, item, null);
         } else {
           ApplicationLogger.error(
               "Processed output file path is null, cannot write processed items");
@@ -223,7 +225,7 @@ public class AbstractBatchJobListener
         String outputFilePath =
             jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
         if (outputFilePath != null) {
-          writeSkippedItemToCsv(outputFilePath, item, t);
+          writeItemToCsv(outputFilePath, item, t);
         } else {
           ApplicationLogger.error("Output file path is null, cannot write skipped item to CSV");
         }
@@ -235,7 +237,7 @@ public class AbstractBatchJobListener
     }
   }
 
-  private void writeSkippedItemToCsv(String path, Object item, Throwable t) {
+  private void writeItemToCsv(String path, Object item, Throwable t) {
     try {
       String fullPath = CommonConstants.TOMCAT_HOME + path;
 
@@ -260,7 +262,7 @@ public class AbstractBatchJobListener
       csvTemplateDTO.setErrorMessage(message);
       csvService.appendSingleRowToCsv(csvTemplateDTO, fullPath);
 
-      ApplicationLogger.info("Successfully wrote skipped item to CSV: " + fullPath);
+      ApplicationLogger.info("Successfully wrote item to CSV: " + fullPath);
     } catch (Exception e) {
       ApplicationLogger.error(
           "Failed to write skipped item to CSV for item: " + item.toString(), e);

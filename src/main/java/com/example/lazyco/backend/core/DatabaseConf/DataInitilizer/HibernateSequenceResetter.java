@@ -3,12 +3,8 @@ package com.example.lazyco.backend.core.DatabaseConf.DataInitilizer;
 import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
-@Component
-@DependsOn("dataSourceInitializer")
 public class HibernateSequenceResetter implements InitializingBean {
 
   private final JdbcTemplate jdbcTemplate;

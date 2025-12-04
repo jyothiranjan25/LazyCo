@@ -201,6 +201,8 @@ public class PostgresConfig {
     properties.put(AvailableSettings.DIALECT, hibernateDialect);
     // Number of statements to batch before execution
     properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "100");
+    // Number of rows to fetch per round trip
+    properties.put(AvailableSettings.STATEMENT_FETCH_SIZE, "200");
     // Optimize insert batching by ordering inserts by entity
     properties.put(AvailableSettings.ORDER_INSERTS, "true");
     // Optimize update batching by ordering updates by entity
@@ -229,7 +231,9 @@ public class PostgresConfig {
     // Cache region factory class implementation
     properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
     // Cache provider class implementation
-    properties.put("hibernate.cache.provider_class", hibernateCacheProviderClass);
+    properties.put("hibernate.javax.cache.provider_class", hibernateCacheProviderClass);
+    // Strategy for handling missing cache regions
+    properties.put("hibernate.javax.cache.missing_cache_strategy", "create");
 
     // Disable runtime statistics collection (expensive in production)
     properties.put(AvailableSettings.GENERATE_STATISTICS, "false");

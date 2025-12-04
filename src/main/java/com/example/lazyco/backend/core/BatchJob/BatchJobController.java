@@ -19,27 +19,6 @@ public class BatchJobController extends AbstractController<BatchJobDTO> {
     this.batchJobService = batchJobService;
   }
 
-  @Override
-  public ResponseEntity<?> resolvePatchAction(String action, BatchJobDTO batchJobDTO) {
-    switch (BatchJobDTO.APIAction.valueOf(action)) {
-      case TERMINATE:
-        //        batchJobDTO = batchJobService.terminateJob(batchJobDTO);
-        //        break;
-      case RESTART:
-        //        batchJobDTO = batchJobService.restartJob(batchJobDTO);
-        //        break;
-      case PAUSE:
-        //          batchJobDTO = batchJobService.pauseJob(batchJobDTO);
-        //          break;
-      case RESUME:
-        //        batchJobDTO = batchJobService.restartJob(batchJobDTO);
-        //        break;
-      default:
-        batchJobDTO = batchJobService.update(batchJobDTO);
-    }
-    return ResponseUtils.sendResponse(batchJobDTO);
-  }
-
   @PostMapping("/audit_logs")
   public ResponseEntity<?> getAuditLogs(@RequestBody BatchJobDTO batchJobDTO) {
     FileDTO fileDTO = batchJobService.getCsvAuditFileForJob(batchJobDTO.getId());

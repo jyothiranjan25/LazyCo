@@ -1,7 +1,6 @@
 package com.example.lazyco.backend.core.BatchJob;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
-import com.example.lazyco.backend.core.BatchJob.SpringBatch.SpringBatchAction;
 import com.example.lazyco.backend.core.Exceptions.ApplicationException;
 import com.example.lazyco.backend.core.Exceptions.CommonMessage;
 import com.example.lazyco.backend.core.File.FileDTO;
@@ -12,11 +11,8 @@ import org.springframework.stereotype.Service;
 public class BatchJobService extends AbstractService<BatchJobDTO, BatchJob>
     implements IBatchJobService {
 
-  private final SpringBatchAction springBatchAction;
-
-  public BatchJobService(BatchJobMapper batchJobMapper, SpringBatchAction springBatchAction) {
+  public BatchJobService(BatchJobMapper batchJobMapper) {
     super(batchJobMapper);
-    this.springBatchAction = springBatchAction;
   }
 
   public void makeUpdates(BatchJobDTO updateObject, BatchJob existing) {

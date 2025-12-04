@@ -4,8 +4,8 @@ import com.example.lazyco.backend.core.BatchJob.BatchJobOperationType;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractBatchJob;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.util.Map;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.stereotype.Service;
 
 /**

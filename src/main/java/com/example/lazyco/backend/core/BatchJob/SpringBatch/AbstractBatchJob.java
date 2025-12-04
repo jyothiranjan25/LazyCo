@@ -9,41 +9,46 @@ import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import java.util.*;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.listener.*;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
-import org.springframework.batch.item.*;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.ItemStream;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 @Scope("prototype")
 public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
 
   private JobRepository jobRepository;
-  private JobLauncher jobLauncher;
-  private ObjectProvider<AbstractBatchJobListener> batchJobListeners;
-  private PlatformTransactionManager transactionManager;
+  private JobOperator jobOperator;
+  private ObjectProvider<AbstractBatchJobListener<T, P>> batchJobListeners;
   private BatchJobService batchJobService;
   private AbstractAction abstractAction;
 
   @Autowired
   public void injectDependencies(
       JobRepository jobRepository,
-      JobLauncher jobLauncher,
-      ObjectProvider<AbstractBatchJobListener> batchJobListeners,
-      PlatformTransactionManager transactionManager,
+      JobOperator jobOperator,
+      ObjectProvider<AbstractBatchJobListener<T, P>> batchJobListeners,
       BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
-    this.jobLauncher = jobLauncher;
+    this.jobOperator = jobOperator;
     this.batchJobListeners = batchJobListeners;
-    this.transactionManager = transactionManager;
     this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
   }
@@ -98,7 +103,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
     try {
       // create and launch job
       Job job = createJob(inputData, childData, batchJobName, operationType);
-      // add batchJobId and logged in user details to job parameters
+      // add batchJobId and logged-in user details to job parameters
       JobParameters jobParameters =
           new JobParametersBuilder()
               .addLong(CommonConstants.BATCH_JOB_ID, batchJobDTO.getId())
@@ -109,7 +114,7 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
                   CommonConstants.LOGGED_USER_ROLE, abstractAction.getLoggedInUserRole().getId())
               .addLong(CommonConstants.Batch_JOB_TIME_STAMP, System.currentTimeMillis())
               .toJobParameters();
-      JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+      JobExecution jobExecution = jobOperator.start(job, jobParameters);
       ApplicationLogger.info(
           "Starting Spring Batch job: "
               + batchJobName
@@ -158,12 +163,12 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
       ItemWriter<P> userWriter = createItemWriter(operationType);
       ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
       return new StepBuilder(jobName + "_Step", jobRepository)
-              .<T, P>chunk(3, transactionManager)
+              .<T, P>chunk(3)
               .listener((StepExecutionListener) jobListener)
-              .listener((ChunkListener) jobListener)
-              .listener((ItemProcessListener<Object, Object>) jobListener)
-              .listener((ItemWriteListener<Object>) jobListener)
-              .listener((SkipListener<Object, Object>) jobListener)
+              .listener((ChunkListener<T, P>) jobListener)
+              .listener((ItemProcessListener<T, P>) jobListener)
+              .listener((ItemWriteListener<P>) jobListener)
+              .listener((SkipListener<T, P>) jobListener)
               .reader(reader)
               .stream((ItemStream) reader)
               .processor(compositeProcessor)
@@ -172,7 +177,6 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
               .skip(Exception.class) // Skip all exceptions to continue to next chunk
               .skipPolicy(createSkipPolicy())
               .skipLimit(Integer.MAX_VALUE)
-              .noRetry(Exception.class) // Don't retry failed items
               .build();
     } catch (Exception e) {
       ApplicationLogger.error("[BATCH] Exception in createProcessingStep: " + e.getMessage(), e);

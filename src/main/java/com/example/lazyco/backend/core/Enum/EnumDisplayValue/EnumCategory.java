@@ -1,10 +1,11 @@
 package com.example.lazyco.backend.core.Enum.EnumDisplayValue;
 
+import com.example.lazyco.backend.core.Utils.FieldInputType;
 import lombok.Getter;
 
 @Getter
 public enum EnumCategory {
-  ;
+  FIELD_INPUT_TYPE(FieldInputType.class);
   private final Class<? extends Enum<?>> enumClass;
 
   EnumCategory(Class<? extends Enum<?>> enumClass) {

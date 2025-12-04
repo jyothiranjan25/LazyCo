@@ -3,14 +3,10 @@ package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 import javax.sql.DataSource;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.JobOperatorFactoryBean;
-import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.core.repository.support.JdbcJobRepositoryFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -27,7 +23,7 @@ public class SpringBatchJobConfig {
 
   @Bean
   public JobRepository jobRepository() throws Exception {
-    JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
+    JdbcJobRepositoryFactoryBean factory = new JdbcJobRepositoryFactoryBean();
     factory.setDataSource(dataSource);
     factory.setTransactionManager(new DataSourceTransactionManager(dataSource));
     factory.setTablePrefix("BATCH_");
@@ -36,21 +32,13 @@ public class SpringBatchJobConfig {
   }
 
   @Bean
-  public JobLauncher jobLauncher(JobRepository repo) throws Exception {
-    TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
-    jobLauncher.setJobRepository(repo);
-    SimpleAsyncTaskExecutor simpleAsyncTaskExecutor = new SimpleAsyncTaskExecutor();
-    simpleAsyncTaskExecutor.setConcurrencyLimit(5);
-    jobLauncher.setTaskExecutor(simpleAsyncTaskExecutor);
-    jobLauncher.afterPropertiesSet();
-    return jobLauncher;
-  }
-
-  @Bean
-  public JobExplorer jobExplorer() throws Exception {
-    JobExplorerFactoryBean factory = new JobExplorerFactoryBean();
-    factory.setDataSource(dataSource);
+  public JobOperator jobOperator(JobRepository jobRepository, JobRegistry jobRegistry)
+      throws Exception {
+    JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
+    factory.setJobRepository(jobRepository);
+    factory.setJobRegistry(jobRegistry);
     factory.setTransactionManager(new DataSourceTransactionManager(dataSource));
+    factory.setTaskExecutor(new SimpleAsyncTaskExecutor());
     factory.afterPropertiesSet();
     return factory.getObject();
   }
@@ -58,20 +46,5 @@ public class SpringBatchJobConfig {
   @Bean
   public JobRegistry jobRegistry() {
     return new MapJobRegistry();
-  }
-
-  @Bean
-  public JobOperator jobOperator(
-      JobLauncher jobLauncher,
-      JobRepository jobRepository,
-      JobExplorer jobExplorer,
-      JobRegistry jobRegistry)
-      throws Exception {
-    JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
-    factory.setJobLauncher(jobLauncher);
-    factory.setJobRepository(jobRepository);
-    factory.setJobExplorer(jobExplorer);
-    factory.setJobRegistry(jobRegistry);
-    return factory.getObject();
   }
 }
