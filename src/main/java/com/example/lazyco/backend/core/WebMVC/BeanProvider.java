@@ -39,6 +39,10 @@ public class BeanProvider implements ApplicationContextAware {
     return context;
   }
 
+  public static <T> T getObjectProvider(Class<T> beanClass) {
+    return context.getBeanProvider(beanClass).getIfAvailable();
+  }
+
   public static ApplicationEventPublisher getPublisher() {
     return context;
   }
