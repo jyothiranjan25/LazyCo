@@ -134,7 +134,6 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
       Map<Class<?>, List<?>> childDataMap = inputData.getChildDataMap();
       BatchJobOperationType operationType = inputData.getOperationType();
       boolean isAtomicOperation = Boolean.TRUE.equals(inputData.getIsAtomicOperation());
-      isAtomicOperation = true;
       int chunkSize = isAtomicOperation ? inputDataList.size() : 1;
 
       //  create reader

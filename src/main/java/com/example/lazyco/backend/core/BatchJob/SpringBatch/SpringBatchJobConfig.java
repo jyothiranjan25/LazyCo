@@ -6,4 +6,4 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableBatchProcessing
-public class SpringBatchJobConfig extends JdbcDefaultBatchConfiguration { }
+public class SpringBatchJobConfig extends JdbcDefaultBatchConfiguration {}
