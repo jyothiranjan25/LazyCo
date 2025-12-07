@@ -1,23 +1,24 @@
 package com.example.lazyco.backend.core.BatchJob.SpringBatch;
 
 import com.example.lazyco.backend.core.AbstractAction;
-import com.example.lazyco.backend.core.BatchJob.BatchJobDTO;
-import com.example.lazyco.backend.core.BatchJob.BatchJobService;
-import com.example.lazyco.backend.core.BatchJob.BatchJobStatus;
-import com.example.lazyco.backend.core.BatchJob.NotifyStatus;
+import com.example.lazyco.backend.core.BatchJob.*;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
+import com.example.lazyco.backend.core.CsvTemplate.CsvTemplateDTO;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Exceptions.ResolveException;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.User.UserService;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleService;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.listener.*;
 import org.springframework.batch.core.step.StepExecution;
@@ -27,8 +28,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull I, @NonNull O>
-    implements JobExecutionListener {
+public class AbstractBatchJobListenerOld<T, P>
+    implements JobExecutionListener,
+        StepExecutionListener,
+        ChunkListener,
+        ItemReadListener<Object>,
+        ItemProcessListener<Object, Object>,
+        ItemWriteListener<Object>,
+        SkipListener<Object, Object> {
 
   private final AbstractAction abstractAction;
   private final UserService userService;
@@ -37,7 +44,7 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
   private final CsvService csvService;
   private JobExecution jobExecution;
 
-  public AbstractBatchJobListener(
+  public AbstractBatchJobListenerOld(
       AbstractAction abstractAction,
       UserService userService,
       UserRoleService userRoleService,
@@ -134,109 +141,131 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
   }
 
   // ==================== STEP LISTENER ====================
-  @Override
-  public void beforeStep(StepExecution stepExecution) {
-    ApplicationLogger.info("[Step Listener] Step started: " + stepExecution.getStepName());
-  }
 
   @Override
-  public @Nullable ExitStatus afterStep(StepExecution stepExecution) {
-    ApplicationLogger.info(
-        "[Step Listener] Step ended: "
-            + stepExecution.getStepName()
-            + " with status: "
-            + stepExecution.getStatus());
+  public void beforeStep(StepExecution stepExecution) {}
+
+  @Override
+  public ExitStatus afterStep(StepExecution stepExecution) {
     return stepExecution.getExitStatus();
   }
 
   // ==================== CHUNK LISTENER ====================
 
-  /**
-   * Transactional scope: beforeChunk and afterChunk are called within the transaction of the chunk.
-   * Be cautious about logging or performing actions that might affect transaction integrity.
-   */
   @Override
-  public void beforeChunk(Chunk chunk) {
-    ApplicationLogger.info(
-        "[Chunk Listener] Chunk started with " + chunk.getItems().size() + " items.");
+  public void beforeChunk(Chunk chunk) {}
+
+  @Override
+  public void afterChunk(Chunk chunk) {}
+
+  @Override
+  public void onChunkError(Exception exception, Chunk chunk) {}
+
+  // ==================== ITEM READ LISTENER ====================
+
+  @Override
+  public void beforeRead() {}
+
+  @Override
+  public void afterRead(Object item) {}
+
+  @Override
+  public void onReadError(Exception ex) {}
+
+  // ==================== ITEM PROCESS LISTENER ====================
+
+  @Override
+  public void beforeProcess(Object item) {}
+
+  @Override
+  public void afterProcess(Object item, Object result) {}
+
+  @Override
+  public void onProcessError(Object item, Exception ex) {}
+
+  // ==================== ITEM WRITE LISTENER ====================
+
+  @Override
+  public void beforeWrite(Chunk<?> items) {}
+
+  @Override
+  public void afterWrite(Chunk<?> items) {
+    try {
+      if (jobExecution != null) {
+        String outputFilePath =
+            jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
+        if (outputFilePath != null) {
+          List<Object> chunkItems = (List<Object>) items.getItems();
+          for (Object item : chunkItems) writeItemToCsv(outputFilePath, item, null);
+        } else {
+          ApplicationLogger.error(
+              "Processed output file path is null, cannot write processed items");
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Error in afterWrite: " + e.getMessage(), e);
+    }
   }
 
   @Override
-  public void afterChunk(Chunk chunk) {
-    ApplicationLogger.info(
-        "[Chunk Listener] Chunk ended with " + chunk.getItems().size() + " items.");
-  }
+  public void onWriteError(Exception exception, Chunk<?> items) {}
+
+  // ==================== SKIP LISTENER ====================
 
   @Override
-  public void onChunkError(@Nullable Exception exception, Chunk chunk) {
-    ApplicationLogger.error("[Chunk Listener] Chunk error: " + chunk.getItems().size(), exception);
-  }
-
-  // ==================== ITEM Reader Listener ====================
-  @Override
-  public void beforeRead() {
-    ApplicationLogger.info("[Item Reader Listener] Before read item.");
-  }
+  public void onSkipInRead(Throwable t) {}
 
   @Override
-  public void afterRead(I item) {
-    ApplicationLogger.info("[Item Reader Listener] After read item: " + item);
-  }
+  public void onSkipInProcess(Object item, Throwable t) {}
 
   @Override
-  public void onReadError(@Nullable Exception ex) {
-    ApplicationLogger.error("[Item Reader Listener] Read error: ", ex);
+  public void onSkipInWrite(Object item, Throwable t) {
+    try {
+      if (jobExecution != null) {
+        String outputFilePath =
+            jobExecution.getJobParameters().getString(CommonConstants.BATCH_JOB_FILE_PATH);
+        if (outputFilePath != null) {
+          writeItemToCsv(outputFilePath, item, t);
+        } else {
+          ApplicationLogger.error("Output file path is null, cannot write skipped item to CSV");
+        }
+      } else {
+        ApplicationLogger.error("JobExecution is null, cannot write skipped item to CSV");
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Error in onSkipInWrite: " + e.getMessage(), e);
+    }
   }
 
-  // ==================== ITEM Processor Listener ====================
-  @Override
-  public void beforeProcess(I item) {
-    ApplicationLogger.info("[Item Processor Listener] Before process item: " + item);
-  }
+  private void writeItemToCsv(String path, Object item, Throwable t) {
+    try {
+      String fullPath = CommonConstants.TOMCAT_HOME + path;
 
-  @Override
-  public void afterProcess(I item, @Nullable O result) {
-    ApplicationLogger.info(
-        "[Item Processor Listener] After process item: " + item + ", result: " + result);
-  }
+      // ✅ Thread-safe directory creation using java.nio.file
+      Path filePath = Paths.get(fullPath);
+      Path parentDir = filePath.getParent();
 
-  @Override
-  public void onProcessError(I item, @Nullable Exception e) {
-    ApplicationLogger.error("[Item Processor Listener] Process error for item: " + item, e);
-  }
+      if (parentDir != null && !Files.exists(parentDir)) {
+        try {
+          Files.createDirectories(parentDir); // creates only directories, never files
+          // If directories already exist, nothing happens (no exception)
+        } catch (IOException e) {
+          throw new RuntimeException("Cannot create output directory", e);
+        }
+      }
+      String message =
+          (t != null) ? ResolveException.resolveExceptionMessage(t) : "Data Saved Successfully";
 
-  // ==================== ITEM Writer Listener ====================
-  @Override
-  public void beforeWrite(Chunk<? extends @NonNull O> items) {
-    ApplicationLogger.info(
-        "[Item Writer Listener] Before write " + items.getItems().size() + " items.");
-  }
+      CsvTemplateDTO csvTemplateDTO = new CsvTemplateDTO();
+      csvTemplateDTO.setCsvClass(item.getClass());
+      csvTemplateDTO.setData(List.of(item));
+      csvTemplateDTO.setErrorMessage(message);
+      csvService.appendSingleRowToCsv(csvTemplateDTO, fullPath);
 
-  @Override
-  public void afterWrite(Chunk<? extends @NonNull O> items) {
-    ApplicationLogger.info(
-        "[Item Writer Listener] After write " + items.getItems().size() + " items.");
-  }
-
-  @Override
-  public void onWriteError(@Nullable Exception exception, Chunk<? extends @NonNull O> items) {
-    ApplicationLogger.error(
-        "[Item Writer Listener] Write error for " + items.getItems().size() + " items.", exception);
-  }
-
-  // ==================== Skip Listener ====================
-  @Override
-  public void onSkipInRead(@Nullable Throwable t) {
-    ApplicationLogger.error("[Skip Listener] Skip in read.", t);
-  }
-
-  @Override
-  public void onSkipInProcess(@Nullable I item, @Nullable Throwable t) {
-    ApplicationLogger.error("[Skip Listener] Skip in process for item: " + item, t);
-  }
-
-  @Override
-  public void onSkipInWrite(@Nullable O item, @Nullable Throwable t) {
-    ApplicationLogger.error("[Skip Listener] Skip in write for item: " + item, t);
+      ApplicationLogger.info("Successfully wrote item to CSV: " + fullPath);
+    } catch (Exception e) {
+      ApplicationLogger.error(
+          "Failed to write skipped item to CSV for item: " + item.toString(), e);
+    }
   }
 }

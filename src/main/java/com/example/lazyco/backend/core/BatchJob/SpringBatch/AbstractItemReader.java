@@ -8,11 +8,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.batch.infrastructure.item.ItemStreamException;
 import org.springframework.batch.infrastructure.item.ItemStreamReader;
 
-public class AbstractItemReader<I> implements ItemStreamReader<I> {
+public class AbstractItemReader<I> implements ItemStreamReader<@NonNull I> {
   private final List<I> data;
   private int currentIndex = 0;
   private final String checkpointKey;
@@ -35,7 +36,7 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
   }
 
   @Override
-  public void open(ExecutionContext executionContext) throws ItemStreamException {
+  public void open(@NonNull ExecutionContext executionContext) throws ItemStreamException {
     try {
       // ✅ First priority: Restore from Spring Batch ExecutionContext (most reliable)
       if (executionContext.containsKey(checkpointKey)) {
@@ -60,7 +61,7 @@ public class AbstractItemReader<I> implements ItemStreamReader<I> {
   }
 
   @Override
-  public void update(ExecutionContext executionContext) throws ItemStreamException {
+  public void update(@NonNull ExecutionContext executionContext) throws ItemStreamException {
     try {
       // ✅ Update ExecutionContext (Spring Batch's transactional store)
       executionContext.putInt(checkpointKey, currentIndex);

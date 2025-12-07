@@ -1,9 +1,13 @@
-package com.example.lazyco.backend.entities.UserManagement.AppUser;
+package com.example.lazyco.backend.entities.UserManagement.AppUser.Upload;
 
+import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractModelMapper;
 import com.example.lazyco.backend.core.BatchJob.BatchJobOperationType;
 import com.example.lazyco.backend.core.BatchJob.SpringBatch.AbstractBatchJob;
-import com.example.lazyco.backend.core.Logger.ApplicationLogger;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
+import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.stereotype.Service;
@@ -18,7 +22,7 @@ import org.springframework.stereotype.Service;
  *     use applicationContect.getBean(AppUserUploader.class) to get a new instance each time
  */
 @Service
-public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
+public class AppUserUploader extends AbstractBatchJob<AppUserBatchDTO, AppUserDTO> {
 
   private final AppUserService appUserService;
 
@@ -27,21 +31,17 @@ public class AppUserUploader extends AbstractBatchJob<AppUserDTO, AppUserDTO> {
   }
 
   @Override
-  protected ItemProcessor<AppUserDTO, AppUserDTO> createItemProcessor(
-      BatchJobOperationType operationType, Map<Class<?>, ?> childData) {
-    return item -> {
-      // Don't throw any exception here else the item will be retried based on retry policy
-      ApplicationLogger.info("AppUserUploader: Processing AppUserDTO");
-      return item;
-    };
+  protected ItemProcessor<@NonNull AppUserBatchDTO, @NonNull AppUserDTO> createItemProcessor(
+      BatchJobOperationType operationType, Map<Class<?>, List<?>> childData) {
+    return item -> new AbstractModelMapper().map(item, AppUserDTO.class);
   }
 
   @Override
-  protected ItemWriter<AppUserDTO> createItemWriter(BatchJobOperationType operationType) {
+  protected ItemWriter<@NonNull AppUserDTO> createItemWriter(BatchJobOperationType operationType) {
     return items -> items.forEach(this::createTest);
   }
 
   private void createTest(AppUserDTO dto) {
-    appUserService.executeCreateTransactional(dto);
+    appUserService.executeCreateNestedTransactional(dto);
   }
 }

@@ -13,7 +13,11 @@ public class GlobalExceptionHandler {
   // handle all unexpected errors/ exceptions will be handled here
   @ExceptionHandler(ExceptionWrapper.class)
   public ResponseEntity<SimpleResponseDTO> applicationExceptionWrapper(ExceptionWrapper e) {
-    ApplicationLogger.error(e);
+    Throwable cause = e;
+    while (cause instanceof ExceptionWrapper && ((ExceptionWrapper) cause).getException() != null) {
+      cause = ((ExceptionWrapper) cause).getException();
+    }
+    ApplicationLogger.error(cause);
     SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
     simpleResponseDTO.setMessage(e.getMessage());
     return ResponseUtils.sendResponse(e.getHttpStatus(), simpleResponseDTO);

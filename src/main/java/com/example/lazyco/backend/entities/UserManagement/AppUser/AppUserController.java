@@ -3,6 +3,8 @@ package com.example.lazyco.backend.entities.UserManagement.AppUser;
 import com.example.lazyco.backend.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.backend.core.Utils.ResponseUtils;
 import com.example.lazyco.backend.core.WebMVC.RequestHandling.CSVParams.CsvParams;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.Upload.AppUserBatchDTO;
+import com.example.lazyco.backend.entities.UserManagement.AppUser.Upload.AppUserUploader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +24,7 @@ public class AppUserController extends AbstractController<AppUserDTO> {
   }
 
   @PostMapping("csv")
-  public ResponseEntity<?> uploadCsv(@CsvParams AppUserDTO appUserDTO) {
+  public ResponseEntity<?> uploadCsv(@CsvParams AppUserBatchDTO appUserDTO) {
     appUserUploader.getObject().executeJob(appUserDTO);
     return ResponseUtils.sendResponse("CSV upload initiated successfully.");
   }

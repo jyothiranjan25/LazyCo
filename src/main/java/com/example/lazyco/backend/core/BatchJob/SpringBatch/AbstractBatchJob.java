@@ -4,11 +4,14 @@ import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.backend.core.BatchJob.*;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.File.FileTypeEnum;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
-import java.util.*;
-import org.springframework.batch.core.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -20,22 +23,27 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
+import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemReader;
-import org.springframework.batch.infrastructure.item.ItemStream;
 import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.support.ListItemReader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 @Scope("prototype")
-public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends AbstractDTO<?>> {
+public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends AbstractDTO<O>> {
 
   private JobRepository jobRepository;
   private JobOperator jobOperator;
-  private ObjectProvider<AbstractBatchJobListener<T, P>> batchJobListeners;
+  private ObjectProvider<@NonNull AbstractBatchJobListener<I, O>> jobListener;
+  private PlatformTransactionManager transactionManager;
   private BatchJobService batchJobService;
   private AbstractAction abstractAction;
 
@@ -43,66 +51,49 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
   public void injectDependencies(
       JobRepository jobRepository,
       JobOperator jobOperator,
-      ObjectProvider<AbstractBatchJobListener<T, P>> batchJobListeners,
+      ObjectProvider<@NonNull AbstractBatchJobListener<I, O>> jobListener,
+      PlatformTransactionManager transactionManager,
       BatchJobService batchJobService,
       AbstractAction abstractAction) {
     this.jobRepository = jobRepository;
     this.jobOperator = jobOperator;
-    this.batchJobListeners = batchJobListeners;
+    this.jobListener = jobListener;
+    this.transactionManager = transactionManager;
     this.batchJobService = batchJobService;
     this.abstractAction = abstractAction;
   }
 
-  public void executeJob(T inputData) {
-    executeJob(inputData, Collections.emptyMap());
-  }
-
-  @SuppressWarnings("unchecked")
-  public void executeJob(T inputData, Map<Class<?>, ?> childData) {
+  @Async
+  public void executeJob(I inputData) {
     try {
-      List<T> listDate = (List<T>) inputData.getObjects();
-      String uniqueJobName =
-          this.getClass().getSimpleName() + "_" + UUID.randomUUID(); // 👈 unique per run
-      if (!listDate.isEmpty()) {
+      String jobName = this.getClass().getSimpleName() + "_" + UUID.randomUUID();
+      if (!inputData.getObjects().isEmpty()) {
         ApplicationLogger.info(
             "Executing Spring Batch job: "
-                + uniqueJobName
+                + jobName
                 + " with input object containing "
-                + listDate.size()
+                + inputData.getObjects().size()
                 + " items");
-        // determine if notification is to be sent
-        boolean sendNotification = Boolean.TRUE.equals(inputData.getSendNotification());
-        // determine operation type
-        BatchJobOperationType actionType =
-            inputData.getOperationType() != null
-                ? inputData.getOperationType()
-                : BatchJobOperationType.CREATE;
-        this.executeJobInBackground(
-            listDate, childData, uniqueJobName, actionType, sendNotification);
+        executeJobInBackground(inputData, jobName);
       } else {
-        ApplicationLogger.info(
+        throw new ExceptionWrapper(
             "No input objects found in the provided DTO for job: "
                 + this.getClass().getSimpleName());
       }
+    } catch (ExceptionWrapper ex) {
+      throw ex;
     } catch (Exception e) {
-      ApplicationLogger.error(
-          "Failed to execute Spring Batch job: " + this.getClass().getSimpleName(), e);
-      throw new RuntimeException("Batch job execution failed", e);
+      throw new ExceptionWrapper(
+          "Failed to execute batch job: " + this.getClass().getSimpleName(), e);
     }
   }
 
-  private void executeJobInBackground(
-      List<T> inputData,
-      Map<Class<?>, ?> childData,
-      String batchJobName,
-      BatchJobOperationType operationType,
-      boolean sendNotification) {
+  private void executeJobInBackground(I inputData, String batchJobName) {
     // create BatchJob entry
-    BatchJobDTO batchJobDTO =
-        createBatchJob(batchJobName, inputData.size(), operationType, sendNotification);
+    BatchJobDTO batchJobDTO = createBatchJob(inputData, batchJobName);
     try {
       // create and launch job
-      Job job = createJob(inputData, childData, batchJobName, operationType);
+      Job job = createJob(inputData, batchJobName);
       // add batchJobId and logged-in user details to job parameters
       JobParameters jobParameters =
           new JobParametersBuilder()
@@ -116,126 +107,126 @@ public abstract class AbstractBatchJob<T extends AbstractDTO<?>, P extends Abstr
               .toJobParameters();
       JobExecution jobExecution = jobOperator.start(job, jobParameters);
       ApplicationLogger.info(
-          "Starting Spring Batch job: "
+          "Launched Spring Batch job: "
               + batchJobName
-              + " with "
-              + inputData.size()
-              + " items to process. JobExecution ID: "
+              + " with JobExecutionId: "
               + jobExecution.getId());
     } catch (Exception e) {
-      ApplicationLogger.error("[BATCH] Exception in executeJob: " + e.getMessage(), e);
-      // update BatchJob entry as FAILED
       updateBatchJob(batchJobDTO);
+      throw new ExceptionWrapper(
+          "Failed to execute batch job: " + this.getClass().getSimpleName(), e);
     }
   }
 
-  protected Job createJob(
-      List<T> inputData,
-      Map<Class<?>, ?> childData,
-      String jobName,
-      BatchJobOperationType operationType) {
+  private Job createJob(I inputData, String jobName) {
+    AbstractBatchJobListener<I, O> listener = jobListener.getObject();
+    return new JobBuilder(jobName, jobRepository)
+        .listener(listener)
+        .start(createProcessingStep(inputData, jobName, listener))
+        .build();
+  }
+
+  private Step createProcessingStep(
+      I inputData, String jobName, AbstractBatchJobListener<I, O> listener) {
     try {
-      // use getBean to ensure new instance of listener per job
-      AbstractBatchJobListener jobListener = batchJobListeners.getObject();
-      return new JobBuilder(jobName, jobRepository)
-          .listener((JobExecutionListener) jobListener)
-          .start(createProcessingStep(inputData, childData, jobName, jobListener, operationType))
+      // extract input data
+      List<I> inputDataList = inputData.getObjects();
+      Map<Class<?>, List<?>> childDataMap = inputData.getChildDataMap();
+      BatchJobOperationType operationType = inputData.getOperationType();
+      boolean isAtomicOperation = Boolean.TRUE.equals(inputData.getIsAtomicOperation());
+      isAtomicOperation = true;
+      int chunkSize = isAtomicOperation ? inputDataList.size() : 1;
+
+      //  create reader
+      ItemReader<@NonNull I> itemReader = createItemReader(inputDataList);
+      // create Processor
+      ItemProcessor<@NonNull I, @NonNull O> itemProcessor =
+          createItemProcessor(operationType, childDataMap);
+      ItemProcessor<@NonNull I, @NonNull O> compositeProcessor =
+          createCompositeProcessor(itemProcessor);
+      // create writer
+      ItemWriter<@NonNull O> itemWriter = createItemWriter(operationType);
+      ItemWriter<@NonNull O> compositeWriter = createCompositeWriter(itemWriter, isAtomicOperation);
+
+      return new StepBuilder(jobName + "_ProcessingStep", jobRepository)
+          .<I, O>chunk(chunkSize)
+          .transactionManager(transactionManager)
+          .taskExecutor(new SimpleAsyncTaskExecutor())
+          .listener((StepExecutionListener) listener)
+          .listener((ChunkListener) listener)
+          .listener((ItemReadListener<I>) listener)
+          .listener((ItemProcessListener<I, O>) listener)
+          .listener((ItemWriteListener<O>) listener)
+          .listener((SkipListener<I, O>) listener)
+          .reader(itemReader)
+          .processor(compositeProcessor)
+          .writer(compositeWriter)
+          .faultTolerant()
+          .skipPolicy(createSkipPolicy((long) inputDataList.size()))
+          .skipLimit(Integer.MAX_VALUE)
           .build();
     } catch (Exception e) {
-      ApplicationLogger.error("[BATCH] Exception in createJob: " + e.getMessage(), e);
-      throw new RuntimeException("Failed to create job", e);
+      throw new ExceptionWrapper("Failed to create processing step", e);
     }
   }
 
-  protected Step createProcessingStep(
-      List<T> inputData,
-      Map<Class<?>, ?> childData,
-      String jobName,
-      AbstractBatchJobListener jobListener,
-      BatchJobOperationType operationType) {
-    try {
-      //  create reader
-      ItemReader<T> reader = ItemReader(inputData, jobName);
-      // create processor
-      ItemProcessor<T, P> userProcessor = createItemProcessor(operationType, childData);
-      ItemProcessor<T, P> compositeProcessor = createCompositeProcessor(userProcessor);
-      // create writer
-      ItemWriter<P> userWriter = createItemWriter(operationType);
-      ItemWriter<P> compositeWriter = createCompositeWriter(userWriter);
-      return new StepBuilder(jobName + "_Step", jobRepository)
-              .<T, P>chunk(3)
-              .listener((StepExecutionListener) jobListener)
-              .listener((ChunkListener<T, P>) jobListener)
-              .listener((ItemProcessListener<T, P>) jobListener)
-              .listener((ItemWriteListener<P>) jobListener)
-              .listener((SkipListener<T, P>) jobListener)
-              .reader(reader)
-              .stream((ItemStream) reader)
-              .processor(compositeProcessor)
-              .writer(compositeWriter)
-              .faultTolerant()
-              .skip(Exception.class) // Skip all exceptions to continue to next chunk
-              .skipPolicy(createSkipPolicy())
-              .skipLimit(Integer.MAX_VALUE)
-              .build();
-    } catch (Exception e) {
-      ApplicationLogger.error("[BATCH] Exception in createProcessingStep: " + e.getMessage(), e);
-      throw new RuntimeException("Failed to create step", e);
-    }
-  }
+  private ItemReader<@NonNull I> createItemReader(List<I> inputData) {
+    return new ItemReader<>() {
+      private final ListItemReader<@NonNull I> delegate = new ListItemReader<>(inputData);
 
-  protected <Z> ItemProcessor<T, P> createCompositeProcessor(ItemProcessor<T, P> userProcessor) {
-    return item -> {
-      return userProcessor != null ? userProcessor.process(item) : null;
-    };
-  }
-
-  protected ItemWriter<P> createCompositeWriter(ItemWriter<P> userWriter) {
-    return items -> {
-      //      for (P item : items) {
-      //        if (userWriter != null) {
-      //          Chunk<P> singleItemChunk = new Chunk<>(Collections.singletonList(item));
-      //          userWriter.write(singleItemChunk);
-      //        }
-      //      }
-      if (userWriter != null) {
-        userWriter.write(items);
+      @Override
+      public I read() {
+        return delegate.read();
       }
     };
   }
 
-  protected ItemReader<T> ItemReader(List<T> inputData, String jobName) {
-    return new AbstractItemReader<>(inputData, jobName);
+  protected abstract ItemProcessor<@NonNull I, @NonNull O> createItemProcessor(
+      BatchJobOperationType operationType, Map<Class<?>, List<?>> childData);
+
+  private ItemProcessor<@NonNull I, @NonNull O> createCompositeProcessor(
+      ItemProcessor<@NonNull I, @NonNull O> userProcessor) {
+    return userProcessor;
   }
 
-  protected abstract ItemProcessor<T, P> createItemProcessor(
-      BatchJobOperationType operationType, Map<Class<?>, ?> childData);
+  protected abstract ItemWriter<@NonNull O> createItemWriter(BatchJobOperationType operationType);
 
-  protected abstract ItemWriter<P> createItemWriter(BatchJobOperationType operationType);
+  private ItemWriter<@NonNull O> createCompositeWriter(
+      ItemWriter<@NonNull O> userWriter, boolean isAtomicOperation) {
+    return items -> {
+      boolean rollbackOnFailure = false;
+      for (O item : items) {
+        try {
+          userWriter.write(new Chunk<>(item));
+        } catch (Exception e) {
+          rollbackOnFailure = true;
+        }
+      }
+      if (isAtomicOperation && rollbackOnFailure) {
+        throw new ExceptionWrapper(
+            "One or more items failed to process in the chunk, rolling back the transaction");
+      }
+    };
+  }
 
-  protected SkipPolicy createSkipPolicy() {
-    return (t, skipCount) -> {
-      ApplicationLogger.error(
-          "[BATCH] Skipping failed item (skip count: " + skipCount + ") due to: " + t.getMessage());
+  private SkipPolicy createSkipPolicy(Long size) {
+    return (throwable, skipCount) -> {
+      ApplicationLogger.error(throwable);
       return true;
     };
   }
 
-  private BatchJobDTO createBatchJob(
-      String jobName,
-      int totalItemCount,
-      BatchJobOperationType operationType,
-      boolean sendNotification) {
+  private BatchJobDTO createBatchJob(I inputDate, String jobName) {
     BatchJobDTO batchJobDTO = new BatchJobDTO();
     batchJobDTO.setName(jobName);
-    batchJobDTO.setOperationType(operationType);
+    batchJobDTO.setOperationType(inputDate.getOperationType());
     batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
-    batchJobDTO.setTotalItemCount(totalItemCount);
+    batchJobDTO.setTotalItemCount(inputDate.getObjects().size());
     batchJobDTO.setStatus(BatchJobStatus.INITIALIZED);
     batchJobDTO.setSessionType(BatchJobSessionType.SINGLE_OBJECT_COMMIT);
     batchJobDTO.setOutputFilePath(
         CommonConstants.BATCH_JOB_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
-    batchJobDTO.setNotifyOnCompletion(sendNotification);
+    batchJobDTO.setNotifyOnCompletion(inputDate.getSendNotification());
     batchJobDTO = batchJobService.create(batchJobDTO);
     return batchJobDTO;
   }
