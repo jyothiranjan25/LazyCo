@@ -33,7 +33,9 @@ public class AppUserUploader extends AbstractBatchJob<AppUserBatchDTO, AppUserDT
   @Override
   protected ItemProcessor<@NonNull AppUserBatchDTO, @NonNull AppUserDTO> createItemProcessor(
       BatchJobOperationType operationType, Map<Class<?>, List<?>> childData) {
-    return item -> new AbstractModelMapper().map(item, AppUserDTO.class);
+    return item -> {
+      return new AbstractModelMapper().map(item, AppUserDTO.class);
+    };
   }
 
   @Override
