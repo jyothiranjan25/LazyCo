@@ -21,12 +21,10 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.listener.*;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
-import org.springframework.batch.infrastructure.item.Chunk;
-import org.springframework.batch.infrastructure.item.ItemProcessor;
-import org.springframework.batch.infrastructure.item.ItemReader;
-import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.*;
 import org.springframework.batch.infrastructure.item.support.ListItemReader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +125,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
         .build();
   }
 
+  @SuppressWarnings("rawtypes")
   private Step createProcessingStep(
       I inputData, String jobName, AbstractBatchJobListener<I, O> listener) {
     try {
@@ -196,20 +195,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
 
   private ItemWriter<@NonNull O> createCompositeWriter(
       ItemWriter<@NonNull O> userWriter, boolean singleObjectOperation) {
-    return items -> {
-      boolean rollbackOnFailure = false;
-      for (O item : items) {
-        try {
-          userWriter.write(new Chunk<>(item));
-        } catch (Exception e) {
-          rollbackOnFailure = true;
-        }
-      }
-      if (!singleObjectOperation && rollbackOnFailure) {
-        throw new ExceptionWrapper(
-            "One or more items failed to process in the chunk, rolling back the transaction");
-      }
-    };
+    return new CountingItemWriter<>(userWriter, singleObjectOperation);
   }
 
   private SkipPolicy createSkipPolicy(Long size) {
@@ -229,7 +215,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
     batchJobDTO.setStartTime(DateTimeZoneUtils.getCurrentDate());
     batchJobDTO.setTotalItemCount(inputDate.getObjects().size());
     batchJobDTO.setStatus(BatchJobStatus.INITIALIZED);
-    batchJobDTO.setSessionType(BatchJobSessionType.SINGLE_OBJECT_COMMIT);
+    batchJobDTO.setSessionType(inputDate.getSessionType());
     batchJobDTO.setOutputFilePath(
         CommonConstants.BATCH_JOB_UPLOAD_LOCATION + jobName + FileTypeEnum.CSV.getExtension());
     batchJobDTO.setNotifyOnCompletion(inputDate.getSendNotification());
@@ -243,5 +229,54 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
     batchJobDTO.setFailedCount(0);
     batchJobDTO.setStatus(BatchJobStatus.FAILED);
     batchJobService.update(batchJobDTO);
+  }
+
+  private static class CountingItemWriter<O>
+      implements ItemWriter<@NonNull O>, StepExecutionListener {
+
+    private StepExecution stepExecution;
+    private final ItemWriter<@NonNull O> userWriter;
+    private final boolean singleObjectOperation;
+
+    public CountingItemWriter(ItemWriter<@NonNull O> userWriter, boolean singleObjectOperation) {
+      this.userWriter = userWriter;
+      this.singleObjectOperation = singleObjectOperation;
+    }
+
+    @Override
+    public void beforeStep(@NonNull StepExecution stepExecution) {
+      this.stepExecution = stepExecution;
+    }
+
+    @Override
+    public void write(@NonNull Chunk<? extends @NonNull O> chunk) {
+      if (stepExecution == null) {
+        throw new IllegalStateException(
+            "StepExecution is not set. Did you forget to call beforeStep()?");
+      }
+      ExecutionContext context = stepExecution.getExecutionContext();
+      long failedCount = context.getLong("FAILED_COUNT", 0L);
+      long processedCount = context.getLong("PROCESSED_COUNT", 0L);
+      boolean rollbackOnFailure = false;
+
+      for (O item : chunk.getItems()) {
+        try {
+          userWriter.write(new Chunk<>(item));
+          processedCount++;
+        } catch (Exception e) {
+          rollbackOnFailure = true;
+          failedCount++;
+        }
+      }
+
+      // update counts in execution context
+      context.putLong("PROCESSED_COUNT", processedCount);
+      context.putLong("FAILED_COUNT", failedCount);
+
+      if (!singleObjectOperation && rollbackOnFailure) {
+        throw new ExceptionWrapper(
+            "One or more items failed to process in the chunk, rolling back the transaction");
+      }
+    }
   }
 }

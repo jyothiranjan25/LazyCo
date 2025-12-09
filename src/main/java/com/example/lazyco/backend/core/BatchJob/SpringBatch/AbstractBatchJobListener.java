@@ -103,15 +103,17 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
       }
       batchJobDTO.setEndTime(DateTimeZoneUtils.getCurrentDate());
 
-      long processedCount =
-          jobExecution.getStepExecutions().stream().mapToLong(StepExecution::getWriteCount).sum();
-      batchJobDTO.setProcessedCount(Math.toIntExact(processedCount));
-
       long failedCount =
           jobExecution.getStepExecutions().stream()
-              .mapToLong(StepExecution::getWriteSkipCount)
+              .mapToLong(se -> se.getExecutionContext().getLong("FAILED_COUNT", 0L))
               .sum();
       batchJobDTO.setFailedCount(Math.toIntExact(failedCount));
+
+      long processedCount =
+          jobExecution.getStepExecutions().stream()
+              .mapToLong(se -> se.getExecutionContext().getLong("PROCESSED_COUNT", 0L))
+              .sum();
+      batchJobDTO.setProcessedCount(Math.toIntExact(processedCount));
 
       NotifyStatus notifyStatus;
       if (batchJobDTO.getNotifyOnCompletion() != null && batchJobDTO.getNotifyOnCompletion()) {
