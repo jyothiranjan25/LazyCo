@@ -31,6 +31,7 @@ import org.springframework.batch.infrastructure.item.support.ListItemReader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -133,8 +134,9 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
       List<I> inputDataList = inputData.getObjects();
       Map<Class<?>, List<?>> childDataMap = inputData.getChildDataMap();
       BatchJobOperationType operationType = inputData.getOperationType();
-      boolean isAtomicOperation = Boolean.TRUE.equals(inputData.getIsAtomicOperation());
-      int chunkSize = isAtomicOperation ? inputDataList.size() : 1;
+      boolean singleObjectOperation =
+          inputData.getSessionType() == BatchJobSessionType.SINGLE_OBJECT_COMMIT;
+      int chunkSize = singleObjectOperation ? 1 : inputDataList.size();
 
       //  create reader
       ItemReader<@NonNull I> itemReader = createItemReader(inputDataList);
@@ -145,7 +147,8 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
           createCompositeProcessor(itemProcessor);
       // create writer
       ItemWriter<@NonNull O> itemWriter = createItemWriter(operationType);
-      ItemWriter<@NonNull O> compositeWriter = createCompositeWriter(itemWriter, isAtomicOperation);
+      ItemWriter<@NonNull O> compositeWriter =
+          createCompositeWriter(itemWriter, singleObjectOperation);
 
       return new StepBuilder(jobName + "_ProcessingStep", jobRepository)
           .<I, O>chunk(chunkSize)
@@ -163,6 +166,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
           .faultTolerant()
           .skipPolicy(createSkipPolicy((long) inputDataList.size()))
           .skipLimit(Integer.MAX_VALUE)
+          .retryPolicy(createRetryPolicy())
           .build();
     } catch (Exception e) {
       throw new ExceptionWrapper("Failed to create processing step", e);
@@ -191,7 +195,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
   protected abstract ItemWriter<@NonNull O> createItemWriter(BatchJobOperationType operationType);
 
   private ItemWriter<@NonNull O> createCompositeWriter(
-      ItemWriter<@NonNull O> userWriter, boolean isAtomicOperation) {
+      ItemWriter<@NonNull O> userWriter, boolean singleObjectOperation) {
     return items -> {
       boolean rollbackOnFailure = false;
       for (O item : items) {
@@ -201,7 +205,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
           rollbackOnFailure = true;
         }
       }
-      if (isAtomicOperation && rollbackOnFailure) {
+      if (!singleObjectOperation && rollbackOnFailure) {
         throw new ExceptionWrapper(
             "One or more items failed to process in the chunk, rolling back the transaction");
       }
@@ -210,9 +214,12 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
 
   private SkipPolicy createSkipPolicy(Long size) {
     return (throwable, skipCount) -> {
-      ApplicationLogger.error(throwable);
       return true;
     };
+  }
+
+  private RetryPolicy createRetryPolicy() {
+    return (throwable) -> false;
   }
 
   private BatchJobDTO createBatchJob(I inputDate, String jobName) {
