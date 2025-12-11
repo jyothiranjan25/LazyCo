@@ -24,7 +24,7 @@ public class CsvTemplateDTO implements Serializable, Cloneable {
   private Map<String, String> optionRows;
   private List<Map<String, String>> rows;
   private Map<String, String> row;
-  private String errorMessage;
+  private String message;
 
   // Setters with processing logic
   public void setHeaders(List<String> headers) {

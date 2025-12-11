@@ -6,14 +6,21 @@ import com.example.lazyco.backend.core.BatchJob.BatchJobService;
 import com.example.lazyco.backend.core.BatchJob.BatchJobStatus;
 import com.example.lazyco.backend.core.BatchJob.NotifyStatus;
 import com.example.lazyco.backend.core.CsvTemplate.CsvService;
+import com.example.lazyco.backend.core.CsvTemplate.CsvTemplateDTO;
 import com.example.lazyco.backend.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.backend.core.Exceptions.ResolveException;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
 import com.example.lazyco.backend.entities.User.UserService;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleService;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.batch.core.BatchStatus;
@@ -34,6 +41,7 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
   private final UserService userService;
   private final UserRoleService userRoleService;
   private final BatchJobService batchJobService;
+  private final ItemException itemException;
   private final CsvService csvService;
   private JobExecution jobExecution;
 
@@ -42,11 +50,13 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
       UserService userService,
       UserRoleService userRoleService,
       BatchJobService batchJobService,
+      ItemException itemException,
       CsvService csvService) {
     this.abstractAction = abstractAction;
     this.userService = userService;
     this.userRoleService = userRoleService;
     this.batchJobService = batchJobService;
+    this.itemException = itemException;
     this.csvService = csvService;
   }
 
@@ -235,10 +245,44 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
   @Override
   public void onSkipInProcess(@Nullable I item, @Nullable Throwable t) {
     ApplicationLogger.error("[Skip Listener] Skip in process for item: " + item, t);
+    itemException.add(item, t);
   }
 
   @Override
   public void onSkipInWrite(@Nullable O item, @Nullable Throwable t) {
     ApplicationLogger.error("[Skip Listener] Skip in write for item: " + item, t);
+    itemException.add(item, t);
+  }
+
+  private void writeItemToCsv(String path, Object item, Throwable t) {
+    try {
+      String fullPath = CommonConstants.TOMCAT_HOME + path;
+
+      // ✅ Thread-safe directory creation using java.nio.file
+      Path filePath = Paths.get(fullPath);
+      Path parentDir = filePath.getParent();
+
+      if (parentDir != null && !Files.exists(parentDir)) {
+        try {
+          Files.createDirectories(parentDir); // creates only directories, never files
+          // If directories already exist, nothing happens (no exception)
+        } catch (IOException e) {
+          throw new RuntimeException("Cannot create output directory", e);
+        }
+      }
+      String message =
+          (t != null) ? ResolveException.resolveExceptionMessage(t) : "Data Saved Successfully";
+
+      CsvTemplateDTO csvTemplateDTO = new CsvTemplateDTO();
+      csvTemplateDTO.setCsvClass(item.getClass());
+      csvTemplateDTO.setData(List.of(item));
+      csvTemplateDTO.setMessage(message);
+      csvService.appendSingleRowToCsv(csvTemplateDTO, fullPath);
+
+      ApplicationLogger.info("Successfully wrote item to CSV: " + fullPath);
+    } catch (Exception e) {
+      ApplicationLogger.error(
+          "Failed to write skipped item to CSV for item: " + item.toString(), e);
+    }
   }
 }

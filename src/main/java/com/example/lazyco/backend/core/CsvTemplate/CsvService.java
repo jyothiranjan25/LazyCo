@@ -272,7 +272,7 @@ public class CsvService {
 
       // --- WRITE SINGLE DATA ROW ---
       Map<String, String> rowMap = generateCsvRows(csvTemplateDTO.getData().get(0));
-      rowMap.put("Message", csvTemplateDTO.getErrorMessage());
+      rowMap.put("Message", csvTemplateDTO.getMessage());
       String[] rowData =
           headers.stream().map(h -> rowMap.getOrDefault(h, "")).toArray(String[]::new);
 

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.retry.RetryPolicy;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -152,7 +152,6 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
       return new StepBuilder(jobName + "_ProcessingStep", jobRepository)
           .<I, O>chunk(chunkSize)
           .transactionManager(transactionManager)
-          .taskExecutor(new SimpleAsyncTaskExecutor())
           .listener((StepExecutionListener) listener)
           .listener((ChunkListener) listener)
           .listener((ItemReadListener<@NonNull I>) listener)
@@ -188,7 +187,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
 
   private ItemProcessor<@NonNull I, @NonNull O> createCompositeProcessor(
       ItemProcessor<@NonNull I, @NonNull O> userProcessor) {
-    return userProcessor;
+    return new CountingItemProcessor<>(userProcessor);
   }
 
   protected abstract ItemWriter<@NonNull O> createItemWriter(BatchJobOperationType operationType);
@@ -231,8 +230,42 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
     batchJobService.update(batchJobDTO);
   }
 
+  private static class CountingItemProcessor<I, O>
+      implements ItemProcessor<@NonNull I, @NonNull O>, StepExecutionListener {
+
+    public static final String FAILED_COUNT = "FAILED_COUNT";
+
+    private StepExecution stepExecution;
+    private final ItemProcessor<@NonNull I, @NonNull O> userProcessor;
+
+    public CountingItemProcessor(ItemProcessor<@NonNull I, @NonNull O> userProcessor) {
+      this.userProcessor = userProcessor;
+    }
+
+    @Override
+    public void beforeStep(@NonNull StepExecution stepExecution) {
+      this.stepExecution = stepExecution;
+    }
+
+    @Override
+    public @Nullable O process(@NonNull I item) throws Exception {
+      ExecutionContext context = stepExecution.getExecutionContext();
+      long failedCount = context.getLong(FAILED_COUNT, 0L);
+      try {
+        return userProcessor.process(item);
+      } catch (Exception e) {
+        failedCount++;
+        context.putLong(FAILED_COUNT, failedCount);
+        throw e; // Rethrow the exception to indicate processing failure
+      }
+    }
+  }
+
   private static class CountingItemWriter<O>
       implements ItemWriter<@NonNull O>, StepExecutionListener {
+
+    public static final String PROCESSED_COUNT = "PROCESSED_COUNT";
+    public static final String FAILED_COUNT = "FAILED_COUNT";
 
     private StepExecution stepExecution;
     private final ItemWriter<@NonNull O> userWriter;
@@ -249,14 +282,14 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
     }
 
     @Override
-    public void write(@NonNull Chunk<? extends @NonNull O> chunk) {
+    public void write(@NonNull Chunk<? extends @NonNull O> chunk) throws Exception {
       if (stepExecution == null) {
         throw new IllegalStateException(
             "StepExecution is not set. Did you forget to call beforeStep()?");
       }
       ExecutionContext context = stepExecution.getExecutionContext();
-      long failedCount = context.getLong("FAILED_COUNT", 0L);
-      long processedCount = context.getLong("PROCESSED_COUNT", 0L);
+      long processedCount = context.getLong(PROCESSED_COUNT, 0L);
+      long failedCount = context.getLong(FAILED_COUNT, 0L);
       boolean rollbackOnFailure = false;
 
       for (O item : chunk.getItems()) {
@@ -266,17 +299,19 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
         } catch (Exception e) {
           rollbackOnFailure = true;
           failedCount++;
+          throw e;
         }
       }
 
       // update counts in execution context
-      context.putLong("PROCESSED_COUNT", processedCount);
-      context.putLong("FAILED_COUNT", failedCount);
+      context.putLong(PROCESSED_COUNT, processedCount);
+      context.putLong(FAILED_COUNT, failedCount);
 
-      if (!singleObjectOperation && rollbackOnFailure) {
-        throw new ExceptionWrapper(
-            "One or more items failed to process in the chunk, rolling back the transaction");
-      }
+      //      if (!singleObjectOperation && rollbackOnFailure) {
+      //        throw new ExceptionWrapper(
+      //            "One or more items failed to process in the chunk, rolling back the
+      // transaction");
+      //      }
     }
   }
 }

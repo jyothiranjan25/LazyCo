@@ -230,6 +230,10 @@ public class PostgresConfig {
     properties.put(AvailableSettings.USE_QUERY_CACHE, useQueryCache);
     // Cache region factory class implementation
     properties.put(AvailableSettings.CACHE_REGION_FACTORY, hibernateCacheRegionFactory);
+      // Avoid redundant cache puts when entity already cached
+      properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
+      // Use structured format for cache entries (better debuggability)
+      properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
     // Cache provider class implementation
     properties.put("hibernate.javax.cache.provider_class", hibernateCacheProviderClass);
     // Strategy for handling missing cache regions
@@ -259,11 +263,6 @@ public class PostgresConfig {
 
     // Transaction isolation level (READ_COMMITTED recommended for PostgreSQL)
     properties.put(AvailableSettings.ISOLATION, "READ_COMMITTED");
-
-    // Avoid redundant cache puts when entity already cached
-    properties.put(AvailableSettings.USE_MINIMAL_PUTS, "true");
-    // Use structured format for cache entries (better debuggability)
-    properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
 
     // Enable Envers auditing (tracks entity changes)
     properties.put("org.hibernate.envers.Audited", "true");
