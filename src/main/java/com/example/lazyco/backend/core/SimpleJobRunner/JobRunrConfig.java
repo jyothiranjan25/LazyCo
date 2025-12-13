@@ -4,6 +4,7 @@ import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.annotation.PreDestroy;
 import javax.sql.DataSource;
 import org.jobrunr.configuration.JobRunr;
+import org.jobrunr.configuration.JobRunrConfiguration;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.server.BackgroundJobServer;
 import org.jobrunr.storage.StorageProvider;
@@ -20,13 +21,13 @@ public class JobRunrConfig {
   }
 
   @Bean
-  public JobScheduler jobScheduler(StorageProvider storageProvider) {
-    return JobRunr.configure()
-        .useStorageProvider(storageProvider)
-        .useBackgroundJobServer()
-        .useDashboard()
-        .initialize()
-        .getJobScheduler();
+  public JobScheduler jobScheduler(StorageProvider storageProvider, JobRunrFilter jobRunrFilter) {
+    JobRunrConfiguration configuration = JobRunr.configure();
+    configuration.useStorageProvider(storageProvider);
+    configuration.withJobFilter(jobRunrFilter);
+    configuration.useBackgroundJobServer();
+    configuration.useDashboard();
+    return configuration.initialize().getJobScheduler();
   }
 
   @PreDestroy
