@@ -598,6 +598,12 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.sql</include>
+                </includes>
+            </resource>
         </resources>
 
         <plugins>

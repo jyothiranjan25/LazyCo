@@ -6,7 +6,6 @@ import com.example.lazyco.backend.core.AbstractAction;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleDTO;
 import com.example.lazyco.backend.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleService;
-import com.example.lazyco.backend.core.QuartzScheduler.QuartzConfig;
 import jakarta.annotation.PreDestroy;
 import java.util.List;
 import org.quartz.*;
@@ -24,10 +23,10 @@ public class CronJobService {
 
   @Autowired
   public void injectDependencies(
-      QuartzConfig quartzConfig,
+      Scheduler scheduler,
       CronJobScheduleService cronJobScheduleService,
       AbstractAction abstractAction) {
-    this.scheduler = quartzConfig.schedulerFactoryBean().getScheduler();
+    this.scheduler = scheduler;
     this.cronJobScheduleService = cronJobScheduleService;
     this.abstractAction = abstractAction;
   }

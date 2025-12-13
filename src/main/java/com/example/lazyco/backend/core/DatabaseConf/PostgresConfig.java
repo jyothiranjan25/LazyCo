@@ -95,6 +95,9 @@ public class PostgresConfig {
   @Value("${hibernate.cache_provider_class:}")
   private String hibernateCacheProviderClass;
 
+  @Value("${hibernate.javax.cache.uri:}")
+  private String getHibernateCacheUri;
+
   // ==============================
   // Hibernate Envers (audit) settings
   // ==============================
@@ -202,7 +205,7 @@ public class PostgresConfig {
     // Number of statements to batch before execution
     properties.put(AvailableSettings.STATEMENT_BATCH_SIZE, "100");
     // Number of rows to fetch per round trip
-    properties.put(AvailableSettings.STATEMENT_FETCH_SIZE, "200");
+    properties.put(AvailableSettings.STATEMENT_FETCH_SIZE, "500");
     // Optimize insert batching by ordering inserts by entity
     properties.put(AvailableSettings.ORDER_INSERTS, "true");
     // Optimize update batching by ordering updates by entity
@@ -236,6 +239,10 @@ public class PostgresConfig {
     properties.put(AvailableSettings.USE_STRUCTURED_CACHE, "true");
     // Cache provider class implementation
     properties.put("hibernate.javax.cache.provider_class", hibernateCacheProviderClass);
+    if (getHibernateCacheUri != null && !getHibernateCacheUri.isEmpty()) {
+      // Hibernate cache configuration URI
+      properties.put("hibernate.javax.cache.uri", getHibernateCacheUri);
+    }
     // Strategy for handling missing cache regions
     properties.put("hibernate.javax.cache.missing_cache_strategy", "create");
 

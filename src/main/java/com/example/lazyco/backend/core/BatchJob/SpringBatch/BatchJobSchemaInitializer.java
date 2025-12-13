@@ -16,15 +16,23 @@ public class BatchJobSchemaInitializer {
 
   @Bean
   public DataSourceInitializer batchSchemaInitializer(DataSource dataSource) {
+    String ddl = hbm2ddlAuto == null ? "" : hbm2ddlAuto.trim().toLowerCase();
     ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-    if ("create-drop".equalsIgnoreCase(hbm2ddlAuto)) {
-      populator.addScript(
-          new ClassPathResource("org/springframework/batch/core/schema-drop-postgresql.sql"));
-      populator.addScript(
-          new ClassPathResource("org/springframework/batch/core/schema-postgresql.sql"));
-    } else {
-      populator.addScript(
-          new ClassPathResource("org/springframework/batch/core/schema-postgresql.sql"));
+    switch (ddl) {
+      case "create-drop":
+        populator.addScript(
+            new ClassPathResource("org/springframework/batch/core/schema-drop-postgresql.sql"));
+        populator.addScript(
+            new ClassPathResource("org/springframework/batch/core/schema-postgresql.sql"));
+        break;
+      case "create":
+      case "update":
+        populator.addScript(
+            new ClassPathResource("org/springframework/batch/core/schema-postgresql.sql"));
+        break;
+      default:
+        // No action needed for 'validate' or 'none'
+        break;
     }
     populator.setContinueOnError(true); // <- continue even if CREATE TABLE fails
     DataSourceInitializer initializer = new DataSourceInitializer();
