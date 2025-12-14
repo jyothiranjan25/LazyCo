@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.time.DateUtils;
 
 /** Modern, thread-safe date/time utilities with deterministic test mode. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -72,6 +73,14 @@ public final class DateTimeZoneUtils {
 
   public static Date getCurrentDate() {
     return Date.from(nowInstant().atZone(systemZone()).toInstant());
+  }
+
+  public static Date addDaysToCurrentDate(int days) {
+    return DateUtils.addDays(getCurrentDate(), days);
+  }
+
+  public static Date addMinutesToCurrentDate(int minutes) {
+    return DateUtils.addMinutes(getCurrentDate(), minutes);
   }
 
   public static LocalDate currentDate() {

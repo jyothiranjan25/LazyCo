@@ -21,3 +21,4 @@ USER_MODULES:
   USER_NOT_AUTHORIZED : "You do not have the necessary permissions to access this resource."
   ROLE_NOT_SELECTED : "No role has been selected for the user."
   LOGOUT_SUCCESS : "You have been successfully logged out."
+  PASSWORD_RESET_INITIATED : "A password reset link has been sent to your registered email address."

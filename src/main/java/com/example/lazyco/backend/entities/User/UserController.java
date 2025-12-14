@@ -20,8 +20,9 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping("/login")
-  public ResponseEntity<UserDTO> login(@RequestBody UserDTO userDTO, HttpServletResponse response) {
-    userDTO = userService.login(userDTO, response);
+  public ResponseEntity<UserDTO> login(
+      @RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    userDTO = userService.login(userDTO, request, response);
     return ResponseUtils.sendResponse(userDTO);
   }
 
@@ -31,6 +32,13 @@ public class UserController {
       HttpServletRequest request,
       HttpServletResponse response) {
     UserDTO userDTO = userService.setRole(userRoleDTO, request, response);
+    return ResponseUtils.sendResponse(userDTO);
+  }
+
+  @PostMapping("/reset_password")
+  public ResponseEntity<UserDTO> refreshToken(
+      @RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+    userDTO = userService.resetPassword(userDTO, request, response);
     return ResponseUtils.sendResponse(userDTO);
   }
 

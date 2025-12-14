@@ -11,7 +11,7 @@ public class YamlUtils {
 
   private static final Map<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
 
-  public static String getValueForKey(String key, String filePath) {
+  public static String getValueForKeyMap(String key, String filePath) {
     Map<String, Object> yamlMap =
         cache.computeIfAbsent(
             filePath,
@@ -36,8 +36,7 @@ public class YamlUtils {
     return getValue(yamlMap, key);
   }
 
-  public static String getValueForKey(
-      String key, String filePath, ApplicationText.Language language) {
+  public static String getValueForKey(String key, String filePath) {
     try (InputStream inputStream = YamlUtils.class.getClassLoader().getResourceAsStream(filePath)) {
       Map<String, Object> yamlMap = new Yaml().load(inputStream);
       if (yamlMap == null || yamlMap.isEmpty()) {

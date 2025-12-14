@@ -1,13 +1,17 @@
 package com.example.lazyco.backend.core.Messages.YamlConfig;
 
+import static com.example.lazyco.backend.core.WebMVC.BeanProvider.getBean;
+
+import com.example.lazyco.backend.core.AbstractAction;
 import java.util.Arrays;
 import java.util.List;
 
 public class ApplicationText {
   public static String get(String key, Language language) {
     String fileName = getFileByLanguage(language);
-    // @Todo: change null to language if needed in future
-    return YamlUtils.getValueForKey(key, fileName, null);
+    if (getBean(AbstractAction.class).isTestEnvironment())
+      return YamlUtils.getValueForKey(key, fileName);
+    else return YamlUtils.getValueForKeyMap(key, fileName);
   }
 
   // add switch case to get file by language

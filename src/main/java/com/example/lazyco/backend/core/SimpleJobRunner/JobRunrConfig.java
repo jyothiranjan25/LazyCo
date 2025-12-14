@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy;
 import javax.sql.DataSource;
 import org.jobrunr.configuration.JobRunr;
 import org.jobrunr.configuration.JobRunrConfiguration;
+import org.jobrunr.jobs.filters.RetryFilter;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.server.BackgroundJobServer;
 import org.jobrunr.storage.StorageProvider;
@@ -24,7 +25,7 @@ public class JobRunrConfig {
   public JobScheduler jobScheduler(StorageProvider storageProvider, JobRunrFilter jobRunrFilter) {
     JobRunrConfiguration configuration = JobRunr.configure();
     configuration.useStorageProvider(storageProvider);
-    configuration.withJobFilter(jobRunrFilter);
+    configuration.withJobFilter(new RetryFilter(1), jobRunrFilter);
     configuration.useBackgroundJobServer();
     configuration.useDashboard();
     return configuration.initialize().getJobScheduler();

@@ -13,6 +13,7 @@ public class Endpoints {
   public List<String> getExcludedRoleCheckEndpoints() {
     List<String> excludedEndpoints = new ArrayList<>(getPublicEndpoints());
     excludedEndpoints.add("/user/set_role");
+    excludedEndpoints.add("/user/reset_password");
     return excludedEndpoints;
   }
 }

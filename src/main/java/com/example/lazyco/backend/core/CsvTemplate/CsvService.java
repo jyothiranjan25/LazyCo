@@ -188,6 +188,21 @@ public class CsvService {
 
   public static List<?> generateCsvToList(FileDTO file, Class<?> dtoType) {
     try {
+      List<Map<String, String>> rows = generateCsvToMap(file);
+      List<Object> dtoList = new ArrayList<>();
+      for (Map<String, String> row : rows) {
+        String json = GsonSingleton.getCsvInstance().toJson(row);
+        Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
+        dtoList.add(dto);
+      }
+      return dtoList;
+    } catch (Exception e) {
+      throw new ExceptionWrapper("Failed to parse CSV into DTO: " + dtoType.getName(), e);
+    }
+  }
+
+  public static List<Map<String, String>> generateCsvToMap(FileDTO file) {
+    try {
       try (InputStream fis = new FileInputStream(file.getFile());
           BOMInputStream bomInputStream =
               BOMInputStream.builder()
@@ -218,17 +233,10 @@ public class CsvService {
             rows.add(row);
           }
         }
-
-        List<Object> dtoList = new ArrayList<>();
-        for (Map<String, String> row : rows) {
-          String json = GsonSingleton.getCsvInstance().toJson(row);
-          Object dto = GsonSingleton.getCsvInstance().fromJson(json, dtoType);
-          dtoList.add(dto);
-        }
-        return dtoList;
+        return rows;
       }
     } catch (Exception e) {
-      throw new ExceptionWrapper("Failed to parse CSV into DTO: " + dtoType.getName(), e);
+      throw new ExceptionWrapper("Failed to parse CSV into map", e);
     }
   }
 

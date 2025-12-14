@@ -7,6 +7,7 @@ import com.example.lazyco.backend.core.ConfigurationMaster.ConfigurationMasterSe
 import com.example.lazyco.backend.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.core.Utils.CommonConstants;
+import com.example.lazyco.backend.core.WebMVC.RBSECHelper.BypassRBAC;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
@@ -85,11 +86,7 @@ public class AbstractAction implements CommonConstants {
 
   /*  Environment Checkers */
   public boolean isTestEnvironment() {
-    return TEST_MODE.equalsIgnoreCase(environment);
-  }
-
-  public boolean isDevelopmentEnvironment() {
-    return DEV_MODE.equalsIgnoreCase(environment);
+    return TEST_MODE.equalsIgnoreCase(environment) || DEV_MODE.equalsIgnoreCase(environment);
   }
 
   /** ThreadLocal storage for per-thread properties */
@@ -120,48 +117,44 @@ public class AbstractAction implements CommonConstants {
     THREAD_LOCAL_PROPERTIES.remove();
   }
 
+  @BypassRBAC
   @EventListener(ContextRefreshedEvent.class)
   public void initializeSystemProps() {
-    setBypassRBAC(true);
+    Properties properties = new Properties();
+    // Load application properties from classpath
     try {
-      Properties properties = new Properties();
-      // Load application properties from classpath
-      try {
-        ApplicationLogger.info("Loading application properties from classpath...");
-        properties.load(
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(APPLICATION_PROPERTIES));
+      ApplicationLogger.info("Loading application properties from classpath...");
+      properties.load(
+          Thread.currentThread()
+              .getContextClassLoader()
+              .getResourceAsStream(APPLICATION_PROPERTIES));
 
-      } catch (Exception e) {
-        ApplicationLogger.error("Error loading application properties: ", e);
-      }
-
-      // load Configuration Master properties from database
-      try {
-        ApplicationLogger.info("Loading Configuration Master properties from database...");
-        ConfigurationMasterService configurationMasterService =
-            getBean(ConfigurationMasterService.class);
-        List<ConfigurationMasterDTO> configMasterProperties =
-            configurationMasterService.get(new ConfigurationMasterDTO());
-
-        for (ConfigurationMasterDTO configMasterDTO : configMasterProperties) {
-          String configKey = configMasterDTO.getConfigKey();
-          String configValue;
-          if (Boolean.TRUE.equals(configMasterDTO.getSensitive())) {
-            configValue = configMasterDTO.getSensitiveConfigValue();
-          } else {
-            configValue = configMasterDTO.getConfigValue();
-          }
-          if (configKey != null && configValue != null) properties.put(configKey, configValue);
-        }
-      } catch (Exception e) {
-        ApplicationLogger.error("Error loading Configuration Master properties: ", e);
-      }
-      setProperties(properties);
-    } finally {
-      setBypassRBAC(false);
+    } catch (Exception e) {
+      ApplicationLogger.error("Error loading application properties: ", e);
     }
+
+    // load Configuration Master properties from database
+    try {
+      ApplicationLogger.info("Loading Configuration Master properties from database...");
+      ConfigurationMasterService configurationMasterService =
+          getBean(ConfigurationMasterService.class);
+      List<ConfigurationMasterDTO> configMasterProperties =
+          configurationMasterService.get(new ConfigurationMasterDTO());
+
+      for (ConfigurationMasterDTO configMasterDTO : configMasterProperties) {
+        String configKey = configMasterDTO.getConfigKey();
+        String configValue;
+        if (Boolean.TRUE.equals(configMasterDTO.getSensitive())) {
+          configValue = configMasterDTO.getSensitiveConfigValue();
+        } else {
+          configValue = configMasterDTO.getConfigValue();
+        }
+        if (configKey != null && configValue != null) properties.put(configKey, configValue);
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error("Error loading Configuration Master properties: ", e);
+    }
+    setProperties(properties);
   }
 
   public AppUserDTO getLoggedInUser() {

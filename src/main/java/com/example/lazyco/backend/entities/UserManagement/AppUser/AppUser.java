@@ -76,9 +76,9 @@ public class AppUser extends AbstractRBACModel {
   @Column(name = "reset_password_token_expiry", comment = "Reset password token expiry timestamp")
   private Date resetPasswordTokenExpiry;
 
-  @Column(name = "last_login", comment = "Timestamp of the last user login")
-  private Date lastLogin;
+  @Column(name = "last_login_date", comment = "Timestamp of the last user login")
+  private Date lastLoginDate;
 
-  @Column(name = "ip_address", comment = "User IP address")
-  private String ipAddress;
+  @Column(name = "last_login_ip_address", comment = "IP address of the last user login")
+  private String lastLoginIpAddress;
 }

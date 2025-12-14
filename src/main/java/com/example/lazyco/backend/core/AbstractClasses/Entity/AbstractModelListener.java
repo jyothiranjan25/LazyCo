@@ -25,20 +25,32 @@ public class AbstractModelListener {
       }
     }
     AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
-    if (appUserDTO == null) {
+    boolean isBypassRBAC = getBean(AbstractAction.class).isBypassRBAC();
+    String userId;
+    if (appUserDTO != null) {
+      userId = appUserDTO.getUserId();
+    } else if (isBypassRBAC) {
+      userId = "SYSTEM";
+    } else {
       throw new ExceptionWrapper("Cannot proceed: user information is missing.");
     }
-    source.setCreatedBy(appUserDTO.getUserId());
+    source.setCreatedBy(userId);
     source.setCreatedAt(DateTimeZoneUtils.getCurrentDate());
   }
 
   @PreUpdate
   public void preUpdate(AbstractModel source) {
     AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
-    if (appUserDTO == null) {
+    boolean isBypassRBAC = getBean(AbstractAction.class).isBypassRBAC();
+    String userId;
+    if (appUserDTO != null) {
+      userId = appUserDTO.getUserId();
+    } else if (isBypassRBAC) {
+      userId = "SYSTEM";
+    } else {
       throw new ExceptionWrapper("Cannot proceed: user information is missing.");
     }
-    source.setUpdatedBy(appUserDTO.getUserId());
+    source.setUpdatedBy(userId);
     source.setUpdatedAt(DateTimeZoneUtils.getCurrentDate());
   }
 }
