@@ -7,13 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class Endpoints {
   public List<String> getPublicEndpoints() {
-    return List.of("/user/login", "/user/logout");
+    return List.of("/user/login", "/user/logout", "/user/reset_password");
   }
 
   public List<String> getExcludedRoleCheckEndpoints() {
     List<String> excludedEndpoints = new ArrayList<>(getPublicEndpoints());
     excludedEndpoints.add("/user/set_role");
-    excludedEndpoints.add("/user/reset_password");
     return excludedEndpoints;
   }
 }

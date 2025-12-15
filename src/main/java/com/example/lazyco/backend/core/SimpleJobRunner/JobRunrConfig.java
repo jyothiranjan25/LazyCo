@@ -2,19 +2,31 @@ package com.example.lazyco.backend.core.SimpleJobRunner;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.annotation.PreDestroy;
+import java.time.Duration;
 import javax.sql.DataSource;
 import org.jobrunr.configuration.JobRunr;
 import org.jobrunr.configuration.JobRunrConfiguration;
 import org.jobrunr.jobs.filters.RetryFilter;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.server.BackgroundJobServer;
+import org.jobrunr.server.BackgroundJobServerConfiguration;
 import org.jobrunr.storage.StorageProvider;
 import org.jobrunr.storage.sql.postgres.PostgresStorageProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JobRunrConfig {
+
+  @Value("${jobrunr.pool-interval-in-seconds:10}")
+  private int poolIntervalInSeconds;
+
+  @Value("${jobrunr.delete-succeeded-jobs-after-days:2}")
+  private long deleteSucceededJobsAfterDays;
+
+  @Value("${jobrunr.delete-deleted-jobs-after-days:1}")
+  private long deleteDeletedJobsAfterDays;
 
   @Bean
   public StorageProvider storageProvider(DataSource dataSource) {
@@ -26,9 +38,17 @@ public class JobRunrConfig {
     JobRunrConfiguration configuration = JobRunr.configure();
     configuration.useStorageProvider(storageProvider);
     configuration.withJobFilter(new RetryFilter(1), jobRunrFilter);
-    configuration.useBackgroundJobServer();
+    configuration.useBackgroundJobServer(backgroundJobServerConfiguration());
     configuration.useDashboard();
     return configuration.initialize().getJobScheduler();
+  }
+
+  private BackgroundJobServerConfiguration backgroundJobServerConfiguration() {
+    return BackgroundJobServerConfiguration.usingStandardBackgroundJobServerConfiguration()
+        .andName("LazyCo-JobRunr-Server")
+        .andPollIntervalInSeconds(poolIntervalInSeconds)
+        .andDeleteSucceededJobsAfter(Duration.ofDays(deleteSucceededJobsAfterDays))
+        .andPermanentlyDeleteDeletedJobsAfter(Duration.ofDays(deleteDeletedJobsAfterDays));
   }
 
   @PreDestroy
