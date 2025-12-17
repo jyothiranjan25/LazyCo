@@ -15,42 +15,41 @@ public class AbstractModelListener {
   @PrePersist
   public void prePersist(AbstractModel source) {
     if (source instanceof AbstractRBACModel modelBase) {
-      if (modelBase.getUserGroup() == null) {
-        UserGroupDTO userGroupDTO = getBean(AbstractAction.class).getLoggedInUserGroup();
-
-        if (userGroupDTO == null) {
-          throw new ExceptionWrapper("Cannot proceed: user group information is missing.");
-        }
-        modelBase.setUserGroup(userGroupDTO.getFullyQualifiedName());
+      AbstractAction action = getBean(AbstractAction.class);
+      String userGroup;
+      if (action.isSystemJob()) {
+        userGroup = action.getSystemJobUserGroup();
+      } else {
+        UserGroupDTO userGroupDTO = action.getLoggedInUserGroup();
+        userGroup = userGroupDTO != null ? userGroupDTO.getFullyQualifiedName() : null;
       }
+      if (userGroup == null || userGroup.isEmpty()) {
+        throw new ExceptionWrapper("Cannot proceed: user group information is missing.");
+      }
+      modelBase.setUserGroup(userGroup);
     }
-    AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
-    boolean isBypassRBAC = getBean(AbstractAction.class).isBypassRBAC();
-    String userId;
-    if (appUserDTO != null) {
-      userId = appUserDTO.getUserId();
-    } else if (isBypassRBAC) {
-      userId = "SYSTEM";
-    } else {
-      throw new ExceptionWrapper("Cannot proceed: user information is missing.");
-    }
-    source.setCreatedBy(userId);
+    source.setCreatedBy(getUserId());
     source.setCreatedAt(DateTimeZoneUtils.getCurrentDate());
   }
 
   @PreUpdate
   public void preUpdate(AbstractModel source) {
-    AppUserDTO appUserDTO = getBean(AbstractAction.class).getLoggedInUser();
-    boolean isBypassRBAC = getBean(AbstractAction.class).isBypassRBAC();
-    String userId;
-    if (appUserDTO != null) {
-      userId = appUserDTO.getUserId();
-    } else if (isBypassRBAC) {
-      userId = "SYSTEM";
-    } else {
-      throw new ExceptionWrapper("Cannot proceed: user information is missing.");
-    }
-    source.setUpdatedBy(userId);
+    source.setUpdatedBy(getUserId());
     source.setUpdatedAt(DateTimeZoneUtils.getCurrentDate());
+  }
+
+  private String getUserId() {
+    AbstractAction action = getBean(AbstractAction.class);
+    String userId;
+    if (action.isSystemJob()) {
+      userId = action.getSystemJobUserId();
+    } else {
+      AppUserDTO userDTO = action.getLoggedInUser();
+      userId = userDTO != null ? userDTO.getEmail() : null;
+    }
+    if (userId == null || userId.isEmpty()) {
+      userId = action.isBypassRBAC() ? "INTERNAL_SERVICE" : "ANONYMOUS_USER";
+    }
+    return userId;
   }
 }

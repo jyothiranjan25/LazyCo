@@ -47,6 +47,24 @@ public class AbstractAction implements CommonConstants {
     return SYSTEM_JOB.get();
   }
 
+  /** ThreadLocal storage for System Jobs */
+  private final ThreadLocal<String> THREAD_LOCAL_USER_ID = ThreadLocal.withInitial(() -> null);
+
+  private final ThreadLocal<String> THREAD_LOCAL_USER_GROUP = ThreadLocal.withInitial(() -> null);
+
+  public void setSystemJobUserContext(String userId, String userGroup) {
+    THREAD_LOCAL_USER_ID.set(userId);
+    THREAD_LOCAL_USER_GROUP.set(userGroup);
+  }
+
+  public String getSystemJobUserId() {
+    return THREAD_LOCAL_USER_ID.get();
+  }
+
+  public String getSystemJobUserGroup() {
+    return THREAD_LOCAL_USER_GROUP.get();
+  }
+
   /** ThreadLocal storage for logged-in user information */
   private final ThreadLocal<AppUserDTO> THREAD_LOCAL_USER = new ThreadLocal<>();
 
@@ -115,6 +133,8 @@ public class AbstractAction implements CommonConstants {
     THREAD_LOCAL_USER.remove();
     THREAD_LOCAL_USER_ROLE.remove();
     THREAD_LOCAL_PROPERTIES.remove();
+    THREAD_LOCAL_USER_ID.remove();
+    THREAD_LOCAL_USER_GROUP.remove();
   }
 
   @BypassRBAC

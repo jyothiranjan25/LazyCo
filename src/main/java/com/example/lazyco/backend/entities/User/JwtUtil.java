@@ -253,21 +253,18 @@ public class JwtUtil {
     }
   }
 
+  /**
+   * Clears the JWT cookie from the HTTP response.
+   *
+   * @param response The HTTP servlet response.
+   */
   public void clearCookie(HttpServletResponse response) {
-    boolean isSafe = cookieSafe;
-
-    if (isSafe) {
-      // Production: must match exact cookie attributes
-      response.addHeader(
-          "Set-Cookie",
-          String.format(
-              "%s=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0", JWT_COOKIE_NAME));
-    } else {
-      // Development
-      response.addHeader(
-          "Set-Cookie",
-          String.format("%s=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0", JWT_COOKIE_NAME));
-    }
+    Cookie cookie = new Cookie(JWT_COOKIE_NAME, null);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(cookieSafe);
+    cookie.setPath("/");
+    cookie.setMaxAge(0); // Expire the cookie immediately
+    response.addCookie(cookie);
   }
 
   /**

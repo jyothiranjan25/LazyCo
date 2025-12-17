@@ -15,5 +15,5 @@ public class EmailService {
 
   public void run(EmailDTO emailDTO) {
     System.out.println("Sending email");
-  } 
+  }
 }

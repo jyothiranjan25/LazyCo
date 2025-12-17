@@ -22,6 +22,17 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     }
   }
 
+  @Override
+  protected void makeUpdates(AppUserDTO source, AppUser target) {
+    super.makeUpdates(source, target);
+    if (source.getResetPasswordToken() == null) {
+      target.setResetPasswordToken(null);
+    }
+    if (source.getResetPasswordTokenExpiry() == null) {
+      target.setResetPasswordTokenExpiry(null);
+    }
+  }
+
   protected void preUpdate(
       AppUserDTO dtoToUpdate, AppUser entityBeforeUpdates, AppUser entityAfterUpdates) {
     if (dtoToUpdate.getPassword() != null) {

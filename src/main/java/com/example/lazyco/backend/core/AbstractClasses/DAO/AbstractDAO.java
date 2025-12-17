@@ -153,10 +153,12 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
     // Add filter for userGroup if the entity has userGroup field
-    if (criteriaBuilderWrapper.getFilter().getUserModifiedGroup() != null) {
-      addRBSECFilters(
-          criteriaBuilderWrapper, criteriaBuilderWrapper.getFilter().getUserModifiedGroup());
-    }
+    String userGroupFilter =
+        criteriaBuilderWrapper.getFilter() != null
+            ? criteriaBuilderWrapper.getFilter().getUserModifiedGroup()
+            : null;
+    if (userGroupFilter != null && !userGroupFilter.isEmpty())
+      addRBSECFilters(criteriaBuilderWrapper, userGroupFilter);
     addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     // DO NOT ADD ANY RESTRICTIONS AFTER THIS POINT!!!! As we are getting the count of response
@@ -213,32 +215,26 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   private void addRBSECFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
-
     if (abstractAction.isBypassRBAC()) {
       ApplicationLogger.info("Bypass RBAC detected, skipping RBSEC filters");
-      return;
-    } else if (abstractAction.isSystemJob()) {
-      ApplicationLogger.info("System job detected, skipping RBSEC filters");
       return;
     }
 
     String userGroup;
-    try {
+    if (abstractAction.isSystemJob()) {
+      userGroup = abstractAction.getSystemJobUserGroup();
+      ApplicationLogger.info(
+          "System Job detected, using system job user group: " + userGroup + " to RBSEC filters");
+    } else {
       UserGroupDTO userGroupDTO = abstractAction.getLoggedInUserGroup();
-      if (userGroupDTO == null || userGroupDTO.getFullyQualifiedName() == null) {
-        ApplicationLogger.warn(
-            "Logged in user's group is null, adding none-possible RBSEC filters");
-        // In case of null user group, set a random UUID to avoid data leakage
-        userGroup = UUID.randomUUID().toString();
-      } else {
-        userGroup = userGroupDTO.getFullyQualifiedName();
-      }
-    } catch (Exception e) {
-      ApplicationLogger.error(e.getMessage(), e);
-      // In case of any exception, set a random UUID to avoid data leakage
+      userGroup = userGroupDTO != null ? userGroupDTO.getFullyQualifiedName() : null;
+      ApplicationLogger.info("Logged in user's group: " + userGroup + " to RBSEC filters");
+    }
+    if (userGroup == null || userGroup.isEmpty()) {
+      ApplicationLogger.warn("Logged in user's group is null, adding none-possible RBSEC filters");
+      // In case of null user group, set a random UUID to avoid data leakage
       userGroup = UUID.randomUUID().toString();
     }
-
     addRBSECFilters(criteriaBuilderWrapper, userGroup);
   }
 

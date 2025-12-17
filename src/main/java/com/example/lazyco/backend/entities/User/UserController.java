@@ -7,10 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
@@ -26,6 +23,13 @@ public class UserController {
     return ResponseUtils.sendResponse(userDTO);
   }
 
+  @GetMapping("/get_user_role")
+  public ResponseEntity<?> getUser(HttpServletRequest request) {
+    UserRoleDTO userRoleDTO = new UserRoleDTO();
+    userRoleDTO.setObjects(userService.getUserRole(request));
+    return ResponseUtils.sendResponse(userRoleDTO);
+  }
+
   @PostMapping("/set_role")
   public ResponseEntity<?> setRole(
       @RequestBody UserRoleDTO userRoleDTO,
@@ -35,10 +39,16 @@ public class UserController {
     return ResponseUtils.sendResponse(userDTO);
   }
 
+  @PostMapping("/forgot_password")
+  public ResponseEntity<UserDTO> forgetPassword(@RequestBody UserDTO userDTO) {
+    userDTO = userService.forgetPassword(userDTO);
+    return ResponseUtils.sendResponse(userDTO);
+  }
+
   @PostMapping("/reset_password")
-  public ResponseEntity<UserDTO> refreshToken(
-      @RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
-    userDTO = userService.resetPassword(userDTO, request, response);
+  public ResponseEntity<UserDTO> resetPassword(
+      @RequestBody UserDTO userDTO, HttpServletResponse response) {
+    userDTO = userService.resetPassword(userDTO, response);
     return ResponseUtils.sendResponse(userDTO);
   }
 

@@ -16,9 +16,12 @@ import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleServi
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jspecify.annotations.NonNull;
 import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -51,8 +54,9 @@ public class UserService implements UserDetailsService {
     this.jwtUtil = jwtUtil;
   }
 
+  @NonNull
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
     UserDTO user = getUser(username);
     if (user == null) {
       throw new UsernameNotFoundException(
@@ -114,10 +118,30 @@ public class UserService implements UserDetailsService {
     return userDTO;
   }
 
+  // Get User Role
+  public List<UserRoleDTO> getUserRole(HttpServletRequest request) {
+    AppUserDTO longedUser = jwtUtil.checkAndGetUser(request, null);
+    if (longedUser == null || longedUser.getId() == null) {
+      throw new ApplicationException(UserMessage.USER_NOT_AUTHORIZED);
+    }
+    UserRoleDTO userRoleDTO = new UserRoleDTO();
+    userRoleDTO.setAppUserId(longedUser.getId());
+    List<UserRoleDTO> userRoleDTOS = userRoleService.get(userRoleDTO);
+    if (userRoleDTOS == null || userRoleDTOS.isEmpty()) {
+      throw new ApplicationException(UserMessage.ROLE_NOT_FOUND);
+    }
+    return userRoleDTOS;
+  }
+
   // Set User Role
   public UserDTO setRole(
       UserRoleDTO userRoleDTO, HttpServletRequest request, HttpServletResponse response) {
+    AppUserDTO longedUser = jwtUtil.checkAndGetUser(request, null);
+    if (longedUser == null || longedUser.getId() == null) {
+      throw new ApplicationException(UserMessage.USER_NOT_AUTHORIZED);
+    }
     userRoleDTO.setFetchOnlyRole(true);
+    userRoleDTO.setAppUserId(longedUser.getId());
     userRoleDTO = userRoleService.getSingle(userRoleDTO);
     if (userRoleDTO == null) {
       throw new ApplicationException(UserMessage.ROLE_NOT_FOUND);
@@ -139,28 +163,64 @@ public class UserService implements UserDetailsService {
   }
 
   // Reset Password
-  public UserDTO resetPassword(
-      UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
-    UserDTO loggedInUser = getUser(userDTO.getUsername());
-    if (loggedInUser == null) {
+  public UserDTO forgetPassword(UserDTO userDTO) {
+    UserDTO user = getUser(userDTO.getUsername());
+    if (user == null) {
       throw new ApplicationException(UserMessage.USER_NOT_FOUND);
     }
 
     AppUserDTO appUserDTO = new AppUserDTO();
-    appUserDTO.setId(loggedInUser.getId());
+    appUserDTO.setId(user.getId());
     appUserDTO.setResetPasswordToken(generateResetToken());
-    Date expiryDate = DateTimeZoneUtils.addMinutesToCurrentDate(10); // Token valid for 5 minutes
+    Date expiryDate =
+        DateTimeZoneUtils.getCurrentDatePlus(Duration.ofMinutes(10)); // Token valid for 5 minutes
     appUserDTO.setResetPasswordTokenExpiry(expiryDate);
     AppUserDTO updated = appUserService.update(appUserDTO);
 
     // send reset token via email - skipped for now
     EmailDTO emailDTO = new EmailDTO();
+    emailDTO.setTo(List.of(updated.getEmail()));
     emailService.sendEmail(emailDTO);
 
-    loggedInUser = new UserDTO();
-    loggedInUser.setMessage(CustomMessage.getMessageString(UserMessage.PASSWORD_RESET_INITIATED));
+    user = new UserDTO();
+    user.setMessage(CustomMessage.getMessageString(UserMessage.PASSWORD_RESET_INITIATED));
 
-    return loggedInUser;
+    return user;
+  }
+
+  public UserDTO resetPassword(UserDTO userDTO, HttpServletResponse response) {
+    AppUserDTO appUser = appUserService.getUserByUserIdOrEmail(userDTO.getUsername());
+    if (appUser == null) {
+      throw new ApplicationException(UserMessage.USER_NOT_FOUND);
+    }
+    if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+      throw new ApplicationException(UserMessage.PASSWORD_CANNOT_BE_EMPTY);
+    }
+    if (appUser.getResetPasswordToken() == null
+        || !appUser.getResetPasswordToken().equals(userDTO.getToken())) {
+      throw new ApplicationException(UserMessage.INVALID_RESET_TOKEN);
+    }
+    Date now = DateTimeZoneUtils.getCurrentDate();
+    if (appUser.getResetPasswordTokenExpiry() == null
+        || appUser.getResetPasswordTokenExpiry().before(now)) {
+      throw new ApplicationException(UserMessage.INVALID_RESET_TOKEN);
+    }
+    // Update password and clear reset token
+    appUser.setPassword(userDTO.getPassword());
+    appUser.setResetPasswordToken(null);
+    appUser.setResetPasswordTokenExpiry(null);
+    appUserService.update(appUser);
+
+    // Auto-login after password reset
+    UserDTO user = new UserDTO();
+    user.setUsername(userDTO.getUsername());
+    user.setPassword(userDTO.getPassword());
+    user = authenticationService.loginAndGetToken(user);
+    String token = user.getToken();
+    jwtUtil.clearCookie(response);
+    jwtUtil.addToCookie(response, token);
+    user.setMessage(CustomMessage.getMessageString(UserMessage.PASSWORD_RESET_SUCCESS));
+    return user;
   }
 
   public String generateResetToken() {
