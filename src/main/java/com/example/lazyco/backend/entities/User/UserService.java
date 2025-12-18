@@ -179,6 +179,11 @@ public class UserService implements UserDetailsService {
 
     // send reset token via email - skipped for now
     EmailDTO emailDTO = new EmailDTO();
+    emailDTO.setSubject("Reset Password");
+    emailDTO.setBodyText(
+        "Your password reset token is: "
+            + updated.getResetPasswordToken()
+            + "\nThis token will expire in 10 minutes.");
     emailDTO.setTo(List.of(updated.getEmail()));
     emailService.sendEmail(emailDTO);
 

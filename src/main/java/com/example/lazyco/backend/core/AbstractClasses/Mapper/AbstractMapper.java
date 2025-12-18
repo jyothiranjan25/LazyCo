@@ -9,8 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.*;
 
-public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModel>
-    extends MapBidirectionalReference<D, E> {
+public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModel> {
 
   @Named("map")
   D map(E entity);

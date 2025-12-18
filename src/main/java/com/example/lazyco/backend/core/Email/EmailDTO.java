@@ -9,6 +9,7 @@ import lombok.Setter;
 public class EmailDTO {
   // Email address fields
   private String from;
+  private String replyTo;
   private List<String> to;
   private List<String> cc;
   private List<String> bcc;
@@ -18,8 +19,6 @@ public class EmailDTO {
   private String bodyText;
   private String bodyHtml;
 
-  // Attachment fields
-  private List<byte[]> attachments;
-  private String attachmentType;
-  private String attachmentName;
+  // Attachments
+  private List<EmailAttachmentDTO> attachments;
 }

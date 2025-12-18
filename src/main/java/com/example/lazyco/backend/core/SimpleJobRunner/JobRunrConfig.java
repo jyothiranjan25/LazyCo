@@ -10,14 +10,19 @@ import org.jobrunr.jobs.filters.RetryFilter;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.server.BackgroundJobServer;
 import org.jobrunr.server.BackgroundJobServerConfiguration;
+import org.jobrunr.server.JobActivator;
 import org.jobrunr.storage.StorageProvider;
 import org.jobrunr.storage.sql.postgres.PostgresStorageProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JobRunrConfig {
+
+  @Value("${jobrunr.name:LazyCo-JobRunr-Server}")
+  private String jobRunName;
 
   @Value("${jobrunr.pool-interval-in-seconds:10}")
   private int poolIntervalInSeconds;
@@ -34,9 +39,16 @@ public class JobRunrConfig {
   }
 
   @Bean
-  public JobScheduler jobScheduler(StorageProvider storageProvider, JobRunrFilter jobRunrFilter) {
+  public JobActivator jobActivator(ApplicationContext ctx) {
+    return ctx::getBean;
+  }
+
+  @Bean
+  public JobScheduler jobScheduler(
+      StorageProvider storageProvider, JobActivator jobActivator, JobRunrFilter jobRunrFilter) {
     JobRunrConfiguration configuration = JobRunr.configure();
     configuration.useStorageProvider(storageProvider);
+    configuration.useJobActivator(jobActivator);
     configuration.withJobFilter(new RetryFilter(1), jobRunrFilter);
     configuration.useBackgroundJobServer(backgroundJobServerConfiguration());
     configuration.useDashboard();
@@ -45,7 +57,7 @@ public class JobRunrConfig {
 
   private BackgroundJobServerConfiguration backgroundJobServerConfiguration() {
     return BackgroundJobServerConfiguration.usingStandardBackgroundJobServerConfiguration()
-        .andName("LazyCo-JobRunr-Server")
+        .andName(jobRunName)
         .andPollIntervalInSeconds(poolIntervalInSeconds)
         .andDeleteSucceededJobsAfter(Duration.ofDays(deleteSucceededJobsAfterDays))
         .andPermanentlyDeleteDeletedJobsAfter(Duration.ofDays(deleteDeletedJobsAfterDays));
