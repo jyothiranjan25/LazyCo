@@ -39,8 +39,6 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   @Column(name = "updated_by", comment = "User who last updated the record")
   private String updatedBy;
 
-  @Transient private boolean skipMapping;
-
   @Transient
   @SuppressWarnings("rawtypes")
   private AbstractDTO dto;

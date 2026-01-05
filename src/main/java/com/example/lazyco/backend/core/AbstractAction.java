@@ -11,6 +11,8 @@ import com.example.lazyco.backend.core.WebMVC.RBSECHelper.BypassRBAC;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Properties;
 import lombok.Getter;
@@ -36,33 +38,47 @@ public class AbstractAction implements CommonConstants {
     return BYPASS_RBAC.get();
   }
 
-  /** ThreadLocal storage to indicate if the current job is a system job. */
-  private final ThreadLocal<Boolean> SYSTEM_JOB = ThreadLocal.withInitial(() -> false);
+  /** ThreadLocal storage for System Jobs */
+  private final ThreadLocal<Deque<SystemJobContext>> SYSTEM_JOB_CONTEXT_STACK =
+      ThreadLocal.withInitial(ArrayDeque::new);
 
-  public void setSystemJob(boolean systemJob) {
-    SYSTEM_JOB.set(systemJob);
+  public void setSystemJobUserContext(String userId, String userGroup) {
+    SYSTEM_JOB_CONTEXT_STACK.get().push(new SystemJobContext(userId, userGroup));
   }
 
   public boolean isSystemJob() {
-    return SYSTEM_JOB.get();
-  }
-
-  /** ThreadLocal storage for System Jobs */
-  private final ThreadLocal<String> THREAD_LOCAL_USER_ID = ThreadLocal.withInitial(() -> null);
-
-  private final ThreadLocal<String> THREAD_LOCAL_USER_GROUP = ThreadLocal.withInitial(() -> null);
-
-  public void setSystemJobUserContext(String userId, String userGroup) {
-    THREAD_LOCAL_USER_ID.set(userId);
-    THREAD_LOCAL_USER_GROUP.set(userGroup);
+    return !SYSTEM_JOB_CONTEXT_STACK.get().isEmpty();
   }
 
   public String getSystemJobUserId() {
-    return THREAD_LOCAL_USER_ID.get();
+    Deque<SystemJobContext> stack = SYSTEM_JOB_CONTEXT_STACK.get();
+    return stack.isEmpty() ? null : stack.peek().getUserId();
   }
 
   public String getSystemJobUserGroup() {
-    return THREAD_LOCAL_USER_GROUP.get();
+    Deque<SystemJobContext> stack = SYSTEM_JOB_CONTEXT_STACK.get();
+    return stack.isEmpty() ? null : stack.peek().getUserGroup();
+  }
+
+  @Getter
+  public static class SystemJobContext {
+    private final String userId;
+    private final String userGroup;
+
+    public SystemJobContext(String userId, String userGroup) {
+      this.userId = userId;
+      this.userGroup = userGroup;
+    }
+  }
+
+  public void popSystemJobUserContext() {
+    Deque<SystemJobContext> stack = SYSTEM_JOB_CONTEXT_STACK.get();
+    if (!stack.isEmpty()) {
+      stack.pop();
+    }
+    if (stack.isEmpty()) {
+      SYSTEM_JOB_CONTEXT_STACK.remove();
+    }
   }
 
   /** ThreadLocal storage for logged-in user information */
@@ -129,12 +145,10 @@ public class AbstractAction implements CommonConstants {
         getLoggedInUserRole() != null ? getLoggedInUserRole().getRole().getName() : null,
         THREAD_LOCAL_PROPERTIES.get());
     BYPASS_RBAC.remove();
-    SYSTEM_JOB.remove();
     THREAD_LOCAL_USER.remove();
     THREAD_LOCAL_USER_ROLE.remove();
     THREAD_LOCAL_PROPERTIES.remove();
-    THREAD_LOCAL_USER_ID.remove();
-    THREAD_LOCAL_USER_GROUP.remove();
+    SYSTEM_JOB_CONTEXT_STACK.remove();
   }
 
   @BypassRBAC

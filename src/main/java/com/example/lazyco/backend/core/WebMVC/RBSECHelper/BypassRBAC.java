@@ -7,4 +7,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BypassRBAC {}
+public @interface BypassRBAC {
+  boolean value() default true;
+}

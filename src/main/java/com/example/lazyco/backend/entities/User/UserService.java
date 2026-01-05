@@ -166,7 +166,8 @@ public class UserService implements UserDetailsService {
   public UserDTO forgetPassword(UserDTO userDTO) {
     UserDTO user = getUser(userDTO.getUsername());
     if (user == null) {
-      throw new ApplicationException(UserMessage.USER_NOT_FOUND);
+      throw new ApplicationException(
+          UserMessage.USER_NOT_FOUND, new Object[] {userDTO.getUsername()});
     }
 
     AppUserDTO appUserDTO = new AppUserDTO();
@@ -185,7 +186,7 @@ public class UserService implements UserDetailsService {
             + updated.getResetPasswordToken()
             + "\nThis token will expire in 10 minutes.");
     emailDTO.setTo(List.of(updated.getEmail()));
-    emailService.sendEmail(emailDTO);
+    emailService.sendSystemMail(emailDTO);
 
     user = new UserDTO();
     user.setMessage(CustomMessage.getMessageString(UserMessage.PASSWORD_RESET_INITIATED));

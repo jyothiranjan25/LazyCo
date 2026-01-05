@@ -13,7 +13,7 @@ public enum ConfigurationMasterKeys {
   SMTP_PORT("SMTP_PORT"),
   SMTP_SSL_PROTOCOL("SMTP_SSL_PROTOCOL"),
   SMTP_DEBUG("SMTP_DEBUG"),
-  EMAIL_PROVIDER("EMAIL_PROVIDER"),
+  EMAIL_PROTOCOL("EMAIL_PROTOCOL"),
   ;
   private final String key;
 

@@ -18,7 +18,6 @@ public final class AsyncContextRunnableWrapper implements Runnable {
   private final Runnable delegate;
   private final RequestAttributes taskRequestContext;
   private final boolean isBypassRBAC;
-  private final boolean isSystemJob;
   private final AppUserDTO appUserDTO;
   private final UserRoleDTO userRoleDTO;
   private final Map<String, String> taskMappedDiagnosticContext;
@@ -39,7 +38,6 @@ public final class AsyncContextRunnableWrapper implements Runnable {
     // Store Abstract Action context
     AbstractAction abstractAction = getBean(AbstractAction.class);
     this.isBypassRBAC = abstractAction.isBypassRBAC();
-    this.isSystemJob = abstractAction.isSystemJob();
     this.appUserDTO = (AppUserDTO) abstractAction.getLoggedAppUser().clone();
     this.userRoleDTO = (UserRoleDTO) abstractAction.getLoggedUserRole().clone();
     // Store the current mapped diagnostic context
@@ -54,7 +52,6 @@ public final class AsyncContextRunnableWrapper implements Runnable {
     // Store Abstract Action original context
     AbstractAction action = getBean(AbstractAction.class);
     boolean originalBypassRBAC = action.isBypassRBAC();
-    boolean originalIsSystemJob = action.isSystemJob();
     AppUserDTO originalAppUserDTO = action.getLoggedAppUser();
     UserRoleDTO originalUserRoleDTO = action.getLoggedUserRole();
     try {
@@ -62,7 +59,6 @@ public final class AsyncContextRunnableWrapper implements Runnable {
       MDC.setContextMap(this.taskMappedDiagnosticContext);
       // Set Abstract Action context for the async task
       action.setBypassRBAC(this.isBypassRBAC);
-      action.setSystemJob(this.isSystemJob);
       action.setLoggedAppUser(this.appUserDTO);
       action.setLoggedUserRole(this.userRoleDTO);
       this.delegate.run();
@@ -72,7 +68,6 @@ public final class AsyncContextRunnableWrapper implements Runnable {
       MDC.setContextMap(originalMappedDiagnosticContext);
       // Restore Abstract Action original context
       action.setBypassRBAC(originalBypassRBAC);
-      action.setSystemJob(originalIsSystemJob);
       action.setLoggedAppUser(originalAppUserDTO);
       action.setLoggedUserRole(originalUserRoleDTO);
     }

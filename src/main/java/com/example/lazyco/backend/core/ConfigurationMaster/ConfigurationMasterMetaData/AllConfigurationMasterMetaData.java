@@ -70,10 +70,10 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "TRUE",
       new String[] {"TRUE", "FALSE"}),
 
-  EMAIL_PROVIDER(
+  EMAIL_PROTOCOL(
       "SMTP Client",
       "The email client used to send emails.",
-      ConfigurationMasterKeys.EMAIL_PROVIDER.getKey(),
+      ConfigurationMasterKeys.EMAIL_PROTOCOL.getKey(),
       FieldInputType.SELECT,
       false,
       "",
