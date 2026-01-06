@@ -10,6 +10,7 @@ import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.backend.core.AbstractClasses.Filter.FilterBuilder;
 import com.example.lazyco.backend.core.AbstractClasses.Mapper.AbstractMapper;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -85,6 +86,9 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters,
       Class<?> resultClass) {
     Class<E> entityClass = (Class<E>) filter.getFilterableEntityClass();
+    if (entityClass == null) {
+      throw new ExceptionWrapper("Annotation @FilteredEntity does not define a valid entity type");
+    }
     resultClass = resultClass == null ? entityClass : resultClass;
     HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
     CriteriaQuery<?> criteriaQuery = builder.createQuery(resultClass);

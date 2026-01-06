@@ -3,6 +3,7 @@ package com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.FieldFil
 import com.example.lazyco.backend.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.backend.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.backend.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -240,6 +241,9 @@ public class FieldFilterUtils {
     }
 
     Class<?> filterableEntityClass = criteriaBuilderWrapper.getFilter().getFilterableEntityClass();
+    if (filterableEntityClass == null) {
+      throw new ExceptionWrapper("Annotation @FilteredEntity does not define a valid entity type");
+    }
 
     // Collect searchable fields
     List<String> entityFieldNames = getSearchableEntityFieldNames(filterableEntityClass);

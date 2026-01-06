@@ -338,7 +338,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Fetch entity records matching the filter
   private List<E> fetchEntityRecords(D filter) {
-    return abstractDAO.get(filter, this::addEntityFilters);
+    List<E> result = abstractDAO.get(filter, this::addEntityFilters);
+    return modifyEntityResult(result, filter);
+  }
+
+  // Hook to modify the entity result list after fetching records
+  protected List<E> modifyEntityResult(List<E> result, D filter) {
+    return result;
   }
 
   // Retrieve multiple entities matching the filter

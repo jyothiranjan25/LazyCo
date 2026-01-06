@@ -117,20 +117,14 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   public Class<?> getFilterableEntityClass() {
     try {
       // ✅ Check if annotation is present first
-      if (!this.getClass().isAnnotationPresent(FilteredEntity.class)) {
-        throw new ExceptionWrapper(
-            "Class " + this.getClass().getSimpleName() + " is not annotated with @FilteredEntity");
-      }
+      if (this.getClass().isAnnotationPresent(FilteredEntity.class)) {
+        FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);
+        Class<?> currentEntityClass = annotation.type();
 
-      FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);
-      Class<?> currentEntityClass = annotation.type();
-
-      if (currentEntityClass != null) {
-        this.filterableEntityClass = currentEntityClass;
-        return this.filterableEntityClass;
-      } else {
-        throw new ExceptionWrapper(
-            "Annotation @FilteredEntity does not define a valid entity type");
+        if (currentEntityClass != null) {
+          this.filterableEntityClass = currentEntityClass;
+          return this.filterableEntityClass;
+        }
       }
     } catch (ExceptionWrapper e) {
       throw e; // Re-throw custom exceptions as is
@@ -138,6 +132,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
       ApplicationLogger.error(t);
       throw new ExceptionWrapper("Failed to get filterableEntityClass", t);
     }
+    return this.filterableEntityClass;
   }
 
   @Override

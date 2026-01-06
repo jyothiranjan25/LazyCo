@@ -1,6 +1,9 @@
 package com.example.lazyco.backend.core.Cache;
 
+import jakarta.annotation.PreDestroy;
 import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import org.ehcache.Cache;
@@ -26,6 +29,13 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
   private final AtomicLong hits = new AtomicLong(0);
   private final AtomicLong misses = new AtomicLong(0);
 
+  // Static registry to manage multiple caches
+  private static final Map<String, TimedECacheLRU<?>> CACHES = new ConcurrentHashMap<>();
+
+  public static void register(String name, TimedECacheLRU<?> cache) {
+    CACHES.put(name, cache);
+  }
+
   // Constructor now accepts Class<T> and simplifies usage
   public TimedECacheLRU(Class<T> valueType, Duration ttl, int maxSize) {
     this(valueType.getSimpleName(), valueType, ttl, maxSize);
@@ -42,6 +52,9 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
                     .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(ttl)))
             .build(true);
     this.cache = cacheManager.getCache(cacheName, String.class, valueType);
+
+    // Register this cache instance in the CacheRegistry
+    register(cacheName, this);
   }
 
   public T get(String key) {
@@ -99,6 +112,12 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
     if (cache != null) cache.clear();
   }
 
+  // Clear all registered caches
+  public static void clearAll() {
+    CACHES.values().forEach(TimedECacheLRU::clear);
+    CACHES.clear();
+  }
+
   // Get the number of cache hits
   public long getHits() {
     return hits.get();
@@ -114,5 +133,12 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
       return cache.getRuntimeConfiguration().getResourcePools().getResourceTypeSet().size();
     }
     return 0;
+  }
+
+  @PreDestroy
+  public void close() {
+    if (cacheManager != null) {
+      cacheManager.close();
+    }
   }
 }

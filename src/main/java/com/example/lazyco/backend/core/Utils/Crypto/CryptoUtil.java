@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.core.ConfigurationMaster;
+package com.example.lazyco.backend.core.Utils.Crypto;
 
 import com.example.lazyco.backend.core.Logger.ApplicationLogger;
 import java.nio.charset.StandardCharsets;

@@ -3,10 +3,17 @@ package com.example.lazyco.backend.core.Cache;
 import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
 import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
 import java.time.Duration;
+import java.util.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Singleton class that holds various caches used throughout the application. Each cache is
+ * implemented using TimedECacheLRU with a specified TTL and maximum size. This class provides
+ * static access to these caches. Don't use this cache for large objects or large collections, as it
+ * is an in-memory cache.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CacheSingleton {
 
@@ -22,4 +29,29 @@ public class CacheSingleton {
   @Getter
   private static final TimedECacheLRU<UserRoleDTO> userRoleCache =
       new TimedECacheLRU<>(UserRoleDTO.class, TTL, MAX_CACHE_SIZE);
+
+  public static class AppUserDTOList extends CachedList<AppUserDTO> {
+    public AppUserDTOList(Collection<? extends AppUserDTO> c) {
+      super(c);
+    }
+  }
+
+  public static class AppUserDTOMap extends CachedMap<Long, AppUserDTO> {
+    public AppUserDTOMap(Map<? extends Long, ? extends AppUserDTO> entries) {
+      super(entries);
+    }
+  }
+
+  // Helper classes for cached collections
+  public abstract static class CachedList<T> extends ArrayList<T> {
+    public CachedList(Collection<? extends T> c) {
+      super(List.copyOf(c));
+    }
+  }
+
+  public abstract static class CachedMap<T, V> extends HashMap<T, V> {
+    public CachedMap(Map<? extends T, ? extends V> entries) {
+      super(Map.copyOf(entries));
+    }
+  }
 }

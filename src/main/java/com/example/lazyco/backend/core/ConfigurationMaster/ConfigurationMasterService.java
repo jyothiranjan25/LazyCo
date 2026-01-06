@@ -1,6 +1,7 @@
 package com.example.lazyco.backend.core.ConfigurationMaster;
 
 import com.example.lazyco.backend.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.backend.core.Utils.Crypto.CryptoUtil;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
