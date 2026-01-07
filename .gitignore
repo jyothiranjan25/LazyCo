@@ -43,3 +43,6 @@ logs/*
 
 ### Mac OS ###
 .DS_Store
+
+### JRebel ###
+rebel.xml

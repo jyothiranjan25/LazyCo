@@ -197,7 +197,8 @@ public class UserService implements UserDetailsService {
   public UserDTO resetPassword(UserDTO userDTO, HttpServletResponse response) {
     AppUserDTO appUser = appUserService.getUserByUserIdOrEmail(userDTO.getUsername());
     if (appUser == null) {
-      throw new ApplicationException(UserMessage.USER_NOT_FOUND);
+      throw new ApplicationException(
+              UserMessage.USER_NOT_FOUND, new Object[] {userDTO.getUsername()});
     }
     if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
       throw new ApplicationException(UserMessage.PASSWORD_CANNOT_BE_EMPTY);
@@ -209,7 +210,7 @@ public class UserService implements UserDetailsService {
     Date now = DateTimeZoneUtils.getCurrentDate();
     if (appUser.getResetPasswordTokenExpiry() == null
         || appUser.getResetPasswordTokenExpiry().before(now)) {
-      throw new ApplicationException(UserMessage.INVALID_RESET_TOKEN);
+      throw new ApplicationException(UserMessage.RESET_TOKEN_EXPIRED);
     }
     // Update password and clear reset token
     appUser.setPassword(userDTO.getPassword());

@@ -23,5 +23,6 @@ USER_MODULES:
   ROLE_NOT_SELECTED : "No role has been selected for the user."
   LOGOUT_SUCCESS : "You have been successfully logged out."
   PASSWORD_RESET_INITIATED : "A password reset link has been sent to your registered email address."
-  INVALID_RESET_TOKEN: "The password reset token is invalid or has expired."
+  INVALID_RESET_TOKEN: "The password reset token is invalid."
+  RESET_TOKEN_EXPIRED: "The password reset token has expired."
   PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
