@@ -1,0 +1,103 @@
+package com.example.lazyco.core.AbstractClasses.Mapper;
+
+import com.example.lazyco.core.GosnConf.GsonSingleton;
+import com.example.lazyco.core.JSONUtils.JSONUtils;
+import com.example.lazyco.core.Logger.ApplicationLogger;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import java.util.function.Consumer;
+import lombok.Getter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
+import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.spi.MappingContext;
+
+public class AbstractModelMapper {
+
+  @Getter protected ModelMapper modelMapper;
+
+  public AbstractModelMapper() {
+    this(false);
+  }
+
+  public AbstractModelMapper(boolean skipNull) {
+    this.modelMapper = new ModelMapper();
+    this.modelMapper
+        .getConfiguration()
+        .setAmbiguityIgnored(true)
+        .setMatchingStrategy(MatchingStrategies.STRICT)
+        .setSkipNullEnabled(skipNull)
+        .setPropertyCondition(
+            (MappingContext<Object, Object> context) -> {
+              if (!skipNull) return true;
+              Object source = context.getSource();
+              return source != null && (!(source instanceof String str) || !str.trim().isEmpty());
+            });
+  }
+
+  public <D, S> D map(S source, D destination) {
+    modelMapper.map(source, destination);
+    return destination;
+  }
+
+  public <D, S> D map(S source, Class<D> destinationClass) {
+    return modelMapper.map(source, destinationClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <D, S> D map(S source, D destination, Consumer<TypeMap<S, D>> configurer) {
+    TypeMap<S, D> typeMap =
+        (TypeMap<S, D>) modelMapper.getTypeMap(source.getClass(), destination.getClass());
+    if (typeMap == null) {
+      typeMap =
+          (TypeMap<S, D>) modelMapper.createTypeMap(source.getClass(), destination.getClass());
+    }
+    configurer.accept(typeMap);
+    modelMapper.map(source, destination);
+    return destination;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <D, S> D map(S source, Class<D> destinationClass, Consumer<TypeMap<S, D>> configurer) {
+    TypeMap<S, D> typeMap =
+        (TypeMap<S, D>) modelMapper.getTypeMap(source.getClass(), destinationClass);
+    if (typeMap == null) {
+      typeMap = (TypeMap<S, D>) modelMapper.createTypeMap(source.getClass(), destinationClass);
+    }
+    configurer.accept(typeMap);
+    return modelMapper.map(source, destinationClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E> E mapCircularReference(E source) {
+    try {
+      if (source == null) {
+        return null;
+      }
+      // Note: Don't use clone method as it won't clone the lazy loaded entities properly
+      // Create a new ObjectMapper instance for serialization
+      ObjectMapper objectMapper = new ObjectMapper();
+      JacksonDepthHandler.registerModule(objectMapper, 3); // Set max depth
+      objectMapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+      String jsonString = objectMapper.writeValueAsString(source);
+      String cleanJsonString = JSONUtils.removeNumbersAndReferences(jsonString);
+
+      E newEntity = (E) GsonSingleton.JsonStringToObject(cleanJsonString, source.getClass());
+
+      E mappedEntity = (E) source.getClass().getDeclaredConstructor().newInstance();
+
+      // Create a Map for the source and destination classes
+      modelMapper.map(newEntity, mappedEntity);
+
+      return mappedEntity;
+    } catch (Exception e) {
+      ApplicationLogger.error(e, e.getClass());
+    }
+    return source;
+  }
+}
