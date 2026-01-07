@@ -26,7 +26,8 @@ public class BypassRBACAspect {
    * Aspect to bypass RBAC checks for methods or classes annotated with @BypassRBAC. It temporarily
    * sets the bypass flag in AbstractAction to true during the method execution.
    */
-  @Around("@within(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC) || @annotation(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC)")
+  @Around(
+      "@within(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC) || @annotation(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC)")
   public Object bypassRBAC(ProceedingJoinPoint joinPoint) throws Throwable {
     // 1️⃣ Save previous state
     boolean previous = abstractAction.isBypassRBAC();

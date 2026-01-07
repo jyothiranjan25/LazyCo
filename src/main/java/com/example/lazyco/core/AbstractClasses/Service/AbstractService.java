@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import lombok.Getter;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Propagation;
@@ -424,6 +425,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
           }
         },
         dto);
+  }
+
+  public Session getCurrentSession() {
+    return abstractDAO.getCurrentSession();
   }
 
   // Hook to mark the current transaction for rollback without throwing an exception

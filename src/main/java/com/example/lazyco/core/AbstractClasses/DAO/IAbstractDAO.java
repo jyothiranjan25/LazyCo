@@ -6,6 +6,7 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import java.util.List;
 import java.util.function.BiConsumer;
+import org.hibernate.Session;
 
 public interface IAbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     extends IPersistenceDAO<E> {
@@ -18,4 +19,6 @@ public interface IAbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters);
 
   Long getCount(D filter, BiConsumer<CriteriaBuilderWrapper, D> addEntityFilters);
+
+  Session getCurrentSession();
 }

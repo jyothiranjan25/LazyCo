@@ -198,7 +198,7 @@ public class UserService implements UserDetailsService {
     AppUserDTO appUser = appUserService.getUserByUserIdOrEmail(userDTO.getUsername());
     if (appUser == null) {
       throw new ApplicationException(
-              UserMessage.USER_NOT_FOUND, new Object[] {userDTO.getUsername()});
+          UserMessage.USER_NOT_FOUND, new Object[] {userDTO.getUsername()});
     }
     if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
       throw new ApplicationException(UserMessage.PASSWORD_CANNOT_BE_EMPTY);

@@ -27,8 +27,7 @@ public class QuartzSchemaInitializer {
       case "create":
       case "update":
         populator.addScript(
-            new ClassPathResource(
-                    "com/example/lazyco/core/QuartzScheduler/schema_postgres.sql"));
+            new ClassPathResource("com/example/lazyco/core/QuartzScheduler/schema_postgres.sql"));
         break;
       default:
         // No action needed for 'validate' or 'none'
