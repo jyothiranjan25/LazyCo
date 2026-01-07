@@ -33,7 +33,7 @@ public class BypassRBACAspect {
     boolean previous = abstractAction.isBypassRBAC();
     BYPASS_STACK.get().push(previous);
 
-    // 2️⃣ Apply THIS method’s desired value
+    // 2️⃣ Determine new state
     boolean bypassValue = isBypassValue(joinPoint);
 
     abstractAction.setBypassRBAC(bypassValue);
