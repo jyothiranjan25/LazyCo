@@ -5,8 +5,8 @@ import static com.example.lazyco.core.WebMVC.BeanProvider.getBean;
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupDTO;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 

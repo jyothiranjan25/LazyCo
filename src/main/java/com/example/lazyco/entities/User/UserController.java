@@ -1,8 +1,8 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.entities.User;
 
 import com.example.lazyco.core.Exceptions.SimpleResponseDTO;
 import com.example.lazyco.core.Utils.ResponseUtils;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;

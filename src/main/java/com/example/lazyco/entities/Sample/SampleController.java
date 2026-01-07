@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.Sample;
+package com.example.lazyco.entities.Sample;
 
 import com.example.lazyco.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.core.AbstractClasses.Service.IAbstractService;

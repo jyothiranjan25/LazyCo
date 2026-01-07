@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.UserGroup;
+package com.example.lazyco.entities.UserManagement.UserGroup;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import org.springframework.stereotype.Service;

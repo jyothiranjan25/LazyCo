@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.Sample;
+package com.example.lazyco.entities.Sample;
 
 import com.example.lazyco.core.Messages.MessageCodes;
 import lombok.Getter;

@@ -8,9 +8,9 @@ import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.System
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.CommonConstants;
 import com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleDTO;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;

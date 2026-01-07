@@ -2,7 +2,7 @@ package com.example.lazyco.core.WebMVC.Security;
 
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.WebMVC.Endpoints;
-import com.example.lazyco.backend.entities.User.JwtUtil;
+import com.example.lazyco.entities.User.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

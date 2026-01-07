@@ -1,10 +1,10 @@
-package com.example.lazyco.backend.entities.UserManagement.AppUser;
+package com.example.lazyco.entities.UserManagement.AppUser;
 
 import com.example.lazyco.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.core.Utils.ResponseUtils;
 import com.example.lazyco.core.WebMVC.RequestHandling.CSVParams.CsvParams;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.Upload.AppUserBatchDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.Upload.AppUserUploader;
+import com.example.lazyco.entities.UserManagement.AppUser.Upload.AppUserBatchDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.Upload.AppUserUploader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

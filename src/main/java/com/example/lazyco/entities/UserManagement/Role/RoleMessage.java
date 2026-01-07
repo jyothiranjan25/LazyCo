@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.Role;
+package com.example.lazyco.entities.UserManagement.Role;
 
 import com.example.lazyco.core.Messages.MessageCodes;
 import lombok.Getter;

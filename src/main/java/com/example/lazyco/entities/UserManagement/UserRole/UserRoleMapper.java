@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.UserRole;
+package com.example.lazyco.entities.UserManagement.UserRole;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import java.util.List;

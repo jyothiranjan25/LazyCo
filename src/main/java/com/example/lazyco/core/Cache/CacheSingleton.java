@@ -1,7 +1,7 @@
 package com.example.lazyco.core.Cache;
 
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleDTO;
 import java.time.Duration;
 import java.util.*;
 import lombok.AccessLevel;

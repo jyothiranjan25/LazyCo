@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.UserGroup;
+package com.example.lazyco.entities.UserManagement.UserGroup;
 
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;

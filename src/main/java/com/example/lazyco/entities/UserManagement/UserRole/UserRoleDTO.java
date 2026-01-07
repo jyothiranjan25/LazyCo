@@ -1,12 +1,12 @@
-package com.example.lazyco.backend.entities.UserManagement.UserRole;
+package com.example.lazyco.entities.UserManagement.UserRole;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.Role.RoleDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.Role.RoleDTO;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupDTO;
 import lombok.Getter;
 import lombok.Setter;
 

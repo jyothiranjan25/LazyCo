@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.Role;
+package com.example.lazyco.entities.UserManagement.Role;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import org.springframework.stereotype.Service;

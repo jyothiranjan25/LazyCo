@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.UserManagement.AppUser;
+package com.example.lazyco.entities.UserManagement.AppUser;
 
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import jakarta.persistence.PrePersist;

@@ -1,13 +1,13 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.entities.User;
 
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.Cache.CacheSingleton;
 import com.example.lazyco.core.DateUtils.DateTimeZoneUtils;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.CommonConstants;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleService;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleService;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

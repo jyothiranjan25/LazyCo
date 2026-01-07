@@ -1,10 +1,12 @@
 package com.example.lazyco.IntegrationTests;
 
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import com.example.lazyco.core.WebMVC.BackendWebConf;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {com.example.lazyco.backend.core.WebMVC.BackendWebConf.class})
+@ContextConfiguration(classes = {BackendWebConf.class})
 public class TestIT {
 
   @Autowired private AppUserService appUserService;

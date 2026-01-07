@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.entities.User;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

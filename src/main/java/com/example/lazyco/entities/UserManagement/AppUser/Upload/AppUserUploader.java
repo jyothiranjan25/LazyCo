@@ -1,10 +1,10 @@
-package com.example.lazyco.backend.entities.UserManagement.AppUser.Upload;
+package com.example.lazyco.entities.UserManagement.AppUser.Upload;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractModelMapper;
 import com.example.lazyco.core.BatchJob.BatchJobOperationType;
 import com.example.lazyco.core.BatchJob.SpringBatch.AbstractBatchJob;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserService;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserService;
 import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.NonNull;

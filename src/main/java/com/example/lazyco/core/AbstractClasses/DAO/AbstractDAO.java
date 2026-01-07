@@ -12,7 +12,7 @@ import com.example.lazyco.core.AbstractClasses.Filter.FilterBuilder;
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
-import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroupDTO;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupDTO;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;

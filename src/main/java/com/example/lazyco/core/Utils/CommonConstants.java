@@ -3,7 +3,7 @@ package com.example.lazyco.core.Utils;
 public interface CommonConstants extends UploadConstants {
 
   // Base package for the backend application
-  String BACKEND_PACKAGE = "com.example.lazyco.backend";
+  String BACKEND_PACKAGE = "com.example.lazyco";
   String APPLICATION_PROPERTIES = "application.properties";
 
   // Environment Variables

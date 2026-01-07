@@ -1,10 +1,10 @@
-package com.example.lazyco.backend.entities.UserManagement.AppUser.Upload;
+package com.example.lazyco.entities.UserManagement.AppUser.Upload;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.BatchJob.SpringBatch.AbstractBatchDTO;
 import com.example.lazyco.core.WebMVC.RequestHandling.CSVParams.CsvField;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUser;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AuthorityEnum;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUser;
+import com.example.lazyco.entities.UserManagement.AppUser.AuthorityEnum;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;

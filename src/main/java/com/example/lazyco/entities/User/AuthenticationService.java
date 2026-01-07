@@ -1,4 +1,4 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.entities.User;
 
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Utils.CommonConstants;

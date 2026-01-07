@@ -1,6 +1,6 @@
 package com.example.lazyco.core.CsvTemplate;
 
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;

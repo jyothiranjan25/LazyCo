@@ -1,9 +1,9 @@
-package com.example.lazyco.backend.entities.UserManagement.UserRole;
+package com.example.lazyco.entities.UserManagement.UserRole;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUser;
-import com.example.lazyco.backend.entities.UserManagement.Role.Role;
-import com.example.lazyco.backend.entities.UserManagement.UserGroup.UserGroup;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUser;
+import com.example.lazyco.entities.UserManagement.Role.Role;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroup;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

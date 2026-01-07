@@ -1,10 +1,10 @@
-package com.example.lazyco.backend.entities.User;
+package com.example.lazyco.entities.User;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUser;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AuthorityEnum;
-import com.example.lazyco.backend.entities.UserManagement.Role.RoleDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUser;
+import com.example.lazyco.entities.UserManagement.AppUser.AuthorityEnum;
+import com.example.lazyco.entities.UserManagement.Role.RoleDTO;
 import com.google.gson.annotations.Expose;
 import java.util.Collection;
 import java.util.List;

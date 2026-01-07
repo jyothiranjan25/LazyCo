@@ -3,8 +3,8 @@ package com.example.lazyco.core.AsyncExecutorConf;
 import static com.example.lazyco.core.WebMVC.BeanProvider.getBean;
 
 import com.example.lazyco.core.AbstractAction;
-import com.example.lazyco.backend.entities.UserManagement.AppUser.AppUserDTO;
-import com.example.lazyco.backend.entities.UserManagement.UserRole.UserRoleDTO;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRoleDTO;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.MDC;

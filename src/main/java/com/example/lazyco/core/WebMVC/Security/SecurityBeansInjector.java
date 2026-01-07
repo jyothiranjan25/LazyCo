@@ -1,7 +1,7 @@
 package com.example.lazyco.core.WebMVC.Security;
 
-import com.example.lazyco.backend.entities.User.CustomPasswordEncoder;
-import com.example.lazyco.backend.entities.User.UserService;
+import com.example.lazyco.entities.User.CustomPasswordEncoder;
+import com.example.lazyco.entities.User.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
