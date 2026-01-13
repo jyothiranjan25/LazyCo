@@ -1,5 +1,6 @@
 package com.example.lazyco.core.Exceptions;
 
+import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.Messages.CustomMessage;
 import com.example.lazyco.core.Messages.MessageCodes;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,7 @@ public class ExceptionWrapper extends RuntimeException {
   @Getter private final HttpStatusCode httpStatusCode;
   @Getter private final CustomMessage customMessage;
   @Getter private Exception exception;
+  @Getter private AbstractDTO<?> abstractDTO;
 
   public ExceptionWrapper(String message) {
     this(message, null);
@@ -43,6 +45,14 @@ public class ExceptionWrapper extends RuntimeException {
     this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
+  public ExceptionWrapper(HttpStatusCode httpStatusCode, MessageCodes code) {
+    this(HttpStatus.resolve(httpStatusCode.value()), code, null);
+  }
+
+  public ExceptionWrapper(HttpStatusCode httpStatusCode, MessageCodes code, Object[] args) {
+    this(HttpStatus.resolve(httpStatusCode.value()), code, args);
+  }
+
   public ExceptionWrapper(HttpStatus httpStatus, MessageCodes code) {
     this(httpStatus, code, null);
   }
@@ -57,18 +67,20 @@ public class ExceptionWrapper extends RuntimeException {
     this.httpStatusCode = httpStatus;
   }
 
-  public ExceptionWrapper(HttpStatusCode httpStatus, MessageCodes code) {
-    this(httpStatus, code, null);
+  public ExceptionWrapper(AbstractDTO<?> abstractDTO) {
+    this(HttpStatus.INTERNAL_SERVER_ERROR, abstractDTO);
   }
 
-  public ExceptionWrapper(HttpStatusCode httpStatus, MessageCodes code, Object[] args) {
-    super(CustomMessage.getMessageString(code, args));
-    this.customMessage =
-        (ArrayUtils.isNotEmpty(args))
-            ? new CustomMessage(code.getValue(), args)
-            : new CustomMessage(code.getValue());
-    this.httpStatus = HttpStatus.resolve(httpStatus.value());
+  public ExceptionWrapper(HttpStatusCode httpStatusCode, AbstractDTO<?> abstractDTO) {
+    this(HttpStatus.resolve(httpStatusCode.value()), abstractDTO);
+  }
+
+  public ExceptionWrapper(HttpStatus httpStatus, AbstractDTO<?> abstractDTO) {
+    super();
+    this.customMessage = null;
+    this.httpStatus = httpStatus;
     this.httpStatusCode = httpStatus;
+    this.abstractDTO = abstractDTO;
   }
 
   public static ExceptionWrapper getExceptionObject(MessageCodes code, Object[] args) {

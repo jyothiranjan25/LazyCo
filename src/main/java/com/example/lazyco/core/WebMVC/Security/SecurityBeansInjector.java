@@ -2,7 +2,6 @@ package com.example.lazyco.core.WebMVC.Security;
 
 import com.example.lazyco.entities.User.CustomPasswordEncoder;
 import com.example.lazyco.entities.User.UserService;
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,10 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Configuration
-@AllArgsConstructor
 public class SecurityBeansInjector {
-
-  private final UserService userService;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -25,15 +21,16 @@ public class SecurityBeansInjector {
   }
 
   @Bean
-  public AuthenticationProvider authenticationProvider() {
+  public AuthenticationProvider authenticationProvider(
+      UserService userService, PasswordEncoder passwordEncoder) {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userService);
-    provider.setPasswordEncoder(passwordEncoder());
+    provider.setPasswordEncoder(passwordEncoder);
     return provider;
   }
 
   @Bean
   public AuthenticationManager authenticationManager(
-      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+      AuthenticationConfiguration authenticationConfiguration) {
     return authenticationConfiguration
         .getAuthenticationManager(); // providerManager implements AuthenticationManager
   }
