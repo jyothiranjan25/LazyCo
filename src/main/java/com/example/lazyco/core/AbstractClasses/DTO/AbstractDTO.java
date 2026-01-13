@@ -4,8 +4,11 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.core.AbstractClasses.Filter.FilterFieldMetadata;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.core.Exceptions.StandardMessageDTO;
 import com.example.lazyco.core.File.FileDTO;
 import com.example.lazyco.core.Logger.ApplicationLogger;
+import com.example.lazyco.core.Messages.CustomMessage;
+import com.example.lazyco.core.Messages.MessageCodes;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.Date;
@@ -61,6 +64,37 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(deserialize = false)
   private String message;
 
+  @Expose(deserialize = false)
+  private StandardMessageDTO messages;
+
+  public void addMessage(StandardMessageDTO.MessageType type, MessageCodes message) {
+    addMessage(type, CustomMessage.getMessageString(message));
+  }
+
+  public void addMessage(StandardMessageDTO.MessageType type, MessageCodes code, Object... args) {
+    addMessage(type, CustomMessage.getMessageString(code, args));
+  }
+
+  public void addMessage(StandardMessageDTO.MessageType type, String message) {
+    addMessage(type, null, message);
+  }
+
+  public void addMessage(StandardMessageDTO.MessageType type, String key, MessageCodes message) {
+    addMessage(type, key, CustomMessage.getMessageString(message));
+  }
+
+  public void addMessage(
+      StandardMessageDTO.MessageType type, String key, MessageCodes code, Object... args) {
+    addMessage(type, key, CustomMessage.getMessageString(code, args));
+  }
+
+  public void addMessage(StandardMessageDTO.MessageType type, String code, String message) {
+    if (this.messages == null) {
+      this.messages = new StandardMessageDTO();
+    }
+    this.messages.addMessage(type, code, message);
+  }
+
   // This field holds a map of file identifiers to their corresponding FileDTOs
   @Expose(serialize = false, deserialize = false)
   private Map<String, FileDTO> fileMap;
@@ -86,7 +120,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   // This field holds the actual entity class that this DTO filters
   // It is set based on the @FilteredEntity annotation
   @Expose(serialize = false, deserialize = false)
-  private Class<?> filterableEntityClass;
+  private transient Class<?> filterableEntityClass;
 
   // Setter with logic to extract from annotation if present
   public void setFilterableEntityClass(Class<?> filterableEntityClass) {
