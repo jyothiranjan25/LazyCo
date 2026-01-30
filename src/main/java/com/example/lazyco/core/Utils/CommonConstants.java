@@ -14,6 +14,7 @@ public interface CommonConstants extends UploadConstants {
   // logged-in user constants
   String LOGGED_USER = "logged_user_id";
   String LOGGED_USER_ROLE = "logged_user_role_id";
+  String LOGGED_USER_AUTHORITIES = "logged_user_authorities";
 
   // batch jon constants
   String BATCH_JOB_ID = "batch_job_id";

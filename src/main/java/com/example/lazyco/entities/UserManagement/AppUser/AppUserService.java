@@ -20,6 +20,9 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
       String encodedPassword = passwordEncoder.encode(dtoToCreate.getPassword());
       entityToCreate.setPassword(encodedPassword);
     }
+    if (entityToCreate.getEmail() != null) {
+      entityToCreate.setEmail(entityToCreate.getEmail().toLowerCase());
+    }
   }
 
   @Override
@@ -30,6 +33,9 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     }
     if (source.getResetPasswordTokenExpiry() == null) {
       target.setResetPasswordTokenExpiry(null);
+    }
+    if (source.getEmail() != null) {
+      target.setEmail(source.getEmail().toLowerCase());
     }
   }
 

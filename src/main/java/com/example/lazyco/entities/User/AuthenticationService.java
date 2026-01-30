@@ -2,6 +2,7 @@ package com.example.lazyco.entities.User;
 
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Utils.CommonConstants;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -23,9 +24,10 @@ public class AuthenticationService {
                   userDTO.getUsername(), userDTO.getPassword()));
       UserDTO user = (UserDTO) authentication.getPrincipal();
       if (authentication.isAuthenticated()) {
-        String token =
-            jwtUtil.generateToken(
-                user.getUsername(), Map.of(CommonConstants.LOGGED_USER, user.getId()));
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(CommonConstants.LOGGED_USER, user.getId());
+        claims.put(CommonConstants.LOGGED_USER_AUTHORITIES, user.getAuthorities());
+        String token = jwtUtil.generateToken(user.getUsername(), claims);
         user.setToken(token);
         return user;
       } else {

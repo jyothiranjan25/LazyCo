@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -327,6 +328,20 @@ public class JwtUtil {
     return extractClaim(token, Claims::getSubject);
   }
 
+  public Collection<? extends GrantedAuthority> extractAuthorities(String token)
+      throws JwtException {
+    final Claims claims = extractAllClaims(token);
+    Object authoritiesObj = claims.get(CommonConstants.LOGGED_USER_AUTHORITIES);
+    if (authoritiesObj instanceof Collection<?> authoritiesCollection) {
+      List<GrantedAuthority> authorities = new ArrayList<>();
+      for (Object authority : authoritiesCollection) {
+        authorities.add(authority::toString);
+      }
+      return authorities;
+    }
+    return Collections.emptyList();
+  }
+
   public String extractUsername(HttpServletRequest request) throws JwtException {
     String token = extractTokenFromRequest(request);
     if (token == null) {
@@ -342,27 +357,6 @@ public class JwtUtil {
 
   public Boolean validateToken(String token) throws JwtException {
     return validateJwtToken(token);
-  }
-
-  // Get username from JWT token
-  public String getUsernameFromToken(String token) {
-    return Jwts.parser()
-        .verifyWith(SECRET_KEY)
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .getSubject();
-  }
-
-  public Boolean validateToken(HttpServletRequest request, String username) throws JwtException {
-    final String tokenUsername = extractUsername(request);
-    return (username.equals(tokenUsername)) && !isTokenExpired(request);
-  }
-
-  // validate token
-  public Boolean validateToken(String token, UserDTO user) {
-    final String username = extractUsername(token);
-    return (username.equals(user.getUsername()) && !isTokenExpired(token));
   }
 
   // Validate JWT token

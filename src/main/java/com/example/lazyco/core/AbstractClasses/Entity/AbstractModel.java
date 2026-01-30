@@ -21,7 +21,8 @@ public abstract class AbstractModel implements Serializable, Cloneable {
       table = "hibernate_sequences",
       pkColumnName = "sequence_name",
       valueColumnName = "next_hi",
-      allocationSize = 1,initialValue = 50)
+      allocationSize = 1,
+      initialValue = 50)
   @Column(name = "id", comment = "Primary key of the table")
   private Long id;
 

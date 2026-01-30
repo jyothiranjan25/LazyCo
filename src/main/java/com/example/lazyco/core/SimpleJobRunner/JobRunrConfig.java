@@ -24,6 +24,12 @@ public class JobRunrConfig {
   @Value("${jobrunr.name:LazyCo-JobRunr-Server}")
   private String jobRunName;
 
+  @Value("${jobrunr.dashboard.enabled:false}")
+  private boolean dashboardEnabled;
+
+  @Value("${jobrunr.dashboard.port:8000}")
+  private int port;
+
   @Value("${jobrunr.pool-interval-in-seconds:10}")
   private int poolIntervalInSeconds;
 
@@ -51,7 +57,7 @@ public class JobRunrConfig {
     configuration.useJobActivator(jobActivator);
     configuration.withJobFilter(new RetryFilter(1), jobRunrFilter);
     configuration.useBackgroundJobServer(backgroundJobServerConfiguration());
-    configuration.useDashboard();
+    configuration.useDashboardIf(dashboardEnabled, port);
     return configuration.initialize().getJobScheduler();
   }
 
