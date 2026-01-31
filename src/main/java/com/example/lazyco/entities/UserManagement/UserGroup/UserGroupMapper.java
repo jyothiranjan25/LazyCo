@@ -8,7 +8,6 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 public interface UserGroupMapper extends AbstractMapper<UserGroupDTO, UserGroup> {
 
-  @Named("map")
   @Mapping(source = "parentUserGroup.id", target = "parentId")
   UserGroupDTO map(UserGroup entity);
 }

@@ -92,7 +92,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     resultClass = resultClass == null ? entityClass : resultClass;
     HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
     CriteriaQuery<?> criteriaQuery = builder.createQuery(resultClass);
-    Root<?> root = criteriaQuery.from(resultClass);
+    Root<?> root = criteriaQuery.from(entityClass);
 
     CriteriaBuilderWrapper criteriaBuilderWrapper =
         new CriteriaBuilderWrapper(root, criteriaQuery, builder, filter);

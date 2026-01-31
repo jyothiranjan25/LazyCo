@@ -206,4 +206,9 @@ public class AbstractAction implements CommonConstants {
     }
     return userRoleDTO.getUserGroup();
   }
+
+  public boolean isAdminUser() {
+    AppUserDTO appUserDTO = getLoggedInUser();
+    return appUserDTO != null && Boolean.TRUE.equals(appUserDTO.getIsAdmin());
+  }
 }
