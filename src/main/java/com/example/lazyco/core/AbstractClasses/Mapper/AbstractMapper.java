@@ -40,10 +40,10 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
   D mapEntityToDTOWithNulls(E source, @MappingTarget D target);
 
   // Validate and set nulls after mapping
-  @AfterMapping
-  default void validateAndSetNullIfFieldsAreNull(@MappingTarget Object obj) {
-    NullMappingProvider.validateAndSetNullIfFieldsAreNull(obj);
-  }
+  //  @AfterMapping
+  //  default void validateAndSetNullIfFieldsAreNull(@MappingTarget Object obj) {
+  //    NullMappingProvider.validateAndSetNullIfFieldsAreNull(obj);
+  //  }
 
   default List<D> map(List<E> entities, D filter) {
     return entities.stream().map(this::map).collect(Collectors.toList());

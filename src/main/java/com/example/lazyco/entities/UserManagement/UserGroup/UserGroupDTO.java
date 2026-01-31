@@ -12,13 +12,14 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = UserGroup.class)
 public class UserGroupDTO extends AbstractDTO<UserGroupDTO> {
-  @InternalFilterableField
-  private String userGroupName;
+  @InternalFilterableField private String userGroupName;
   private String fullyQualifiedName;
   private String description;
+
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "parentUserGroup.id")
   private Long parentId;
+
   private List<UserGroupDTO> childUserGroups;
   private Boolean fetchParent;
 }

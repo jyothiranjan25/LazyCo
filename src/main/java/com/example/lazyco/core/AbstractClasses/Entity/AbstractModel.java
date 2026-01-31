@@ -26,7 +26,7 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   @Column(name = "id", comment = "Primary key of the table")
   private Long id;
 
-  @Version private Long version; // for optimistic locking safety
+  //  @Version private Long version; // for optimistic locking safety
 
   @Column(name = "created_at", comment = "Record creation timestamp", updatable = false)
   private Date createdAt;
