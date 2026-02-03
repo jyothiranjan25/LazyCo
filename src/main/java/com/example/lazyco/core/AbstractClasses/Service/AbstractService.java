@@ -8,6 +8,7 @@ import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.CommonMessage;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
+import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Messages.CustomMessage;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.ParameterizedType;
@@ -333,6 +334,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     } catch (ApplicationException e) {
       throw e;
     } catch (Exception e) {
+      ApplicationLogger.error(e);
       throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
@@ -374,6 +376,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     } catch (ApplicationException e) {
       throw e;
     } catch (Exception e) {
+      ApplicationLogger.error(e);
       throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
@@ -400,6 +403,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     } catch (ApplicationException | EntityNotFoundException e) {
       throw e;
     } catch (Exception e) {
+      ApplicationLogger.error(e);
       throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     }
   }
