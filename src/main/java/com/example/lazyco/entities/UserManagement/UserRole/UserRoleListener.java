@@ -8,16 +8,16 @@ public class UserRoleListener {
 
   @PrePersist
   public void prePersist(UserRole userRole) {
-    // Logic to execute before persisting an AppUser entity
+    // Logic to execute before persisting entity
   }
 
   @PreUpdate
   public void preUpdate(UserRole userRole) {
-    // Logic to execute before persisting an AppUser entity
+    // Logic to execute before persisting entity
   }
 
   @PreRemove
   public void preRemove(UserRole userRole) {
-    // Logic to execute before persisting an AppUser entity
+    // Logic to execute before persisting entity
   }
 }

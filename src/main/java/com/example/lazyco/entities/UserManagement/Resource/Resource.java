@@ -31,6 +31,9 @@ public class Resource extends AbstractModel {
   @Column(name = "resource_order", comment = "Order of the resource for sorting purposes")
   private Integer resourceOrder;
 
+  @Column(name = "action", comment = "Action associated with the resource")
+  private String action;
+
   @ManyToOne
   @JoinColumn(name = "parent_resource_id", comment = "Reference to the parent resource")
   private Resource parentResource;

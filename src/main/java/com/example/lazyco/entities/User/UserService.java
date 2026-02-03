@@ -214,8 +214,7 @@ public class UserService implements UserDetailsService {
     }
     // Update password and clear reset token
     appUser.setPassword(userDTO.getPassword());
-    appUser.setResetPasswordToken(null);
-    appUser.setResetPasswordTokenExpiry(null);
+    appUser.setClearResetPasswordToken(true);
     appUserService.update(appUser);
 
     // Auto-login after password reset

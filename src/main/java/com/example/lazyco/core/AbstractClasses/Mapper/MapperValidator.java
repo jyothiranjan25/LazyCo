@@ -18,16 +18,16 @@ public class MapperValidator {
       return;
     }
 
-    if (!(obj instanceof AbstractModel || obj instanceof AbstractDTO<?>)) {
-      return;
+    if (obj instanceof AbstractDTO<?>) {
+      cleanDtoObject(obj);
+    } else if (obj instanceof AbstractModel) {
+      cleanEntityObject(obj);
     }
-
-    cleanObject(obj);
   }
 
-  private static boolean cleanObject(Object obj) {
+  private static boolean cleanDtoObject(Object obj) {
     // only process AbstractModel or AbstractDTO instances
-    if (!(obj instanceof AbstractModel || obj instanceof AbstractDTO<?>)) {
+    if (!(obj instanceof AbstractDTO<?>)) {
       return false;
     }
     Class<?> clazz = obj.getClass();
@@ -62,7 +62,7 @@ public class MapperValidator {
           } else {
             for (Object item : collection) {
               if (item != null) {
-                cleanObject(item);
+                cleanDtoObject(item);
               }
             }
             allFieldsNull = false;
@@ -72,7 +72,7 @@ public class MapperValidator {
 
         // nested DTO / Model
         if (value instanceof AbstractModel || value instanceof AbstractDTO<?>) {
-          boolean innerAllNull = cleanObject(value);
+          boolean innerAllNull = cleanDtoObject(value);
           if (innerAllNull) {
             field.set(obj, null);
           } else {
@@ -90,6 +90,58 @@ public class MapperValidator {
     }
 
     return allFieldsNull;
+  }
+
+  private static boolean cleanEntityObject(Object obj) {
+    if (!isInstanceOfAbstractModel(obj)) {
+      return true;
+    }
+
+    Class<?> clazz = obj.getClass();
+    List<Field> fields = getDeclaredFieldsRecursively(clazz);
+
+    boolean allFieldsNull = true;
+
+    try {
+      for (Field field : fields) {
+        field.setAccessible(true);
+        Object value = field.get(obj);
+
+        // skip primitive types and collections
+        if (field.getType().isPrimitive() || (value instanceof Collection)) {
+          continue;
+        }
+
+        // null value → nothing to clean
+        if (value == null) {
+          continue;
+        }
+
+        // nested entity
+        if (isInstanceOfAbstractModel(value)) {
+          boolean innerAllNull = cleanEntityObject(value);
+          if (innerAllNull) {
+            field.set(obj, null);
+          } else {
+            allFieldsNull = false;
+          }
+          continue;
+        }
+
+        // any other non-null value
+        allFieldsNull = false;
+      }
+
+    } catch (IllegalAccessException e) {
+      ApplicationLogger.error(e);
+      return false;
+    }
+
+    return allFieldsNull;
+  }
+
+  private static boolean isInstanceOfAbstractModel(Object obj) {
+    return (obj instanceof AbstractModel);
   }
 
   // Additional helper methods can be added here as needed

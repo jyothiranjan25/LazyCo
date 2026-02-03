@@ -8,16 +8,16 @@ public class UserGroupListener {
 
   @PrePersist
   public void prePersist(UserGroup userGroup) {
-    // Logic to execute before persisting a UserGroup entity
+    // Logic to execute before persisting entity
   }
 
   @PreUpdate
   public void preUpdate(UserGroup userGroup) {
-    // Logic to execute before updating a UserGroup entity
+    // Logic to execute before updating entity
   }
 
   @PreRemove
   public void preRemove(UserGroup userGroup) {
-    // Logic to execute before removing a UserGroup entity
+    // Logic to execute before removing entity
   }
 }

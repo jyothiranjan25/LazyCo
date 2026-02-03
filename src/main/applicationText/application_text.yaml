@@ -12,9 +12,12 @@ COMMON_MODULES:
 
 USER_GROUP:
   USER_GROUP_NAME_REQUIRED : "User group name is required."
-  USER_GROUP_NOT_FOUND : "User group with ID '%1$s' not found."
   DUPLICATE_USER_GROUP_NAME : "A user group with the name '%1$s' already exists."
   USER_GROUP_DELETE_NOT_ALLOWED : "Deletion of user group '%1$s' is not allowed."
+
+RESOURCE:
+    RESOURCE_NAME_REQUIRED : "Resource name is required."
+    DUPLICATE_RESOURCE_NAME : "A resource with the name '%1$s' already exists."
 
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."

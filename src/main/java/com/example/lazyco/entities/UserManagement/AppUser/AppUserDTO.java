@@ -52,6 +52,8 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
   private Date resetPasswordTokenExpiry;
 
+  private Boolean clearResetPasswordToken;
+
   private Date lastLoginDate;
 
   private String lastLoginIpAddress;

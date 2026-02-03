@@ -106,7 +106,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    validateBeforeCreateOrUpdate(dtoToCreate);
+    validateBeforeCreate(dtoToCreate);
 
     // Map DTO to Entity
     E entityToCreate = abstractMapper.map(dtoToCreate);
@@ -173,7 +173,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    validateBeforeCreateOrUpdate(dtoToUpdate);
+    validateBeforeUpdate(dtoToUpdate);
 
     // Retrieve existing entity
     E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
@@ -219,7 +219,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void postUpdate(D requestDTO, E entityBeforeUpdate, E updatedEntity) {}
 
   // Hook to validate DTO before create or update
-  protected void validateBeforeCreateOrUpdate(D requestDTO) {}
+  protected void validateBeforeCreate(D requestDTO) {}
+
+  protected void validateBeforeUpdate(D requestDTO) {}
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
