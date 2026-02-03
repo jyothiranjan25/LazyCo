@@ -22,4 +22,5 @@ public class UserGroupDTO extends AbstractDTO<UserGroupDTO> {
 
   private List<UserGroupDTO> childUserGroups;
   private Boolean fetchParent;
+  private Boolean getChildForParent;
 }

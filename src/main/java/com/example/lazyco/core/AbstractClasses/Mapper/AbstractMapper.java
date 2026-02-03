@@ -26,10 +26,10 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
   // --- DTO -> Entity updates ---
   @Named("standardDtoToEntityMapping")
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  void mapDTOToEntity(D source, @MappingTarget E target);
+  E mapDTOToEntity(D source, @MappingTarget E target);
 
   @Named("standardDtoToEntityMappingWithNulls")
-  void mapDTOToEntityWithNulls(D source, @MappingTarget E target);
+  E mapDTOToEntityWithNulls(D source, @MappingTarget E target);
 
   // --- Entity -> DTO updates ---
   @Named("standardEntityToDtoMapping")

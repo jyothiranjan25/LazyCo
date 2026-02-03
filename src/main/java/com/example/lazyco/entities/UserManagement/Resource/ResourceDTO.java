@@ -24,4 +24,5 @@ public class ResourceDTO extends AbstractDTO<ResourceDTO> {
 
   private List<ResourceDTO> childResources;
   private Boolean fetchParent;
+  private Boolean getChildForParent;
 }

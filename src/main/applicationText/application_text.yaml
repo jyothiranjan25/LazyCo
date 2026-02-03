@@ -17,7 +17,9 @@ USER_GROUP:
 
 RESOURCE:
     RESOURCE_NAME_REQUIRED : "Resource name is required."
+    RESOURCE_ACTION_REQUIRED : "Resource action URL is required."
     DUPLICATE_RESOURCE_NAME : "A resource with the name '%1$s' already exists."
+    INVALID_PARENT_RESOURCE : "A child resource cannot have a child as its parent resource."
 
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
