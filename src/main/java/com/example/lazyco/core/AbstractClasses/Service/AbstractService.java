@@ -9,8 +9,6 @@ import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.CommonMessage;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
-import com.example.lazyco.core.Messages.CustomMessage;
-import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -21,6 +19,7 @@ import lombok.Getter;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -310,6 +309,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     return result;
   }
 
+  @Transactional(readOnly = true)
+  public List<D> search(D filter) {
+    return fetchDTORecords(filter);
+  }
+
   // Retrieve multiple DTOs matching the filter
   @Transactional(readOnly = true)
   public List<D> get(D dto) {
@@ -399,10 +403,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
       criteria.setId(id);
       E result = getSingleEntity(criteria);
       if (result == null)
-        throw new EntityNotFoundException(
-            CustomMessage.getMessageString(CommonMessage.OBJECT_NOT_FOUND));
+        throw new ApplicationException(HttpStatus.NOT_FOUND, CommonMessage.OBJECT_NOT_FOUND);
       return result;
-    } catch (ApplicationException | EntityNotFoundException e) {
+    } catch (ApplicationException e) {
       throw e;
     } catch (Exception e) {
       ApplicationLogger.error(e);

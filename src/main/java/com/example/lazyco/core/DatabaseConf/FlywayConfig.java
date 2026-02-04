@@ -14,7 +14,7 @@ public class FlywayConfig {
   public Flyway flyway(DataSource dataSource) {
     return Flyway.configure()
         .dataSource(dataSource)
-        .locations("classpath:dbResources/migration")
+        .locations("classpath:migration")
         .baselineOnMigrate(true)
         .validateOnMigrate(true)
         .outOfOrder(false)

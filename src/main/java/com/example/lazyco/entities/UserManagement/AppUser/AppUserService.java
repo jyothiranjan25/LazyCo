@@ -30,12 +30,14 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     AppUserDTO filter = new AppUserDTO();
     filter.setUserId(requestDTO.getUserId());
     if (getCount(filter) > 0) {
-      throw new ApplicationException(AppUserMessage.DUPLICATE_USER_ID);
+      throw new ApplicationException(
+          AppUserMessage.DUPLICATE_USER_ID, new Object[] {requestDTO.getUserId()});
     }
     filter = new AppUserDTO();
     filter.setEmail(requestDTO.getEmail().toLowerCase());
     if (getCount(filter) > 0) {
-      throw new ApplicationException(AppUserMessage.EMAIL_IN_USE);
+      throw new ApplicationException(
+          AppUserMessage.EMAIL_IN_USE, new Object[] {requestDTO.getEmail()});
     }
   }
 

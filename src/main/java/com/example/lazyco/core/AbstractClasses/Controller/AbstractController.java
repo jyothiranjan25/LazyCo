@@ -1,9 +1,6 @@
 package com.example.lazyco.core.AbstractClasses.Controller;
 
-import com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents.CreateControllerComponent;
-import com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents.DeleteControllerComponent;
-import com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents.GetControllerComponent;
-import com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents.UpdateControllerComponent;
+import com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents.*;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.Service.IAbstractService;
 import com.example.lazyco.core.Utils.CRUDEnums;
@@ -19,6 +16,8 @@ public abstract class AbstractController<D extends AbstractDTO<D>>
 
   protected IAbstractService<D, ?> abstractService;
 
+  private final SearchControllerComponent<D> searchControllerComponent;
+
   private final GetControllerComponent<D> readControllerComponent;
 
   private final CreateControllerComponent<D> createControllerComponent;
@@ -29,10 +28,20 @@ public abstract class AbstractController<D extends AbstractDTO<D>>
 
   public AbstractController(IAbstractService<D, ?> abstractService) {
     this.abstractService = abstractService;
+    this.searchControllerComponent = new SearchControllerComponent<>(abstractService, this);
     this.readControllerComponent = new GetControllerComponent<>(abstractService, this);
     this.createControllerComponent = new CreateControllerComponent<>(abstractService, this);
     this.updateControllerComponent = new UpdateControllerComponent<>(abstractService, this);
     this.deleteControllerComponent = new DeleteControllerComponent<>(abstractService, this);
+  }
+
+  @GetMapping("/search")
+  protected ResponseEntity<?> search(@QueryParams D t) {
+    if (!restrictCRUDAction().contains(CRUDEnums.SEARCH)) {
+      return searchControllerComponent.execute(t);
+    }
+    return ResponseUtils.sendResponse(
+        HttpStatus.METHOD_NOT_ALLOWED, "Request method 'GET' not supported");
   }
 
   @GetMapping

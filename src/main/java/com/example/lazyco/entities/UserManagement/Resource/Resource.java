@@ -1,14 +1,13 @@
 package com.example.lazyco.entities.UserManagement.Resource;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.entities.UserManagement.Module.Module;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -17,7 +16,16 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "resource", comment = "Table storing application resources")
+@Table(
+    name = "resource",
+    comment = "Table storing application resources",
+    indexes = {
+      @Index(name = "idx_resource_name", columnList = "resource_name"),
+      @Index(name = "idx_resource_order", columnList = "resource_order")
+    },
+    uniqueConstraints = {
+      @UniqueConstraint(name = "uk_resource_name", columnNames = "resource_name")
+    })
 @EntityListeners(ResourceListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Resource extends AbstractModel {
@@ -35,9 +43,15 @@ public class Resource extends AbstractModel {
   private String action;
 
   @ManyToOne
-  @JoinColumn(name = "parent_resource_id", comment = "Reference to the parent resource")
+  @JoinColumn(
+      name = "parent_resource_id",
+      foreignKey = @ForeignKey(name = "fk_resource_parent_resource"),
+      comment = "Reference to the parent resource")
   private Resource parentResource;
 
   @OneToMany(mappedBy = "parentResource")
   private Set<Resource> childResources;
+
+  @ManyToMany(mappedBy = "resources")
+  private Set<Module> modules;
 }

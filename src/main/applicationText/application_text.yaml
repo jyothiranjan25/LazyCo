@@ -37,3 +37,9 @@ USER_MODULES:
   INVALID_RESET_TOKEN: "The password reset token is invalid."
   RESET_TOKEN_EXPIRED: "The password reset token has expired."
   PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
+
+APP_USER:
+  USER_ID_REQUIRED : "User ID is required."
+  EMAIL_REQUIRED : "Email is required."
+  DUPLICATE_USER_ID: "A user with the ID '%1$s' already exists."
+  EMAIL_IN_USE : "The email '%1$s' is already associated with another account."

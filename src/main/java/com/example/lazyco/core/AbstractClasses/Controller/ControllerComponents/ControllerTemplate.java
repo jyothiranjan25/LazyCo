@@ -55,6 +55,10 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
 
   abstract D execute(D t);
 
+  protected boolean isSearchRequest() {
+    return false;
+  }
+
   protected boolean isGetRequest() {
     return false;
   }

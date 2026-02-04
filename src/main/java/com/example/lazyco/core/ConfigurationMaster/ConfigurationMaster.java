@@ -6,14 +6,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
-@Audited
 @Getter
 @Setter
+@Audited
 @Entity
+@DynamicUpdate
+@DynamicInsert
 @Table(
     name = "configuration_master",
+    comment = "Table storing configuration key-value",
     indexes = {@Index(name = "idx_configuration_master_config_key", columnList = "config_key")})
 @EntityListeners(ConfigurationMasterListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

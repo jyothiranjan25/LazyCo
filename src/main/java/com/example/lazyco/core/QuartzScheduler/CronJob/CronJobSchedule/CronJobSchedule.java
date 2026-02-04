@@ -19,6 +19,7 @@ import org.hibernate.envers.Audited;
 @DynamicInsert
 @Table(
     name = "cron_job_schedule",
+    comment = "Table storing cron job schedules",
     indexes = {
       @Index(name = "idx_cron_job_schedule_cron_job_type", columnList = "cron_job_type"),
       @Index(name = "idx_cron_job_schedule_status", columnList = "status")

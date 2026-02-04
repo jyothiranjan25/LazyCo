@@ -44,7 +44,10 @@ public class UserGroup extends AbstractModel {
   private String description;
 
   @ManyToOne
-  @JoinColumn(name = "parent_user_group_id", comment = "Reference to the parent user group")
+  @JoinColumn(
+      name = "parent_user_group_id",
+      foreignKey = @ForeignKey(name = "fk_user_group_parent_user_group"),
+      comment = "Reference to the parent user group")
   private UserGroup parentUserGroup;
 
   @OneToMany(mappedBy = "parentUserGroup")

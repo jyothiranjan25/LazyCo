@@ -6,9 +6,8 @@ import jakarta.persistence.*;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.envers.Audited;
 
 @Audited
@@ -18,6 +17,7 @@ import org.hibernate.envers.Audited;
 @DynamicInsert
 @Table(
     name = "cron_job_execution_log",
+    comment = "Table storing cron job execution logs",
     indexes = {
       @Index(
           name = "idx_cron_job_execution_log_cron_job_schedule_id",
@@ -30,10 +30,6 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CronJobExecutionLog extends AbstractModel {
 
-  @ManyToOne
-  @JoinColumn(name = "cron_job_schedule_id")
-  private CronJobSchedule cronJobSchedule;
-
   @Column(name = "start_time")
   private Date startTime;
 
@@ -44,4 +40,12 @@ public class CronJobExecutionLog extends AbstractModel {
   private CronJobStatusEnum status;
 
   private String remarks;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "cron_job_schedule_id",
+      comment = "Reference to the cron job schedule",
+      foreignKey = @ForeignKey(name = "fk_cron_job_execution_log_cron_job_schedule"))
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private CronJobSchedule cronJobSchedule;
 }

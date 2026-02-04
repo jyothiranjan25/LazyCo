@@ -7,13 +7,24 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "batch_job")
 @Audited
+@Entity
+@DynamicUpdate
+@DynamicInsert
+@Table(
+    name = "batch_job",
+    comment = "Table storing batch job details",
+    indexes = {
+      @Index(name = "idx_batch_job_job_id", columnList = "job_id"),
+      @Index(name = "idx_batch_job_status", columnList = "status"),
+      @Index(name = "idx_batch_job_operation_type", columnList = "operation_type")
+    })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class BatchJob extends AbstractRBACModel {
 
