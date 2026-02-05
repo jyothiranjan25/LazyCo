@@ -30,7 +30,7 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Resource extends AbstractModel {
 
-  @Column(name = "resource_name", comment = "Name of the resource")
+  @Column(name = "name", comment = "Name of the resource")
   private String resourceName;
 
   @Column(name = "description", comment = "Description of the resource")
@@ -41,6 +41,12 @@ public class Resource extends AbstractModel {
 
   @Column(name = "action", comment = "Action associated with the resource")
   private String action;
+
+  @Column(
+      name = "show_in_menu",
+      columnDefinition = "boolean default true",
+      comment = "Whether this resource should be visible")
+  private Boolean showInMenu;
 
   @ManyToOne
   @JoinColumn(

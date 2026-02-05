@@ -10,14 +10,16 @@ import org.mapstruct.*;
     uses = {ResourceMapper.class})
 public interface ModuleMapper extends AbstractMapper<ModuleDTO, Module> {
 
-  @Named("ignoreResources")
   @Mapping(target = "resources", ignore = true)
-  ModuleDTO mapIgnoringResources(Module entity);
+  ModuleDTO map(Module entity);
+
+  @Named("mapResources")
+  ModuleDTO mapResources(Module entity);
 
   @Override
   default List<ModuleDTO> map(List<Module> entities, ModuleDTO filter) {
-    if (filter != null && Boolean.FALSE.equals(filter.getFetchResources())) {
-      return entities.stream().map(this::mapIgnoringResources).toList();
+    if (filter != null && Boolean.TRUE.equals(filter.getFetchResources())) {
+      return entities.stream().map(this::mapResources).toList();
     }
     return AbstractMapper.super.map(entities, filter);
   }

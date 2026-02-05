@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.UserManagement.Role;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = Role.class)
 public class RoleDTO extends AbstractDTO<RoleDTO> {
-  private String name;
+  @InternalFilterableField private String roleName;
   private String description;
   private String icon;
   private RoleTypeEnum roleType;

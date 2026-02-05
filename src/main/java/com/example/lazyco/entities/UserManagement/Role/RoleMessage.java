@@ -5,6 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum RoleMessage implements MessageCodes {
+  ROLE_NAME_REQUIRED("ROLE.ROLE_NAME_REQUIRED"),
+  DUPLICATE_ROLE_NAME("ROLE.DUPLICATE_ROLE_NAME"),
   ;
 
   private final String value;

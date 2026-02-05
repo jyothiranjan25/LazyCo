@@ -23,7 +23,13 @@ RESOURCE:
 
 MODULE:
   MODULE_NAME_REQUIRED : "Module name is required."
+  MODULE_ACTION_REQUIRED : "Module action URL is required."
   DUPLICATE_MODULE_NAME : "A module with the name '%1$s' already exists."
+  SELECT_ACTION_OR_RESOURCE : "Please add either an action or select at least one resource for the module — not both."
+
+ROLE:
+  ROLE_NAME_REQUIRED : "Role name is required."
+  DUPLICATE_ROLE_NAME : "A role with the name '%1$s' already exists."
 
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."

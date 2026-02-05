@@ -17,6 +17,7 @@ public class ResourceDTO extends AbstractDTO<ResourceDTO> {
   private String description;
   private Integer resourceOrder;
   private String action;
+  private Boolean showInMenu;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "parentResource.id")

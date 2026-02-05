@@ -142,7 +142,7 @@ public class AbstractAction implements CommonConstants {
         isBypassRBAC(),
         isSystemJob(),
         getLoggedInUser() != null ? getLoggedInUser().getUserId() : null,
-        getLoggedInUserRole() != null ? getLoggedInUserRole().getRole().getName() : null,
+        getLoggedInUserRole() != null ? getLoggedInUserRole().getRole().getRoleName() : null,
         THREAD_LOCAL_PROPERTIES.get());
     BYPASS_RBAC.remove();
     THREAD_LOCAL_USER.remove();

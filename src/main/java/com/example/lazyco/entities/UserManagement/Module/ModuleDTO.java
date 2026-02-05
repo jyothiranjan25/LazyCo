@@ -16,6 +16,8 @@ public class ModuleDTO extends AbstractDTO<ModuleDTO> {
   @InternalFilterableField private String moduleName;
   private String description;
   private String action;
+  private Boolean showInMenu;
+  private String icon;
   private List<ResourceDTO> addResources;
   private List<ResourceDTO> removeResources;
   private List<ResourceDTO> resources;

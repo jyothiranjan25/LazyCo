@@ -38,6 +38,6 @@ public class ConfigurationMaster extends AbstractRBACModel {
   @Column(
       name = "is_sensitive",
       comment = "Indicates if the configuration is sensitive",
-      columnDefinition = "BOOLEAN DEFAULT FALSE")
+      columnDefinition = "boolean default false")
   private Boolean sensitive;
 }

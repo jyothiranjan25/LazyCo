@@ -34,7 +34,7 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class UserGroup extends AbstractModel {
 
-  @Column(name = "user_group_name", comment = "Unique user group name")
+  @Column(name = "name", comment = "Unique user group name")
   private String userGroupName;
 
   @Column(name = "fully_qualified_name", comment = "Fully qualified user group name")

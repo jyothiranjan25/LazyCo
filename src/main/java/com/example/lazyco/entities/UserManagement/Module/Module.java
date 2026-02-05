@@ -29,7 +29,7 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Module extends AbstractModel {
 
-  @Column(name = "module_name", comment = "Name of the module")
+  @Column(name = "name", comment = "Name of the module")
   private String moduleName;
 
   @Column(name = "description", comment = "Description of the module")
@@ -37,6 +37,15 @@ public class Module extends AbstractModel {
 
   @Column(name = "action", comment = "Action associated with the module")
   private String action;
+
+  @Column(
+      name = "show_in_menu",
+      columnDefinition = "boolean default true",
+      comment = "Whether this module should be visible")
+  private Boolean showInMenu;
+
+  @Column(name = "icon", comment = "Icon representing the module", length = 4069)
+  private String icon;
 
   @ManyToMany
   @JoinTable(
