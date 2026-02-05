@@ -61,6 +61,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   }
 
   public E findById(Class<E> clazz, Long id) {
+    getCurrentSession().clear();
     return getCurrentSession().find(clazz, id);
   }
 

@@ -2,10 +2,10 @@ package com.example.lazyco.entities.UserManagement.Module;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
-import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.entities.UserManagement.Resource.Resource;
 import com.example.lazyco.entities.UserManagement.Resource.ResourceDTO;
 import com.example.lazyco.entities.UserManagement.Resource.ResourceMapper;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,9 +71,6 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
     if (createdDTO.getResources() != null && !createdDTO.getResources().isEmpty()) {
       createdDTO.setResources(mapResourceTree(createdDTO.getResources()));
     }
-    if (true) {
-      throw new ExceptionWrapper("Simulated exception after creation");
-    }
     return createdDTO;
   }
 
@@ -93,11 +90,13 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
   private void mapAssociatedEntities(ModuleDTO source, Module target) {
     if (source.getAddResources() != null && !source.getAddResources().isEmpty()) {
       List<Resource> addResources = resourceMapper.mapDTOList(source.getAddResources());
-      addAssociatedEntities(target.getResources(), addResources);
+      target.setResources(
+          new HashSet<>(addAssociatedEntities(target.getResources(), addResources)));
     }
     if (source.getRemoveResources() != null && !source.getRemoveResources().isEmpty()) {
       List<Resource> removeResources = resourceMapper.mapDTOList(source.getRemoveResources());
-      removeAssociatedEntities(target.getResources(), removeResources);
+      target.setResources(
+          new HashSet<>(removeAssociatedEntities(target.getResources(), removeResources)));
     }
   }
 
