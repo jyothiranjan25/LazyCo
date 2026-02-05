@@ -1,7 +1,9 @@
 package com.example.lazyco.entities.UserManagement.Role;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.entities.UserManagement.RoleModuleResource.RoleModuleResource;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -37,4 +39,7 @@ public class Role extends AbstractModel {
   @Column(name = "role_type", comment = "Type of the role")
   @Enumerated(EnumType.STRING)
   private RoleTypeEnum roleType;
+
+  @OneToMany(mappedBy = "role")
+  private Set<RoleModuleResource> roleModuleResources;
 }

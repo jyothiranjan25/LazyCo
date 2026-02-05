@@ -7,10 +7,8 @@ import com.example.lazyco.entities.UserManagement.UserGroup.UserGroup;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -38,6 +36,7 @@ public class UserRole extends AbstractModel {
 
   @ManyToOne
   @JoinColumn(name = "app_user_id", comment = "Reference to the user")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private AppUser appUser;
 
   @ManyToOne

@@ -58,6 +58,16 @@ public class Module extends AbstractModel {
           @JoinColumn(
               name = "resource_id",
               foreignKey = @ForeignKey(name = "fk_module_resource_resource")),
+      indexes = {
+        @Index(name = "idx_module_resource_module_id", columnList = "module_id"),
+        @Index(name = "idx_module_resource_resource_id", columnList = "resource_id"),
+        @Index(name = "idx_module_resource_module_resource", columnList = "module_id, resource_id")
+      },
+      uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_module_resource_module_resource",
+            columnNames = {"module_id", "resource_id"})
+      },
       comment = "Join table linking modules and resources")
   private Set<Resource> resources;
 }

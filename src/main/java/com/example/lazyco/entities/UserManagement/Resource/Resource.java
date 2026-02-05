@@ -21,7 +21,8 @@ import org.hibernate.envers.Audited;
     comment = "Table storing application resources",
     indexes = {
       @Index(name = "idx_resource_name", columnList = "resource_name"),
-      @Index(name = "idx_resource_order", columnList = "resource_order")
+      @Index(name = "idx_resource_order", columnList = "resource_order"),
+      @Index(name = "idx_resource_parent_resource_id", columnList = "parent_resource_id")
     },
     uniqueConstraints = {
       @UniqueConstraint(name = "uk_resource_name", columnNames = "resource_name")

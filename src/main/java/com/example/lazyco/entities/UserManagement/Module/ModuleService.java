@@ -34,7 +34,7 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
     return result;
   }
 
-  private List<ResourceDTO> mapResourceTree(List<ResourceDTO> resources) {
+  public List<ResourceDTO> mapResourceTree(List<ResourceDTO> resources) {
     // group resources by parentId
     Map<Long, List<ResourceDTO>> groupedByParent =
         resources.stream()

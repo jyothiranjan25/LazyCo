@@ -1,12 +1,16 @@
 package com.example.lazyco.entities.UserManagement.UserRole;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
+import com.example.lazyco.entities.UserManagement.Role.RoleMapper;
+import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupMapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = {RoleMapper.class, UserGroupMapper.class})
 public interface UserRoleMapper extends AbstractMapper<UserRoleDTO, UserRole> {
 
   @Named("mapOnlyRole")
