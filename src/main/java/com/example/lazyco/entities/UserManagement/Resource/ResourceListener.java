@@ -1,8 +1,10 @@
 package com.example.lazyco.entities.UserManagement.Resource;
 
+import com.example.lazyco.core.Exceptions.ApplicationException;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
+import org.apache.commons.lang3.StringUtils;
 
 public class ResourceListener {
 
@@ -30,6 +32,10 @@ public class ResourceListener {
 
     if (resource.getParentResource() == null) {
       resource.setAction(null);
+    }
+
+    if (resource.getParentResource() != null && StringUtils.isEmpty(resource.getAction())) {
+      throw new ApplicationException(ResourceMessage.RESOURCE_ACTION_REQUIRED);
     }
   }
 }

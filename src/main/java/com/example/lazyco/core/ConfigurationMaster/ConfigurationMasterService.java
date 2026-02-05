@@ -38,7 +38,7 @@ public class ConfigurationMasterService
   @Override
   protected void preUpdate(
       ConfigurationMasterDTO requestDTO,
-      ConfigurationMaster entityBeforeUpdates,
+      ConfigurationMasterDTO entityBeforeUpdates,
       ConfigurationMaster entityAfterUpdates) {
     if (Boolean.TRUE.equals(requestDTO.getSensitive())
         && !requestDTO.getConfigValue().equals(MASKED_VALUE)) {

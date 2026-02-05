@@ -21,6 +21,10 @@ RESOURCE:
     DUPLICATE_RESOURCE_NAME : "A resource with the name '%1$s' already exists."
     INVALID_PARENT_RESOURCE : "A child resource cannot have a child as its parent resource."
 
+MODULE:
+  MODULE_NAME_REQUIRED : "Module name is required."
+  DUPLICATE_MODULE_NAME : "A module with the name '%1$s' already exists."
+
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
   ROLE_NOT_FOUND : "Please select a valid role for the user."

@@ -30,7 +30,7 @@ public class EnumDisplayValueService extends AbstractService<EnumDisplayValueDTO
 
   protected void preUpdate(
       EnumDisplayValueDTO dtoToUpdate,
-      EnumDisplayValue entityBeforeUpdates,
+      EnumDisplayValueDTO entityBeforeUpdates,
       EnumDisplayValue entityAfterUpdates) {
     if (entityAfterUpdates.getCategory() == null || entityAfterUpdates.getEnumCode() == null) {
       throw new ApplicationException(EnumDisplayValueMessage.MANDATORY_FIELDS_MISSING);

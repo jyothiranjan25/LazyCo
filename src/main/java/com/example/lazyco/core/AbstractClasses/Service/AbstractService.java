@@ -26,7 +26,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
-    implements IAbstractService<D, E> {
+    extends AbstractHelperService<D, E> implements IAbstractService<D, E> {
 
   // Cache for DTO class calculation to avoid repeated reflection
   private static final ConcurrentHashMap<Class<?>, Class<?>> dtoClassCache =
@@ -126,17 +126,26 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     postCreate(dtoToCreate, refreshedEntity);
 
     // Map back to DTO and return
-    return abstractMapper.map(refreshedEntity);
+    D createdDTO = abstractMapper.map(refreshedEntity);
+    return modifyCreateResult(dtoToCreate, createdDTO);
   }
 
   // Hooks called to modify the DTO before creation
   protected void updateDtoBeforeCreate(D requestDTO) {}
+
+  // Hook to validate DTO before create or update
+  protected void validateBeforeCreate(D requestDTO) {}
 
   // Hook called before the entity is persisted
   protected void preCreate(D requestDTO, E entityToCreate) {}
 
   // Hook called after the entity is persisted
   protected void postCreate(D requestDTO, E createdEntity) {}
+
+  // Hook to modify the created DTO before returning to caller
+  protected D modifyCreateResult(D requestDTO, D createdDTO) {
+    return createdDTO;
+  }
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
@@ -178,17 +187,16 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
 
     // Create a clone of the existing entity to apply updates
-    @SuppressWarnings("unchecked")
-    E existingEntityClone = (E) existingEntity.clone(); // Create a copy for pre-update
+    D EntityClone = abstractMapper.map(existingEntity);
 
     // Apply updates from DTO to the cloned entity
-    makeUpdates(dtoToUpdate, existingEntityClone);
+    makeUpdates(dtoToUpdate, existingEntity);
 
     // Pre-update hook
-    preUpdate(dtoToUpdate, existingEntity, existingEntityClone);
+    preUpdate(dtoToUpdate, EntityClone, existingEntity);
 
     // Save the updated entity
-    E updatedEntity = abstractDAO.update(existingEntityClone);
+    E updatedEntity = abstractDAO.update(existingEntity);
 
     // TODO: (low priority) optimize to avoid double DB hit
     // Retrieve the updated entity to ensure all fields are populated
@@ -197,14 +205,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
 
     // Post-update hook
-    postUpdate(dtoToUpdate, existingEntity, refreshedEntity);
+    postUpdate(dtoToUpdate, EntityClone, refreshedEntity);
 
     // Map back to DTO and return
-    return abstractMapper.map(refreshedEntity);
+    D updatedDTO = abstractMapper.map(refreshedEntity);
+    return modifyUpdateResult(dtoToUpdate, updatedDTO);
   }
 
   // Hooks called to modify the DTO before update
   protected void updateDtoBeforeUpdate(D dtoToUpdate) {}
+
+  // Hook to validate DTO before create or update
+  protected void validateBeforeUpdate(D requestDTO) {}
 
   // Hook to apply updates from DTO to the existing entity
   protected void makeUpdates(D source, E target) {
@@ -212,15 +224,15 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook called before the entity is updated
-  protected void preUpdate(D requestDTO, E entityBeforeUpdates, E entityAfterUpdates) {}
+  protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityAfterUpdates) {}
 
   // Hook called after the entity is updated
-  protected void postUpdate(D requestDTO, E entityBeforeUpdate, E updatedEntity) {}
+  protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity) {}
 
-  // Hook to validate DTO before create or update
-  protected void validateBeforeCreate(D requestDTO) {}
-
-  protected void validateBeforeUpdate(D requestDTO) {}
+  // Hook to modify the updated DTO before returning to caller
+  protected D modifyUpdateResult(D requestDTO, D updatedDTO) {
+    return updatedDTO;
+  }
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
@@ -290,10 +302,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   private List<D> fetchDTORecords(D filter) {
     filter = updateFilterBeforeGet(filter);
     List<D> result = abstractDAO.get(filter, abstractMapper, this::addEntityFilters);
-    // Clone each DTO to avoid side effects
-    @SuppressWarnings("unchecked")
-    List<D> clonedResult = result.stream().map(dto -> (D) dto.clone()).toList();
-    return modifyGetResult(clonedResult, filter);
+    return modifyGetResult(result, filter);
   }
 
   // Hook to modify the filter before fetching records

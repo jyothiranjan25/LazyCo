@@ -55,4 +55,17 @@ public abstract class AbstractModel implements Serializable, Cloneable {
       return o1;
     }
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    AbstractModel that = (AbstractModel) obj;
+    return id != null && id.equals(that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

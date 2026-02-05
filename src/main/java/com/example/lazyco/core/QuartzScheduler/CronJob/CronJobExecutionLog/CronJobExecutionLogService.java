@@ -47,7 +47,7 @@ public class CronJobExecutionLogService
   @Override
   protected void postUpdate(
       CronJobExecutionLogDTO dtoToUpdate,
-      CronJobExecutionLog entityBeforeUpdate,
+      CronJobExecutionLogDTO entityBeforeUpdate,
       CronJobExecutionLog updatedEntity) {
     if (updatedEntity.getStatus() == CronJobStatusEnum.FAILED) {
       checkLastXLogsStatus(getBean(CronJobExecutionLogMapper.class).map(updatedEntity));

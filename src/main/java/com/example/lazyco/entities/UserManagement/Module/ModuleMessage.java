@@ -5,6 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum ModuleMessage implements MessageCodes {
+  MODULE_NAME_REQUIRED("MODULE.MODULE_NAME_REQUIRED"),
+  DUPLICATE_MODULE_NAME("MODULE.DUPLICATE_MODULE_NAME"),
   ;
 
   private final String value;

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.mapstruct.*;
 
 public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractModel> {
@@ -22,6 +21,12 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
 
   @InheritInverseConfiguration(name = "map")
   E map(D dto);
+
+  @InheritInverseConfiguration(name = "map")
+  List<E> mapDTOList(List<D> dtos);
+
+  @InheritInverseConfiguration(name = "map")
+  Set<E> mapDTOSet(Set<D> dtos);
 
   // --- DTO -> Entity updates ---
   @Named("standardDtoToEntityMapping")
@@ -46,7 +51,7 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
   }
 
   default List<D> map(List<E> entities, D filter) {
-    return entities.stream().map(this::map).collect(Collectors.toList());
+    return map(entities);
   }
 
   default Set<D> map(Set<E> entities, D filter) {

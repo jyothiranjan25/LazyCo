@@ -64,7 +64,7 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   protected void preUpdate(
-      AppUserDTO dtoToUpdate, AppUser entityBeforeUpdates, AppUser entityAfterUpdates) {
+      AppUserDTO dtoToUpdate, AppUserDTO entityBeforeUpdates, AppUser entityAfterUpdates) {
     if (dtoToUpdate.getPassword() != null) {
       String encodedPassword = passwordEncoder.encode(dtoToUpdate.getPassword());
       entityAfterUpdates.setPassword(encodedPassword);

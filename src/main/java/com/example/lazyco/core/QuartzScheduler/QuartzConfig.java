@@ -6,6 +6,7 @@ import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
@@ -30,13 +31,15 @@ public class QuartzConfig {
   public SchedulerFactoryBean schedulerFactoryBean(
       DataSource dataSource,
       JobFactory jobFactory,
-      JobFailureHandlingListener jobFailureListeners) {
+      JobFailureHandlingListener jobFailureListeners,
+      TaskExecutor taskExecutor) {
     SchedulerFactoryBean factory = new SchedulerFactoryBean();
 
     factory.setDataSource(dataSource);
     factory.setJobFactory(jobFactory);
     factory.setQuartzProperties(quartzProperties());
     factory.setGlobalJobListeners(jobFailureListeners);
+    factory.setTaskExecutor(taskExecutor);
 
     factory.setOverwriteExistingJobs(true);
     factory.setWaitForJobsToCompleteOnShutdown(true);

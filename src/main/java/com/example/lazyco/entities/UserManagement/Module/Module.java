@@ -16,7 +16,15 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "module", comment = "Table storing modules in the system")
+@Table(
+    name = "module",
+    comment = "Table storing modules in the system",
+    indexes = {@Index(name = "idx_module_module_name", columnList = "module_name")},
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "uk_module_module_name",
+          columnNames = {"module_name"})
+    })
 @EntityListeners(ModuleListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Module extends AbstractModel {
@@ -25,7 +33,7 @@ public class Module extends AbstractModel {
   private String moduleName;
 
   @Column(name = "description", comment = "Description of the module")
-  private String moduleDescription;
+  private String description;
 
   @Column(name = "action", comment = "Action associated with the module")
   private String action;

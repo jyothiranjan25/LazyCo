@@ -26,10 +26,6 @@ public class ResourceService extends AbstractService<ResourceDTO, Resource> {
     if (StringUtils.isEmpty(requestDTO.getResourceName())) {
       throw new ApplicationException(ResourceMessage.RESOURCE_NAME_REQUIRED);
     }
-
-    if (requestDTO.getParentId() != null && StringUtils.isEmpty(requestDTO.getAction())) {
-      throw new ApplicationException(ResourceMessage.RESOURCE_ACTION_REQUIRED);
-    }
     // validate duplicate resource name
     validateDuplicateName(requestDTO.getResourceName(), null);
 
@@ -48,10 +44,6 @@ public class ResourceService extends AbstractService<ResourceDTO, Resource> {
 
   @Override
   protected void validateBeforeUpdate(ResourceDTO requestDTO) {
-    if (requestDTO.getParentId() != null && StringUtils.isEmpty(requestDTO.getAction())) {
-      throw new ApplicationException(ResourceMessage.RESOURCE_ACTION_REQUIRED);
-    }
-
     if (!StringUtils.isEmpty(requestDTO.getResourceName())) {
       validateDuplicateName(requestDTO.getResourceName(), requestDTO.getId());
     }
