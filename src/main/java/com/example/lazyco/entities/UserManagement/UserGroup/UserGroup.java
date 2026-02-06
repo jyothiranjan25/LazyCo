@@ -5,10 +5,8 @@ import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -49,8 +47,8 @@ public class UserGroup extends AbstractModel {
       name = "parent_user_group_id",
       foreignKey = @ForeignKey(name = "fk_user_group_parent_user_group"),
       comment = "Reference to the parent user group")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private UserGroup parentUserGroup;
 
-  @OneToMany(mappedBy = "parentUserGroup")
   private Set<UserGroup> childUserGroups;
 }

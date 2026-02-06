@@ -54,6 +54,7 @@ public class Resource extends AbstractModel {
       name = "parent_resource_id",
       foreignKey = @ForeignKey(name = "fk_resource_parent_resource"),
       comment = "Reference to the parent resource")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Resource parentResource;
 
   @OneToMany(mappedBy = "parentResource")

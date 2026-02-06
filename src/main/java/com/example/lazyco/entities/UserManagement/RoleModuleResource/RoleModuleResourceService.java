@@ -9,4 +9,17 @@ public class RoleModuleResourceService
   protected RoleModuleResourceService(RoleModuleResourceMapper roleModuleResourceMapper) {
     super(roleModuleResourceMapper);
   }
+
+  @Override
+  public RoleModuleResourceDTO executeCreateTransactional(RoleModuleResourceDTO dto) {
+    RoleModuleResourceDTO filter = new RoleModuleResourceDTO();
+    filter.setRoleId(dto.getRoleId());
+    filter.setModuleId(dto.getModuleId());
+    filter.setResourceId(dto.getResourceId());
+
+    if(getCount(filter) < 1){
+      return super.executeCreateTransactional(dto);
+    }
+    return dto;
+  }
 }
