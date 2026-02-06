@@ -75,13 +75,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    validateBeforeCreate(dtoToCreate);
+    self.validateBeforeCreate(dtoToCreate);
 
     // Map DTO to Entity
     E entityToCreate = abstractMapper.map(dtoToCreate);
 
     // Pre-create hook
-    preCreate(dtoToCreate, entityToCreate);
+    self.preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
     E createdEntity = abstractDAO.save(entityToCreate);
@@ -93,7 +93,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         assertEntityByIdPost((Class<E>) entityToCreate.getClass(), createdEntity.getId());
 
     // Post-create hook
-    postCreate(dtoToCreate, refreshedEntity);
+    self.postCreate(dtoToCreate, refreshedEntity);
 
     // Map back to DTO and return
     D createdDTO = abstractMapper.map(refreshedEntity);
@@ -151,7 +151,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    validateBeforeUpdate(dtoToUpdate);
+    self.validateBeforeUpdate(dtoToUpdate);
 
     // Retrieve existing entity
     E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
@@ -163,7 +163,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     makeUpdates(dtoToUpdate, existingEntity);
 
     // Pre-update hook
-    preUpdate(dtoToUpdate, EntityClone, existingEntity);
+    self.preUpdate(dtoToUpdate, EntityClone, existingEntity);
 
     // Save the updated entity
     E updatedEntity = abstractDAO.update(existingEntity);
@@ -175,7 +175,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
         assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
 
     // Post-update hook
-    postUpdate(dtoToUpdate, EntityClone, refreshedEntity);
+    self.postUpdate(dtoToUpdate, EntityClone, refreshedEntity);
 
     // Map back to DTO and return
     D updatedDTO = abstractMapper.map(refreshedEntity);
@@ -194,7 +194,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hook called before the entity is updated
-  protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityAfterUpdates) {}
+  protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityToUpdate) {}
 
   // Hook called after the entity is updated
   protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity) {}
@@ -241,13 +241,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E existingEntity = assertEntityByIdPre(dtoToDelete.getId());
 
     // Pre-delete hook
-    preDelete(dtoToDelete, existingEntity);
+    self.preDelete(dtoToDelete, existingEntity);
 
     // Delete the entity
     existingEntity = abstractDAO.delete(existingEntity);
 
     // Post-delete hook
-    postDelete(dtoToDelete, existingEntity);
+    self.postDelete(dtoToDelete, existingEntity);
 
     // Return the original DTO
     return abstractMapper.map(existingEntity);

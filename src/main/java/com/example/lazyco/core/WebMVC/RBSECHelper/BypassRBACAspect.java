@@ -1,6 +1,7 @@
 package com.example.lazyco.core.WebMVC.RBSECHelper;
 
 import com.example.lazyco.core.AbstractAction;
+import com.example.lazyco.core.Logger.ApplicationLogger;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -26,9 +27,12 @@ public class BypassRBACAspect {
    * Aspect to bypass RBAC checks for methods or classes annotated with @BypassRBAC. It temporarily
    * sets the bypass flag in AbstractAction to true during the method execution.
    */
-  @Around(
-      "@within(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC) || @annotation(com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC)")
+  @Around("@within(BypassRBAC) || @annotation(BypassRBAC)")
   public Object bypassRBAC(ProceedingJoinPoint joinPoint) throws Throwable {
+
+    ApplicationLogger.info(
+        "AOP BypassRBACAspect triggered for method: " + joinPoint.getSignature().toShortString());
+
     // 1️⃣ Save previous state
     boolean previous = abstractAction.isBypassRBAC();
     BYPASS_STACK.get().push(previous);

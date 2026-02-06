@@ -42,7 +42,9 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @FilterableField
   private List<AuthorityEnum> authorities;
 
-  private Boolean isAdmin;
+  private Boolean isSuperAdmin;
+
+  private Boolean isAdministrator;
 
   private Boolean isActive;
 

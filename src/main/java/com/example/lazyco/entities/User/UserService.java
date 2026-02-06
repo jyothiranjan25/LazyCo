@@ -136,16 +136,22 @@ public class UserService implements UserDetailsService {
   // Set User Role
   public UserDTO setRole(
       UserRoleDTO userRoleDTO, HttpServletRequest request, HttpServletResponse response) {
+    // check if role id is provided
+    if (userRoleDTO.getId() == null) {
+      throw new ApplicationException(UserMessage.ROLE_CANNOT_BE_NULL);
+    }
+
+    // check if logged user is valid
     AppUserDTO longedUser = jwtUtil.checkAndGetUser(request, null);
     if (longedUser == null || longedUser.getId() == null) {
       throw new ApplicationException(UserMessage.USER_NOT_AUTHORIZED);
     }
-    userRoleDTO.setFetchOnlyRole(true);
     userRoleDTO.setAppUserId(longedUser.getId());
     userRoleDTO = userRoleService.getSingle(userRoleDTO);
     if (userRoleDTO == null) {
       throw new ApplicationException(UserMessage.ROLE_NOT_FOUND);
     }
+    // Generate new token with updated role claim
     String token =
         jwtUtil.addClaimsAndRegenerateToken(
             Map.of(CommonConstants.LOGGED_USER_ROLE, userRoleDTO.getId()), request);
@@ -159,6 +165,7 @@ public class UserService implements UserDetailsService {
     }
     userDTO.setToken(token);
     userDTO.setRole(userRoleDTO.getRole());
+    userDTO.setUserGroup(userRoleDTO.getUserGroup());
     return userDTO;
   }
 

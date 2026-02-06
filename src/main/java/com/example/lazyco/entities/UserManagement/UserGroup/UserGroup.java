@@ -50,5 +50,6 @@ public class UserGroup extends AbstractModel {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private UserGroup parentUserGroup;
 
+  @OneToMany(mappedBy = "parentUserGroup")
   private Set<UserGroup> childUserGroups;
 }

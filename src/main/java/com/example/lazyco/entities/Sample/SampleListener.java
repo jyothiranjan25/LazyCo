@@ -1,8 +1,6 @@
 package com.example.lazyco.entities.Sample;
 
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 
 public class SampleListener {
 
@@ -20,4 +18,9 @@ public class SampleListener {
   public void preRemove(Sample sample) {
     // Logic to execute before persisting entity
   }
+
+  @PostPersist
+  @PostUpdate
+  @PostRemove
+  public void deleteCache(Sample sample) {}
 }

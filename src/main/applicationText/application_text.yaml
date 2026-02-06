@@ -31,8 +31,16 @@ ROLE:
   ROLE_NAME_REQUIRED : "Role name is required."
   DUPLICATE_ROLE_NAME : "A role with the name '%1$s' already exists."
 
+APP_USER:
+  USER_ID_REQUIRED : "User ID is required."
+  EMAIL_REQUIRED : "Email is required."
+  FIRST_NAME_REQUIRED : "First name is required."
+  DUPLICATE_USER_ID: "A user with the ID '%1$s' already exists."
+  EMAIL_IN_USE : "The email '%1$s' is already associated with another account."
+
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
+  ROLE_CANNOT_BE_NULL : "Role cannot be null. Please select a valid role for the user."
   ROLE_NOT_FOUND : "Please select a valid role for the user."
   PASSWORD_CANNOT_BE_EMPTY: "Password cannot be empty. Please enter a valid password."
   INCORRECT_PASSWORD: "The password you entered is incorrect. Please try again or reset your password."
@@ -47,9 +55,3 @@ USER_MODULES:
   INVALID_RESET_TOKEN: "The password reset token is invalid."
   RESET_TOKEN_EXPIRED: "The password reset token has expired."
   PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
-
-APP_USER:
-  USER_ID_REQUIRED : "User ID is required."
-  EMAIL_REQUIRED : "Email is required."
-  DUPLICATE_USER_ID: "A user with the ID '%1$s' already exists."
-  EMAIL_IN_USE : "The email '%1$s' is already associated with another account."

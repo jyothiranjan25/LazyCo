@@ -37,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 @EnableScheduling
 @EnableAsync(proxyTargetClass = true)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(basePackages = {BACKEND_PACKAGE})
 @PropertySources({@PropertySource("classpath:" + APPLICATION_PROPERTIES)})

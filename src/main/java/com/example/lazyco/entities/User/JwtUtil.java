@@ -145,6 +145,10 @@ public class JwtUtil {
             () -> userService.getUserById(userId));
   }
 
+  public AppUserDTO getLoggedUser(HttpServletRequest request) {
+    return abstractAction.getLoggedAppUser();
+  }
+
   /**
    * Checks and retrieves the user role from the JWT token in the request.
    *

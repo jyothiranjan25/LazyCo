@@ -3,7 +3,7 @@ package com.example.lazyco.entities.UserManagement.AppUser;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -50,13 +50,19 @@ public class AppUser extends AbstractRBACModel {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "authorities", comment = "User authorities/roles")
-  private List<AuthorityEnum> authorities;
+  private Set<AuthorityEnum> authorities;
 
   @Column(
-      name = "is_admin",
-      comment = "Indicates if the user has admin privileges",
+      name = "is_super_admin",
+      comment = "Indicates if the user has super admin privileges",
       columnDefinition = "boolean default false")
-  private Boolean isAdmin;
+  private Boolean isSuperAdmin;
+
+  @Column(
+      name = "is_administrator",
+      comment = "Indicates if the user has administrator privileges",
+      columnDefinition = "boolean default false")
+  private Boolean isAdministrator;
 
   @Column(
       name = "is_active",

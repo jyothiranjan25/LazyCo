@@ -5,6 +5,7 @@ import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.CommonConstants;
 import com.example.lazyco.entities.User.JwtUtil;
 import com.example.lazyco.entities.User.UserMessage;
+import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -25,11 +26,27 @@ public class LoginControllerInterceptor implements HandlerInterceptor {
       throws Exception {
     ApplicationLogger.info("Check user is logged in - LoginControllerInterceptor");
 
-    // Case 1: Check if the user is not null
+    // Case 1: Check if the request is invalid or the user is not logged in
     if (jwtUtil.requestIsInvalid(request, CommonConstants.LOGGED_USER)) {
       request.getSession().invalidate();
       throw new ApplicationException(
           HttpStatus.UNAUTHORIZED, UserMessage.USER_NOT_AUTHORIZED); // Stop further processing
+    }
+
+    AppUserDTO loggedUser = jwtUtil.getLoggedUser(request);
+
+    // Case 2: Check if the user account is Active
+    if (Boolean.FALSE.equals(loggedUser.getIsActive())) {
+      request.getSession().invalidate();
+      throw new ApplicationException(
+          HttpStatus.UNAUTHORIZED, UserMessage.ACCOUNT_DISABLED); // Stop further processing
+    }
+
+    // Case 3: Check if the user account is locked
+    if (Boolean.TRUE.equals(loggedUser.getIsLocked())) {
+      request.getSession().invalidate();
+      throw new ApplicationException(
+          HttpStatus.UNAUTHORIZED, UserMessage.ACCOUNT_LOCKED); // Stop further processing
     }
 
     /*

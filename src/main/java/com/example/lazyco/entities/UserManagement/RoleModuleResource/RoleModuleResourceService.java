@@ -17,7 +17,7 @@ public class RoleModuleResourceService
     filter.setModuleId(dto.getModuleId());
     filter.setResourceId(dto.getResourceId());
 
-    if(getCount(filter) < 1){
+    if (getCount(filter) < 1) {
       return super.executeCreateTransactional(dto);
     }
     return dto;

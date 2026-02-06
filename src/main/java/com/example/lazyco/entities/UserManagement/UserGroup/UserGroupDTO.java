@@ -4,7 +4,9 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +22,7 @@ public class UserGroupDTO extends AbstractDTO<UserGroupDTO> {
   @FieldPath(fullyQualifiedPath = "parentUserGroup.id")
   private Long parentId;
 
-  private List<UserGroupDTO> childUserGroups;
+  private Set<UserGroupDTO> childUserGroups;
   private Boolean fetchParent;
   private Boolean getChildForParent;
 }
