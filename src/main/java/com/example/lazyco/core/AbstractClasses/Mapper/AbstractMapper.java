@@ -25,6 +25,9 @@ public interface AbstractMapper<D extends AbstractDTO<D>, E extends AbstractMode
   @InheritInverseConfiguration(name = "map")
   List<E> mapDTOList(List<D> dtos);
 
+  @InheritInverseConfiguration(name = "map")
+  Set<E> mapDTOSet(Set<D> dtos);
+
   // --- DTO -> Entity updates ---
   @Named("standardDtoToEntityMapping")
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
