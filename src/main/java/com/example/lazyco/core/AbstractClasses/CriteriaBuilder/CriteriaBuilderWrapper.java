@@ -868,8 +868,9 @@ public class CriteriaBuilderWrapper {
   // Date range conflict criteria - Improved with error handling
   // -------------------------------
 
-  public void addDateTimeRangeConflictCriteria(DateRangeDTO dateRangeDTO, String from, String to) {
-    if (dateRangeDTO == null || from == null || to == null) {
+  public void addDateTimeRangeConflictCriteria(
+      DateRangeDTO dateRangeDTO, String StartDateColumn, String EndDateColumn) {
+    if (dateRangeDTO == null || StartDateColumn == null || EndDateColumn == null) {
       return;
     }
 
@@ -877,16 +878,16 @@ public class CriteriaBuilderWrapper {
       Disjunction d = new Disjunction(this);
 
       Conjunction startDateBetween = new Conjunction(this);
-      startDateBetween.add(this.getGtPredicate(from, dateRangeDTO.getStart()));
-      startDateBetween.add(this.getLtPredicate(from, dateRangeDTO.getEnd()));
+      startDateBetween.add(this.getGtPredicate(StartDateColumn, dateRangeDTO.getStart()));
+      startDateBetween.add(this.getLtPredicate(StartDateColumn, dateRangeDTO.getEnd()));
 
       Conjunction endDateBetween = new Conjunction(this);
-      endDateBetween.add(this.getGtPredicate(to, dateRangeDTO.getStart()));
-      endDateBetween.add(this.getLtPredicate(to, dateRangeDTO.getEnd()));
+      endDateBetween.add(this.getGtPredicate(EndDateColumn, dateRangeDTO.getStart()));
+      endDateBetween.add(this.getLtPredicate(EndDateColumn, dateRangeDTO.getEnd()));
 
       Conjunction startAndEnd = new Conjunction(this);
-      startAndEnd.add(this.getLePredicate(from, dateRangeDTO.getStart()));
-      startAndEnd.add(this.getGePredicate(to, dateRangeDTO.getEnd()));
+      startAndEnd.add(this.getLePredicate(StartDateColumn, dateRangeDTO.getStart()));
+      startAndEnd.add(this.getGePredicate(EndDateColumn, dateRangeDTO.getEnd()));
 
       d.add(startDateBetween.build());
       d.add(endDateBetween.build());
