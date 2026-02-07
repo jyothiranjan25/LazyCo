@@ -84,7 +84,7 @@ public class FilterBuilder {
             }
           }
           Predicate finalAnd = ExpressionOperation.getJunction(op, criteriaBuilderWrapper, and);
-          criteriaBuilderWrapper.and(finalAnd);
+          criteriaBuilderWrapper.andGroup(finalAnd);
           break;
         case OR:
           List<Predicate> or = new ArrayList<>();
@@ -95,7 +95,7 @@ public class FilterBuilder {
             }
           }
           Predicate finalOr = ExpressionOperation.getJunction(op, criteriaBuilderWrapper, or);
-          criteriaBuilderWrapper.or(finalOr);
+          criteriaBuilderWrapper.orGroup(finalOr);
           break;
       }
     }

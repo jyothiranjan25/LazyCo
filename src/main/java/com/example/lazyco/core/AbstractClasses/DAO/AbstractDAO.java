@@ -262,7 +262,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
           criteriaBuilderWrapper.getILikePredicate(AbstractRBACModel.RBAC_COLUMN, groupName + ".%");
 
       // Combine with OR - user can see their lineage OR child groups
-      criteriaBuilderWrapper.or(exactGroupPredicate, childGroupPredicate);
+      criteriaBuilderWrapper.orGroup(exactGroupPredicate, childGroupPredicate);
     } catch (Exception e) {
       ApplicationLogger.error(e.getMessage(), e);
     }

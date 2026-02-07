@@ -265,7 +265,7 @@ public class FieldFilterUtils {
       searchPredicates.add(criteriaBuilderWrapper.getSearchCriteria(path, searchString));
     }
     if (!searchPredicates.isEmpty()) {
-      criteriaBuilderWrapper.or(searchPredicates.toArray(new Predicate[0]));
+      criteriaBuilderWrapper.orGroup(searchPredicates.toArray(new Predicate[0]));
     }
   }
 

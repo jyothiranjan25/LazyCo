@@ -563,6 +563,8 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getSearchPredicate(Path<?> path, String value) {
+    //    return criteriaBuilder.ilike(criteriaBuilder.toString((Expression<Character>) path),
+    // value);
     return criteriaBuilder.ilike(
         criteriaBuilder.lower(criteriaBuilder.toString((Expression<Character>) path)),
         value.toLowerCase());
