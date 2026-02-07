@@ -2,6 +2,7 @@ package com.example.lazyco.entities.UserManagement.Resource;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.entities.UserManagement.Module.Module;
+import com.example.lazyco.entities.UserManagement.RoleModuleResource.RoleModuleResource;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -62,4 +63,7 @@ public class Resource extends AbstractModel {
 
   @ManyToMany(mappedBy = "resources")
   private Set<Module> modules;
+
+  @OneToMany(mappedBy = "resource")
+  private Set<RoleModuleResource> roleModuleResources;
 }

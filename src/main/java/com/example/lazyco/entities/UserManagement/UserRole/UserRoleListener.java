@@ -1,8 +1,8 @@
 package com.example.lazyco.entities.UserManagement.UserRole;
 
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
-import jakarta.persistence.PreUpdate;
+import com.example.lazyco.core.Cache.CacheSingleton;
+import com.example.lazyco.core.Utils.CommonConstants;
+import jakarta.persistence.*;
 
 public class UserRoleListener {
 
@@ -19,5 +19,13 @@ public class UserRoleListener {
   @PreRemove
   public void preRemove(UserRole userRole) {
     // Logic to execute before persisting entity
+  }
+
+  @PostPersist
+  @PostUpdate
+  @PostRemove
+  public void deleteCache(UserRole userRole) {
+    CacheSingleton.getUserRoleCache()
+        .remove(CommonConstants.LOGGED_USER_ROLE.concat(":" + userRole.getId()));
   }
 }

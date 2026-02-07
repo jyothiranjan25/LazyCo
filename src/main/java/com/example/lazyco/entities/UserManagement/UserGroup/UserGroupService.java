@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.UserManagement.UserGroup;
 
+import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
@@ -8,8 +9,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserGroupService extends AbstractService<UserGroupDTO, UserGroup> {
-  protected UserGroupService(UserGroupMapper UserGroupMapper) {
+
+  private final AbstractAction abstractAction;
+
+  protected UserGroupService(UserGroupMapper UserGroupMapper, AbstractAction abstractAction) {
     super(UserGroupMapper);
+    this.abstractAction = abstractAction;
+  }
+
+  @Override
+  protected UserGroupDTO updateFilterBeforeGet(UserGroupDTO filter) {
+    // extract logged in user group id and set it to filter to fetch only the user groups relevant
+    // to logged in user
+    if (Boolean.TRUE.equals(filter.getFetchForLoggedInUser())) {
+      UserGroupDTO userGroupDTO = abstractAction.getLoggedInUserGroup();
+      if (userGroupDTO != null && userGroupDTO.getId() != null) {
+        filter.setId(userGroupDTO.getId());
+      }
+    }
+    return filter;
   }
 
   @Override

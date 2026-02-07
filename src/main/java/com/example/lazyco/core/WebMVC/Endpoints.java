@@ -12,6 +12,7 @@ public class Endpoints {
     endpoints.add("/user/logout");
     endpoints.add("/user/forgot_password");
     endpoints.add("/user/reset_password");
+    endpoints.add("/admin/**");
     return endpoints;
   }
 

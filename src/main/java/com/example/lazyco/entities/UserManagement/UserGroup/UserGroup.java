@@ -1,6 +1,7 @@
 package com.example.lazyco.entities.UserManagement.UserGroup;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRole;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -52,4 +53,7 @@ public class UserGroup extends AbstractModel {
 
   @OneToMany(mappedBy = "parentUserGroup")
   private Set<UserGroup> childUserGroups;
+
+  @OneToMany(mappedBy = "userGroup")
+  private Set<UserRole> userRoles;
 }

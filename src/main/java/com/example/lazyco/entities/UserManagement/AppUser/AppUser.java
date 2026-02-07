@@ -1,6 +1,7 @@
 package com.example.lazyco.entities.UserManagement.AppUser;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.UserManagement.UserRole.UserRole;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Set;
@@ -87,4 +88,7 @@ public class AppUser extends AbstractRBACModel {
 
   @Column(name = "last_login_ip_address", comment = "IP address of the last user login")
   private String lastLoginIpAddress;
+
+  @OneToMany(mappedBy = "appUser")
+  private Set<UserRole> userRoles;
 }

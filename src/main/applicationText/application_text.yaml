@@ -38,6 +38,12 @@ APP_USER:
   DUPLICATE_USER_ID: "A user with the ID '%1$s' already exists."
   EMAIL_IN_USE : "The email '%1$s' is already associated with another account."
 
+USER_ROLE:
+  APP_USER_ID_REQUIRED : "App user ID is required."
+  ROLE_ID_REQUIRED : "Role ID is required."
+  USER_GROUP_ID_REQUIRED : "User group ID is required."
+  USER_ROLE_ALREADY_EXISTS : "The role already exists for the user in the specified user group."
+
 USER_MODULES:
   USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
   ROLE_CANNOT_BE_NULL : "Role cannot be null. Please select a valid role for the user."
@@ -45,11 +51,11 @@ USER_MODULES:
   PASSWORD_CANNOT_BE_EMPTY: "Password cannot be empty. Please enter a valid password."
   INCORRECT_PASSWORD: "The password you entered is incorrect. Please try again or reset your password."
   USER_ID_OR_PASSWORD_INCORRECT: "Invalid user ID or password. Please check your credentials and try again."
-  ACCOUNT_DISABLED : "Your account has been disabled. Please contact support Team."
-  ACCOUNT_LOCKED: "Your account has been locked,Please contact support Team."
+  ACCOUNT_DISABLED : "Your account has been disabled. Please contact administrator for assistance."
+  ACCOUNT_LOCKED: "Your account has been locked,Please contact administrator for assistance."
   PASSWORD_EXPIRED: "Your password has expired. Please reset your password to continue."
   USER_NOT_AUTHORIZED : "You do not have the necessary permissions to access this resource."
-  ROLE_NOT_SELECTED : "No role has been selected for the user."
+  ROLE_NOT_SELECTED : "No role has been selected for the user. Please select a role to proceed."
   LOGOUT_SUCCESS : "You have been successfully logged out."
   PASSWORD_RESET_INITIATED : "A password reset link has been sent to your registered email address."
   INVALID_RESET_TOKEN: "The password reset token is invalid."
