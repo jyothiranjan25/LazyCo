@@ -4,7 +4,6 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.ComparisionPredic
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.DateUtils.DateRangeDTO;
-import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.*;
 import jakarta.persistence.metamodel.PluralAttribute;
@@ -457,7 +456,7 @@ public class CriteriaBuilderWrapper {
 
   private Predicate getIsEmptyPredicate(Path<?> path) {
     if (!(path.getModel() instanceof PluralAttribute)) {
-      throw new ExceptionWrapper("isEmpty can only be used on collection attributes: " + path);
+      throw new IllegalStateException("isEmpty can only be used on collection attributes: " + path);
     }
     return criteriaBuilder.isEmpty((Expression<Collection<?>>) path);
   }
@@ -473,7 +472,8 @@ public class CriteriaBuilderWrapper {
 
   private Predicate getIsNotEmptyPredicate(Path<?> path) {
     if (!(path.getModel() instanceof PluralAttribute)) {
-      throw new ExceptionWrapper("isNotEmpty can only be used on collection attributes: " + path);
+      throw new IllegalStateException(
+          "isNotEmpty can only be used on collection attributes: " + path);
     }
     return criteriaBuilder.isNotEmpty((Expression<Collection<?>>) path);
   }
@@ -534,6 +534,19 @@ public class CriteriaBuilderWrapper {
 
   public Predicate getOrPredicate(Predicate... predicates) {
     return criteriaBuilder.or(predicates);
+  }
+
+  /** Grouping predicates */
+  public void andGroup(Predicate... predicates) {
+    if (predicates != null && predicates.length > 0) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.and(predicates));
+    }
+  }
+
+  public void orGroup(Predicate... predicates) {
+    if (predicates != null && predicates.length > 0) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.or(predicates));
+    }
   }
 
   // -------------------------------
@@ -703,7 +716,7 @@ public class CriteriaBuilderWrapper {
       return FieldFilterUtils.getPathNode(this, fullyQualifiedPath);
     } catch (Exception e) {
       ApplicationLogger.error("Failed to get expression for: " + aliasPath, e);
-      throw new RuntimeException("Failed to resolve path: " + aliasPath, e);
+      throw new IllegalArgumentException("Failed to resolve path: " + aliasPath, e);
     }
   }
 
@@ -727,6 +740,14 @@ public class CriteriaBuilderWrapper {
       fullyQualifiedPath = parentPath + "." + property;
     }
     return fullyQualifiedPath;
+  }
+
+  public Predicate exists(Subquery<?> subquery) {
+    return criteriaBuilder.exists(subquery);
+  }
+
+  public Predicate notExists(Subquery<?> subquery) {
+    return criteriaBuilder.not(criteriaBuilder.exists(subquery));
   }
 
   // -------------------------------
@@ -775,6 +796,9 @@ public class CriteriaBuilderWrapper {
         }
       }
 
+      if (aliasToFullyQualifiedPathMap.containsKey(alias)) {
+        throw new IllegalStateException("Alias already in use: " + alias);
+      }
       aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
     } catch (Exception e) {
       ApplicationLogger.error("Failed to create join for property: " + property, e);
@@ -829,7 +853,9 @@ public class CriteriaBuilderWrapper {
           fqPath.append(".");
         }
       }
-
+      if (aliasToFullyQualifiedPathMap.containsKey(alias)) {
+        throw new IllegalStateException("Alias already in use: " + alias);
+      }
       aliasToFullyQualifiedPathMap.put(alias, fqPath.toString());
     } catch (Exception e) {
       ApplicationLogger.error("Failed to create fetch for property: " + property, e);
