@@ -1,6 +1,6 @@
 package com.example.lazyco.entities.UserManagement.Role;
 
-import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.entities.UserManagement.Module.ModuleDTO;
 import com.example.lazyco.entities.UserManagement.Module.ModuleService;
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoleService extends AbstractService<RoleDTO, Role> {
+public class RoleService extends CommonAbstractService<RoleDTO, Role> {
 
   private final ModuleService moduleService;
   private final RoleModuleResourceService roleModuleResourceService;
@@ -82,7 +82,9 @@ public class RoleService extends AbstractService<RoleDTO, Role> {
     if (StringUtils.isEmpty(requestDTO.getRoleName())) {
       throw new ApplicationException(RoleMessage.ROLE_NAME_REQUIRED);
     }
-    validateDuplicateName(requestDTO.getRoleName(), null);
+
+    // name should be unique
+    validateUniqueName(requestDTO,RoleMessage.DUPLICATE_ROLE_NAME);
   }
 
   @Override
@@ -93,24 +95,13 @@ public class RoleService extends AbstractService<RoleDTO, Role> {
   @Override
   protected void validateBeforeUpdate(RoleDTO requestDTO) {
     if (!StringUtils.isEmpty(requestDTO.getRoleName())) {
-      validateDuplicateName(requestDTO.getRoleName(), requestDTO.getId());
+      validateUniqueName(requestDTO,RoleMessage.DUPLICATE_ROLE_NAME);
     }
   }
 
   @Override
   protected void postUpdate(RoleDTO requestDTO, RoleDTO entityBeforeUpdate, Role updatedEntity) {
     mapRoleModuleResources(requestDTO, updatedEntity);
-  }
-
-  private void validateDuplicateName(String roleName, Long excludeId) {
-    RoleDTO filter = new RoleDTO();
-    filter.setRoleName(roleName);
-    if (excludeId != null) {
-      filter.setIdsNotIn(List.of(excludeId));
-    }
-    if (getCount(filter) > 0) {
-      throw new ApplicationException(RoleMessage.DUPLICATE_ROLE_NAME, new Object[] {roleName});
-    }
   }
 
   public void mapRoleModuleResources(RoleDTO requestDTO, Role entity) {

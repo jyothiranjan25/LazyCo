@@ -1,6 +1,6 @@
 package com.example.lazyco.entities.UserManagement.Module;
 
-import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.entities.UserManagement.Resource.Resource;
 import com.example.lazyco.entities.UserManagement.Resource.ResourceDTO;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class ModuleService extends AbstractService<ModuleDTO, Module> {
+public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
 
   private final ResourceMapper resourceMapper;
 
@@ -58,7 +58,9 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
     if (StringUtils.isEmpty(requestDTO.getModuleName())) {
       throw new ApplicationException(ModuleMessage.MODULE_NAME_REQUIRED);
     }
-    validateDuplicateName(requestDTO.getModuleName(), null);
+
+    // name should be unique
+    validateUniqueName(requestDTO, ModuleMessage.DUPLICATE_MODULE_NAME);
   }
 
   @Override
@@ -77,7 +79,7 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
   @Override
   protected void validateBeforeUpdate(ModuleDTO requestDTO) {
     if (!StringUtils.isEmpty(requestDTO.getModuleName())) {
-      validateDuplicateName(requestDTO.getModuleName(), requestDTO.getId());
+      validateUniqueName(requestDTO,ModuleMessage.DUPLICATE_MODULE_NAME);
     }
   }
 
@@ -97,18 +99,6 @@ public class ModuleService extends AbstractService<ModuleDTO, Module> {
       List<Resource> removeResources = resourceMapper.mapDTOList(source.getRemoveResources());
       target.setResources(
           new HashSet<>(removeAssociatedEntities(target.getResources(), removeResources)));
-    }
-  }
-
-  private void validateDuplicateName(String moduleName, Long excludeId) {
-    ModuleDTO filter = new ModuleDTO();
-    filter.setModuleName(moduleName);
-    if (excludeId != null) {
-      filter.setIdsNotIn(List.of(excludeId));
-    }
-    if (getCount(filter) > 0) {
-      throw new ApplicationException(
-          ModuleMessage.DUPLICATE_MODULE_NAME, new Object[] {moduleName});
     }
   }
 

@@ -3,6 +3,7 @@ package com.example.lazyco.entities.UserManagement.Module;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.core.AbstractClasses.DTO.HasName;
 import com.example.lazyco.entities.UserManagement.Resource.ResourceDTO;
 import java.util.List;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @FilteredEntity(type = Module.class)
-public class ModuleDTO extends AbstractDTO<ModuleDTO> {
+public class ModuleDTO extends AbstractDTO<ModuleDTO> implements HasName {
 
   @InternalFilterableField private String moduleName;
   private String description;
@@ -22,4 +23,14 @@ public class ModuleDTO extends AbstractDTO<ModuleDTO> {
   private List<ResourceDTO> removeResources;
   private List<ResourceDTO> resources;
   private Boolean fetchResources;
+
+  @Override
+  public String getName() {
+    return moduleName;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.moduleName = name;
+  }
 }

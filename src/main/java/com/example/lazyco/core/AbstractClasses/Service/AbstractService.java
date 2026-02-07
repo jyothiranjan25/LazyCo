@@ -7,10 +7,15 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.CommonMessage;
+import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import lombok.Getter;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,7 +26,11 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Transactional
 public abstract class AbstractService<D extends AbstractDTO<D>, E extends AbstractModel>
-    extends AbstractHelperService<D, E> implements IAbstractService<D, E> {
+    implements IAbstractService<D, E> {
+
+  // Cache for DTO class calculation to avoid repeated reflection
+  private static final ConcurrentHashMap<Class<?>, Class<?>> dtoClassCache =
+      new ConcurrentHashMap<>();
 
   @Lazy
   @Autowired
@@ -30,15 +39,36 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   private final AbstractMapper<D, E> abstractMapper;
   private IAbstractDAO<D, E> abstractDAO;
+  @Getter private final Class<D> dtoClass;
 
   protected AbstractService(AbstractMapper<D, E> abstractMapper) {
-    super();
     this.abstractMapper = abstractMapper;
+    dtoClass = this.calculateDTOClass();
   }
 
   @Autowired
   private void injectDependencies(IAbstractDAO<D, E> abstractDAO) {
     this.abstractDAO = abstractDAO;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Class<D> calculateDTOClass() {
+    // Use cache to avoid repeated reflection
+    return (Class<D>)
+        dtoClassCache.computeIfAbsent(
+            getClass(),
+            clazz -> {
+              Type superClass = clazz.getGenericSuperclass();
+              if (superClass instanceof ParameterizedType parameterizedType) {
+                Type type = parameterizedType.getActualTypeArguments()[0];
+                if (type instanceof Class) {
+                  return (Class<?>) type;
+                } else if (type instanceof ParameterizedType) {
+                  return (Class<?>) ((ParameterizedType) type).getRawType();
+                }
+              }
+              throw new ExceptionWrapper("Unable to determine DTO class for: " + clazz.getName());
+            });
   }
 
   // Do not call this method directly, use the template method instead

@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.core.AbstractClasses.DTO.HasName;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @FilteredEntity(type = UserGroup.class)
-public class UserGroupDTO extends AbstractDTO<UserGroupDTO> {
+public class UserGroupDTO extends AbstractDTO<UserGroupDTO> implements HasName {
   @InternalFilterableField private String userGroupName;
   private String fullyQualifiedName;
   private String description;
@@ -24,4 +25,14 @@ public class UserGroupDTO extends AbstractDTO<UserGroupDTO> {
   private Boolean fetchParent;
   private Boolean getChildForParent;
   private Boolean fetchForLoggedInUser;
+
+  @Override
+  public String getName() {
+    return userGroupName;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.userGroupName = name;
+  }
 }

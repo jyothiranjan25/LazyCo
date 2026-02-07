@@ -2,13 +2,13 @@ package com.example.lazyco.entities.UserManagement.UserGroup;
 
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
-import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
+import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserGroupService extends AbstractService<UserGroupDTO, UserGroup> {
+public class UserGroupService extends CommonAbstractService<UserGroupDTO, UserGroup> {
 
   private final AbstractAction abstractAction;
 
@@ -45,16 +45,11 @@ public class UserGroupService extends AbstractService<UserGroupDTO, UserGroup> {
       throw new ApplicationException(UserGroupMessage.USER_GROUP_NAME_REQUIRED);
     }
 
-    // check for duplicate name
-    UserGroupDTO userGroupDTO = new UserGroupDTO();
-    userGroupDTO.setUserGroupName(requestDTO.getUserGroupName());
-    if (getCount(userGroupDTO) > 0) {
-      throw new ApplicationException(
-          UserGroupMessage.DUPLICATE_USER_GROUP_NAME, new Object[] {requestDTO.getUserGroupName()});
-    }
+    // name should be unique
+    validateUniqueName(requestDTO, UserGroupMessage.DUPLICATE_USER_GROUP_NAME);
 
     // set fully qualified name
-    setFullyQualifiedName(userGroupDTO);
+    setFullyQualifiedName(requestDTO);
   }
 
   private void setFullyQualifiedName(UserGroupDTO requestDTO) {

@@ -8,7 +8,13 @@ COMMON_MODULES:
   ID_REQUIRED: "The ID is required."
   INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
   FIELD_MISSING : "The field '%1$s' is missing."
+  DUPLICATE_RECORD : "A record with the same value already exists."
   DUPLICATE_FIELD : "The record '%1$s' already exists."
+  CODE_ALREADY_EXISTS : "The code '%1$s' is already in use. Please choose a different code."
+  ERROR_VALIDATING_CODE : "Error while validating the code."
+  CODE_REQUIRED : "The code field is required."
+  ERROR_VALIDATING_NAME : "Error while validating the name."
+  NAME_REQUIRED : "The name field is required."
 
 USER_GROUP:
   USER_GROUP_NAME_REQUIRED : "User group name is required."
