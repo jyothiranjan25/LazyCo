@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.Sample;
+package com.example.lazyco.Sample;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;

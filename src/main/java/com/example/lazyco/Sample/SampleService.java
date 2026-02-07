@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.Sample;
+package com.example.lazyco.Sample;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import org.springframework.stereotype.Service;
