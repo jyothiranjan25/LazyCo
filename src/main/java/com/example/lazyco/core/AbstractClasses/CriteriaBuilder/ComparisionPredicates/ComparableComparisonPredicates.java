@@ -32,7 +32,6 @@ public class ComparableComparisonPredicates implements ComparisonPredicates {
     return criteriaBuilder.between(expression, (Comparable) from, (Comparable) to);
   }
 
-  @Override
   public Predicate getGePredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {
     return criteriaBuilder.greaterThanOrEqualTo(
@@ -40,7 +39,6 @@ public class ComparableComparisonPredicates implements ComparisonPredicates {
         (Expression<? extends Comparable>) expression2);
   }
 
-  @Override
   public Predicate getLePredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {
     return criteriaBuilder.lessThanOrEqualTo(
@@ -48,7 +46,6 @@ public class ComparableComparisonPredicates implements ComparisonPredicates {
         (Expression<? extends Comparable>) expression2);
   }
 
-  @Override
   public Predicate getGtPredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {
     return criteriaBuilder.greaterThan(
@@ -56,7 +53,6 @@ public class ComparableComparisonPredicates implements ComparisonPredicates {
         (Expression<? extends Comparable>) expression2);
   }
 
-  @Override
   public Predicate getLtPredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {
     return criteriaBuilder.lessThan(

@@ -4,8 +4,10 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.ComparisionPredic
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.DateUtils.DateRangeDTO;
+import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.*;
+import jakarta.persistence.metamodel.PluralAttribute;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
@@ -45,28 +47,23 @@ public class CriteriaBuilderWrapper {
     this.finalPredicate = criteriaBuilder.conjunction();
   }
 
+  public void setDistinct() {
+    query.select(root).distinct(isDistinct);
+  }
+
   public Predicate getFinalPredicate() {
     query.where(finalPredicate);
     return query.getRestriction();
-  }
-
-  private CriteriaBuilderWrapper addAndPredicate(Predicate predicate) {
-    this.finalPredicate = criteriaBuilder.and(finalPredicate, predicate);
-    return this;
-  }
-
-  private CriteriaBuilderWrapper addOrPredicate(Predicate predicate) {
-    this.finalPredicate = criteriaBuilder.or(finalPredicate, predicate);
-    return this;
   }
 
   // -------------------------------
   // Common predicate methods (fluent)
   // -------------------------------
 
+  /** Equal predicates */
   public void eq(String key, Object value) {
     if (Objects.nonNull(value)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(key, value));
+      eq(getExpression(key), value);
     }
   }
 
@@ -77,53 +74,39 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getEqualPredicate(String key, Object value) {
-    return criteriaBuilder.equal(getExpression(key), value);
+    return getEqualPredicate(getExpression(key), value);
   }
 
   public Predicate getEqualPredicate(Path<?> path, Object value) {
     return criteriaBuilder.equal(path, value);
   }
 
-  public void propertyEq(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate, criteriaBuilder.equal(getExpression(column1), getExpression(column2)));
-  }
-
   public void equalIgnoreCase(String key, Object value) {
     if (Objects.nonNull(value)) {
-      Expression lower = criteriaBuilder.lower(getExpression(key));
+      Expression lowerColumn = criteriaBuilder.lower(getExpression(key));
+      String lowerValue = value.toString().toLowerCase();
       finalPredicate =
-          criteriaBuilder.and(
-              finalPredicate, criteriaBuilder.equal(lower, value.toString().toLowerCase()));
+          criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(lowerColumn, lowerValue));
     }
   }
 
-  public void notEqual(String key, Object value) {
+  public void propertyEq(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate =
+        criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(column1Path, column2Path));
+  }
+
+  /** Not equal predicates */
+  public void notEq(String key, Object value) {
     if (Objects.nonNull(value)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(key, value));
+      notEq(getExpression(key), value);
     }
   }
 
-  public void notEqual(Path<?> path, Object value) {
+  public void notEq(Path<?> path, Object value) {
     if (Objects.nonNull(value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(path, value));
-    }
-  }
-
-  public void notEqualProperty(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate,
-            criteriaBuilder.notEqual(getExpression(column1), getExpression(column2)));
-  }
-
-  public void notEqualIgnoreCase(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      Expression lower = criteriaBuilder.lower(getExpression(key));
-      finalPredicate =
-          criteriaBuilder.and(
-              finalPredicate, criteriaBuilder.notEqual(lower, value.toString().toLowerCase()));
     }
   }
 
@@ -135,16 +118,27 @@ public class CriteriaBuilderWrapper {
     return criteriaBuilder.notEqual(path, value);
   }
 
+  public void notEqualIgnoreCase(String key, Object value) {
+    if (Objects.nonNull(value)) {
+      Expression lowerColumn = criteriaBuilder.lower(getExpression(key));
+      String lowerValue = value.toString().toLowerCase();
+      finalPredicate =
+          criteriaBuilder.and(finalPredicate, criteriaBuilder.notEqual(lowerColumn, lowerValue));
+    }
+  }
+
+  public void notPropertyEq(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate =
+        criteriaBuilder.and(finalPredicate, criteriaBuilder.notEqual(column1Path, column2Path));
+  }
+
+  /** Greater than predicates */
   public void gt(String key, Object value) {
     if (Objects.nonNull(value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(key, value));
     }
-  }
-
-  public void greaterThan(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate, getGtPredicate(getExpression(column1), getExpression(column2)));
   }
 
   public Predicate getGtPredicate(String key, Object value) {
@@ -155,20 +149,21 @@ public class CriteriaBuilderWrapper {
     return ComparisonPredicates.factory(value).getGtPredicate(criteriaBuilder, path, value);
   }
 
+  public void propertyGt(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(column1Path, column2Path));
+  }
+
   public Predicate getGtPredicate(Path<?> path, Path<?> path2) {
     return ComparisonPredicates.factory(path).getGtPredicate(criteriaBuilder, path, path2);
   }
 
+  /** Less than predicates */
   public void lt(String key, Object value) {
     if (Objects.nonNull(value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(key, value));
     }
-  }
-
-  public void lessThan(String column1, String column2) {
-    finalPredicate =
-        criteriaBuilder.and(
-            finalPredicate, getLtPredicate(getExpression(column1), getExpression(column2)));
   }
 
   public Predicate getLtPredicate(String key, Object value) {
@@ -179,28 +174,21 @@ public class CriteriaBuilderWrapper {
     return ComparisonPredicates.factory(value).getLtPredicate(criteriaBuilder, path, value);
   }
 
+  public void propertyLt(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(column1Path, column2Path));
+  }
+
   public Predicate getLtPredicate(Path<?> path, Path<?> path2) {
     return ComparisonPredicates.factory(path).getLtPredicate(criteriaBuilder, path, path2);
   }
 
+  /** Greater than or equal predicates */
   public void ge(String key, Object value) {
     if (Objects.nonNull(value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(key, value));
     }
-  }
-
-  public void greaterThenOrEqual(String column1, String column2) {
-    Predicate gePredicate = getGePredicate(getExpression(column1), getExpression(column2));
-    finalPredicate = criteriaBuilder.and(finalPredicate, gePredicate);
-  }
-
-  public Predicate greaterThanOrEqual(String key, Object value) {
-    return greaterThanOrEqual(getExpression(key), value);
-  }
-
-  public Predicate greaterThanOrEqual(Path<?> path, Object value) {
-    Predicate gePredicate = getGePredicate(path, criteriaBuilder.literal(value));
-    return criteriaBuilder.and(finalPredicate, gePredicate);
   }
 
   public Predicate getGePredicate(String key, Object value) {
@@ -211,28 +199,21 @@ public class CriteriaBuilderWrapper {
     return ComparisonPredicates.factory(value).getGePredicate(criteriaBuilder, path, value);
   }
 
+  public void propertyGe(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(column1Path, column2Path));
+  }
+
   public Predicate getGePredicate(Path<?> path, Path<?> path2) {
     return ComparisonPredicates.factory(path).getGePredicate(criteriaBuilder, path, path2);
   }
 
+  /** Less than or equal predicates */
   public void le(String key, Object value) {
     if (Objects.nonNull(value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(key, value));
     }
-  }
-
-  public void lessThenOrEqual(String column1, String column2) {
-    Predicate lePredicate = getLePredicate(getExpression(column1), getExpression(column2));
-    finalPredicate = criteriaBuilder.and(finalPredicate, lePredicate);
-  }
-
-  public Predicate lessThanOrEqual(String key, Object value) {
-    return lessThanOrEqual(getExpression(key), value);
-  }
-
-  public Predicate lessThanOrEqual(Path<?> path, Object value) {
-    Predicate lePredicate = getLePredicate(path, criteriaBuilder.literal(value));
-    return criteriaBuilder.and(finalPredicate, lePredicate);
   }
 
   public Predicate getLePredicate(String key, Object value) {
@@ -243,13 +224,20 @@ public class CriteriaBuilderWrapper {
     return ComparisonPredicates.factory(value).getLePredicate(criteriaBuilder, path, value);
   }
 
+  public void propertyLe(String column1, String column2) {
+    Path<?> column1Path = getExpression(column1);
+    Path<?> column2Path = getExpression(column2);
+    finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(column1Path, column2Path));
+  }
+
   public Predicate getLePredicate(Path<?> path, Path<?> path2) {
     return ComparisonPredicates.factory(path).getLePredicate(criteriaBuilder, path, path2);
   }
 
+  /** IN predicates */
   public void in(String key, List value) {
     if (value != null && !value.isEmpty()) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(key, value));
+      in(getExpression(key), value);
     }
   }
 
@@ -267,9 +255,10 @@ public class CriteriaBuilderWrapper {
     return path.in(value);
   }
 
+  /** NOT IN predicates */
   public void notIn(String key, List value) {
     if (value != null && !value.isEmpty()) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(key, value));
+      notIn(getExpression(key), value);
     }
   }
 
@@ -287,9 +276,10 @@ public class CriteriaBuilderWrapper {
     return path.in(value).not();
   }
 
+  /** LIKE predicates */
   public void like(String key, String value) {
     if (value != null && !value.trim().isEmpty()) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(key, value));
+      like(getExpression(key), value);
     }
   }
 
@@ -299,17 +289,65 @@ public class CriteriaBuilderWrapper {
     }
   }
 
+  public void like(Path<?> path, Object value) {
+    if (value != null && !value.toString().trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(path, value));
+    }
+  }
+
   public Predicate getLikePredicate(String key, String value) {
     return getLikePredicate(getExpression(key), value);
   }
 
   public Predicate getLikePredicate(Path<?> path, String value) {
-    return criteriaBuilder.like((Expression<String>) path, value);
+    Expression<String> expressionPath = (Expression<String>) path;
+    return criteriaBuilder.like(expressionPath, value);
   }
 
+  public Predicate getLikePredicate(Path<?> path, Object value) {
+    Expression<String> expressionPath = (Expression<String>) path;
+    Expression<String> expressionValue = criteriaBuilder.literal(value.toString());
+    return criteriaBuilder.like(expressionPath, expressionValue);
+  }
+
+  /** NOT LIKE predicates */
+  public void notLike(String key, String value) {
+    if (value != null && !value.trim().isEmpty()) {
+      notLike(getExpression(key), value);
+    }
+  }
+
+  public void notLike(Path<?> path, String value) {
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotLikePredicate(path, value));
+    }
+  }
+
+  public void notLike(Path<?> path, Object value) {
+    if (value != null && !value.toString().trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotLikePredicate(path, value));
+    }
+  }
+
+  public Predicate getNotLikePredicate(String key, String value) {
+    return getNotLikePredicate(getExpression(key), value);
+  }
+
+  public Predicate getNotLikePredicate(Path<?> path, String value) {
+    Expression<String> expressionPath = (Expression<String>) path;
+    return criteriaBuilder.not(criteriaBuilder.like(expressionPath, value));
+  }
+
+  public Predicate getNotLikePredicate(Path<?> path, Object value) {
+    Expression<String> expressionPath = (Expression<String>) path;
+    Expression<String> expressionValue = criteriaBuilder.literal(value.toString());
+    return criteriaBuilder.not(criteriaBuilder.like(expressionPath, expressionValue));
+  }
+
+  /** ILIKE predicates */
   public void iLike(String key, String value) {
     if (value != null && !value.trim().isEmpty()) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(key, value));
+      iLike(getExpression(key), value);
     }
   }
 
@@ -319,29 +357,64 @@ public class CriteriaBuilderWrapper {
     }
   }
 
+  public void iLike(Path<?> path, Object value) {
+    if (value != null && !value.toString().trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(path, value));
+    }
+  }
+
   public Predicate getILikePredicate(String key, String value) {
     return getILikePredicate(getExpression(key), value);
   }
 
   public Predicate getILikePredicate(Path<?> path, String value) {
-    return criteriaBuilder.ilike((Expression<String>) path, value);
+    Expression<String> expressionPath = (Expression<String>) path;
+    return criteriaBuilder.ilike(expressionPath, value);
   }
 
   public Predicate getILikePredicate(Path<?> path, Object value) {
-    return criteriaBuilder.ilike((Expression<String>) path, (Expression<String>) value);
+    Expression<String> expressionPath = (Expression<String>) path;
+    Expression<String> expressionValue = criteriaBuilder.literal(value.toString());
+    return criteriaBuilder.ilike(expressionPath, expressionValue);
   }
 
-  public Predicate getNotILikePredicate(String key, Object value) {
+  /** NOT ILIKE predicates */
+  public void notILike(String key, String value) {
+    if (value != null && !value.trim().isEmpty()) {
+      notILike(getExpression(key), value);
+    }
+  }
+
+  public void notILike(Path<?> path, String value) {
+    if (value != null && !value.trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotILikePredicate(path, value));
+    }
+  }
+
+  public void notILike(Path<?> path, Object value) {
+    if (value != null && !value.toString().trim().isEmpty()) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getNotILikePredicate(path, value));
+    }
+  }
+
+  public Predicate getNotILikePredicate(String key, String value) {
     return getNotILikePredicate(getExpression(key), value);
   }
 
-  public Predicate getNotILikePredicate(Path<?> path, Object value) {
-    return criteriaBuilder.not(
-        criteriaBuilder.ilike((Expression<String>) path, (Expression<String>) value));
+  public Predicate getNotILikePredicate(Path<?> path, String value) {
+    Expression<String> expressionPath = (Expression<String>) path;
+    return criteriaBuilder.not(criteriaBuilder.ilike(expressionPath, value));
   }
 
+  public Predicate getNotILikePredicate(Path<?> path, Object value) {
+    Expression<String> expressionPath = (Expression<String>) path;
+    Expression<String> expressionValue = criteriaBuilder.literal(value.toString());
+    return criteriaBuilder.not(criteriaBuilder.ilike(expressionPath, expressionValue));
+  }
+
+  /** IS NULL predicates */
   public void isNull(String key) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getIsNullPredicate(key));
+    isNull(getExpression(key));
   }
 
   public void isNull(Path<?> path) {
@@ -356,8 +429,9 @@ public class CriteriaBuilderWrapper {
     return criteriaBuilder.isNull(key);
   }
 
+  /** IS NOT NULL predicates */
   public void isNotNull(String key) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getIsNotNullPredicate(key));
+    isNotNull(getExpression(key));
   }
 
   public void isNotNull(Path<?> path) {
@@ -372,17 +446,42 @@ public class CriteriaBuilderWrapper {
     return criteriaBuilder.isNotNull(key);
   }
 
-  public void isEmpty(String id) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, getIsEmptyPredicate(id));
+  /** Is Empty predicates */
+  public void isEmpty(String key) {
+    isEmpty(getExpression(key));
   }
 
-  private Expression<Boolean> getIsEmptyPredicate(String key) {
-    return criteriaBuilder.isEmpty(root.get(key));
+  public void isEmpty(Path<?> path) {
+    finalPredicate = criteriaBuilder.and(finalPredicate, getIsEmptyPredicate(path));
   }
 
+  private Predicate getIsEmptyPredicate(Path<?> path) {
+    if (!(path.getModel() instanceof PluralAttribute)) {
+      throw new ExceptionWrapper("isEmpty can only be used on collection attributes: " + path);
+    }
+    return criteriaBuilder.isEmpty((Expression<Collection<?>>) path);
+  }
+
+  /** Is Not Empty predicates */
+  public void isNotEmpty(String key) {
+    isNotEmpty(getExpression(key));
+  }
+
+  public void isNotEmpty(Path<?> path) {
+    finalPredicate = criteriaBuilder.and(finalPredicate, getIsNotEmptyPredicate(path));
+  }
+
+  private Predicate getIsNotEmptyPredicate(Path<?> path) {
+    if (!(path.getModel() instanceof PluralAttribute)) {
+      throw new ExceptionWrapper("isNotEmpty can only be used on collection attributes: " + path);
+    }
+    return criteriaBuilder.isNotEmpty((Expression<Collection<?>>) path);
+  }
+
+  /** Between predicates */
   public void between(String key, Object from, Object to) {
     if (Objects.nonNull(from) && Objects.nonNull(to)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
+      between(getExpression(key), from, to);
     }
   }
 
@@ -400,6 +499,22 @@ public class CriteriaBuilderWrapper {
     return ComparisonPredicates.factory(from).getBetweenPredicate(criteriaBuilder, path, from, to);
   }
 
+  /** Not Between predicates */
+  public void notBetween(String key, Object from, Object to) {
+    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+      notBetween(getExpression(key), from, to);
+    }
+  }
+
+  public void notBetween(Path<?> key, Object from, Object to) {
+    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+      finalPredicate =
+          criteriaBuilder.and(
+              finalPredicate, criteriaBuilder.not(getBetweenPredicate(key, from, to)));
+    }
+  }
+
+  /** AND predicates */
   public void and(Predicate... predicates) {
     if (predicates != null && predicates.length > 0) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
@@ -410,9 +525,10 @@ public class CriteriaBuilderWrapper {
     return criteriaBuilder.and(predicates);
   }
 
+  /** OR predicates */
   public void or(Predicate... predicates) {
     if (predicates != null && predicates.length > 0) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getOrPredicate(predicates));
+      finalPredicate = criteriaBuilder.or(finalPredicate, getOrPredicate(predicates));
     }
   }
 
@@ -445,10 +561,6 @@ public class CriteriaBuilderWrapper {
   // Query configuration - Improved performance
   // -------------------------------
 
-  public void setDistinct() {
-    query.select(root).distinct(isDistinct);
-  }
-
   public void groupBy(String... fieldPaths) {
     if (fieldPaths != null && fieldPaths.length > 0) {
       List<Expression<?>> expressions = new ArrayList<>();
@@ -462,6 +574,18 @@ public class CriteriaBuilderWrapper {
       if (!expressions.isEmpty()) {
         query.groupBy(expressions);
       }
+    }
+  }
+
+  public void having(Predicate... predicates) {
+    if (predicates != null && predicates.length > 0) {
+      query.having(predicates);
+    }
+  }
+
+  public void having(List<Predicate> predicates) {
+    if (!predicates.isEmpty()) {
+      query.having(predicates);
     }
   }
 
@@ -713,9 +837,12 @@ public class CriteriaBuilderWrapper {
     }
   }
 
-  public void addDateTimeRangeConflictCriteria(
-      DateRangeDTO dateRangeDTO, String startAlias, String endAlias) {
-    if (dateRangeDTO == null || startAlias == null || endAlias == null) {
+  // -------------------------------
+  // Date range conflict criteria - Improved with error handling
+  // -------------------------------
+
+  public void addDateTimeRangeConflictCriteria(DateRangeDTO dateRangeDTO, String from, String to) {
+    if (dateRangeDTO == null || from == null || to == null) {
       return;
     }
 
@@ -723,16 +850,16 @@ public class CriteriaBuilderWrapper {
       Disjunction d = new Disjunction(this);
 
       Conjunction startDateBetween = new Conjunction(this);
-      startDateBetween.add(this.getGtPredicate(startAlias, dateRangeDTO.getStart()));
-      startDateBetween.add(this.getLtPredicate(startAlias, dateRangeDTO.getEnd()));
+      startDateBetween.add(this.getGtPredicate(from, dateRangeDTO.getStart()));
+      startDateBetween.add(this.getLtPredicate(from, dateRangeDTO.getEnd()));
 
       Conjunction endDateBetween = new Conjunction(this);
-      endDateBetween.add(this.getGtPredicate(endAlias, dateRangeDTO.getStart()));
-      endDateBetween.add(this.getLtPredicate(endAlias, dateRangeDTO.getEnd()));
+      endDateBetween.add(this.getGtPredicate(to, dateRangeDTO.getStart()));
+      endDateBetween.add(this.getLtPredicate(to, dateRangeDTO.getEnd()));
 
       Conjunction startAndEnd = new Conjunction(this);
-      startAndEnd.add(this.getLePredicate(startAlias, dateRangeDTO.getStart()));
-      startAndEnd.add(this.getGePredicate(endAlias, dateRangeDTO.getEnd()));
+      startAndEnd.add(this.getLePredicate(from, dateRangeDTO.getStart()));
+      startAndEnd.add(this.getGePredicate(to, dateRangeDTO.getEnd()));
 
       d.add(startDateBetween.build());
       d.add(endDateBetween.build());

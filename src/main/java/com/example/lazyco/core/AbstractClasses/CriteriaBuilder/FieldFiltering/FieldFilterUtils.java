@@ -57,8 +57,15 @@ public class FieldFilterUtils {
         return;
       }
 
+      // Handle collection values with 'in' clause
       if (value instanceof Collection<?>) {
         criteriaBuilderWrapper.in(fieldPathNode, (Collection<?>) value);
+        return;
+      }
+
+      // For string fields, use case-insensitive like; for others, use equality
+      if (fieldPathNode.getJavaType().equals(String.class)) {
+        criteriaBuilderWrapper.iLike(fieldPathNode, value);
       } else {
         criteriaBuilderWrapper.eq(fieldPathNode, value);
       }

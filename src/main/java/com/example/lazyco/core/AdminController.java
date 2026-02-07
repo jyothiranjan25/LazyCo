@@ -2,7 +2,6 @@ package com.example.lazyco.core;
 
 import com.example.lazyco.core.Cache.TimedECacheLRU;
 import com.example.lazyco.core.DateUtils.DateTimeZoneUtils;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +33,7 @@ public class AdminController {
     // Clear Hibernate second-level cache
     try {
       sessionFactory.getCache().evictAllRegions();
-      cacheResults.put(
-          "hibernate", "Hibernate second-level cache cleared successfully");
+      cacheResults.put("hibernate", "Hibernate second-level cache cleared successfully");
     } catch (Exception e) {
       success = false;
       cacheResults.put("hibernate", Map.of("status", "failed", "message", e.getMessage()));
@@ -44,8 +42,7 @@ public class AdminController {
     // Clear custom application caches
     try {
       TimedECacheLRU.clearAll();
-      cacheResults.put(
-          "eCache","ECache (TimedECacheLRU) cleared successfully");
+      cacheResults.put("eCache", "ECache (TimedECacheLRU) cleared successfully");
     } catch (Exception e) {
       success = false;
       cacheResults.put("eCache", Map.of("status", "failed", "message", e.getMessage()));
