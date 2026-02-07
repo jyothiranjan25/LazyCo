@@ -50,9 +50,9 @@ public class CriteriaBuilderWrapper {
     query.select(root).distinct(isDistinct);
   }
 
-  public Predicate getFinalPredicate() {
+  public void getFinalPredicate() {
     query.where(finalPredicate);
-    return query.getRestriction();
+    query.getRestriction();
   }
 
   // -------------------------------
@@ -61,13 +61,11 @@ public class CriteriaBuilderWrapper {
 
   /** Equal predicates */
   public void eq(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      eq(getExpression(key), value);
-    }
+    eq(getExpression(key), value);
   }
 
   public void eq(Path<?> path, Object value) {
-    if (Objects.nonNull(value)) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getEqualPredicate(path, value));
     }
   }
@@ -81,8 +79,12 @@ public class CriteriaBuilderWrapper {
   }
 
   public void equalIgnoreCase(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      Expression lowerColumn = criteriaBuilder.lower(getExpression(key));
+    equalIgnoreCase(getExpression(key), value);
+  }
+
+  public void equalIgnoreCase(Path<?> path, Object value) {
+    if (validateValue(path, value)) {
+      Expression lowerColumn = criteriaBuilder.lower((Expression<String>) path);
       String lowerValue = value.toString().toLowerCase();
       finalPredicate =
           criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(lowerColumn, lowerValue));
@@ -104,7 +106,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public void notEq(Path<?> path, Object value) {
-    if (Objects.nonNull(value)) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotEqualPredicate(path, value));
     }
   }
@@ -118,8 +120,12 @@ public class CriteriaBuilderWrapper {
   }
 
   public void notEqualIgnoreCase(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      Expression lowerColumn = criteriaBuilder.lower(getExpression(key));
+    notEqualIgnoreCase(getExpression(key), value);
+  }
+
+  public void notEqualIgnoreCase(Path<?> path, Object value) {
+    if (validateValue(path, value)) {
+      Expression lowerColumn = criteriaBuilder.lower((Expression<String>) path);
       String lowerValue = value.toString().toLowerCase();
       finalPredicate =
           criteriaBuilder.and(finalPredicate, criteriaBuilder.notEqual(lowerColumn, lowerValue));
@@ -135,7 +141,11 @@ public class CriteriaBuilderWrapper {
 
   /** Greater than predicates */
   public void gt(String key, Object value) {
-    if (Objects.nonNull(value)) {
+    gt(getExpression(key), value);
+  }
+
+  public void gt(Path<?> key, Object value) {
+    if (validateValue(key, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(key, value));
     }
   }
@@ -160,8 +170,12 @@ public class CriteriaBuilderWrapper {
 
   /** Less than predicates */
   public void lt(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(key, value));
+    lt(getExpression(key), value);
+  }
+
+  public void lt(Path<?> path, Object value) {
+    if (validateValue(path, value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(path, value));
     }
   }
 
@@ -185,8 +199,12 @@ public class CriteriaBuilderWrapper {
 
   /** Greater than or equal predicates */
   public void ge(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(key, value));
+    ge(getExpression(key), value);
+  }
+
+  public void ge(Path<?> path, Object value) {
+    if (validateValue(path, value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(path, value));
     }
   }
 
@@ -210,8 +228,12 @@ public class CriteriaBuilderWrapper {
 
   /** Less than or equal predicates */
   public void le(String key, Object value) {
-    if (Objects.nonNull(value)) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(key, value));
+    le(getExpression(key), value);
+  }
+
+  public void le(Path<?> path, Object value) {
+    if (validateValue(path, value)) {
+      finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(path, value));
     }
   }
 
@@ -235,13 +257,11 @@ public class CriteriaBuilderWrapper {
 
   /** IN predicates */
   public void in(String key, List value) {
-    if (value != null && !value.isEmpty()) {
-      in(getExpression(key), value);
-    }
+    in(getExpression(key), value);
   }
 
   public void in(Path<?> path, Collection<?> value) {
-    if (value != null && !value.isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getInPredicate(path, value));
     }
   }
@@ -256,13 +276,11 @@ public class CriteriaBuilderWrapper {
 
   /** NOT IN predicates */
   public void notIn(String key, List value) {
-    if (value != null && !value.isEmpty()) {
-      notIn(getExpression(key), value);
-    }
+    notIn(getExpression(key), value);
   }
 
   public void notIn(Path<?> path, Collection<?> value) {
-    if (value != null && !value.isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotInPredicate(path, value));
     }
   }
@@ -277,19 +295,17 @@ public class CriteriaBuilderWrapper {
 
   /** LIKE predicates */
   public void like(String key, String value) {
-    if (value != null && !value.trim().isEmpty()) {
-      like(getExpression(key), value);
-    }
+    like(getExpression(key), value);
   }
 
   public void like(Path<?> path, String value) {
-    if (value != null && !value.trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(path, value));
     }
   }
 
   public void like(Path<?> path, Object value) {
-    if (value != null && !value.toString().trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getLikePredicate(path, value));
     }
   }
@@ -311,19 +327,17 @@ public class CriteriaBuilderWrapper {
 
   /** NOT LIKE predicates */
   public void notLike(String key, String value) {
-    if (value != null && !value.trim().isEmpty()) {
-      notLike(getExpression(key), value);
-    }
+    notLike(getExpression(key), value);
   }
 
   public void notLike(Path<?> path, String value) {
-    if (value != null && !value.trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotLikePredicate(path, value));
     }
   }
 
   public void notLike(Path<?> path, Object value) {
-    if (value != null && !value.toString().trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotLikePredicate(path, value));
     }
   }
@@ -345,19 +359,17 @@ public class CriteriaBuilderWrapper {
 
   /** ILIKE predicates */
   public void iLike(String key, String value) {
-    if (value != null && !value.trim().isEmpty()) {
-      iLike(getExpression(key), value);
-    }
+    iLike(getExpression(key), value);
   }
 
   public void iLike(Path<?> path, String value) {
-    if (value != null && !value.trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(path, value));
     }
   }
 
   public void iLike(Path<?> path, Object value) {
-    if (value != null && !value.toString().trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getILikePredicate(path, value));
     }
   }
@@ -379,19 +391,17 @@ public class CriteriaBuilderWrapper {
 
   /** NOT ILIKE predicates */
   public void notILike(String key, String value) {
-    if (value != null && !value.trim().isEmpty()) {
-      notILike(getExpression(key), value);
-    }
+    notILike(getExpression(key), value);
   }
 
   public void notILike(Path<?> path, String value) {
-    if (value != null && !value.trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotILikePredicate(path, value));
     }
   }
 
   public void notILike(Path<?> path, Object value) {
-    if (value != null && !value.toString().trim().isEmpty()) {
+    if (validateValue(path, value)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getNotILikePredicate(path, value));
     }
   }
@@ -480,13 +490,11 @@ public class CriteriaBuilderWrapper {
 
   /** Between predicates */
   public void between(String key, Object from, Object to) {
-    if (Objects.nonNull(from) && Objects.nonNull(to)) {
-      between(getExpression(key), from, to);
-    }
+    between(getExpression(key), from, to);
   }
 
   public void between(Path<?> key, Object from, Object to) {
-    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+    if (validateValue(key, from) && validateValue(key, to)) {
       finalPredicate = criteriaBuilder.and(finalPredicate, getBetweenPredicate(key, from, to));
     }
   }
@@ -501,13 +509,11 @@ public class CriteriaBuilderWrapper {
 
   /** Not Between predicates */
   public void notBetween(String key, Object from, Object to) {
-    if (Objects.nonNull(from) && Objects.nonNull(to)) {
-      notBetween(getExpression(key), from, to);
-    }
+    notBetween(getExpression(key), from, to);
   }
 
   public void notBetween(Path<?> key, Object from, Object to) {
-    if (Objects.nonNull(from) && Objects.nonNull(to)) {
+    if (validateValue(key, from) && validateValue(key, to)) {
       finalPredicate =
           criteriaBuilder.and(
               finalPredicate, criteriaBuilder.not(getBetweenPredicate(key, from, to)));
@@ -516,9 +522,7 @@ public class CriteriaBuilderWrapper {
 
   /** AND predicates */
   public void and(Predicate... predicates) {
-    if (predicates != null && predicates.length > 0) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
-    }
+    finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
   }
 
   public Predicate getAndPredicate(Predicate... predicates) {
@@ -527,9 +531,7 @@ public class CriteriaBuilderWrapper {
 
   /** OR predicates */
   public void or(Predicate... predicates) {
-    if (predicates != null && predicates.length > 0) {
-      finalPredicate = criteriaBuilder.or(finalPredicate, getOrPredicate(predicates));
-    }
+    finalPredicate = criteriaBuilder.or(finalPredicate, getOrPredicate(predicates));
   }
 
   public Predicate getOrPredicate(Predicate... predicates) {
@@ -538,15 +540,11 @@ public class CriteriaBuilderWrapper {
 
   /** Grouping predicates */
   public void andGroup(Predicate... predicates) {
-    if (predicates != null && predicates.length > 0) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.and(predicates));
-    }
+    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.and(predicates));
   }
 
   public void orGroup(Predicate... predicates) {
-    if (predicates != null && predicates.length > 0) {
-      finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.or(predicates));
-    }
+    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.or(predicates));
   }
 
   // -------------------------------
@@ -690,6 +688,7 @@ public class CriteriaBuilderWrapper {
   // Projection methods - Improved error handling
   // -------------------------------
 
+  @SuppressWarnings("deprecation")
   public void addProjection(String... fieldPaths) {
     if (fieldPaths != null && fieldPaths.length > 0) {
       List<Expression<?>> expressions = new ArrayList<>();
@@ -894,5 +893,17 @@ public class CriteriaBuilderWrapper {
     } catch (Exception e) {
       ApplicationLogger.error("Failed to add date range conflict criteria", e);
     }
+  }
+
+  // -------------------------------
+  // Validation methods - Improved with error handling
+  // -------------------------------
+  private boolean validateValue(Path<?> field, Object value) {
+    return Objects.nonNull(value); // Skip null values for non-nullable predicates
+  }
+
+  private boolean validateValue(Path<?> field, Collection<?> value) {
+    return Objects.nonNull(value)
+        && !value.isEmpty(); // Skip null or empty collections for IN predicates
   }
 }
