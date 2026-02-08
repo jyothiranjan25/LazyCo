@@ -116,11 +116,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // Save entity
     E createdEntity = abstractDAO.save(entityToCreate);
 
-    // TODO: (low priority) optimize to avoid double DB hit
-    // Retrieve the created entity to ensure all fields are populated
-    @SuppressWarnings("unchecked")
-    E refreshedEntity =
-        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), createdEntity.getId());
+    //    // TODO: (low priority) optimize to avoid double DB hit
+    //    // Retrieve the created entity to ensure all fields are populated
+    //    @SuppressWarnings("unchecked")
+    //    E refreshedEntity =
+    //        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), createdEntity.getId());
+
+    E refreshedEntity = createdEntity;
 
     // Post-create hook
     self.postCreate(dtoToCreate, refreshedEntity);
@@ -201,8 +203,10 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // TODO: (low priority) optimize to avoid double DB hit
     // Retrieve the updated entity to ensure all fields are populated
     @SuppressWarnings("unchecked")
-    E refreshedEntity =
-        assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
+    //    E refreshedEntity =
+    //        assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
+
+    E refreshedEntity = updatedEntity;
 
     // Post-update hook
     self.postUpdate(dtoToUpdate, EntityClone, refreshedEntity);

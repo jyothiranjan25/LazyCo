@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -21,6 +22,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
     try {
       getCurrentSession().persist(entity);
       flush();
+      getCurrentSession().refresh(entity);
       return entity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
@@ -35,6 +37,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
     try {
       E mergedEntity = getCurrentSession().merge(entity);
       flush();
+      getCurrentSession().refresh(mergedEntity);
       return mergedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
@@ -66,7 +69,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
 
   // Get the current Hibernate session
   public Session getCurrentSession() {
-    return sessionFactory.getCurrentSession();
+    return SessionManager.getCurrentSession();
   }
 
   // Check if the current transaction is nested
@@ -74,10 +77,14 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
     if (!TransactionSynchronizationManager.isActualTransactionActive()) {
       return false;
     }
-    // Get the current transaction status bound to this thread
-    var status = TransactionAspectSupport.currentTransactionStatus();
-    if (status instanceof DefaultTransactionStatus defaultStatus) {
-      return defaultStatus.hasSavepoint(); // true if NESTED
+    try {
+      // Get the current transaction status bound to this thread
+      var status = TransactionAspectSupport.currentTransactionStatus();
+      if (status instanceof DefaultTransactionStatus defaultStatus) {
+        return defaultStatus.hasSavepoint(); // true if NESTED
+      }
+    } catch (NoTransactionException e) {
+      return false;
     }
     return false;
   }

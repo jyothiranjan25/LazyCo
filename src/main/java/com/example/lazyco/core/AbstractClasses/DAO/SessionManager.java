@@ -5,109 +5,115 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.jpa.hibernate.SessionHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Spring-managed SessionManager that works with @Transactional annotations. All transaction
- * management is now handled declaratively by Spring.
+ * Centralized access to the Spring-managed Hibernate Session.
+ *
+ * <p>Rules:
+ *
+ * <ul>
+ *   <li>Must be called inside a @Transactional method
+ *   <li>Never opens or closes Sessions manually
+ *   <li>Fails fast when misused
+ * </ul>
+ *
+ * <p>Designed to work correctly with nested transactions (savepoint).
  */
 @Component
 public class SessionManager {
 
-  private static SessionFactory sessionFactory;
+  /**
+   * Static reference is intentional to allow legacy/static access. Marked volatile for safe
+   * publication.
+   */
+  private static volatile SessionFactory sessionFactory;
 
   @Autowired
-  public void setSessionFactoryObject(SessionFactory sessionFactory) {
+  public void setSessionFactory(SessionFactory sessionFactory) {
     SessionManager.sessionFactory = sessionFactory;
   }
 
   /**
-   * Get the current Hibernate session managed by Spring's @Transactional. This session is
-   * automatically managed by Spring's transaction infrastructure.
+   * Obtain the current Hibernate Session bound to the calling thread.
+   *
+   * @return the current Session
+   * @throws IllegalStateException if no transaction/session is active
    */
   public static Session getCurrentSession() {
-    try {
-      if (sessionFactory == null) {
-        throw new IllegalStateException("SessionFactory is not initialized");
-      }
+    if (sessionFactory == null) {
+      throw new IllegalStateException("SessionFactory is not initialized");
+    }
 
-      // First try to get the session directly from SessionFactory
+    try {
       Session session = sessionFactory.getCurrentSession();
 
-      // Validate the session is open and usable
-      if (session != null && session.isOpen()) {
-        return session;
-      } else {
-        throw new HibernateException("Session is null or closed");
-      }
-    } catch (HibernateException e) {
-      ApplicationLogger.error(
-          "No session bound to thread - ensure method is @Transactional: " + e.getMessage());
-
-      // Fallback: try to get session from Spring's transaction synchronization
-      try {
-        SessionHolder sessionHolder =
-            (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-        if (sessionHolder != null) {
-          Session session = sessionHolder.getSession();
-          if (session.isOpen()) {
-            ApplicationLogger.debug(
-                "Retrieved session from TransactionSynchronizationManager fallback");
-            return session;
-          }
-        }
-      } catch (Exception fallbackException) {
-        ApplicationLogger.error(
-            "Fallback session retrieval also failed: " + fallbackException.getMessage());
+      if (session == null) {
+        throw new IllegalStateException("No Hibernate Session bound to current thread");
       }
 
-      // If we get here, no session is available
-      String errorMessage =
-          "No active transaction found. Ensure the calling method is annotated with @Transactional. "
-              + "Thread: "
+      if (!session.isOpen()) {
+        throw new IllegalStateException("Hibernate Session is closed");
+      }
+
+      return session;
+
+    } catch (HibernateException ex) {
+      ApplicationLogger.warn(
+          "No Hibernate Session available. Ensure the calling method is annotated with @Transactional. "
+              + "Thread="
               + Thread.currentThread().getName()
-              + ", Transaction active: "
-              + TransactionSynchronizationManager.isActualTransactionActive()
-              + ", Synchronization active: "
-              + TransactionSynchronizationManager.isSynchronizationActive();
-
-      ApplicationLogger.error(errorMessage);
-      throw new IllegalStateException(errorMessage, e);
+              + ", txActive="
+              + TransactionSynchronizationManager.isActualTransactionActive(),
+          ex);
+      throw ex;
     }
   }
 
-  /** Check if a transaction is currently active. */
+  /**
+   * Check whether a real (database-backed) transaction is active.
+   *
+   * @return true if an actual transaction is active
+   */
   public static boolean isTransactionActive() {
-    return TransactionSynchronizationManager.isSynchronizationActive()
-        && TransactionSynchronizationManager.isActualTransactionActive();
+    return TransactionSynchronizationManager.isActualTransactionActive();
   }
 
-  /** Check if a session is currently open and bound to the current thread. */
+  /** Check whether a usable Hibernate Session is available. Safe to call outside a transaction. */
   public static boolean isSessionAvailable() {
     try {
-      Session session = getCurrentSession();
-      return session.isOpen();
+      return isTransactionActive() && getCurrentSession().isOpen();
     } catch (Exception e) {
       return false;
     }
   }
 
   /**
-   * Flush the current session if available. Note: Spring will automatically flush at transaction
-   * commit.
+   * Flush the current Hibernate Session if a transaction is active.
+   *
+   * <p>Normally unnecessary, as Spring flushes automatically at commit. Useful when:
+   *
+   * <ul>
+   *   <li>you need constraint violations early
+   *   <li>you rely on DB-generated values mid-transaction
+   *   <li>working with savepoint
+   * </ul>
    */
   public static void flush() {
+    if (!isTransactionActive()) {
+      return;
+    }
+
     try {
       Session session = getCurrentSession();
-      if (session.isOpen()) {
-        session.flush();
-        ApplicationLogger.debug("Session flushed successfully");
-      }
+      session.flush();
+      ApplicationLogger.debug("Hibernate session flushed successfully");
     } catch (Exception e) {
-      ApplicationLogger.error("Error flushing session: " + e.getMessage());
-      throw new RuntimeException("Failed to flush session", e);
+      throw new RuntimeException(
+          "Failed to flush Hibernate Session. txActive="
+              + TransactionSynchronizationManager.isActualTransactionActive(),
+          e);
     }
   }
 }

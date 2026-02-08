@@ -21,12 +21,12 @@ public class InstitutionService extends CommonAbstractService<InstitutionDTO, In
     if (StringUtils.isEmpty(requestDTO.getCode())) {
       throw new ApplicationException(InstitutionMessage.INSTITUTION_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    //    validateUniqueCode(requestDTO);
 
     if (StringUtils.isEmpty(requestDTO.getName())) {
       throw new ApplicationException(InstitutionMessage.INSTITUTION_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
+    //    validateUniqueName(requestDTO, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
   }
 
   @Override
