@@ -44,8 +44,8 @@ public class CronJobExecutionLog extends AbstractModel {
   @ManyToOne
   @JoinColumn(
       name = "cron_job_schedule_id",
-      comment = "Reference to the cron job schedule",
-      foreignKey = @ForeignKey(name = "fk_cron_job_execution_log_cron_job_schedule"))
+      foreignKey = @ForeignKey(name = "fk_cron_job_execution_log_cron_job_schedule"),
+      comment = "Reference to the cron job schedule")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private CronJobSchedule cronJobSchedule;
 }

@@ -20,11 +20,11 @@ import org.hibernate.envers.Audited;
 @Table(
     name = "module",
     comment = "Table storing modules in the system",
-    indexes = {@Index(name = "idx_module_module_name", columnList = "module_name")},
+    indexes = {@Index(name = "idx_module_name", columnList = "name")},
     uniqueConstraints = {
       @UniqueConstraint(
-          name = "uk_module_module_name",
-          columnNames = {"module_name"})
+          name = "uk_module_name",
+          columnNames = {"name"})
     })
 @EntityListeners(ModuleListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -54,11 +54,13 @@ public class Module extends AbstractModel {
       joinColumns =
           @JoinColumn(
               name = "module_id",
-              foreignKey = @ForeignKey(name = "fk_module_resource_module")),
+              foreignKey = @ForeignKey(name = "fk_module_resource_module"),
+              comment = "Reference to the module"),
       inverseJoinColumns =
           @JoinColumn(
               name = "resource_id",
-              foreignKey = @ForeignKey(name = "fk_module_resource_resource")),
+              foreignKey = @ForeignKey(name = "fk_module_resource_resource"),
+              comment = "Reference to the resource"),
       indexes = {
         @Index(name = "idx_module_resource_module_id", columnList = "module_id"),
         @Index(name = "idx_module_resource_resource_id", columnList = "resource_id"),

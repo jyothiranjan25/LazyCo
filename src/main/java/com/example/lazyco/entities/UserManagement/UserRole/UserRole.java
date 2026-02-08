@@ -35,15 +35,24 @@ import org.hibernate.envers.Audited;
 public class UserRole extends AbstractModel {
 
   @ManyToOne
-  @JoinColumn(name = "app_user_id", comment = "Reference to the user")
+  @JoinColumn(
+      name = "app_user_id",
+      foreignKey = @ForeignKey(name = "fk_user_role_app_user"),
+      comment = "Reference to the app user")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private AppUser appUser;
 
   @ManyToOne
-  @JoinColumn(name = "role_id", comment = "Reference to the role")
+  @JoinColumn(
+      name = "role_id",
+      foreignKey = @ForeignKey(name = "fk_user_role_role"),
+      comment = "Reference to the role")
   private Role role;
 
   @ManyToOne
-  @JoinColumn(name = "user_group_id", comment = "Reference to the user group")
+  @JoinColumn(
+      name = "user_group_id",
+      foreignKey = @ForeignKey(name = "fk_user_role_user_group"),
+      comment = "Reference to the user group")
   private UserGroup userGroup;
 }

@@ -1,6 +1,6 @@
 package com.example.lazyco.Sample;
 
-import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +17,5 @@ import org.hibernate.envers.Audited;
 @Table(name = "sample")
 @EntityListeners(SampleListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Sample extends AbstractModel {}
+// public class Sample extends AbstractModel {}
+public class Sample extends AbstractRBACModel {}

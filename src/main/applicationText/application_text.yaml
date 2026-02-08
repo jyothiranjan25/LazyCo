@@ -23,10 +23,10 @@ USER_GROUP:
   USER_GROUP_DELETE_NOT_ALLOWED : "Deletion of user group '%1$s' is not allowed."
 
 RESOURCE:
-    RESOURCE_NAME_REQUIRED : "Resource name is required."
-    RESOURCE_ACTION_REQUIRED : "Resource action URL is required."
-    DUPLICATE_RESOURCE_NAME : "A resource with the name '%1$s' already exists."
-    INVALID_PARENT_RESOURCE : "A child resource cannot have a child as its parent resource."
+  RESOURCE_NAME_REQUIRED : "Resource name is required."
+  RESOURCE_ACTION_REQUIRED : "Resource action URL is required."
+  DUPLICATE_RESOURCE_NAME : "A resource with the name '%1$s' already exists."
+  INVALID_PARENT_RESOURCE : "A child resource cannot have a child as its parent resource."
 
 MODULE:
   MODULE_NAME_REQUIRED : "Module name is required."
@@ -69,7 +69,18 @@ USER_MODULES:
   RESET_TOKEN_EXPIRED: "The password reset token has expired."
   PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
 
+UNIVERSITY:
+  UNIVERSITY_CODE_REQUIRED : "University code is required."
+  UNIVERSITY_NAME_REQUIRED : "University name is required."
+  DUPLICATE_UNIVERSITY_NAME : "A university with the name '%1$s' already exists."
+
+INSTITUTION:
+  UNIVERSITY_ID_REQUIRED: "University ID is required for institution."
+  INSTITUTION_CODE_REQUIRED : "Institution code is required."
+  INSTITUTION_NAME_REQUIRED : "Institution name is required."
+  DUPLICATE_INSTITUTION_NAME : "An institution with the name '%1$s' already exists."
+
 ACADEMIC_YEAR:
-    ACADEMIC_YEAR_CODE_REQUIRED : "Academic year code is required."
-    ACADEMIC_YEAR_NAME_REQUIRED : "Academic year name is required."
-    ACADEMIC_YEAR_DATE_CONFLICT : "The academic year '%1$s' has date conflicts with another academic year. Please adjust the dates to avoid overlap."
+  ACADEMIC_YEAR_CODE_REQUIRED : "Academic year code is required."
+  ACADEMIC_YEAR_NAME_REQUIRED : "Academic year name is required."
+  ACADEMIC_YEAR_DATE_CONFLICT : "The academic year '%1$s' has date conflicts with another academic year. Please adjust the dates to avoid overlap."

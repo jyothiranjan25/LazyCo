@@ -15,7 +15,7 @@ public class QuartzSchemaInitializer {
   private String hbm2ddlAuto;
 
   @Bean
-  public DataSourceInitializer batchSchemaInitializer(DataSource dataSource) {
+  public DataSourceInitializer quartzTableInitializer(DataSource dataSource) {
     String ddl = hbm2ddlAuto == null ? "" : hbm2ddlAuto.trim().toLowerCase();
 
     ResourceDatabasePopulator populator = new ResourceDatabasePopulator();

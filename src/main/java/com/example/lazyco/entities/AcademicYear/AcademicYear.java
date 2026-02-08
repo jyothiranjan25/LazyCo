@@ -22,7 +22,11 @@ import org.hibernate.envers.Audited;
     comment = "Table storing academic years",
     indexes = {
       @Index(name = "idx_academic_year_code", columnList = "code"),
-      @Index(name = "idx_academic_year_name", columnList = "name")
+      @Index(name = "idx_academic_year_name", columnList = "name"),
+      @Index(name = "idx_academic_year_start_date", columnList = "start_date"),
+      @Index(name = "idx_academic_year_end_date", columnList = "end_date"),
+      @Index(name = "idx_academic_year_is_active", columnList = "is_active"),
+      @Index(name = "idx_academic_year_start_end_date", columnList = "start_date, end_date")
     },
     uniqueConstraints = {@UniqueConstraint(name = "uk_academic_year_code", columnNames = "code")})
 @EntityListeners(AcademicYearListener.class)

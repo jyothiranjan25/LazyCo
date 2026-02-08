@@ -1,5 +1,6 @@
 package com.example.lazyco.core.Cache;
 
+import com.example.lazyco.core.Logger.ApplicationLogger;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
@@ -138,6 +139,7 @@ public class TimedECacheLRU<T> implements TimedCache<String, T> {
   @PreDestroy
   public void close() {
     if (cacheManager != null) {
+      ApplicationLogger.info("Closing cache manager");
       cacheManager.close();
     }
   }

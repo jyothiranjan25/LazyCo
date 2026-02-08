@@ -20,8 +20,9 @@
         </expiry>
         <resources>
             <heap unit="entries">100000</heap>
-            <offheap unit="MB">50</offheap>
-            <disk unit="MB" persistent="true">100</disk>
+            <offheap unit="MB">20</offheap>
+            <!--            <disk unit="MB" persistent="true">100</disk>-->
+            <disk unit="MB">100</disk>
         </resources>
     </cache>
 
@@ -34,8 +35,8 @@
         </expiry>
         <resources>
             <heap unit="entries">100000</heap>
-            <offheap unit="MB">50</offheap>
-            <disk unit="MB" persistent="true">100</disk>
+            <offheap unit="MB">20</offheap>
+            <disk unit="MB">100</disk>
         </resources>
     </cache>
 
@@ -48,8 +49,8 @@
         </expiry>
         <resources>
             <heap unit="entries">100000</heap>
-            <offheap unit="MB">50</offheap>
-            <disk unit="MB" persistent="true">100</disk>
+            <offheap unit="MB">20</offheap>
+            <disk unit="MB">100</disk>
         </resources>
     </cache>
 </config>

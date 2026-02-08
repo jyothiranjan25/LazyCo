@@ -20,12 +20,12 @@ import org.hibernate.envers.Audited;
     name = "user_group",
     comment = "Table storing user group details",
     indexes = {
-      @Index(name = "idx_user_group_name", columnList = "user_group_name"),
+      @Index(name = "idx_user_group_name", columnList = "name"),
       @Index(name = "idx_user_group_fully_qualified_name", columnList = "fully_qualified_name"),
       @Index(name = "idx_user_group_parent_user_group_id", columnList = "parent_user_group_id")
     },
     uniqueConstraints = {
-      @UniqueConstraint(name = "uk_user_group_name", columnNames = "user_group_name"),
+      @UniqueConstraint(name = "uk_user_group_name", columnNames = "name"),
       @UniqueConstraint(
           name = "uk_user_group_fully_qualified_name",
           columnNames = {"fully_qualified_name"})
