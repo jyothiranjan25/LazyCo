@@ -23,9 +23,9 @@ public class InstitutionDTO extends AbstractDTO<InstitutionDTO> implements HasCo
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "university.code")
-  private Long universityCode;
+  private String universityCode;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "university.name")
-  private Long universityName;
+  private String universityName;
 }
