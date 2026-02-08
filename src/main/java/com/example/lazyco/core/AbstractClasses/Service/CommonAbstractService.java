@@ -58,7 +58,7 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
         if (messageCodes == null) {
           messageCodes = CommonMessage.CODE_ALREADY_EXISTS;
         }
-        throw new ApplicationException(messageCodes);
+        throw new ApplicationException(messageCodes, new Object[] {filterCode});
       }
     } catch (ApplicationException e) {
       throw e; // Rethrow application exceptions to be handled by the caller

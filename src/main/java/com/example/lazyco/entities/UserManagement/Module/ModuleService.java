@@ -55,7 +55,7 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
 
   @Override
   protected void validateBeforeCreate(ModuleDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getModuleName())) {
+    if (StringUtils.isEmpty(requestDTO.getName())) {
       throw new ApplicationException(ModuleMessage.MODULE_NAME_REQUIRED);
     }
 
@@ -78,8 +78,8 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
 
   @Override
   protected void validateBeforeUpdate(ModuleDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getModuleName())) {
-      validateUniqueName(requestDTO,ModuleMessage.DUPLICATE_MODULE_NAME);
+    if (!StringUtils.isEmpty(requestDTO.getName())) {
+      validateUniqueName(requestDTO, ModuleMessage.DUPLICATE_MODULE_NAME);
     }
   }
 

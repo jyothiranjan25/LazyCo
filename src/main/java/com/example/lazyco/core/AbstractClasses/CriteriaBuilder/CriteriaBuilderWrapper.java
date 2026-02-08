@@ -4,6 +4,8 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.ComparisionPredic
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.DateUtils.DateRangeDTO;
+import com.example.lazyco.core.DateUtils.LocalDateRangeDTO;
+import com.example.lazyco.core.DateUtils.LocalDateTimeRangeDTO;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import jakarta.persistence.criteria.*;
 import jakarta.persistence.metamodel.PluralAttribute;
@@ -540,11 +542,12 @@ public class CriteriaBuilderWrapper {
 
   /** Grouping predicates */
   public void andGroup(Predicate... predicates) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.and(predicates));
+    finalPredicate = criteriaBuilder.and(finalPredicate, getAndPredicate(predicates));
   }
 
   public void orGroup(Predicate... predicates) {
-    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.or(predicates));
+    finalPredicate =
+        criteriaBuilder.and(finalPredicate, getAndPredicate(getOrPredicate(predicates)));
   }
 
   // -------------------------------
@@ -865,12 +868,39 @@ public class CriteriaBuilderWrapper {
   }
 
   // -------------------------------
-  // Date range conflict criteria - Improved with error handling
+  // Date conflict criteria - Improved with error handling
   // -------------------------------
 
-  public void addDateTimeRangeConflictCriteria(
-      DateRangeDTO dateRangeDTO, String StartDateColumn, String EndDateColumn) {
-    if (dateRangeDTO == null || StartDateColumn == null || EndDateColumn == null) {
+  public void addDateTimeConflictCriteria(
+      DateRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeConflictCriteria(
+      LocalDateRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeConflictCriteria(
+      LocalDateTimeRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeConflictCriteria(
+      Object startDate, Object endDate, String startDateColumn, String endDateColumn) {
+    if (startDate == null || endDate == null || startDateColumn == null || endDateColumn == null) {
       return;
     }
 
@@ -878,21 +908,70 @@ public class CriteriaBuilderWrapper {
       Disjunction d = new Disjunction(this);
 
       Conjunction startDateBetween = new Conjunction(this);
-      startDateBetween.add(this.getGtPredicate(StartDateColumn, dateRangeDTO.getStart()));
-      startDateBetween.add(this.getLtPredicate(StartDateColumn, dateRangeDTO.getEnd()));
+      startDateBetween.add(this.getGtPredicate(startDateColumn, startDate));
+      startDateBetween.add(this.getLtPredicate(startDateColumn, endDate));
 
       Conjunction endDateBetween = new Conjunction(this);
-      endDateBetween.add(this.getGtPredicate(EndDateColumn, dateRangeDTO.getStart()));
-      endDateBetween.add(this.getLtPredicate(EndDateColumn, dateRangeDTO.getEnd()));
+      endDateBetween.add(this.getGtPredicate(endDateColumn, startDate));
+      endDateBetween.add(this.getLtPredicate(endDateColumn, endDate));
 
       Conjunction startAndEnd = new Conjunction(this);
-      startAndEnd.add(this.getLePredicate(StartDateColumn, dateRangeDTO.getStart()));
-      startAndEnd.add(this.getGePredicate(EndDateColumn, dateRangeDTO.getEnd()));
+      startAndEnd.add(this.getLePredicate(startDateColumn, startDate));
+      startAndEnd.add(this.getGePredicate(endDateColumn, endDate));
 
       d.add(startDateBetween.build());
       d.add(endDateBetween.build());
       d.add(startAndEnd.build());
       this.and(d.build());
+    } catch (Exception e) {
+      ApplicationLogger.error("Failed to add date range conflict criteria", e);
+    }
+  }
+
+  public void addDateTimeRangeConflictCriteria(
+      DateRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeRangeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeRangeConflictCriteria(
+      LocalDateRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeRangeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeRangeConflictCriteria(
+      LocalDateTimeRangeDTO dateRangeDTO, String startDateColumn, String endDateColumn) {
+    if (dateRangeDTO == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+    addDateTimeRangeConflictCriteria(
+        dateRangeDTO.getStart(), dateRangeDTO.getEnd(), startDateColumn, endDateColumn);
+  }
+
+  public void addDateTimeRangeConflictCriteria(
+      Object startDate, Object endDate, String startDateColumn, String endDateColumn) {
+    if (startDate == null || endDate == null || startDateColumn == null || endDateColumn == null) {
+      return;
+    }
+
+    try {
+      Predicate startBetween = this.getBetweenPredicate(startDateColumn, startDate, endDate);
+
+      Predicate endBetween = this.getBetweenPredicate(endDateColumn, startDate, endDate);
+
+      Predicate fullOverlap =
+          this.getAndPredicate(
+              this.getLePredicate(startDateColumn, startDate),
+              this.getGePredicate(endDateColumn, endDate));
+
+      this.orGroup(startBetween, endBetween, fullOverlap);
     } catch (Exception e) {
       ApplicationLogger.error("Failed to add date range conflict criteria", e);
     }

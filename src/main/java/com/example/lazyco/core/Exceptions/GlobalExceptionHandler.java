@@ -29,6 +29,7 @@ public class GlobalExceptionHandler {
     ApplicationLogger.error(e);
     SimpleResponseDTO simpleResponseDTO = ResolveException.resolveException(e);
     HttpStatus httpStatus = simpleResponseDTO.getHttpStatus();
+    simpleResponseDTO.setHttpStatus(null);
     return ResponseUtils.sendResponse(httpStatus, simpleResponseDTO);
   }
 }

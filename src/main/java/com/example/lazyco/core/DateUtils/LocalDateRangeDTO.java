@@ -1,30 +1,29 @@
 package com.example.lazyco.core.DateUtils;
 
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class DateRangeDTO {
-  private Date start;
-  private Date end;
+public class LocalDateRangeDTO {
+  private LocalDate start;
+  private LocalDate end;
 
-  /** Default constructor creates a range for the current day (start of day to end of day). */
-  public DateRangeDTO() {
-    Date now = new Date();
+  public LocalDateRangeDTO() {
+    LocalDate now = LocalDate.now();
     this.start = now;
     this.end = now;
   }
 
-  public DateRangeDTO(Date start, Date end) {
+  public LocalDateRangeDTO(LocalDate start, LocalDate end) {
     this.start = start;
     this.end = end;
     validateRange();
   }
 
   private void validateRange() {
-    if (start != null && end != null && start.after(end)) {
+    if (start != null && end != null && start.isAfter(end)) {
       throw new IllegalArgumentException("Start date must be before or equal to end date");
     }
   }

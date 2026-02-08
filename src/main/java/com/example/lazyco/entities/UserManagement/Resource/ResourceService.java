@@ -22,7 +22,7 @@ public class ResourceService extends CommonAbstractService<ResourceDTO, Resource
 
   @Override
   protected void validateBeforeCreate(ResourceDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getResourceName())) {
+    if (StringUtils.isEmpty(requestDTO.getName())) {
       throw new ApplicationException(ResourceMessage.RESOURCE_NAME_REQUIRED);
     }
     // name should be unique
@@ -43,7 +43,7 @@ public class ResourceService extends CommonAbstractService<ResourceDTO, Resource
 
   @Override
   protected void validateBeforeUpdate(ResourceDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getResourceName())) {
+    if (!StringUtils.isEmpty(requestDTO.getName())) {
       validateUniqueName(requestDTO, ResourceMessage.DUPLICATE_RESOURCE_NAME);
     }
   }

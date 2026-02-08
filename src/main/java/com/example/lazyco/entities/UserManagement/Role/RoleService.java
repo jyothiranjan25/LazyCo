@@ -79,12 +79,12 @@ public class RoleService extends CommonAbstractService<RoleDTO, Role> {
 
   @Override
   protected void validateBeforeCreate(RoleDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getRoleName())) {
+    if (StringUtils.isEmpty(requestDTO.getName())) {
       throw new ApplicationException(RoleMessage.ROLE_NAME_REQUIRED);
     }
 
     // name should be unique
-    validateUniqueName(requestDTO,RoleMessage.DUPLICATE_ROLE_NAME);
+    validateUniqueName(requestDTO, RoleMessage.DUPLICATE_ROLE_NAME);
   }
 
   @Override
@@ -94,8 +94,8 @@ public class RoleService extends CommonAbstractService<RoleDTO, Role> {
 
   @Override
   protected void validateBeforeUpdate(RoleDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getRoleName())) {
-      validateUniqueName(requestDTO,RoleMessage.DUPLICATE_ROLE_NAME);
+    if (!StringUtils.isEmpty(requestDTO.getName())) {
+      validateUniqueName(requestDTO, RoleMessage.DUPLICATE_ROLE_NAME);
     }
   }
 

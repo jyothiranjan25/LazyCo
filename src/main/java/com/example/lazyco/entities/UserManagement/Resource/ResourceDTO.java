@@ -5,7 +5,6 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.In
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.DTO.HasName;
-import jakarta.persistence.*;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = Resource.class)
 public class ResourceDTO extends AbstractDTO<ResourceDTO> implements HasName {
-  @InternalFilterableField private String resourceName;
+  @InternalFilterableField private String name;
   private String description;
   private Integer resourceOrder;
   private String action;
@@ -27,14 +26,4 @@ public class ResourceDTO extends AbstractDTO<ResourceDTO> implements HasName {
   private List<ResourceDTO> childResources;
   private Boolean fetchParent;
   private Boolean getChildForParent;
-
-  @Override
-  public String getName() {
-    return resourceName;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.resourceName = name;
-  }
 }

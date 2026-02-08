@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = UserGroup.class)
 public class UserGroupDTO extends AbstractDTO<UserGroupDTO> implements HasName {
-  @InternalFilterableField private String userGroupName;
+  @InternalFilterableField private String name;
   private String fullyQualifiedName;
   private String description;
 
@@ -25,14 +25,4 @@ public class UserGroupDTO extends AbstractDTO<UserGroupDTO> implements HasName {
   private Boolean fetchParent;
   private Boolean getChildForParent;
   private Boolean fetchForLoggedInUser;
-
-  @Override
-  public String getName() {
-    return userGroupName;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.userGroupName = name;
-  }
 }

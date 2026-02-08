@@ -35,7 +35,7 @@ import org.hibernate.envers.Audited;
 public class UserGroup extends AbstractModel {
 
   @Column(name = "name", comment = "Unique user group name")
-  private String userGroupName;
+  private String name;
 
   @Column(name = "fully_qualified_name", comment = "Fully qualified user group name")
   private String fullyQualifiedName;

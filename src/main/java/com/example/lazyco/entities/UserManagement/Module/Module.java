@@ -31,7 +31,7 @@ import org.hibernate.envers.Audited;
 public class Module extends AbstractModel {
 
   @Column(name = "name", comment = "Name of the module")
-  private String moduleName;
+  private String name;
 
   @Column(name = "description", comment = "Description of the module")
   private String description;

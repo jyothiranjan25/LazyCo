@@ -14,7 +14,7 @@ import lombok.Setter;
 @FilteredEntity(type = Module.class)
 public class ModuleDTO extends AbstractDTO<ModuleDTO> implements HasName {
 
-  @InternalFilterableField private String moduleName;
+  @InternalFilterableField private String name;
   private String description;
   private String action;
   private Boolean showInMenu;
@@ -23,14 +23,4 @@ public class ModuleDTO extends AbstractDTO<ModuleDTO> implements HasName {
   private List<ResourceDTO> removeResources;
   private List<ResourceDTO> resources;
   private Boolean fetchResources;
-
-  @Override
-  public String getName() {
-    return moduleName;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.moduleName = name;
-  }
 }

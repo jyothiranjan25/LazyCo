@@ -21,7 +21,10 @@ import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -57,6 +60,8 @@ public class GsonSingleton {
   private static void registerTypeAdapter(GsonBuilder gsonBuilder) {
     gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
     gsonBuilder.registerTypeAdapter(Time.class, new TimeTypeAdapter());
+    gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter());
+    gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter());
     gsonBuilder.registerTypeAdapter(String.class, new StringTypeAdapter());
     gsonBuilder.serializeSpecialFloatingPointValues();
     gsonBuilder.registerTypeAdapter(Number.class, new NumberTypeAdapter());
@@ -457,6 +462,58 @@ public class GsonSingleton {
       }
 
       throw new JsonParseException("Invalid time format: " + jsonElement);
+    }
+  }
+
+  public static class LocalDateTypeAdapter
+      implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    @Override
+    public JsonElement serialize(
+        LocalDate localDate, Type type, JsonSerializationContext jsonSerializationContext) {
+      if (localDate == null) {
+        return JsonNull.INSTANCE;
+      }
+      return new JsonPrimitive(localDate.format(FORMATTER));
+    }
+
+    @Override
+    public LocalDate deserialize(
+        JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
+        throws JsonParseException {
+      if (jsonElement == null
+          || jsonElement.isJsonNull()
+          || jsonElement.getAsString().trim().isEmpty()) {
+        return null;
+      }
+      return LocalDate.parse(jsonElement.getAsString(), FORMATTER);
+    }
+  }
+
+  public static class LocalDateTimeTypeAdapter
+      implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+    @Override
+    public JsonElement serialize(
+        LocalDateTime localDateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+      if (localDateTime == null) {
+        return JsonNull.INSTANCE;
+      }
+      return new JsonPrimitive(localDateTime.format(FORMATTER));
+    }
+
+    @Override
+    public LocalDateTime deserialize(
+        JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
+        throws JsonParseException {
+      if (jsonElement == null
+          || jsonElement.isJsonNull()
+          || jsonElement.getAsString().trim().isEmpty()) {
+        return null;
+      }
+      return LocalDateTime.parse(jsonElement.getAsString(), FORMATTER);
     }
   }
 

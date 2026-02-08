@@ -8,6 +8,7 @@ COMMON_MODULES:
   ID_REQUIRED: "The ID is required."
   INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
   FIELD_MISSING : "The field '%1$s' is missing."
+  REFERENCE_ERROR : "The record cannot be deleted because it is referenced by other records."
   DUPLICATE_RECORD : "A record with the same value already exists."
   DUPLICATE_FIELD : "The record '%1$s' already exists."
   CODE_ALREADY_EXISTS : "The code '%1$s' is already in use. Please choose a different code."
@@ -67,3 +68,8 @@ USER_MODULES:
   INVALID_RESET_TOKEN: "The password reset token is invalid."
   RESET_TOKEN_EXPIRED: "The password reset token has expired."
   PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
+
+ACADEMIC_YEAR:
+    ACADEMIC_YEAR_CODE_REQUIRED : "Academic year code is required."
+    ACADEMIC_YEAR_NAME_REQUIRED : "Academic year name is required."
+    ACADEMIC_YEAR_DATE_CONFLICT : "The academic year '%1$s' has date conflicts with another academic year. Please adjust the dates to avoid overlap."

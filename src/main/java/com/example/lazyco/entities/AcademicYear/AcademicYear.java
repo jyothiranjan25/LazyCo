@@ -1,6 +1,6 @@
 package com.example.lazyco.entities.AcademicYear;
 
-import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.Getter;
@@ -27,13 +27,16 @@ import org.hibernate.envers.Audited;
     uniqueConstraints = {@UniqueConstraint(name = "uk_academic_year_code", columnNames = "code")})
 @EntityListeners(AcademicYearListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class AcademicYear extends AbstractModel {
+public class AcademicYear extends AbstractRBACModel {
 
   @Column(name = "code", comment = "Code representing the academic year")
   private String code;
 
   @Column(name = "name", comment = "Name of the academic year")
   private String name;
+
+  @Column(name = "description", comment = "Description of the academic year")
+  private String description;
 
   @Column(name = "start_date", comment = "Start date of the academic year")
   private LocalDate startDate;

@@ -12,9 +12,22 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = AcademicYear.class)
 public class AcademicYearDTO extends AbstractDTO<AcademicYearDTO> implements HasCodeAndName {
+
   @InternalFilterableField private String code;
   @InternalFilterableField private String name;
+  private String description;
   @InternalFilterableField private LocalDate startDate;
   @InternalFilterableField private LocalDate endDate;
   @InternalFilterableField private Boolean isActive;
+
+  /**
+   * The following fields are used for date comparison filtering in the service layer. They are not
+   * persisted in the database and are only used to pass parameters for filtering based on date
+   * comparisons.
+   */
+  private LocalDate comparisonDate;
+
+  private LocalDate startDateComparison;
+  private LocalDate endDateComparison;
+  private AcademicYearDTODateComparisonEnum dateComparison;
 }

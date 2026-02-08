@@ -29,7 +29,7 @@ import org.hibernate.envers.Audited;
 public class Role extends AbstractModel {
 
   @Column(name = "name", comment = "Name of the role")
-  private String roleName;
+  private String name;
 
   @Column(name = "description", comment = "Description of the role")
   private String description;

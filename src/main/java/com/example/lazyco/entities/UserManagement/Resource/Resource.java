@@ -33,7 +33,7 @@ import org.hibernate.envers.Audited;
 public class Resource extends AbstractModel {
 
   @Column(name = "name", comment = "Name of the resource")
-  private String resourceName;
+  private String name;
 
   @Column(name = "description", comment = "Description of the resource")
   private String description;

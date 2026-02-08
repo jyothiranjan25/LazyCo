@@ -13,20 +13,10 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = Role.class)
 public class RoleDTO extends AbstractDTO<RoleDTO> implements HasName {
-  @InternalFilterableField private String roleName;
+  @InternalFilterableField private String name;
   private String description;
   private String icon;
   private RoleTypeEnum roleType;
   private List<RoleModuleResourceDTO> roleModuleResources;
   private Boolean fetchModuleResources;
-
-  @Override
-  public String getName() {
-    return roleName;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.roleName = name;
-  }
 }
