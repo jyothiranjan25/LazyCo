@@ -27,9 +27,8 @@ public class ResolveException {
 
     String defaultMessage = CustomMessage.getMessageString(CommonMessage.APPLICATION_ERROR);
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-
-    if (e instanceof PSQLException psqlEx) {
-      try {
+    try {
+      if (e instanceof PSQLException psqlEx) {
         String sqlState = psqlEx.getSQLState();
         String detail = psqlEx.getServerErrorMessage().getDetail();
         if (PSQLState.UNIQUE_VIOLATION.getState().equals(sqlState)) {
@@ -56,23 +55,23 @@ public class ResolveException {
           defaultMessage = psqlEx.getMessage();
           status = HttpStatus.BAD_REQUEST;
         }
-      } catch (Exception ignore) {
+      } else if (e instanceof PropertyValueException hibernateEx) {
+        defaultMessage =
+            CustomMessage.getMessageString(
+                CommonMessage.FIELD_MISSING, hibernateEx.getPropertyName());
+        status = HttpStatus.BAD_REQUEST;
+      } else if (e instanceof OptimisticLockException
+          || e instanceof ObjectOptimisticLockingFailureException) {
+        defaultMessage = CustomMessage.getMessageString(CommonMessage.INTERNET_IS_SLOW);
+        status = HttpStatus.CONFLICT;
+      } else if (e instanceof HttpRequestMethodNotSupportedException httpEx) {
+        defaultMessage = httpEx.getMessage();
+        status = (HttpStatus) httpEx.getStatusCode();
+      } else if (e instanceof NoHandlerFoundException noHandlerEx) {
+        defaultMessage = noHandlerEx.getMessage();
+        status = HttpStatus.NOT_FOUND;
       }
-    } else if (e instanceof PropertyValueException hibernateEx) {
-      defaultMessage =
-          CustomMessage.getMessageString(
-              CommonMessage.FIELD_MISSING, hibernateEx.getPropertyName());
-      status = HttpStatus.BAD_REQUEST;
-    } else if (e instanceof OptimisticLockException
-        || e instanceof ObjectOptimisticLockingFailureException) {
-      defaultMessage = CustomMessage.getMessageString(CommonMessage.INTERNET_IS_SLOW);
-      status = HttpStatus.CONFLICT;
-    } else if (e instanceof HttpRequestMethodNotSupportedException httpEx) {
-      defaultMessage = httpEx.getMessage();
-      status = (HttpStatus) httpEx.getStatusCode();
-    } else if (e instanceof NoHandlerFoundException noHandlerEx) {
-      defaultMessage = noHandlerEx.getMessage();
-      status = HttpStatus.NOT_FOUND;
+    } catch (Exception ignore) {
     }
 
     simpleResponseDTO.setMessage(defaultMessage);
