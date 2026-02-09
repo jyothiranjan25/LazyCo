@@ -1,6 +1,6 @@
 package com.example.lazyco.entities.AcademicProgram;
 
-public enum ProgramStudyType {
+public enum ProgramLevelEnum {
   UNDERGRADUATE,
   POSTGRADUATE,
   DOCTORATE,

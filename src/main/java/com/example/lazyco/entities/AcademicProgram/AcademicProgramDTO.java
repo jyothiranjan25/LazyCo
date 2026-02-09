@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.AcademicProgram;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
@@ -14,7 +15,11 @@ public class AcademicProgramDTO extends AbstractDTO<AcademicProgramDTO> implemen
   @InternalFilterableField private String code;
   @InternalFilterableField private String name;
   private String description;
-  private ProgramStudyMode programStudyMode;
-  private ProgramStudyType programStudyType;
+  private ProgramStudyModeEnum programStudyMode;
+  private ProgramLevelEnum programLevel;
   @InternalFilterableField private Boolean isActive;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "institution.id")
+  private Long institutionId;
 }

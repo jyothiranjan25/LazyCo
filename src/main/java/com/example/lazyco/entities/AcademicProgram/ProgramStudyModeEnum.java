@@ -1,6 +1,6 @@
 package com.example.lazyco.entities.AcademicProgram;
 
-public enum ProgramStudyMode {
+public enum ProgramStudyModeEnum {
   FULL_TIME,
   PART_TIME,
   ONLINE,

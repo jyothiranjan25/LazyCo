@@ -71,7 +71,7 @@ public class AcademicYearService extends CommonAbstractService<AcademicYearDTO, 
       AcademicYearDTO filter = new AcademicYearDTO();
       filter.setStartDateComparison(requestDTO.getStartDate());
       filter.setEndDateComparison(requestDTO.getEndDate());
-      filter.setDateComparison(AcademicYearDTODateComparisonEnum.CONFLICT_CHECK);
+      filter.setDateComparison(DateComparisonEnum.CONFLICT_CHECK);
       if (requestDTO.getId() != null) {
         filter.setIdsNotIn(List.of(requestDTO.getId()));
       }

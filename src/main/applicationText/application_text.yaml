@@ -46,7 +46,7 @@ APP_USER:
   EMAIL_IN_USE : "The email '%1$s' is already associated with another account."
 
 USER_ROLE:
-  APP_USER_ID_REQUIRED : "App user ID is required."
+  APP_USER_ID_REQUIRED : "App user is required."
   ROLE_ID_REQUIRED : "Role ID is required."
   USER_GROUP_ID_REQUIRED : "User group ID is required."
   USER_ROLE_ALREADY_EXISTS : "The role already exists for the user in the specified user group."
@@ -75,7 +75,7 @@ UNIVERSITY:
   DUPLICATE_UNIVERSITY_NAME : "A university with the name '%1$s' already exists."
 
 INSTITUTION:
-  UNIVERSITY_ID_REQUIRED: "University ID is required for institution."
+  UNIVERSITY_ID_REQUIRED: "University is required for institution."
   INSTITUTION_CODE_REQUIRED : "Institution code is required."
   INSTITUTION_NAME_REQUIRED : "Institution name is required."
   DUPLICATE_INSTITUTION_NAME : "An institution with the name '%1$s' already exists."
@@ -93,8 +93,14 @@ TERM_SYSTEM:
   ERROR_SAVING_TERM_MASTERS : "Error occurred while saving term masters for the term system. Please try again."
 
 TERM_MASTER:
-  TERM_MASTER_TERM_SYSTEM_ID_REQUIRED : "Term system ID is required for term master."
+  TERM_MASTER_TERM_SYSTEM_ID_REQUIRED : "Term system is required for term master."
   TERM_MASTER_CODE_REQUIRED : "Term master code is required."
   TERM_MASTER_NAME_REQUIRED : "Term master name is required."
   DUPLICATE_TERM_MASTER_NAME : "A term master with the name '%1$s' already exists."
+
+ACADEMIC_PROGRAM:
+  ACADEMIC_PROGRAM_INSTITUTION_ID_REQUIRED : "Institution is required for academic program."
+  ACADEMIC_PROGRAM_CODE_REQUIRED : "Academic program code is required."
+  ACADEMIC_PROGRAM_NAME_REQUIRED : "Academic program name is required."
+  DUPLICATE_ACADEMIC_PROGRAM_NAME : "An academic program with the name '%1$s' already exists."
 

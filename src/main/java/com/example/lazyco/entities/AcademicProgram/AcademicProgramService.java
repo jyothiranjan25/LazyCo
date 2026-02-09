@@ -14,6 +14,12 @@ public class AcademicProgramService
 
   @Override
   protected void validateBeforeCreate(AcademicProgramDTO requestDTO) {
+
+    if (requestDTO.getInstitutionId() == null) {
+      throw new ApplicationException(
+          AcademicProgramMessage.ACADEMIC_PROGRAM_INSTITUTION_ID_REQUIRED);
+    }
+
     if (StringUtils.isEmpty(requestDTO.getCode())) {
       throw new ApplicationException(AcademicProgramMessage.ACADEMIC_PROGRAM_CODE_REQUIRED);
     }

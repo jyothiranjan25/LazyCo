@@ -1,8 +1,7 @@
 package com.example.lazyco.entities.Institution;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface InstitutionMapper extends AbstractMapper<InstitutionDTO, Institution> {

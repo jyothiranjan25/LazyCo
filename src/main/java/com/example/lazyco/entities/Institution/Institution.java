@@ -1,8 +1,10 @@
 package com.example.lazyco.entities.Institution;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.University.University;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
@@ -50,4 +52,7 @@ public class Institution extends AbstractRBACModel {
       comment = "Reference to the university this institution belongs to.")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private University university;
+
+  @OneToMany(mappedBy = "institution")
+  private Set<AcademicProgram> academicPrograms;
 }

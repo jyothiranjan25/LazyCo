@@ -29,5 +29,5 @@ public class AcademicYearDTO extends AbstractDTO<AcademicYearDTO> implements Has
 
   private LocalDate startDateComparison;
   private LocalDate endDateComparison;
-  private AcademicYearDTODateComparisonEnum dateComparison;
+  private DateComparisonEnum dateComparison;
 }
