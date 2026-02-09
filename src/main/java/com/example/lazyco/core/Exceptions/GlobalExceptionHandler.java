@@ -1,5 +1,6 @@
 package com.example.lazyco.core.Exceptions;
 
+import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.ResponseUtils;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,13 @@ public class GlobalExceptionHandler {
     SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
     simpleResponseDTO.setMessage(e.getMessage());
     return ResponseUtils.sendResponse(e.getHttpStatus(), simpleResponseDTO);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @ExceptionHandler(BatchException.class)
+  public ResponseEntity<?> applicationExceptionWrapper(BatchException e) {
+    AbstractDTO<?> failedDTO = e.getAbstractDTO();
+    return ResponseUtils.sendResponse(e.getHttpStatus(), (AbstractDTO) (failedDTO));
   }
 
   // handle all unexpected errors/ exceptions will be handled here

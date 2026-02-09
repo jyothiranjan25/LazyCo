@@ -14,11 +14,11 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.Getter;
-import org.hibernate.Session;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,29 +73,45 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    return executeWithTemplate(
-        dto, self::executeCreateNestedTransactional, self::executeCreateNewTransactional);
+    Function<D, D> atomicOperation = this::executeCreateNestedTransactional;
+    Function<D, D> nonAtomicOperation = this::executeCreateNewTransactional;
+    Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
+    return executeWithTemplate(dto, operation);
   }
 
   // Execute create in the current transaction
   public D executeCreateTransactional(D dto) {
-    return executeCreate(dto);
+    return executeWithTemplate(dto, true, this::executeCreate);
+  }
+
+  public D executeCreateTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeCreate);
   }
 
   // Execute create in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeCreateNewTransactional(D dto) {
-    return executeCreate(dto);
+    return executeWithTemplate(dto, true, this::executeCreate);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public D executeCreateNewTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeCreate);
   }
 
   // Execute create in a nested transaction (saves a savepoint)
   @Transactional(propagation = Propagation.NESTED)
   public D executeCreateNestedTransactional(D dto) {
-    return executeCreate(dto);
+    return executeWithTemplate(dto, true, this::executeCreate);
+  }
+
+  @Transactional(propagation = Propagation.NESTED)
+  public D executeCreateNestedTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeCreate);
   }
 
   // Core create logic
-  private D executeCreate(D dtoToCreate) {
+  private D executeCreate(D dtoToCreate, boolean immediateFlush) {
     // Hook for subclasses to modify dto before creation
     updateDtoBeforeCreate(dtoToCreate);
 
@@ -105,30 +121,27 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    self.validateBeforeCreate(dtoToCreate);
+    validateBeforeCreate(dtoToCreate);
 
     // Map DTO to Entity
     E entityToCreate = abstractMapper.map(dtoToCreate);
 
     // Pre-create hook
-    self.preCreate(dtoToCreate, entityToCreate);
+    preCreate(dtoToCreate, entityToCreate);
 
     // Save entity
-    E createdEntity = abstractDAO.save(entityToCreate);
-
-    //    // TODO: (low priority) optimize to avoid double DB hit
-    //    // Retrieve the created entity to ensure all fields are populated
-    //    @SuppressWarnings("unchecked")
-    //    E refreshedEntity =
-    //        assertEntityByIdPost((Class<E>) entityToCreate.getClass(), createdEntity.getId());
-
-    E refreshedEntity = createdEntity;
+    E createdEntity;
+    if (immediateFlush) {
+      createdEntity = abstractDAO.saveAndFlush(entityToCreate);
+    } else {
+      createdEntity = abstractDAO.save(entityToCreate);
+    }
 
     // Post-create hook
-    self.postCreate(dtoToCreate, refreshedEntity);
+    postCreate(dtoToCreate, createdEntity);
 
     // Map back to DTO and return
-    D createdDTO = abstractMapper.map(refreshedEntity);
+    D createdDTO = abstractMapper.map(createdEntity);
     return modifyCreateResult(dtoToCreate, createdDTO);
   }
 
@@ -151,29 +164,45 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
-    return executeWithTemplate(
-        dto, self::executeUpdateNestedTransactional, self::executeUpdateNewTransactional);
+    Function<D, D> atomicOperation = this::executeUpdateNestedTransactional;
+    Function<D, D> nonAtomicOperation = this::executeUpdateNewTransactional;
+    Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
+    return executeWithTemplate(dto, operation);
   }
 
   // Execute update in the current transaction
   public D executeUpdateTransactional(D dto) {
-    return executeUpdate(dto);
+    return executeWithTemplate(dto, true, this::executeUpdate);
+  }
+
+  public D executeUpdateTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeUpdate);
   }
 
   // Execute update in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeUpdateNewTransactional(D dto) {
-    return executeUpdate(dto);
+    return executeWithTemplate(dto, true, this::executeUpdate);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public D executeUpdateNewTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeUpdate);
   }
 
   // Execute update in a nested transaction (saves a savepoint)
   @Transactional(propagation = Propagation.NESTED)
   public D executeUpdateNestedTransactional(D dto) {
-    return executeUpdate(dto);
+    return executeWithTemplate(dto, true, this::executeUpdate);
+  }
+
+  @Transactional(propagation = Propagation.NESTED)
+  public D executeUpdateNestedTransactional(D dto, boolean immediateFlush) {
+    return executeWithTemplate(dto, immediateFlush, this::executeUpdate);
   }
 
   // Core update logic
-  private D executeUpdate(D dtoToUpdate) {
+  private D executeUpdate(D dtoToUpdate, boolean immediateFlush) {
     // Hook for subclasses to modify dto before update
     updateDtoBeforeUpdate(dtoToUpdate);
 
@@ -183,7 +212,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // validate before update
-    self.validateBeforeUpdate(dtoToUpdate);
+    validateBeforeUpdate(dtoToUpdate);
 
     // Retrieve existing entity
     E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
@@ -195,24 +224,21 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     makeUpdates(dtoToUpdate, existingEntity);
 
     // Pre-update hook
-    self.preUpdate(dtoToUpdate, EntityClone, existingEntity);
+    preUpdate(dtoToUpdate, EntityClone, existingEntity);
 
     // Save the updated entity
-    E updatedEntity = abstractDAO.update(existingEntity);
-
-    // TODO: (low priority) optimize to avoid double DB hit
-    // Retrieve the updated entity to ensure all fields are populated
-    @SuppressWarnings("unchecked")
-    //    E refreshedEntity =
-    //        assertEntityByIdPost((Class<E>) updatedEntity.getClass(), updatedEntity.getId());
-
-    E refreshedEntity = updatedEntity;
+    E updatedEntity;
+    if (immediateFlush) {
+      updatedEntity = abstractDAO.updateAndFlush(existingEntity);
+    } else {
+      updatedEntity = abstractDAO.update(existingEntity);
+    }
 
     // Post-update hook
-    self.postUpdate(dtoToUpdate, EntityClone, refreshedEntity);
+    postUpdate(dtoToUpdate, EntityClone, updatedEntity);
 
     // Map back to DTO and return
-    D updatedDTO = abstractMapper.map(refreshedEntity);
+    D updatedDTO = abstractMapper.map(updatedEntity);
     return modifyUpdateResult(dtoToUpdate, updatedDTO);
   }
 
@@ -240,29 +266,31 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
-    return executeWithTemplate(
-        dto, self::executeDeleteNestedTransactional, self::executeDeleteNewTransactional);
+    Function<D, D> atomicOperation = this::executeDeleteNestedTransactional;
+    Function<D, D> nonAtomicOperation = this::executeDeleteNewTransactional;
+    Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
+    return executeWithTemplate(dto, operation);
   }
 
   // Execute delete in the current transaction
   public D executeDeleteTransactional(D dto) {
-    return executeDelete(dto);
+    return executeWithTemplate(dto, true, this::executeDelete);
   }
 
   // Execute delete in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeDeleteNewTransactional(D dto) {
-    return executeDelete(dto);
+    return executeWithTemplate(dto, true, this::executeDelete);
   }
 
   // Execute delete in a nested transaction (saves a savepoint)
   @Transactional(propagation = Propagation.NESTED)
   public D executeDeleteNestedTransactional(D dto) {
-    return executeDelete(dto);
+    return executeWithTemplate(dto, true, this::executeDelete);
   }
 
   // Core delete logic
-  private D executeDelete(D dtoToDelete) {
+  private D executeDelete(D dtoToDelete, boolean immediateFlush) {
     // Hook for subclasses to modify dto before deletion
     updateDtoBeforeDelete(dtoToDelete);
 
@@ -275,13 +303,17 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E existingEntity = assertEntityByIdPre(dtoToDelete.getId());
 
     // Pre-delete hook
-    self.preDelete(dtoToDelete, existingEntity);
+    preDelete(dtoToDelete, existingEntity);
 
     // Delete the entity
-    existingEntity = abstractDAO.delete(existingEntity);
+    if (immediateFlush) {
+      existingEntity = abstractDAO.deleteAndFlush(existingEntity);
+    } else {
+      existingEntity = abstractDAO.delete(existingEntity);
+    }
 
     // Post-delete hook
-    self.postDelete(dtoToDelete, existingEntity);
+    postDelete(dtoToDelete, existingEntity);
 
     // Return the original DTO
     return abstractMapper.map(existingEntity);
@@ -432,29 +464,38 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     return abstractDAO.findById(clazz, id);
   }
 
-  // Template method to execute operations with choice of atomic or non-atomic execution
-  private D executeWithTemplate(
-      D dto, Function<D, D> atomicOperation, Function<D, D> nonAtomicOperation) {
+  // Template method to choose between atomic and non-atomic operations based on the DTO flag
+  private Function<D, D> chooseOperation(D dto, Function<D, D> atomic, Function<D, D> nonAtomic) {
+    return Boolean.TRUE.equals(dto.getIsAtomicOperation()) ? atomic : nonAtomic;
+  }
+
+  // Template method to execute the given operation with the service operation template
+  private D executeWithTemplate(D dto, Function<D, D> operation) {
     return ServiceOperationTemplate.executeServiceOperationTemplate(
         new ServiceOperationTemplate<D>(this) {
           @Override
           public D execute(D dtoInput) {
-            Function<D, D> operation =
-                Boolean.TRUE.equals(dto.getIsAtomicOperation())
-                    ? atomicOperation
-                    : nonAtomicOperation;
             return operation.apply(dtoInput);
           }
         },
         dto);
   }
 
-  public Session getCurrentSession() {
-    return abstractDAO.getCurrentSession();
+  private D executeWithTemplate(
+      D dto, boolean immediateFlush, BiFunction<D, Boolean, D> operation) {
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
+        new ServiceOperationTemplate<D>(this) {
+          @Override
+          public D execute(D dtoInput) {
+            return operation.apply(dtoInput, immediateFlush);
+          }
+        },
+        dto);
   }
 
   // Hook to mark the current transaction for rollback without throwing an exception
   public void markRollback(D dto) {
+    ApplicationLogger.warn("Transaction marked for rollback for DTO: {}", dto.getClass().getSimpleName());
     // Tell Spring to roll back this transaction without throwing
     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }

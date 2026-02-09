@@ -6,9 +6,15 @@ public interface IPersistenceDAO<E extends AbstractModel> {
 
   E save(E entity);
 
+  E saveAndFlush(E entity);
+
   E update(E entity);
 
+  E updateAndFlush(E entity);
+
   E delete(E entity);
+
+  E deleteAndFlush(E entity);
 
   E findById(Class<E> clazz, Long id);
 

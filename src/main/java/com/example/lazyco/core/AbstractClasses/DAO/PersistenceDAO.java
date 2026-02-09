@@ -21,6 +21,21 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E save(E entity) {
     try {
       getCurrentSession().persist(entity);
+      getCurrentSession().refresh(entity);
+      return entity;
+    } catch (Exception e) {
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
+      throw e;
+    }
+  }
+
+  @Override
+  public E saveAndFlush(E entity) {
+    try {
+      getCurrentSession().persist(entity);
       flush();
       getCurrentSession().refresh(entity);
       return entity;
@@ -34,6 +49,21 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   }
 
   public E update(E entity) {
+    try {
+      E mergedEntity = getCurrentSession().merge(entity);
+      getCurrentSession().refresh(mergedEntity);
+      return mergedEntity;
+    } catch (Exception e) {
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
+      throw e;
+    }
+  }
+
+  @Override
+  public E updateAndFlush(E entity) {
     try {
       E mergedEntity = getCurrentSession().merge(entity);
       flush();
@@ -53,6 +83,23 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
       // Ensure entity is managed before removal
       E managedEntity = getCurrentSession().merge(entity);
       getCurrentSession().remove(managedEntity);
+      return managedEntity;
+    } catch (Exception e) {
+      // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
+      if (isNestedTransaction()) {
+        getCurrentSession().clear();
+      }
+      throw e;
+    }
+  }
+
+  @Override
+  public E deleteAndFlush(E entity) {
+    try {
+      // Ensure entity is managed before removal
+      E managedEntity = getCurrentSession().merge(entity);
+      getCurrentSession().remove(managedEntity);
+      flush();
       return managedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush

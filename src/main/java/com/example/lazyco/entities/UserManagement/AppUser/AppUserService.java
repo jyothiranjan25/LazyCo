@@ -3,7 +3,6 @@ package com.example.lazyco.entities.UserManagement.AppUser;
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
-import com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +35,6 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   @Override
-  @BypassRBAC
   protected void validateBeforeCreate(AppUserDTO requestDTO) {
     if (StringUtils.isEmpty(requestDTO.getUserId())) {
       throw new ApplicationException(AppUserMessage.USER_ID_REQUIRED);
@@ -63,7 +61,6 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   @Override
-  @BypassRBAC
   protected void validateBeforeUpdate(AppUserDTO requestDTO) {
     duplicateCheck(requestDTO);
   }
@@ -88,25 +85,30 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   private void duplicateCheck(AppUserDTO requestDTO) {
-    AppUserDTO filter = new AppUserDTO();
-    if (requestDTO.getId() != null) filter.setIdsNotIn(List.of(requestDTO.getId()));
-    // Check for duplicate userId
-    if (!StringUtils.isEmpty(requestDTO.getUserId())) {
-      filter.setUserId(requestDTO.getUserId());
-      if (getCount(filter) > 0) {
-        throw new ApplicationException(
-            AppUserMessage.DUPLICATE_USER_ID, new Object[] {requestDTO.getUserId()});
+    abstractAction.setBypassRBAC(true);
+    try {
+      AppUserDTO filter = new AppUserDTO();
+      if (requestDTO.getId() != null) filter.setIdsNotIn(List.of(requestDTO.getId()));
+      // Check for duplicate userId
+      if (!StringUtils.isEmpty(requestDTO.getUserId())) {
+        filter.setUserId(requestDTO.getUserId());
+        if (getCount(filter) > 0) {
+          throw new ApplicationException(
+              AppUserMessage.DUPLICATE_USER_ID, new Object[] {requestDTO.getUserId()});
+        }
       }
-    }
 
-    // Check for duplicate email
-    if (!StringUtils.isEmpty(requestDTO.getEmail())) {
-      filter = new AppUserDTO();
-      filter.setEmail(requestDTO.getEmail().toLowerCase());
-      if (getCount(filter) > 0) {
-        throw new ApplicationException(
-            AppUserMessage.EMAIL_IN_USE, new Object[] {requestDTO.getEmail()});
+      // Check for duplicate email
+      if (!StringUtils.isEmpty(requestDTO.getEmail())) {
+        filter = new AppUserDTO();
+        filter.setEmail(requestDTO.getEmail().toLowerCase());
+        if (getCount(filter) > 0) {
+          throw new ApplicationException(
+              AppUserMessage.EMAIL_IN_USE, new Object[] {requestDTO.getEmail()});
+        }
       }
+    } finally {
+      abstractAction.setBypassRBAC(false);
     }
   }
 
