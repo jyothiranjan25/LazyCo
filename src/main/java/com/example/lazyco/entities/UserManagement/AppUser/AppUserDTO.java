@@ -42,13 +42,13 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   @FilterableField
   private List<AuthorityEnum> authorities;
 
-  private Boolean isSuperAdmin;
+  @InternalFilterableField private Boolean isSuperAdmin;
 
-  private Boolean isAdministrator;
+  @InternalFilterableField private Boolean isAdministrator;
 
-  private Boolean isActive;
+  @InternalFilterableField private Boolean isActive;
 
-  private Boolean isLocked;
+  @InternalFilterableField private Boolean isLocked;
 
   private String resetPasswordToken;
 

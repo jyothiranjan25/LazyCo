@@ -1,8 +1,7 @@
-package com.example.lazyco.entities.TermSystem.TermMaster;
+package com.example.lazyco.entities.TermMaster;
 
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
-import com.example.lazyco.entities.TermSystem.TermSystemMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +36,16 @@ public class TermMasterService extends CommonAbstractService<TermMasterDTO, Term
     }
 
     if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
+      validateUniqueName(requestDTO, TermMasterMessage.DUPLICATE_TERM_MASTER_NAME);
+    }
+  }
+
+  @Override
+  protected void makeUpdates(
+      TermMasterDTO source, TermMaster beforeUpdates, TermMaster afterUpdates) {
+    // don't update term system if term system id is not provided in the request
+    if (beforeUpdates.getTermSystem() != null) {
+      afterUpdates.setTermSystem(beforeUpdates.getTermSystem());
     }
   }
 }

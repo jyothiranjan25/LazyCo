@@ -218,13 +218,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     E existingEntity = assertEntityByIdPre(dtoToUpdate.getId());
 
     // Create a clone of the existing entity to apply updates
-    D EntityClone = abstractMapper.map(existingEntity);
+    D entityClone = abstractMapper.map(existingEntity);
+
+    // Map the cloned entity back to an entity instance to be used in hooks
+    E entityCloneEntity = abstractMapper.map(entityClone);
 
     // Apply updates from DTO to the cloned entity
     makeUpdates(dtoToUpdate, existingEntity);
 
+    makeUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
+
     // Pre-update hook
-    preUpdate(dtoToUpdate, EntityClone, existingEntity);
+    preUpdate(dtoToUpdate, entityClone, existingEntity);
 
     // Save the updated entity
     E updatedEntity;
@@ -235,7 +240,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     }
 
     // Post-update hook
-    postUpdate(dtoToUpdate, EntityClone, updatedEntity);
+    postUpdate(dtoToUpdate, entityClone, updatedEntity);
 
     // Map back to DTO and return
     D updatedDTO = abstractMapper.map(updatedEntity);
@@ -252,6 +257,9 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void makeUpdates(D source, E target) {
     abstractMapper.mapDTOToEntity(source, target);
   }
+
+  // Overloaded hook to provide both the original entity and the cloned entity for updates
+  protected void makeUpdates(D source, E beforeUpdates, E afterUpdates) {}
 
   // Hook called before the entity is updated
   protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityToUpdate) {}

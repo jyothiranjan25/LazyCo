@@ -4,10 +4,11 @@ import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.BatchException;
 import com.example.lazyco.core.Messages.CustomMessage;
-import com.example.lazyco.entities.TermSystem.TermMaster.TermMaster;
-import com.example.lazyco.entities.TermSystem.TermMaster.TermMasterDTO;
-import com.example.lazyco.entities.TermSystem.TermMaster.TermMasterMapper;
-import com.example.lazyco.entities.TermSystem.TermMaster.TermMasterService;
+import com.example.lazyco.entities.TermMaster.TermMaster;
+import com.example.lazyco.entities.TermMaster.TermMasterDTO;
+import com.example.lazyco.entities.TermMaster.TermMasterMapper;
+import com.example.lazyco.entities.TermMaster.TermMasterService;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -40,32 +41,12 @@ public class TermSystemService extends CommonAbstractService<TermSystemDTO, Term
       throw new ApplicationException(TermSystemMessage.TERM_SYSTEM_NAME_REQUIRED);
     }
     validateUniqueName(requestDTO, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
-
-    // check if term master exists
-    if (requestDTO.getTermMasters() == null || requestDTO.getTermMasters().isEmpty()) {
-      throw new ApplicationException(TermSystemMessage.TERM_SYSTEM_TERM_MASTERS_REQUIRED);
-    }
   }
 
   @Override
   protected void postCreate(TermSystemDTO requestDTO, TermSystem createdEntity) {
     // Create term masters associated with the term system
-    List<TermMasterDTO> termMasterDTOs = requestDTO.getTermMasters();
-    for (TermMasterDTO termMasterDTO : termMasterDTOs) {
-      termMasterDTO.setTermSystemId(createdEntity.getId());
-    }
-    TermMasterDTO termMasterDTO = new TermMasterDTO();
-    termMasterDTO.setIsAtomicOperation(true);
-    termMasterDTO.setObjects(termMasterDTOs);
-    termMasterDTO = termMasterService.executeCreateNestedTransactional(termMasterDTO, false);
-    requestDTO.setTermMasters(termMasterDTO.getObjects());
-    if (Boolean.TRUE.equals(termMasterDTO.getHasError())) {
-      requestDTO.setMessage(
-          CustomMessage.getMessageString(TermSystemMessage.ERROR_CREATING_TERM_MASTERS));
-      throw new BatchException(HttpStatus.BAD_REQUEST, requestDTO);
-    }
-    List<TermMaster> createdTermMasters = termMasterMapper.mapDTOList(termMasterDTO.getObjects());
-    createdEntity.setTermMasters(new HashSet<>(createdTermMasters));
+    mapTermMasters(requestDTO, createdEntity);
   }
 
   @Override
@@ -76,6 +57,69 @@ public class TermSystemService extends CommonAbstractService<TermSystemDTO, Term
 
     if (!StringUtils.isEmpty(requestDTO.getName())) {
       validateUniqueName(requestDTO, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
+    }
+  }
+
+  @Override
+  protected void postUpdate(
+      TermSystemDTO requestDTO, TermSystemDTO entityBeforeUpdate, TermSystem updatedEntity) {
+    // update term masters associated with the term system
+    mapTermMasters(requestDTO, updatedEntity);
+  }
+
+  private void mapTermMasters(TermSystemDTO requestDTO, TermSystem entity) {
+    boolean hasError = false;
+    if (requestDTO.getTermMasters() != null && !requestDTO.getTermMasters().isEmpty()) {
+      List<TermMasterDTO> termMasterDTOs = requestDTO.getTermMasters();
+
+      List<TermMasterDTO> addTermMasterDTOs =
+          termMasterDTOs.stream()
+              .filter(dto -> dto.getId() == null)
+              .peek(dto -> dto.setTermSystemId(entity.getId()))
+              .toList();
+
+      List<TermMasterDTO> updateTermMasterDTOs =
+          termMasterDTOs.stream().filter(dto -> dto.getId() != null).toList();
+
+      List<TermMasterDTO> resultTermMasterDTOs = new ArrayList<>();
+      List<TermMaster> resultTermMasters = new ArrayList<>();
+
+      if (!addTermMasterDTOs.isEmpty()) {
+        TermMasterDTO termMasterDTO = new TermMasterDTO();
+        termMasterDTO.setIsAtomicOperation(true);
+        termMasterDTO.setObjects(addTermMasterDTOs);
+        termMasterDTO = termMasterService.executeCreateNestedTransactional(termMasterDTO);
+        resultTermMasterDTOs.addAll(termMasterDTO.getObjects());
+        if (Boolean.TRUE.equals(termMasterDTO.getHasError())) {
+          hasError = true;
+        }
+        List<TermMaster> createdTermMasters =
+            termMasterMapper.mapDTOList(termMasterDTO.getObjects());
+        resultTermMasters.addAll(createdTermMasters);
+      }
+
+      if (!updateTermMasterDTOs.isEmpty()) {
+        TermMasterDTO termMasterDTO = new TermMasterDTO();
+        termMasterDTO.setIsAtomicOperation(true);
+        termMasterDTO.setObjects(updateTermMasterDTOs);
+        termMasterDTO = termMasterService.executeUpdateNestedTransactional(termMasterDTO);
+        resultTermMasterDTOs.addAll(termMasterDTO.getObjects());
+        if (Boolean.TRUE.equals(termMasterDTO.getHasError())) {
+          hasError = true;
+        }
+        List<TermMaster> updatedTermMasters =
+            termMasterMapper.mapDTOList(termMasterDTO.getObjects());
+        resultTermMasters.addAll(updatedTermMasters);
+      }
+
+      entity.setTermMasters(new HashSet<>(resultTermMasters));
+
+      if (hasError) {
+        requestDTO.setTermMasters(resultTermMasterDTOs);
+        requestDTO.setMessage(
+            CustomMessage.getMessageString(TermSystemMessage.ERROR_SAVING_TERM_MASTERS));
+        throw new BatchException(HttpStatus.BAD_REQUEST, requestDTO);
+      }
     }
   }
 }

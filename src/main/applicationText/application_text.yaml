@@ -90,7 +90,7 @@ TERM_SYSTEM:
   TERM_SYSTEM_NAME_REQUIRED : "Term system name is required."
   DUPLICATE_TERM_SYSTEM_NAME : "A term system with the name '%1$s' already exists."
   TERM_SYSTEM_TERM_MASTERS_REQUIRED : "At least one term master must be associated with the term system."
-  ERROR_CREATING_TERM_MASTERS : "Error occurred while creating term masters for the term system. Please try again."
+  ERROR_SAVING_TERM_MASTERS : "Error occurred while saving term masters for the term system. Please try again."
 
 TERM_MASTER:
   TERM_MASTER_TERM_SYSTEM_ID_REQUIRED : "Term system ID is required for term master."

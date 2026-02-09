@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.TermSystem.TermMaster;
+package com.example.lazyco.entities.TermMaster;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.TermSystem.TermSystem;

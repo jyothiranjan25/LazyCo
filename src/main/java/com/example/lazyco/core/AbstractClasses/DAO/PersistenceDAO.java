@@ -49,7 +49,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
 
   public E update(E entity) {
     try {
-        return getCurrentSession().merge(entity);
+      return getCurrentSession().merge(entity);
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
       if (isNestedTransaction()) {
@@ -63,8 +63,8 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E updateAndFlush(E entity) {
     try {
       E mergedEntity = getCurrentSession().merge(entity);
-      getCurrentSession().refresh(mergedEntity);
       flush();
+      getCurrentSession().refresh(mergedEntity);
       return mergedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
