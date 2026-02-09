@@ -63,8 +63,8 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
   public E updateAndFlush(E entity) {
     try {
       E mergedEntity = getCurrentSession().merge(entity);
-      flush();
       getCurrentSession().refresh(mergedEntity);
+      flush();
       return mergedEntity;
     } catch (Exception e) {
       // CRITICAL FIX: Clear session state after failed operations in nested transactions on flush
@@ -95,6 +95,7 @@ public class PersistenceDAO<E extends AbstractModel> implements IPersistenceDAO<
     try {
       // Ensure entity is managed before removal
       E managedEntity = getCurrentSession().merge(entity);
+      flush();
       getCurrentSession().remove(managedEntity);
       flush();
       return managedEntity;

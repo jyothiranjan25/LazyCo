@@ -119,26 +119,8 @@ public class PostgresConfig {
     // --- PostgreSQL-specific optimizations ---
     // Rewrite multi-row inserts into a single batch insert
     config.addDataSourceProperty("reWriteBatchedInserts", "true");
-    // Allow flexible string type handling (fixes type issues)
-    config.addDataSourceProperty("stringtype", "unspecified");
     // Use server-side prepared statements after 1 execution
     config.addDataSourceProperty("prepareThreshold", "1");
-    // Enable client-side prepared statement caching
-    config.addDataSourceProperty("cachePrepStmts", "true");
-    // Use server-side prepared statements
-    config.addDataSourceProperty("useServerPrepStmts", "true");
-    // Track session state locally (reduces network round trips)
-    config.addDataSourceProperty("useLocalSessionState", "true");
-    // Rewrite batched statements into a single request
-    config.addDataSourceProperty("rewriteBatchedStatements", "true");
-    // Max number of prepared statements to cache
-    config.addDataSourceProperty("preparedStatementCacheQueries", "1024");
-    // Memory size allocated for prepared statement cache
-    config.addDataSourceProperty("preparedStatementCacheSizeMiB", "10");
-    // Cache size for database metadata fields
-    config.addDataSourceProperty("databaseMetadataCacheFields", "65536");
-    // Memory size allocated for metadata cache
-    config.addDataSourceProperty("databaseMetadataCacheFieldsMiB", "5");
     // Enable TCP keep-alive to detect dead connections
     config.addDataSourceProperty("tcpKeepAlive", "true");
     // Disable socket timeout (0 = infinite)
@@ -180,7 +162,7 @@ public class PostgresConfig {
     config.setKeepaliveTime(keepaliveTime);
 
     // Disable auto-commit, Hibernate manages transactions
-    config.setAutoCommit(true);
+    config.setAutoCommit(false);
     // Custom pool name (useful for monitoring/metrics)
     config.setPoolName("HikariPool-HighConcurrency");
     // Lightweight validation query for checking connections
