@@ -24,7 +24,7 @@ public class LoginControllerInterceptor implements HandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    ApplicationLogger.info("Check user is logged in - LoginControllerInterceptor");
+    ApplicationLogger.info("Checking user is logged in - LoginControllerInterceptor");
 
     // Case 1: Check if the request is invalid or the user is not logged in
     if (jwtUtil.requestIsInvalid(request, CommonConstants.LOGGED_USER)) {

@@ -73,8 +73,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
-    Function<D, D> atomicOperation = this::executeCreateNestedTransactional;
-    Function<D, D> nonAtomicOperation = this::executeCreateNewTransactional;
+    Function<D, D> atomicOperation = self::executeCreateNestedTransactional;
+    Function<D, D> nonAtomicOperation = self::executeCreateNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
     return executeWithTemplate(dto, operation);
   }
@@ -164,8 +164,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
-    Function<D, D> atomicOperation = this::executeUpdateNestedTransactional;
-    Function<D, D> nonAtomicOperation = this::executeUpdateNewTransactional;
+    Function<D, D> atomicOperation = self::executeUpdateNestedTransactional;
+    Function<D, D> nonAtomicOperation = self::executeUpdateNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
     return executeWithTemplate(dto, operation);
   }
@@ -266,8 +266,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
-    Function<D, D> atomicOperation = this::executeDeleteNestedTransactional;
-    Function<D, D> nonAtomicOperation = this::executeDeleteNewTransactional;
+    Function<D, D> atomicOperation = self::executeDeleteNestedTransactional;
+    Function<D, D> nonAtomicOperation = self::executeDeleteNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
     return executeWithTemplate(dto, operation);
   }
@@ -495,7 +495,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Hook to mark the current transaction for rollback without throwing an exception
   public void markRollback(D dto) {
-    ApplicationLogger.warn("Transaction marked for rollback for DTO: {}", dto.getClass().getSimpleName());
+    ApplicationLogger.warn(
+        "Transaction marked for rollback for DTO: {}", dto.getClass().getSimpleName());
     // Tell Spring to roll back this transaction without throwing
     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
   }

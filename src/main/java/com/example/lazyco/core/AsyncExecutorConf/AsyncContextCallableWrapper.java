@@ -61,7 +61,7 @@ public final class AsyncContextCallableWrapper<T> implements Callable<T> {
       RequestContextHolder.setRequestAttributes(this.taskRequestContext);
       MDC.setContextMap(this.taskMappedDiagnosticContext);
       // Set Abstract Action context for the async task
-      action.setBypassRBAC(this.isBypassRBAC);
+      action.pushBypassRBAC(this.isBypassRBAC);
       action.setLoggedAppUser(this.appUserDTO);
       action.setLoggedUserRole(this.userRoleDTO);
       var1 = this.delegate.call();
@@ -70,7 +70,7 @@ public final class AsyncContextCallableWrapper<T> implements Callable<T> {
       RequestContextHolder.setRequestAttributes(originalRequestContext);
       MDC.setContextMap(originalMappedDiagnosticContext);
       // Restore Abstract Action original context
-      action.setBypassRBAC(originalBypassRBAC);
+      action.popBypassRBAC();
       action.setLoggedAppUser(originalAppUserDTO);
       action.setLoggedUserRole(originalUserRoleDTO);
     }

@@ -28,14 +28,25 @@ public class AbstractAction implements CommonConstants {
   private String environment;
 
   /** ThreadLocal storage to indicate if RBAC checks should be bypassed for the current thread. */
-  private final ThreadLocal<Boolean> BYPASS_RBAC = ThreadLocal.withInitial(() -> false);
+  private final ThreadLocal<Deque<Boolean>> BYPASS_STACK = ThreadLocal.withInitial(ArrayDeque::new);
 
-  public void setBypassRBAC(boolean bypassRBAC) {
-    BYPASS_RBAC.set(bypassRBAC);
+  public void pushBypassRBAC(boolean bypass) {
+    BYPASS_STACK.get().push(bypass);
   }
 
   public boolean isBypassRBAC() {
-    return BYPASS_RBAC.get();
+    Deque<Boolean> stack = BYPASS_STACK.get();
+    return !stack.isEmpty() && stack.peek();
+  }
+
+  public void popBypassRBAC() {
+    Deque<Boolean> stack = BYPASS_STACK.get();
+    if (!stack.isEmpty()) {
+      stack.pop();
+    }
+    if (stack.isEmpty()) {
+      BYPASS_STACK.remove();
+    }
   }
 
   /** ThreadLocal storage for System Jobs */
@@ -144,7 +155,7 @@ public class AbstractAction implements CommonConstants {
         getLoggedInUser() != null ? getLoggedInUser().getUserId() : null,
         getLoggedInUserRole() != null ? getLoggedInUserRole().getRole().getName() : null,
         THREAD_LOCAL_PROPERTIES.get());
-    BYPASS_RBAC.remove();
+    BYPASS_STACK.remove();
     THREAD_LOCAL_USER.remove();
     THREAD_LOCAL_USER_ROLE.remove();
     THREAD_LOCAL_PROPERTIES.remove();

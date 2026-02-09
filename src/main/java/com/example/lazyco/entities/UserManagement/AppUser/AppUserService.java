@@ -85,7 +85,7 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   private void duplicateCheck(AppUserDTO requestDTO) {
-    abstractAction.setBypassRBAC(true);
+    abstractAction.pushBypassRBAC(true);
     try {
       AppUserDTO filter = new AppUserDTO();
       if (requestDTO.getId() != null) filter.setIdsNotIn(List.of(requestDTO.getId()));
@@ -108,7 +108,7 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
         }
       }
     } finally {
-      abstractAction.setBypassRBAC(false);
+      abstractAction.popBypassRBAC();
     }
   }
 

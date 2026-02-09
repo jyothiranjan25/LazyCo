@@ -3,8 +3,6 @@ package com.example.lazyco.core.WebMVC.RBSECHelper;
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import java.lang.reflect.Method;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,8 +19,6 @@ public class BypassRBACAspect {
     this.abstractAction = abstractAction;
   }
 
-  private final ThreadLocal<Deque<Boolean>> BYPASS_STACK = ThreadLocal.withInitial(ArrayDeque::new);
-
   /**
    * Aspect to bypass RBAC checks for methods or classes annotated with @BypassRBAC. It temporarily
    * sets the bypass flag in AbstractAction to true during the method execution.
@@ -33,24 +29,27 @@ public class BypassRBACAspect {
     ApplicationLogger.info(
         "AOP BypassRBACAspect triggered for method: " + joinPoint.getSignature().toShortString());
 
-    // 1️⃣ Save previous state
-    boolean previous = abstractAction.isBypassRBAC();
-    BYPASS_STACK.get().push(previous);
-
-    // 2️⃣ Determine new state
+    // Determine new state
     boolean bypassValue = isBypassValue(joinPoint);
 
-    abstractAction.setBypassRBAC(bypassValue);
+    ApplicationLogger.info(
+        "Setting bypassRBAC to "
+            + bypassValue
+            + " for method: "
+            + joinPoint.getSignature().toShortString());
+
+    abstractAction.pushBypassRBAC(bypassValue);
+
     try {
       return joinPoint.proceed();
     } finally {
-      // 3️⃣ Restore previous state
-      Deque<Boolean> stack = BYPASS_STACK.get();
-      boolean restore = stack.pop();
-      if (stack.isEmpty()) {
-        BYPASS_STACK.remove();
-      }
-      abstractAction.setBypassRBAC(restore);
+      abstractAction.popBypassRBAC();
+      ApplicationLogger.info(
+          "Restoring bypassRBAC to "
+              + abstractAction.isBypassRBAC()
+              + " for method: "
+              + joinPoint.getSignature().toShortString()
+              + " after method execution");
     }
   }
 

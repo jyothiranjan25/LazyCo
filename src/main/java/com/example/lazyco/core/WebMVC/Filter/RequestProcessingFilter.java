@@ -53,7 +53,7 @@ public class RequestProcessingFilter extends OncePerRequestFilter {
         filterChain.doFilter(wrappedRequest, response);
       } else {
         ApplicationLogger.info(
-            "processing Multipart Request{}METHOD: {}{}Content Type: {}{}URI: {}",
+            "processing Request{}METHOD: {}{}Content Type: {}{}URI: {}",
             System.lineSeparator(),
             request.getMethod(),
             System.lineSeparator(),

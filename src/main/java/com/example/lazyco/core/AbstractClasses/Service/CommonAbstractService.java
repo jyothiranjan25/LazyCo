@@ -38,7 +38,7 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
     if (!HasCode.class.isAssignableFrom(incomingDto.getClass())) {
       throw new ApplicationException(CommonMessage.ERROR_VALIDATING_CODE);
     }
-    abstractAction.setBypassRBAC(true);
+    abstractAction.pushBypassRBAC(true);
     try {
       D filter = getDtoClass().getDeclaredConstructor().newInstance();
       HasCode filterWithCode = (HasCode) filter;
@@ -65,7 +65,7 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
     } catch (Exception e) {
       throw new ApplicationException(CommonMessage.APPLICATION_ERROR);
     } finally {
-      abstractAction.setBypassRBAC(false);
+      abstractAction.popBypassRBAC();
     }
   }
 

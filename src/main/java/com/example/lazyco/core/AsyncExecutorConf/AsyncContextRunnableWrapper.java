@@ -58,7 +58,7 @@ public final class AsyncContextRunnableWrapper implements Runnable {
       RequestContextHolder.setRequestAttributes(this.taskRequestContext);
       MDC.setContextMap(this.taskMappedDiagnosticContext);
       // Set Abstract Action context for the async task
-      action.setBypassRBAC(this.isBypassRBAC);
+      action.pushBypassRBAC(this.isBypassRBAC);
       action.setLoggedAppUser(this.appUserDTO);
       action.setLoggedUserRole(this.userRoleDTO);
       this.delegate.run();
@@ -67,7 +67,7 @@ public final class AsyncContextRunnableWrapper implements Runnable {
       RequestContextHolder.setRequestAttributes(originalRequestContext);
       MDC.setContextMap(originalMappedDiagnosticContext);
       // Restore Abstract Action original context
-      action.setBypassRBAC(originalBypassRBAC);
+      action.popBypassRBAC();
       action.setLoggedAppUser(originalAppUserDTO);
       action.setLoggedUserRole(originalUserRoleDTO);
     }

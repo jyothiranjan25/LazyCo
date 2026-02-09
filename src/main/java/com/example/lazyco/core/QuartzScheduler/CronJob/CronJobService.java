@@ -2,10 +2,10 @@ package com.example.lazyco.core.QuartzScheduler.CronJob;
 
 import static org.quartz.JobBuilder.newJob;
 
-import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleDTO;
 import com.example.lazyco.core.QuartzScheduler.CronJob.CronJobSchedule.CronJobScheduleService;
+import com.example.lazyco.core.WebMVC.RBSECHelper.BypassRBAC;
 import jakarta.annotation.PreDestroy;
 import java.util.List;
 import org.quartz.*;
@@ -19,16 +19,12 @@ public class CronJobService {
 
   private Scheduler scheduler;
   private CronJobScheduleService cronJobScheduleService;
-  private AbstractAction abstractAction;
 
   @Autowired
   public void injectDependencies(
-      Scheduler scheduler,
-      CronJobScheduleService cronJobScheduleService,
-      AbstractAction abstractAction) {
+      Scheduler scheduler, CronJobScheduleService cronJobScheduleService) {
     this.scheduler = scheduler;
     this.cronJobScheduleService = cronJobScheduleService;
-    this.abstractAction = abstractAction;
   }
 
   public static String getGroupId(Long cronJobScheduleId) {
@@ -80,26 +76,22 @@ public class CronJobService {
   }
 
   /** method to run at the startup, that will start all the active cronJobSchedules */
+  @BypassRBAC
   @EventListener(ContextRefreshedEvent.class)
   public void startAllActiveCronJobs() {
-    abstractAction.setBypassRBAC(true);
-    try {
-      // get all the active cronJobSchedules
-      CronJobScheduleDTO cronJobScheduleDTO = new CronJobScheduleDTO();
-      cronJobScheduleDTO.setStatus(true);
+    // get all the active cronJobSchedules
+    CronJobScheduleDTO cronJobScheduleDTO = new CronJobScheduleDTO();
+    cronJobScheduleDTO.setStatus(true);
 
-      // get the cronJobScheduleDTOs
-      List<CronJobScheduleDTO> cronJobScheduleDTOs = cronJobScheduleService.get(cronJobScheduleDTO);
+    // get the cronJobScheduleDTOs
+    List<CronJobScheduleDTO> cronJobScheduleDTOs = cronJobScheduleService.get(cronJobScheduleDTO);
 
-      ApplicationLogger.info("Started cron jobs: " + cronJobScheduleDTOs.size());
-      // loop through the cronJobScheduleDTOs and add the cron jobs
-      for (CronJobScheduleDTO cronJobSchedule : cronJobScheduleDTOs) {
-        CronJobTypeEnum cronJobType = cronJobSchedule.getCronJobType();
-        Class<? extends Job> jobClass = cronJobType.getCronJobType();
-        addCronJob(jobClass, cronJobSchedule);
-      }
-    } finally {
-      abstractAction.setBypassRBAC(false);
+    ApplicationLogger.info("Started cron jobs: " + cronJobScheduleDTOs.size());
+    // loop through the cronJobScheduleDTOs and add the cron jobs
+    for (CronJobScheduleDTO cronJobSchedule : cronJobScheduleDTOs) {
+      CronJobTypeEnum cronJobType = cronJobSchedule.getCronJobType();
+      Class<? extends Job> jobClass = cronJobType.getCronJobType();
+      addCronJob(jobClass, cronJobSchedule);
     }
   }
 
