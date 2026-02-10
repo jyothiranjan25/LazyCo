@@ -1,7 +1,7 @@
 package com.example.lazyco.entities.TermSystem;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.entities.TermMaster.TermMasterMapper;
+import com.example.lazyco.entities.TermSystem.TermMaster.TermMasterMapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

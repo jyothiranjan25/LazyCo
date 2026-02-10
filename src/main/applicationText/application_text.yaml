@@ -104,3 +104,9 @@ ACADEMIC_PROGRAM:
   ACADEMIC_PROGRAM_NAME_REQUIRED : "Academic program name is required."
   DUPLICATE_ACADEMIC_PROGRAM_NAME : "An academic program with the name '%1$s' already exists."
 
+PROGRAM_SPECIALIZATION:
+  ACADEMIC_PROGRAM_ID_IS_REQUIRED : "Academic program is required for program specialization."
+  PROGRAM_SPECIALIZATION_CODE_IS_REQUIRED : "Program specialization code is required."
+  PROGRAM_SPECIALIZATION_NAME_IS_REQUIRED : "Program specialization name is required."
+  DUPLICATE_PROGRAM_SPECIALIZATION_NAME : "A program specialization with the name '%1$s' already exists."
+

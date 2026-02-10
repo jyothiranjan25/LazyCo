@@ -1,8 +1,11 @@
 package com.example.lazyco.entities.AcademicProgram;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.AcademicProgram.ProgramSpecialization.ProgramSpecialization;
+import com.example.lazyco.entities.AcademicProgram.ProgramTermSystem.ProgramTermSystem;
 import com.example.lazyco.entities.Institution.Institution;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
@@ -49,7 +52,7 @@ public class AcademicProgram extends AbstractRBACModel {
   @Enumerated(EnumType.STRING)
   private ProgramStudyModeEnum programStudyMode;
 
-  @Column(name = "program_level", comment = "Study type of the academic program")
+  @Column(name = "program_level", comment = "Level of the academic program")
   @Enumerated(EnumType.STRING)
   private ProgramLevelEnum programLevel;
 
@@ -65,4 +68,10 @@ public class AcademicProgram extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_academic_program_institution"),
       comment = "Reference to the institution offering this academic program")
   private Institution institution;
+
+  @OneToMany(mappedBy = "academicProgram")
+  private Set<ProgramSpecialization> programSpecializations;
+
+  @OneToMany(mappedBy = "academicProgram")
+  private Set<ProgramTermSystem> programTermSystems;
 }

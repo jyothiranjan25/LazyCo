@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.TermMaster;
+package com.example.lazyco.entities.TermSystem.TermMaster;
 
 import jakarta.persistence.*;
 

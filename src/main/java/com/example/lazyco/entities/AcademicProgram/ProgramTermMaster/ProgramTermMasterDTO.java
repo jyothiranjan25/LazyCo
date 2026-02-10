@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.TermMaster;
+package com.example.lazyco.entities.AcademicProgram.ProgramTermMaster;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
@@ -10,13 +10,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@FilteredEntity(type = TermMaster.class)
-public class TermMasterDTO extends AbstractDTO<TermMasterDTO> implements HasCodeAndName {
+@FilteredEntity(type = ProgramTermMaster.class)
+public class ProgramTermMasterDTO extends AbstractDTO<ProgramTermMasterDTO>
+    implements HasCodeAndName {
   @InternalFilterableField private String code;
   @InternalFilterableField private String name;
   private String description;
 
   @InternalFilterableField
-  @FieldPath(fullyQualifiedPath = "termSystem.id")
-  private Long termSystemId;
+  @FieldPath(fullyQualifiedPath = "programTermSystem.id")
+  private Long programTermSystemId;
 }

@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.TermMaster;
+package com.example.lazyco.entities.TermSystem.TermMaster;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import org.mapstruct.*;
