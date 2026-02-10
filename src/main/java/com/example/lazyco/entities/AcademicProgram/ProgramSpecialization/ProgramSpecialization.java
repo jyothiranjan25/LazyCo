@@ -15,7 +15,20 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "program_specialization", comment = "Table storing program specialization details")
+@Table(
+    name = "program_specialization",
+    comment = "Table storing program specialization details",
+    indexes = {
+      @Index(name = "idx_program_specialization_code", columnList = "code"),
+      @Index(name = "idx_program_specialization_name", columnList = "name"),
+      @Index(name = "idx_program_specialization_is_active", columnList = "is_active"),
+      @Index(
+          name = "idx_program_specialization_academic_program_id",
+          columnList = "academic_program_id")
+    },
+    uniqueConstraints = {
+      @UniqueConstraint(name = "uk_program_specialization_code", columnNames = "code"),
+    })
 @EntityListeners(ProgramSpecializationListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramSpecialization extends AbstractRBACModel {

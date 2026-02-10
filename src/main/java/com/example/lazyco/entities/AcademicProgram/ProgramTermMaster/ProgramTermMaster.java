@@ -15,19 +15,28 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "program_term_master", comment = "Table storing program term master details")
+@Table(
+    name = "program_term_master",
+    comment = "Table storing program term master details",
+    indexes = {
+      @Index(name = "idx_program_term_master_name", columnList = "name"),
+      @Index(name = "idx_program_term_master_term_sequence", columnList = "term_sequence"),
+      @Index(
+          name = "idx_program_term_master_program_term_system_id",
+          columnList = "program_term_system_id")
+    })
 @EntityListeners(ProgramTermMasterListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramTermMaster extends AbstractRBACModel {
-
-  @Column(name = "code", comment = "Code representing the program term master")
-  private String code;
 
   @Column(name = "name", comment = "Name of the a program term master")
   private String name;
 
   @Column(name = "description", comment = "Description of the program term master")
   private String description;
+
+  @Column(name = "term_sequence", comment = "Sequence of the term in the program term system")
+  private Integer termSequence;
 
   @ManyToOne
   @JoinColumn(

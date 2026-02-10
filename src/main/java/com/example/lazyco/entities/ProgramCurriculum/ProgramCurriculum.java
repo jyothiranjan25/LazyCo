@@ -21,7 +21,27 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "sample")
+@Table(
+    name = "program_curriculums",
+    comment = "Table representing program curriculums",
+    indexes = {
+      @Index(name = "idx_program_curriculums_code", columnList = "code"),
+      @Index(name = "idx_program_curriculums_name", columnList = "name"),
+      @Index(name = "idx_program_curriculums_start_date", columnList = "start_date"),
+      @Index(name = "idx_program_curriculums_end_date", columnList = "end_date"),
+      @Index(name = "idx_program_curriculums_conviction_date", columnList = "conviction_date"),
+      @Index(name = "idx_program_curriculums_academic_year_id", columnList = "academic_year_id"),
+      @Index(name = "idx_program_curriculums_term_system_id", columnList = "term_system_id"),
+      @Index(
+          name = "idx_program_curriculums_academic_program_id",
+          columnList = "academic_program_id"),
+      @Index(
+          name = "idx_program_curriculums_program_term_system_id",
+          columnList = "program_term_system_id")
+    },
+    uniqueConstraints = {
+      @UniqueConstraint(name = "uk_program_curriculums_code", columnNames = "code")
+    })
 @EntityListeners(ProgramCurriculumListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramCurriculum extends AbstractRBACModel {
@@ -46,6 +66,16 @@ public class ProgramCurriculum extends AbstractRBACModel {
 
   @Column(name = "admission_capacity", comment = "Admission capacity for the program curriculum")
   private Integer admissionCapacity;
+
+  @Column(
+      name = "min_credit",
+      comment = "min credit requirement for the program curriculum completion")
+  private Integer minCredit;
+
+  @Column(
+      name = "mix_credit",
+      comment = "mix credit requirement for the program curriculum completion")
+  private Integer mixCredit;
 
   @ManyToOne
   @JoinColumn(
