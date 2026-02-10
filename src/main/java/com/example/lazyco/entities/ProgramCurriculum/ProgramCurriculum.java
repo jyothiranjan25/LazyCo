@@ -73,9 +73,10 @@ public class ProgramCurriculum extends AbstractRBACModel {
   private Integer minCredit;
 
   @Column(
-      name = "mix_credit",
-      comment = "mix credit requirement for the program curriculum completion")
-  private Integer mixCredit;
+      name = "max_credit",
+      comment =
+          "max credit can be taken for the program curriculum completion, if null then no max credit limit")
+  private Integer maxCredit;
 
   @ManyToOne
   @JoinColumn(

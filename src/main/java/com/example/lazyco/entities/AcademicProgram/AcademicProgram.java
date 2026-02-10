@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.ProgramSpecialization.ProgramSpecialization;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermSystem.ProgramTermSystem;
 import com.example.lazyco.entities.Institution.Institution;
+import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -25,7 +26,7 @@ import org.hibernate.envers.Audited;
       @Index(name = "idx_academic_program_code", columnList = "code"),
       @Index(name = "idx_academic_program_name", columnList = "name"),
       @Index(name = "idx_academic_program_program_study_mode", columnList = "program_study_mode"),
-      @Index(name = "idx_academic_program_program_study_type", columnList = "program_study_type"),
+      @Index(name = "idx_academic_program_program_level", columnList = "program_level"),
       @Index(name = "idx_academic_program_is_active", columnList = "is_active"),
       @Index(name = "idx_academic_program_institution_id", columnList = "institution_id")
     },
@@ -74,4 +75,7 @@ public class AcademicProgram extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "academicProgram")
   private Set<ProgramTermSystem> programTermSystems;
+
+  @OneToMany(mappedBy = "academicProgram")
+  private Set<ProgramCurriculum> programCurriculums;
 }

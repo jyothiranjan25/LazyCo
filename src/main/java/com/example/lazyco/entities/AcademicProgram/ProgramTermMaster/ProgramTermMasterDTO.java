@@ -14,7 +14,7 @@ import lombok.Setter;
 public class ProgramTermMasterDTO extends AbstractDTO<ProgramTermMasterDTO> implements HasName {
   @InternalFilterableField private String name;
   private String description;
-  @InternalFilterableField private Integer sequenceNumber;
+  @InternalFilterableField private Integer termSequence;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermSystem.id")

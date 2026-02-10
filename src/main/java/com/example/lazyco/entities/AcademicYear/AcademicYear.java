@@ -1,8 +1,10 @@
 package com.example.lazyco.entities.AcademicYear;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -53,4 +55,7 @@ public class AcademicYear extends AbstractRBACModel {
       columnDefinition = "boolean default true",
       comment = "Whether this academic year is active")
   private Boolean isActive;
+
+  @OneToMany(mappedBy = "academicYear")
+  private Set<ProgramCurriculum> programCurriculums;
 }

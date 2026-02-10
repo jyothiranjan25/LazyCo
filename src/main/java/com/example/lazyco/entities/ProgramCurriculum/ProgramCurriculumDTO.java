@@ -23,6 +23,9 @@ public class ProgramCurriculumDTO extends AbstractDTO<ProgramCurriculumDTO>
   @InternalFilterableField private LocalDate convictionDate;
   @InternalFilterableField private Integer admissionCapacity;
 
+  private Integer minCredit;
+  private Integer maxCredit;
+
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "academicYear.id")
   private Long academicYearId;

@@ -3,6 +3,7 @@ package com.example.lazyco.entities.AcademicProgram.ProgramTermSystem;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermMaster.ProgramTermMaster;
+import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -60,4 +61,7 @@ public class ProgramTermSystem extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "programTermSystem")
   private Set<ProgramTermMaster> programTermMasters;
+
+  @OneToMany(mappedBy = "programTermSystem")
+  private Set<ProgramCurriculum> programCurriculums;
 }

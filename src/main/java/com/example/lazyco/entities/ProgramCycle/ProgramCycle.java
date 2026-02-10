@@ -50,7 +50,7 @@ import org.hibernate.envers.Audited;
     uniqueConstraints = {
       @UniqueConstraint(name = "uk_program_cycle_code", columnNames = "code"),
       @UniqueConstraint(
-          name = "uk_program_cycle_program_curriculum_term_cycle_program_term_master",
+          name = "uk_program_cycle_pcurriculum_term_cycle_pterm_master",
           columnNames = {"program_curriculum_id", "term_cycle_id", "program_term_master_id"})
     })
 @EntityListeners(ProgramCycleListener.class)
