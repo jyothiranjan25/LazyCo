@@ -4,9 +4,12 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermSystem.ProgramTermSystem;
 import com.example.lazyco.entities.AcademicYear.AcademicYear;
+import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
+import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import com.example.lazyco.entities.TermSystem.TermSystem;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -105,4 +108,10 @@ public class ProgramCurriculum extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_curriculum_program_term_system"),
       comment = "Foreign key referencing the program term system")
   private ProgramTermSystem programTermSystem;
+
+  @OneToMany(mappedBy = "programCurriculum")
+  private Set<ProgramCycle> programCycles;
+
+  @OneToMany(mappedBy = "curriculum")
+  private Set<AdmissionOfferProgram> admissionOfferPrograms;
 }

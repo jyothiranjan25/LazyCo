@@ -2,7 +2,9 @@ package com.example.lazyco.entities.AcademicProgram.ProgramTermMaster;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermSystem.ProgramTermSystem;
+import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
@@ -45,4 +47,7 @@ public class ProgramTermMaster extends AbstractRBACModel {
       comment = "Foreign key referencing the program term master")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private ProgramTermSystem programTermSystem;
+
+  @OneToMany(mappedBy = "programTermMaster")
+  private Set<ProgramCycle> programCycles;
 }

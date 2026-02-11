@@ -2,8 +2,10 @@ package com.example.lazyco.entities.TermCycle;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicYear.AcademicYear;
+import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import com.example.lazyco.entities.TermSystem.TermMaster.TermMaster;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -59,4 +61,7 @@ public class TermCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_term_cycle_term_master"),
       comment = "Foreign key referencing the term master")
   private TermMaster termMaster;
+
+  @OneToMany(mappedBy = "termCycle")
+  private Set<ProgramCycle> programCycles;
 }
