@@ -467,7 +467,9 @@ public class GsonSingleton {
 
   public static class LocalDateTypeAdapter
       implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     public JsonElement serialize(
@@ -475,7 +477,7 @@ public class GsonSingleton {
       if (localDate == null) {
         return JsonNull.INSTANCE;
       }
-      return new JsonPrimitive(localDate.format(FORMATTER));
+      return new JsonPrimitive(localDate.format(DATE_FORMATTER));
     }
 
     @Override
@@ -487,13 +489,20 @@ public class GsonSingleton {
           || jsonElement.getAsString().trim().isEmpty()) {
         return null;
       }
-      return LocalDate.parse(jsonElement.getAsString(), FORMATTER);
+      String dateString = jsonElement.getAsString();
+      try {
+        return LocalDate.parse(dateString, DATE_FORMATTER);
+      } catch (Exception e) {
+        return LocalDate.parse(dateString, DATE_TIME_FORMATTER);
+      }
     }
   }
 
   public static class LocalDateTimeTypeAdapter
       implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     @Override
     public JsonElement serialize(
@@ -501,7 +510,7 @@ public class GsonSingleton {
       if (localDateTime == null) {
         return JsonNull.INSTANCE;
       }
-      return new JsonPrimitive(localDateTime.format(FORMATTER));
+      return new JsonPrimitive(localDateTime.format(DATE_TIME_FORMATTER));
     }
 
     @Override
@@ -513,7 +522,13 @@ public class GsonSingleton {
           || jsonElement.getAsString().trim().isEmpty()) {
         return null;
       }
-      return LocalDateTime.parse(jsonElement.getAsString(), FORMATTER);
+      String value = jsonElement.getAsString();
+
+      try {
+        return LocalDateTime.parse(value, DATE_TIME_FORMATTER);
+      } catch (Exception e) {
+        return LocalDate.parse(value, DATE_FORMATTER).atStartOfDay();
+      }
     }
   }
 

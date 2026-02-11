@@ -1,8 +1,7 @@
 package com.example.lazyco.entities.ProgramCurriculum;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ProgramCurriculumMapper

@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -105,6 +106,11 @@ public class MapperValidator {
     try {
       for (Field field : fields) {
         field.setAccessible(true);
+
+        if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+
         Object value = field.get(obj);
 
         // skip primitive types and collections

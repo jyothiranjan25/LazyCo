@@ -226,7 +226,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // Apply updates from DTO to the cloned entity
     makeUpdates(dtoToUpdate, existingEntity);
 
-    makeUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
+    afterMapperUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
 
     // Pre-update hook
     preUpdate(dtoToUpdate, entityClone, existingEntity);
@@ -259,7 +259,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Overloaded hook to provide both the original entity and the cloned entity for updates
-  protected void makeUpdates(D source, E beforeUpdates, E afterUpdates) {}
+  protected void afterMapperUpdates(D requestDTO, E beforeUpdates, E afterUpdates) {}
 
   // Hook called before the entity is updated
   protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityToUpdate) {}

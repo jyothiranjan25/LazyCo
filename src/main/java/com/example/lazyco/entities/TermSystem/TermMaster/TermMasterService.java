@@ -41,8 +41,8 @@ public class TermMasterService extends CommonAbstractService<TermMasterDTO, Term
   }
 
   @Override
-  protected void makeUpdates(
-      TermMasterDTO source, TermMaster beforeUpdates, TermMaster afterUpdates) {
+  protected void afterMapperUpdates(
+      TermMasterDTO requestDTO, TermMaster beforeUpdates, TermMaster afterUpdates) {
     // don't update term system if term system id is not provided in the request
     if (beforeUpdates.getTermSystem() != null) {
       afterUpdates.setTermSystem(beforeUpdates.getTermSystem());

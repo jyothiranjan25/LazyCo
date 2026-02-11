@@ -50,8 +50,13 @@ import org.hibernate.envers.Audited;
     uniqueConstraints = {
       @UniqueConstraint(name = "uk_program_cycle_code", columnNames = "code"),
       @UniqueConstraint(
-          name = "uk_program_cycle_pcurriculum_term_cycle_pterm_master",
-          columnNames = {"program_curriculum_id", "term_cycle_id", "program_term_master_id"})
+          name = "uk_program_cycle_pcurriculum_tcycle_ptmaster_sdate",
+          columnNames = {
+            "program_curriculum_id",
+            "term_cycle_id",
+            "program_term_master_id",
+            "start_date"
+          })
     })
 @EntityListeners(ProgramCycleListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -109,18 +114,12 @@ public class ProgramCycle extends AbstractRBACModel {
       comment = "Deadline for instructors to submit grades for the program cycle")
   private LocalDateTime gradeSubmissionDeadline;
 
-  @Column(
-      name = "is_current_cycle",
-      comment = "Flag to indicate if this program cycle is the current active cycle",
-      columnDefinition = "boolean default false")
-  private Boolean isCurrentCycle;
-
   @ManyToOne
   @JoinColumn(
       name = "program_curriculum_id",
       foreignKey = @ForeignKey(name = "fk_program_cycle_program_curriculum"),
       comment = "Foreign key referencing the program curriculum")
-  private ProgramCurriculum curriculum;
+  private ProgramCurriculum programCurriculum;
 
   @ManyToOne
   @JoinColumn(
