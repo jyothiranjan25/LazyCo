@@ -25,19 +25,19 @@ import org.hibernate.envers.Audited;
       @Index(
           name = "idx_admission_offer_program_admission_offer_id",
           columnList = "admission_offer_id"),
-      @Index(name = "idx_admission_offer_program_curriculum_id", columnList = "curriculum_id"),
+      @Index(name = "idx_admission_offer_program_curriculum_id", columnList = "program_curriculum_id"),
       @Index(name = "idx_admission_offer_program_program_cycle_id", columnList = "program_cycle_id")
     },
     uniqueConstraints = {
       @UniqueConstraint(
           name = "uk_adoffer_program_aoffer_curriculum_pcycle",
-          columnNames = {"admission_offer_id", "curriculum_id", "program_cycle_id"})
+          columnNames = {"admission_offer_id", "program_curriculum_id", "program_cycle_id"})
     })
 @EntityListeners(AdmissionOfferProgramListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AdmissionOfferProgram extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the admission offer program")
+  @Column(name = "code", comment = "Code representing the raw admission offer program")
   private String code;
 
   @ManyToOne
@@ -49,7 +49,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
 
   @ManyToOne
   @JoinColumn(
-      name = "curriculum_id",
+      name = "program_curriculum_id",
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_curriculum"),
       comment = "Reference to the program curriculum for this admission offer program.")
   private ProgramCurriculum programCurriculum;

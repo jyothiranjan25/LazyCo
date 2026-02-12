@@ -2,6 +2,11 @@ package com.example.lazyco.entities.AdmissionOffer;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface AdmissionOfferMapper extends AbstractMapper<AdmissionOfferDTO, AdmissionOffer> {}
+public interface AdmissionOfferMapper extends AbstractMapper<AdmissionOfferDTO, AdmissionOffer> {
+
+    @Mapping(target = "academicYearId", source = "academicYear.id")
+    AdmissionOfferDTO map(AdmissionOffer entity);
+}

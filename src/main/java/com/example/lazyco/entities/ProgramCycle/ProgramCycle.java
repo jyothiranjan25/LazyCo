@@ -40,7 +40,6 @@ import org.hibernate.envers.Audited;
       @Index(
           name = "idx_program_cycle_grade_submission_deadline",
           columnList = "grade_submission_deadline"),
-      @Index(name = "idx_program_cycle_is_current_cycle", columnList = "is_current_cycle"),
       @Index(
           name = "idx_program_cycle_program_curriculum_id",
           columnList = "program_curriculum_id"),
