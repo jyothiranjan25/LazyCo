@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AdmissionOfferMapper extends AbstractMapper<AdmissionOfferDTO, AdmissionOffer> {
 
-    @Mapping(target = "academicYearId", source = "academicYear.id")
-    AdmissionOfferDTO map(AdmissionOffer entity);
+  @Mapping(target = "academicYearId", source = "academicYear.id")
+  @Mapping(target = "applicationFormTemplateId", source = "applicationFormTemplate.id")
+  AdmissionOfferDTO map(AdmissionOffer entity);
 }

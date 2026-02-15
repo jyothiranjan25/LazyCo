@@ -25,7 +25,9 @@ import org.hibernate.envers.Audited;
       @Index(
           name = "idx_admission_offer_program_admission_offer_id",
           columnList = "admission_offer_id"),
-      @Index(name = "idx_admission_offer_program_curriculum_id", columnList = "program_curriculum_id"),
+      @Index(
+          name = "idx_admission_offer_program_curriculum_id",
+          columnList = "program_curriculum_id"),
       @Index(name = "idx_admission_offer_program_program_cycle_id", columnList = "program_cycle_id")
     },
     uniqueConstraints = {

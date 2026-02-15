@@ -96,8 +96,8 @@ public class ProgramCycle extends AbstractRBACModel {
 
   @Column(
       name = "disable_student_registration",
-      comment = "Flag to disable student registration for the program cycle",
-      columnDefinition = "boolean default false")
+      columnDefinition = "boolean default false",
+      comment = "Flag to disable student registration for the program cycle")
   private Boolean disableStudentRegistration;
 
   @Column(

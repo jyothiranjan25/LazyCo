@@ -26,5 +26,9 @@ public class AdmissionOfferDTO extends AbstractDTO<AdmissionOfferDTO> implements
   @FieldPath(fullyQualifiedPath = "academicYear.id")
   private Long academicYearId;
 
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "applicationFormTemplate.id")
+  private Long applicationFormTemplateId;
+
   private List<AdmissionOfferProgramDTO> offerPrograms;
 }

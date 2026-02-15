@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 public interface AdmissionOfferProgramMapper
     extends AbstractMapper<AdmissionOfferProgramDTO, AdmissionOfferProgram> {
 
-    @Mapping(target = "admissionOfferId", source = "admissionOffer.id")
-    @Mapping(target = "programCurriculumId", source = "programCurriculum.id")
-    @Mapping(target = "programCycleId", source = "programCycle.id")
-    AdmissionOfferProgramDTO map(AdmissionOfferProgram entity);
+  @Mapping(target = "admissionOfferId", source = "admissionOffer.id")
+  @Mapping(target = "programCurriculumId", source = "programCurriculum.id")
+  @Mapping(target = "programCycleId", source = "programCycle.id")
+  AdmissionOfferProgramDTO map(AdmissionOfferProgram entity);
 }

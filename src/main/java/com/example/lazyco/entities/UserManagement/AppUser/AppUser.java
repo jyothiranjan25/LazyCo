@@ -55,26 +55,26 @@ public class AppUser extends AbstractRBACModel {
 
   @Column(
       name = "is_super_admin",
-      comment = "Indicates if the user has super admin privileges",
-      columnDefinition = "boolean default false")
+      columnDefinition = "boolean default false",
+      comment = "Indicates if the user has super admin privileges")
   private Boolean isSuperAdmin;
 
   @Column(
       name = "is_administrator",
-      comment = "Indicates if the user has administrator privileges",
-      columnDefinition = "boolean default false")
+      columnDefinition = "boolean default false",
+      comment = "Indicates if the user has administrator privileges")
   private Boolean isAdministrator;
 
   @Column(
       name = "is_active",
-      comment = "Indicates if the user is active",
-      columnDefinition = "boolean default true")
+      columnDefinition = "boolean default true",
+      comment = "Indicates if the user is active")
   private Boolean isActive;
 
   @Column(
       name = "is_locked",
-      comment = "Indicates if the user account is locked",
-      columnDefinition = "boolean default false")
+      columnDefinition = "boolean default false",
+      comment = "Indicates if the user account is locked")
   private Boolean isLocked;
 
   @Column(name = "reset_password_token", comment = "Token used for resetting the user password")
