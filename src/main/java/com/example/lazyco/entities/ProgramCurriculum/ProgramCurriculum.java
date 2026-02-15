@@ -85,6 +85,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
   @JoinColumn(
       name = "academic_year_id",
       foreignKey = @ForeignKey(name = "fk_program_curriculum_academic_year"),
+      nullable = false,
       comment = "Foreign key referencing the academic year")
   private AcademicYear academicYear;
 
@@ -92,6 +93,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
   @JoinColumn(
       name = "term_system_id",
       foreignKey = @ForeignKey(name = "fk_program_curriculum_term_system"),
+      nullable = false,
       comment = "Foreign key referencing the term system")
   private TermSystem termSystem;
 
@@ -99,6 +101,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
   @JoinColumn(
       name = "academic_program_id",
       foreignKey = @ForeignKey(name = "fk_program_curriculum_academic_program"),
+      nullable = false,
       comment = "Foreign key referencing the academic program")
   private AcademicProgram academicProgram;
 
@@ -106,6 +109,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
   @JoinColumn(
       name = "program_term_system_id",
       foreignKey = @ForeignKey(name = "fk_program_curriculum_program_term_system"),
+      nullable = false,
       comment = "Foreign key referencing the program term system")
   private ProgramTermSystem programTermSystem;
 

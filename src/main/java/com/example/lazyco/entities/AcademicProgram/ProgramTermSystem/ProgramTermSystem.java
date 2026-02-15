@@ -55,6 +55,7 @@ public class ProgramTermSystem extends AbstractRBACModel {
   @JoinColumn(
       name = "academic_program_id",
       foreignKey = @ForeignKey(name = "fk_program_term_system_academic_program"),
+      nullable = false,
       comment = "Foreign key referencing the academic program")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private AcademicProgram academicProgram;

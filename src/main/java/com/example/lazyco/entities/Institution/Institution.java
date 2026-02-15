@@ -49,6 +49,7 @@ public class Institution extends AbstractRBACModel {
   @JoinColumn(
       name = "university_id",
       foreignKey = @ForeignKey(name = "fk_institution_university"),
+      nullable = false,
       comment = "Reference to the university this institution belongs to.")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private University university;

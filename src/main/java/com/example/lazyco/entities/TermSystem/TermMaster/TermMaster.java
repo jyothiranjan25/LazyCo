@@ -41,6 +41,7 @@ public class TermMaster extends AbstractRBACModel {
   @JoinColumn(
       name = "term_system_id",
       foreignKey = @ForeignKey(name = "fk_term_master_term_system"),
+      nullable = false,
       comment = "Reference to the term system")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private TermSystem termSystem;

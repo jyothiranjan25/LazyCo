@@ -1,6 +1,7 @@
 package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocument;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPage.ApplicationFormPage;
 import jakarta.persistence.*;
 import java.util.Set;
@@ -45,6 +46,9 @@ public class ApplicationFormTemplate extends AbstractRBACModel {
       columnDefinition = "boolean default true",
       comment = "Indicates whether the application form template is active")
   private Boolean isActive;
+
+  @OneToMany(mappedBy = "applicationFormTemplate")
+  private Set<ApplicationFormDocument> applicationFormDocuments;
 
   @OneToMany(mappedBy = "applicationFormTemplate")
   private Set<ApplicationFormPage> applicationFormPages;

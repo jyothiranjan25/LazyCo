@@ -38,6 +38,7 @@ public class UserRole extends AbstractModel {
   @JoinColumn(
       name = "app_user_id",
       foreignKey = @ForeignKey(name = "fk_user_role_app_user"),
+      nullable = false,
       comment = "Reference to the app user")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private AppUser appUser;
@@ -46,6 +47,7 @@ public class UserRole extends AbstractModel {
   @JoinColumn(
       name = "role_id",
       foreignKey = @ForeignKey(name = "fk_user_role_role"),
+      nullable = false,
       comment = "Reference to the role")
   private Role role;
 
@@ -53,6 +55,7 @@ public class UserRole extends AbstractModel {
   @JoinColumn(
       name = "user_group_id",
       foreignKey = @ForeignKey(name = "fk_user_role_user_group"),
+      nullable = false,
       comment = "Reference to the user group")
   private UserGroup userGroup;
 }

@@ -46,6 +46,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
   @JoinColumn(
       name = "admission_offer_id",
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_admission_offer"),
+      nullable = false,
       comment = "Reference to the admission offer this mapping belongs to.")
   private AdmissionOffer admissionOffer;
 
@@ -53,6 +54,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
   @JoinColumn(
       name = "program_curriculum_id",
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_curriculum"),
+      nullable = false,
       comment = "Reference to the program curriculum for this admission offer program.")
   private ProgramCurriculum programCurriculum;
 
@@ -60,6 +62,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
   @JoinColumn(
       name = "program_cycle_id",
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_program_cycle"),
+      nullable = false,
       comment = "Reference to the program cycle for this admission offer program.")
   private ProgramCycle programCycle;
 }

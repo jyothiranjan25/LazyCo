@@ -119,6 +119,7 @@ public class ProgramCycle extends AbstractRBACModel {
   @JoinColumn(
       name = "program_curriculum_id",
       foreignKey = @ForeignKey(name = "fk_program_cycle_program_curriculum"),
+      nullable = false,
       comment = "Foreign key referencing the program curriculum")
   private ProgramCurriculum programCurriculum;
 
@@ -126,6 +127,7 @@ public class ProgramCycle extends AbstractRBACModel {
   @JoinColumn(
       name = "term_cycle_id",
       foreignKey = @ForeignKey(name = "fk_program_cycle_term_cycle"),
+      nullable = false,
       comment = "Foreign key referencing the term cycle")
   private TermCycle termCycle;
 
@@ -133,6 +135,7 @@ public class ProgramCycle extends AbstractRBACModel {
   @JoinColumn(
       name = "program_term_master_id",
       foreignKey = @ForeignKey(name = "fk_program_cycle_program_term_master"),
+      nullable = false,
       comment = "Foreign key referencing the program term master")
   private ProgramTermMaster programTermMaster;
 

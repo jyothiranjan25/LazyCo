@@ -9,6 +9,6 @@ public interface ApplicationFormSectionCustomFieldMapper
     extends AbstractMapper<
         ApplicationFormSectionCustomFieldDTO, ApplicationFormSectionCustomField> {
 
-    @Mapping(target = "applicationFormPageSectionId", source = "applicationFormPageSection.id")
-    ApplicationFormSectionCustomFieldDTO map(ApplicationFormSectionCustomField entity);
+  @Mapping(target = "applicationFormPageSectionId", source = "applicationFormPageSection.id")
+  ApplicationFormSectionCustomFieldDTO map(ApplicationFormSectionCustomField entity);
 }

@@ -56,6 +56,7 @@ public class AdmissionOffer extends AbstractRBACModel {
   @JoinColumn(
       name = "academic_year_id",
       foreignKey = @ForeignKey(name = "fk_admission_offer_academic_year"),
+      nullable = false,
       comment = "Reference to the academic year this admission offer belongs to.")
   private AcademicYear academicYear;
 

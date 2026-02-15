@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface FieldPath {
-  String aliasPath() default "";
-
   String fullyQualifiedPath() default "";
+
+  String aliasPath() default "";
 
   boolean shouldFetch() default false;
 }

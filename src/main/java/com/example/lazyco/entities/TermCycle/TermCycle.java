@@ -52,6 +52,7 @@ public class TermCycle extends AbstractRBACModel {
   @JoinColumn(
       name = "academic_year_id",
       foreignKey = @ForeignKey(name = "fk_term_cycle_academic_year"),
+      nullable = false,
       comment = "Foreign key referencing the academic year")
   private AcademicYear academicYear;
 
@@ -59,6 +60,7 @@ public class TermCycle extends AbstractRBACModel {
   @JoinColumn(
       name = "term_master_id",
       foreignKey = @ForeignKey(name = "fk_term_cycle_term_master"),
+      nullable = false,
       comment = "Foreign key referencing the term master")
   private TermMaster termMaster;
 

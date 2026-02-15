@@ -41,6 +41,7 @@ public class RoleModuleResource extends AbstractModel {
   @JoinColumn(
       name = "role_id",
       foreignKey = @ForeignKey(name = "fk_role_module_resource_role"),
+      nullable = false,
       comment = "Reference to the role")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Role role;
@@ -49,6 +50,7 @@ public class RoleModuleResource extends AbstractModel {
   @JoinColumn(
       name = "module_id",
       foreignKey = @ForeignKey(name = "fk_role_module_resource_module"),
+      nullable = false,
       comment = "Reference to the module")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Module module;

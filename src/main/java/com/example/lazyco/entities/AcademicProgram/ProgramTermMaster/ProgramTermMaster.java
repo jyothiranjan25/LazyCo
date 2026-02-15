@@ -44,6 +44,7 @@ public class ProgramTermMaster extends AbstractRBACModel {
   @JoinColumn(
       name = "program_term_system_id",
       foreignKey = @ForeignKey(name = "fk_program_term_system_program_term_master"),
+      nullable = false,
       comment = "Foreign key referencing the program term master")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private ProgramTermSystem programTermSystem;

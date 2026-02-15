@@ -1,15 +1,13 @@
 package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.Table;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate.ApplicationFormTemplate;
+import com.example.lazyco.entities.Document.Document;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -18,7 +16,49 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "application_form_document")
+@Table(
+    name = "application_form_document",
+    comment = "Table storing documents associated with application form templates",
+    indexes = {
+      @Index(name = "idx_application_form_document_key", columnList = "key"),
+      @Index(name = "idx_application_form_document_is_mandatory", columnList = "is_mandatory"),
+      @Index(
+          name = "idx_application_form_document_template_id",
+          columnList = "application_form_template_id"),
+      @Index(name = "idx_application_form_document_document_id", columnList = "document_id")
+    },
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "uk_application_form_document_template_id_document_id",
+          columnNames = {"application_form_template_id", "document_id"})
+    })
 @EntityListeners(ApplicationFormDocumentListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class ApplicationFormDocument extends AbstractRBACModel {}
+public class ApplicationFormDocument extends AbstractRBACModel {
+
+  @Column(name = "key", comment = "Key representing the type of document required")
+  private String key;
+
+  @Column(
+      name = "is_mandatory",
+      columnDefinition = "boolean default false",
+      comment = "Whether this document is mandatory for the application form")
+  private Boolean isMandatory;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "application_form_template_id",
+      foreignKey = @ForeignKey(name = "fk_application_form_document_template_id"),
+      nullable = false,
+      comment = "Reference to the application form template this document belongs to")
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private ApplicationFormTemplate applicationFormTemplate;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "document_id",
+      foreignKey = @ForeignKey(name = "fk_application_form_document_document_id"),
+      nullable = false,
+      comment = "Reference to the document this application form document represents")
+  private Document document;
+}

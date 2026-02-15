@@ -67,6 +67,7 @@ public class AcademicProgram extends AbstractRBACModel {
   @JoinColumn(
       name = "institution_id",
       foreignKey = @ForeignKey(name = "fk_academic_program_institution"),
+      nullable = false,
       comment = "Reference to the institution offering this academic program")
   private Institution institution;
 

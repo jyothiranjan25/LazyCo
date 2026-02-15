@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.In
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.DTO.HasCodeAndName;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocumentDTO;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPage.ApplicationFormPageDTO;
 import java.util.List;
 import lombok.Getter;
@@ -19,7 +20,9 @@ public class ApplicationFormTemplateDTO extends AbstractDTO<ApplicationFormTempl
   @InternalFilterableField private String name;
   private String description;
   @InternalFilterableField private Boolean isActive;
+  private List<ApplicationFormDocumentDTO> applicationFormDocuments;
   private List<ApplicationFormPageDTO> applicationFormPages;
 
+  private Boolean fetchDocuments;
   private Boolean fetchPages;
 }
