@@ -44,7 +44,8 @@ public class TermSystemService extends CommonAbstractService<TermSystemDTO, Term
   }
 
   @Override
-  protected void postCreate(TermSystemDTO requestDTO, TermSystem createdEntity) {
+  protected void postCreate(
+      TermSystemDTO requestDTO, TermSystem createdEntity, TermSystemDTO createdDTO) {
     // Create term masters associated with the term system
     mapTermMasters(requestDTO, createdEntity);
   }

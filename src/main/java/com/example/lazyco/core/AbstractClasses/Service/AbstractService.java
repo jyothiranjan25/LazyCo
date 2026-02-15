@@ -137,11 +137,12 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
       createdEntity = abstractDAO.save(entityToCreate);
     }
 
-    // Post-create hook
-    postCreate(dtoToCreate, createdEntity);
-
     // Map back to DTO and return
     D createdDTO = abstractMapper.map(createdEntity);
+
+    // Post-create hook
+    postCreate(dtoToCreate, createdEntity, createdDTO);
+
     return modifyCreateResult(dtoToCreate, createdDTO);
   }
 
@@ -155,7 +156,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void preCreate(D requestDTO, E entityToCreate) {}
 
   // Hook called after the entity is persisted
-  protected void postCreate(D requestDTO, E createdEntity) {}
+  protected void postCreate(D requestDTO, E createdEntity, D createdDTO) {}
 
   // Hook to modify the created DTO before returning to caller
   protected D modifyCreateResult(D requestDTO, D createdDTO) {
@@ -239,11 +240,14 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
       updatedEntity = abstractDAO.update(existingEntity);
     }
 
+    // Map back to DTO and return
+    D updatedDTO = abstractMapper.map(updatedEntity);
+
     // Post-update hook
     postUpdate(dtoToUpdate, entityClone, updatedEntity);
 
-    // Map back to DTO and return
-    D updatedDTO = abstractMapper.map(updatedEntity);
+    postUpdate(dtoToUpdate, entityClone, updatedEntity, updatedDTO);
+
     return modifyUpdateResult(dtoToUpdate, updatedDTO);
   }
 
@@ -266,6 +270,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Hook called after the entity is updated
   protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity) {}
+
+  protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity, D updatedDTO) {}
 
   // Hook to modify the updated DTO before returning to caller
   protected D modifyUpdateResult(D requestDTO, D updatedDTO) {

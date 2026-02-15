@@ -6,7 +6,6 @@ import java.util.List;
 public enum FieldInputType {
   // Text Inputs
   TEXT,
-  TEXTAREA,
 
   // Numeric Inputs
   NUMBER,
@@ -23,13 +22,12 @@ public enum FieldInputType {
   EMAIL,
   PHONE,
   MOBILE,
-  ADDRESS,
   ;
 
   // Validation for specific formats
   public boolean validateField(Object value) {
     return switch (this) {
-      case TEXT, TEXTAREA, SELECT, ADDRESS -> value instanceof String;
+      case TEXT, SELECT -> value instanceof String;
       case NUMBER -> value instanceof Number;
       case DATE, DATETIME -> value instanceof Date;
       case MULTI_SELECT -> value instanceof List<?>;

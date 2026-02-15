@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 public interface ApplicationFormDocumentMapper
     extends AbstractMapper<ApplicationFormDocumentDTO, ApplicationFormDocument> {
 
-    @Mapping(target ="applicationFormTemplateId" , source = "applicationFormTemplate.id")
-    @Mapping(target = "documentId", source = "document.id")
-    ApplicationFormDocumentDTO map(ApplicationFormDocument entity);
+  @Mapping(target = "applicationFormTemplateId", source = "applicationFormTemplate.id")
+  @Mapping(target = "documentId", source = "document.id")
+  ApplicationFormDocumentDTO map(ApplicationFormDocument entity);
 }

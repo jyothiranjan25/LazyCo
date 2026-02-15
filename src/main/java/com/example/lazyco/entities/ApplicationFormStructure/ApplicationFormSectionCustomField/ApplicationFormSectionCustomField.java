@@ -2,6 +2,7 @@ package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSect
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPageSection.ApplicationFormPageSection;
+import com.example.lazyco.entities.CustomField.CustomField;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,21 +20,16 @@ import org.hibernate.envers.Audited;
     name = "application_form_section_custom_field",
     comment = "Table storing custom fields for application form sections",
     indexes = {
-      @Index(name = "idx_application_form_section_custom_field_name", columnList = "name"),
-      @Index(name = "idx_application_form_section_custom_field_key", columnList = "key"),
       @Index(
           name = "idx_application_form_section_custom_field_page_section_id",
-          columnList = "application_form_page_section_id")
+          columnList = "application_form_page_section_id"),
+      @Index(
+          name = "idx_application_form_section_custom_field_custom_field_id",
+          columnList = "custom_field_id")
     })
 @EntityListeners(ApplicationFormSectionCustomFieldListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ApplicationFormSectionCustomField extends AbstractRBACModel {
-
-  @Column(name = "name", comment = "Name of the application form section custom field")
-  private String name;
-
-  @Column(name = "key", comment = "Unique key for the application form section custom field")
-  private String key;
 
   @Column(
       name = "is_required",
@@ -49,4 +45,14 @@ public class ApplicationFormSectionCustomField extends AbstractRBACModel {
       comment = "Reference to the application form page section this custom field belongs to")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private ApplicationFormPageSection applicationFormPageSection;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "custom_field_id",
+      foreignKey = @ForeignKey(name = "fk_application_form_section_custom_field_custom_field_id"),
+      nullable = false,
+      comment =
+          "Reference to the custom field associated with this application form section custom field")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
+  private CustomField customField;
 }

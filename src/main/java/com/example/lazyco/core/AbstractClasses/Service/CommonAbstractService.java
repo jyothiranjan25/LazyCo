@@ -106,8 +106,7 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
   }
 
   // Utility methods for managing associated entities in collections
-  public <T> void addAssociated(
-      Collection<T> existingCollection, Collection<T> incomingCollection) {
+  public <T> void addEntities(Collection<T> existingCollection, Collection<T> incomingCollection) {
 
     if (incomingCollection == null || existingCollection == null) {
       return;
@@ -120,7 +119,7 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
     }
   }
 
-  public <T> void removeAssociated(
+  public <T> void removeEntities(
       Collection<T> existingCollection, Collection<T> incomingCollection) {
 
     if (incomingCollection == null || existingCollection == null) {
@@ -129,6 +128,21 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
 
     for (T entity : incomingCollection) {
       existingCollection.remove(entity);
+    }
+  }
+
+  public <T extends AbstractModel, O extends AbstractDTO<O>> void removeAssociated(
+      Collection<T> existingCollection, Collection<O> incomingCollection) {
+
+    if (incomingCollection == null || existingCollection == null) {
+      return;
+    }
+
+    for (O incomingDTO : incomingCollection) {
+      if (incomingDTO.getId() == null) {
+        continue; // Skip if incoming DTO doesn't have an ID
+      }
+      existingCollection.removeIf(entity -> entity.getId().equals(incomingDTO.getId()));
     }
   }
 

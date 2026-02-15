@@ -20,7 +20,6 @@ import org.hibernate.envers.Audited;
     name = "application_form_document",
     comment = "Table storing documents associated with application form templates",
     indexes = {
-      @Index(name = "idx_application_form_document_key", columnList = "key"),
       @Index(name = "idx_application_form_document_is_mandatory", columnList = "is_mandatory"),
       @Index(
           name = "idx_application_form_document_template_id",
@@ -35,9 +34,6 @@ import org.hibernate.envers.Audited;
 @EntityListeners(ApplicationFormDocumentListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ApplicationFormDocument extends AbstractRBACModel {
-
-  @Column(name = "key", comment = "Key representing the type of document required")
-  private String key;
 
   @Column(
       name = "is_mandatory",

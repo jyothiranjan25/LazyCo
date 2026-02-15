@@ -88,7 +88,7 @@ public class RoleService extends CommonAbstractService<RoleDTO, Role> {
   }
 
   @Override
-  protected void postCreate(RoleDTO requestDTO, Role createdEntity) {
+  protected void postCreate(RoleDTO requestDTO, Role createdEntity, RoleDTO createdDTO) {
     mapRoleModuleResources(requestDTO, createdEntity);
   }
 

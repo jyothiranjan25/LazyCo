@@ -4,7 +4,6 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.core.AbstractClasses.DTO.HasName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,13 +11,15 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = ApplicationFormSectionCustomField.class)
 public class ApplicationFormSectionCustomFieldDTO
-    extends AbstractDTO<ApplicationFormSectionCustomFieldDTO> implements HasName {
+    extends AbstractDTO<ApplicationFormSectionCustomFieldDTO> {
 
-  @InternalFilterableField private String name;
-  @InternalFilterableField private String key;
   @InternalFilterableField private Boolean isRequired;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "applicationFormPageSection.id")
   private Long applicationFormPageSectionId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "customField.id")
+  private Long customFieldId;
 }

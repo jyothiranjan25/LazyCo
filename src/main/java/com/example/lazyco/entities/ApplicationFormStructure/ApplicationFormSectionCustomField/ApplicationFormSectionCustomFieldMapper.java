@@ -10,5 +10,6 @@ public interface ApplicationFormSectionCustomFieldMapper
         ApplicationFormSectionCustomFieldDTO, ApplicationFormSectionCustomField> {
 
   @Mapping(target = "applicationFormPageSectionId", source = "applicationFormPageSection.id")
+  @Mapping(target = "customFieldId", source = "customField.id")
   ApplicationFormSectionCustomFieldDTO map(ApplicationFormSectionCustomField entity);
 }
