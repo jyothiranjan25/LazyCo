@@ -3,14 +3,14 @@ package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.Appli
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum URLSettingsMetaData implements SystemSettingsMetaData {
   APP_URL(
       "APP URL",
       "Base URL of the web application.",
       SystemSettingsKeys.APP_URL.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "https://example.com"),
   ;
   private final SystemSettingsMetaDataDTO metaData;
@@ -19,7 +19,7 @@ public enum URLSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder) {
     this.metaData =
         new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);
@@ -29,7 +29,7 @@ public enum URLSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder,
       String[] options) {
     this.metaData =

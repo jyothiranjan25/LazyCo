@@ -3,26 +3,26 @@ package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.Email
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum SMTPAccountSettingsMetaData implements SystemSettingsMetaData {
   SMTP_EMAIL_CLIENT(
       "SMTP Email Client",
       "Your SMTP email client is the email address that you will use to send emails from.",
       SystemSettingsKeys.SMTP_EMAIL_CLIENT.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "username@example.com"),
   SMTP_USERNAME(
       "SMTP Username",
       "Your SMTP username is your email address that you can use to sign in to your account.",
       SystemSettingsKeys.SMTP_USERNAME.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "username@example.com"),
   SMTP_PASSWORD(
       "SMTP Password",
       "Your SMTP password is the password for your email account that you will use to sign in.",
       SystemSettingsKeys.SMTP_PASSWORD.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "SMTP password");
 
   private final SystemSettingsMetaDataDTO metaData;
@@ -31,7 +31,7 @@ public enum SMTPAccountSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder) {
     this.metaData =
         new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);

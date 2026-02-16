@@ -3,26 +3,26 @@ package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.Roles
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum RoleAdminSecuritySettingsMetaData implements SystemSettingsMetaData {
   ROLE_ADMIN(
       "Role Admin",
       "Select who will have Administrator access.",
       SystemSettingsKeys.ROLE_ADMIN.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "Admin"),
   SECURITY_ROLE(
       "Security Role",
       "Select who will have Security access.",
       SystemSettingsKeys.SECURITY_ROLE.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "Super Admin"),
   SECURITY_ROLE_CLIENT(
       "Security Role Client",
       "Select who will have Security access from the client end.",
       SystemSettingsKeys.SECURITY_ROLE_CLIENT.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "Super Admin Client");
 
   private final SystemSettingsMetaDataDTO metaData;
@@ -31,7 +31,7 @@ public enum RoleAdminSecuritySettingsMetaData implements SystemSettingsMetaData 
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder) {
     this.metaData =
         new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);

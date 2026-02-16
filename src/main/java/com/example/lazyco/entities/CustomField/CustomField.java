@@ -1,7 +1,7 @@
 package com.example.lazyco.entities.CustomField;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomField;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOption;
 import jakarta.persistence.*;
@@ -35,9 +35,12 @@ public class CustomField extends AbstractModel {
   @Column(name = "name", comment = "Name of the custom field")
   private String name;
 
+  @Column(name = "key", comment = "Unique key for the custom field")
+  private String key;
+
   @Column(name = "field_type", comment = "Type of the custom field input")
   @Enumerated(EnumType.STRING)
-  private FieldInputType fieldType;
+  private FieldTypeEnum fieldType;
 
   @OneToMany(mappedBy = "customField")
   private Set<ApplicationFormSectionCustomField> applicationFormSectionCustomFields;

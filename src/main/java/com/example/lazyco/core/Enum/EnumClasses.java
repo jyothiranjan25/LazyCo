@@ -1,13 +1,13 @@
 package com.example.lazyco.core.Enum;
 
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 
 @Getter
 public enum EnumClasses {
-  FIELD_INPUT_TYPE("FIELD_INPUT_TYPE", FieldInputType.class),
+  FIELD_INPUT_TYPE("FIELD_INPUT_TYPE", FieldTypeEnum.class),
   ;
   private final String key;
   private final Class<?> enumClass;

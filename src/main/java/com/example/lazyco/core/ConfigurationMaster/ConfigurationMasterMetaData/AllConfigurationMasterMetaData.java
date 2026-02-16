@@ -1,13 +1,13 @@
 package com.example.lazyco.core.ConfigurationMaster.ConfigurationMasterMetaData;
 
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaData {
   SMTP_USERNAME(
       "SMTP Username",
       "The username used to authenticate the SMTP server.",
       ConfigurationMasterKeys.SMTP_USERNAME.getKey(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       false,
       "Enter SMTP Username"),
 
@@ -15,7 +15,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Password",
       "The password used to authenticate the SMTP server.",
       ConfigurationMasterKeys.SMTP_PASSWORD.getKey(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       true,
       "Enter SMTP Password"),
 
@@ -23,7 +23,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Host",
       "The SMTP Host used to send emails.",
       ConfigurationMasterKeys.SMTP_HOST.getKey(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       false,
       "Enter SMTP Host"),
 
@@ -31,7 +31,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Host User ID",
       "The user ID used to authenticate the SMTP server.",
       ConfigurationMasterKeys.SMTP_HOST_USER_ID.getKey(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       false,
       "Enter SMTP Host User ID"),
 
@@ -39,7 +39,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Host Password",
       "The password used to authenticate the SMTP server.",
       ConfigurationMasterKeys.SMTP_HOST_PASSWORD.getKey(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       true,
       "Enter SMTP Host Password"),
 
@@ -47,7 +47,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP SSL Protocol",
       "The SSL protocol used to connect to the SMTP server.",
       ConfigurationMasterKeys.SMTP_SSL_PROTOCOL.getKey(),
-      FieldInputType.SELECT,
+      FieldTypeEnum.SELECT,
       false,
       "Enter SMTP SSL Protocol",
       new String[] {"SSLv2Hello", "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}),
@@ -56,7 +56,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Port",
       "The port used to connect to the SMTP server.",
       ConfigurationMasterKeys.SMTP_PORT.getKey(),
-      FieldInputType.NUMBER,
+      FieldTypeEnum.NUMBER,
       false,
       "Enter SMTP Port"),
 
@@ -64,7 +64,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Debug",
       "The debug mode used to connect to the SMTP server.",
       ConfigurationMasterKeys.SMTP_DEBUG.getKey(),
-      FieldInputType.SELECT,
+      FieldTypeEnum.SELECT,
       false,
       "Enter SMTP Debug",
       "TRUE",
@@ -74,7 +74,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       "SMTP Client",
       "The email client used to send emails.",
       ConfigurationMasterKeys.EMAIL_PROTOCOL.getKey(),
-      FieldInputType.SELECT,
+      FieldTypeEnum.SELECT,
       false,
       "",
       "SMTP",
@@ -86,7 +86,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       boolean isSensitive,
       String placeholder) {
     this.metaData =
@@ -98,7 +98,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       boolean isSensitive,
       String placeholder,
       String[] options) {
@@ -111,7 +111,7 @@ public enum AllConfigurationMasterMetaData implements ConfigurationMasterMetaDat
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       boolean isSensitive,
       String placeholder,
       String defaultValue,

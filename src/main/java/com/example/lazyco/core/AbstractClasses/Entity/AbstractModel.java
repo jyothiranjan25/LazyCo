@@ -68,4 +68,17 @@ public abstract class AbstractModel implements Serializable, Cloneable {
   public int hashCode() {
     return getClass().hashCode();
   }
+
+  public String mergeObject(Object... value) {
+    StringBuilder merged = new StringBuilder();
+    for (Object val : value) {
+      if (val != null && !val.toString().trim().isEmpty()) {
+        if (!merged.isEmpty()) {
+          merged.append(" ");
+        }
+        merged.append(val.toString().trim());
+      }
+    }
+    return merged.toString();
+  }
 }

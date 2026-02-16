@@ -2,7 +2,7 @@ package com.example.lazyco.entities.CustomField;
 
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOption;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOptionDTO;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOptionService;
@@ -39,8 +39,8 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
   @Override
   protected void preUpdate(
       CustomFieldDTO requestDTO, CustomFieldDTO entityBeforeUpdates, CustomField entityToUpdate) {
-    if (FieldInputType.SELECT.equals(requestDTO.getFieldType())
-        || FieldInputType.MULTI_SELECT.equals(requestDTO.getFieldType())) {
+    if (FieldTypeEnum.SELECT.equals(requestDTO.getFieldType())
+        || FieldTypeEnum.MULTI_SELECT.equals(requestDTO.getFieldType())) {
       removeAssociated(entityToUpdate.getCustomFieldOptions(), requestDTO.getRemoveOptions());
     }
   }
@@ -57,8 +57,8 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
 
   private List<CustomFieldOptionDTO> addCustomFieldOptions(
       CustomFieldDTO requestDTO, CustomField entity) {
-    if (!FieldInputType.SELECT.equals(requestDTO.getFieldType())
-        && !FieldInputType.MULTI_SELECT.equals(requestDTO.getFieldType())) {
+    if (!FieldTypeEnum.SELECT.equals(requestDTO.getFieldType())
+        && !FieldTypeEnum.MULTI_SELECT.equals(requestDTO.getFieldType())) {
       return new ArrayList<>();
     }
 

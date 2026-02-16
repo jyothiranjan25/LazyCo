@@ -1,7 +1,7 @@
 package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData;
 
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ public class SystemSettingsMetaDataDTO extends AbstractDTO<SystemSettingsMetaDat
   private String name;
   private String description;
   private String configKey;
-  private FieldInputType inputType;
+  private FieldTypeEnum inputType;
   private String placeholder;
   private String defaultValue;
   private String[] options;
@@ -26,7 +26,7 @@ public class SystemSettingsMetaDataDTO extends AbstractDTO<SystemSettingsMetaDat
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder,
       String defaultValue,
       String[] options) {
@@ -38,7 +38,7 @@ public class SystemSettingsMetaDataDTO extends AbstractDTO<SystemSettingsMetaDat
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder,
       String[] options) {
     this.name = name;

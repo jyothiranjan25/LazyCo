@@ -118,4 +118,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "programCurriculum")
   private Set<AdmissionOfferProgram> admissionOfferPrograms;
+
+  //  @OneToMany(mappedBy = "programCurriculum")
+  //  private Set<ApplicationForm> applicationForms;
 }

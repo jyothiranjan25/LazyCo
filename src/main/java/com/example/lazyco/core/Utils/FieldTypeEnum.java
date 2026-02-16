@@ -3,7 +3,7 @@ package com.example.lazyco.core.Utils;
 import java.util.Date;
 import java.util.List;
 
-public enum FieldInputType {
+public enum FieldTypeEnum {
   // Text Inputs
   TEXT,
 

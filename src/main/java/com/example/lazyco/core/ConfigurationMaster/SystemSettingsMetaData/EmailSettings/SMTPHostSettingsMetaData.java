@@ -3,26 +3,26 @@ package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.Email
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum SMTPHostSettingsMetaData implements SystemSettingsMetaData {
   SMTP_HOST(
       "SMTP Host",
       "SMTP Host is the server that will send out your email.",
       SystemSettingsKeys.SMTP_HOST.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "smtp.example.com"),
   SMTP_HOST_USER_ID(
       "SMTP Host User ID",
       "SMTP Host User ID is the user name used to sign in to the smtp server.",
       SystemSettingsKeys.SMTP_HOST_USER_ID.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "username@example.com"),
   SMTP_HOST_PASSWORD(
       "SMTP Host Password",
       "Your password must have 8 characters and meet the following criteria: 1 Capital Letter | 1 Small Letter | 1 Number | 1 Symbol",
       SystemSettingsKeys.SMTP_HOST_PASSWORD.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "SMTP host password");
 
   private final SystemSettingsMetaDataDTO metaData;
@@ -31,7 +31,7 @@ public enum SMTPHostSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder) {
     this.metaData =
         new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);

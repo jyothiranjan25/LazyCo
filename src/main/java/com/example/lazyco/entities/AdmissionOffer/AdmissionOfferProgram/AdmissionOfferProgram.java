@@ -29,11 +29,6 @@ import org.hibernate.envers.Audited;
           name = "idx_admission_offer_program_curriculum_id",
           columnList = "program_curriculum_id"),
       @Index(name = "idx_admission_offer_program_program_cycle_id", columnList = "program_cycle_id")
-    },
-    uniqueConstraints = {
-      @UniqueConstraint(
-          name = "uk_adoffer_program_aoffer_curriculum_pcycle",
-          columnNames = {"admission_offer_id", "program_curriculum_id", "program_cycle_id"})
     })
 @EntityListeners(AdmissionOfferProgramListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

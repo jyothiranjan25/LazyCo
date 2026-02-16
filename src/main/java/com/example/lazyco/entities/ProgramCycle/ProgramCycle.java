@@ -141,4 +141,7 @@ public class ProgramCycle extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "programCycle")
   private Set<AdmissionOfferProgram> admissionOfferPrograms;
+
+  //  @OneToMany(mappedBy = "startingProgramCycle")
+  //  private Set<ApplicationForm> applicationForms;
 }

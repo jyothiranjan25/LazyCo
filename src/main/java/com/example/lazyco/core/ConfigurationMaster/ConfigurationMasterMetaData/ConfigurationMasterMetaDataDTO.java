@@ -1,7 +1,7 @@
 package com.example.lazyco.core.ConfigurationMaster.ConfigurationMasterMetaData;
 
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +14,7 @@ public class ConfigurationMasterMetaDataDTO extends AbstractDTO<ConfigurationMas
   private String name;
   private String description;
   private String configKey;
-  private FieldInputType inputType;
+  private FieldTypeEnum inputType;
   private Boolean isSensitive;
   private String placeholder;
   private String defaultValue;
@@ -24,7 +24,7 @@ public class ConfigurationMasterMetaDataDTO extends AbstractDTO<ConfigurationMas
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       Boolean isSensitive,
       String placeholder,
       String defaultValue,
@@ -37,7 +37,7 @@ public class ConfigurationMasterMetaDataDTO extends AbstractDTO<ConfigurationMas
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       Boolean isSensitive,
       String placeholder,
       String[] options) {

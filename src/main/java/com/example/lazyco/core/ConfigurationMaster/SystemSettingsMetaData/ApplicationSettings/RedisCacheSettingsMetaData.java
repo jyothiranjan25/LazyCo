@@ -3,35 +3,35 @@ package com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.Appli
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsKeys;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaData;
 import com.example.lazyco.core.ConfigurationMaster.SystemSettingsMetaData.SystemSettingsMetaDataDTO;
-import com.example.lazyco.core.Utils.FieldInputType;
+import com.example.lazyco.core.Utils.FieldTypeEnum;
 
 public enum RedisCacheSettingsMetaData implements SystemSettingsMetaData {
   REDIS_CACHE_URL(
       "Redis Cache URL",
       "Enter the connection string for the local server of the database you want to connect to.",
       SystemSettingsKeys.REDIS_CACHE_URL.getValue(),
-      FieldInputType.TEXT,
+      FieldTypeEnum.TEXT,
       "localhost"),
 
   REDIS_CACHE_PORT(
       "Redis Cache Port",
       "An Redis Cache port is a communication endpoint that is designed to direct data through a network, from one server to another, to its recipient.",
       SystemSettingsKeys.REDIS_CACHE_PORT.getValue(),
-      FieldInputType.NUMBER,
+      FieldTypeEnum.NUMBER,
       "6379"),
 
   REDIS_CACHE_EXPIRATION(
       "Redis Cache Expiration",
       "Enter the expiration time for the cache in minutes.",
       SystemSettingsKeys.REDIS_CACHE_EXPIRATION.getValue(),
-      FieldInputType.NUMBER,
+      FieldTypeEnum.NUMBER,
       "60"),
 
   REDIS_CACHE_ENABLE(
       "Enable Redis Cache",
       "Enable Redis Cache for faster data retrieval.",
       SystemSettingsKeys.REDIS_CACHE_ENABLE.getValue(),
-      FieldInputType.SELECT,
+      FieldTypeEnum.SELECT,
       "",
       new String[] {"ON", "OFF"});
   private final SystemSettingsMetaDataDTO metaData;
@@ -40,7 +40,7 @@ public enum RedisCacheSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder) {
     this.metaData =
         new SystemSettingsMetaDataDTO(name, description, configKey, inputType, placeholder, null);
@@ -50,7 +50,7 @@ public enum RedisCacheSettingsMetaData implements SystemSettingsMetaData {
       String name,
       String description,
       String configKey,
-      FieldInputType inputType,
+      FieldTypeEnum inputType,
       String placeholder,
       String[] options) {
     this.metaData =
