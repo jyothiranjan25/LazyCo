@@ -1,6 +1,7 @@
 package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
+import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocument;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPage.ApplicationFormPage;
 import jakarta.persistence.*;
@@ -52,4 +53,7 @@ public class ApplicationFormTemplate extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "applicationFormTemplate")
   private Set<ApplicationFormPage> applicationFormPages;
+
+  @OneToMany(mappedBy = "applicationFormTemplate")
+  private Set<AdmissionOffer> admissionOffers;
 }

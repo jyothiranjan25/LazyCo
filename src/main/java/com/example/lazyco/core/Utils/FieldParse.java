@@ -1,9 +1,11 @@
 package com.example.lazyco.core.Utils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import lombok.NoArgsConstructor;
 
@@ -155,6 +157,36 @@ public class FieldParse {
     throw new IllegalArgumentException("Cannot convert to String: " + value);
   }
 
+  public static LocalDateTime parseLocalDateTime(Object value) {
+    if (value == null) return null;
+    if (value instanceof LocalDateTime ldt) {
+      return ldt;
+    }
+    if (value instanceof String s) {
+      DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+      DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+      try {
+        return LocalDateTime.parse(s, DATE_TIME_FORMATTER);
+      } catch (Exception e) {
+        LocalDate date = LocalDate.parse(s, DATE_FORMATTER);
+        return date.atStartOfDay();
+      }
+    }
+    throw new IllegalArgumentException("Cannot convert to LocalDateTime: " + value);
+  }
+
+  public static LocalDateTime parseLocalDateTime(Object value, String formatter) {
+    if (value == null) return null;
+    if (value instanceof LocalDateTime ldt) {
+      return ldt;
+    }
+    if (value instanceof String s) {
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter);
+      return LocalDateTime.parse(s, dateTimeFormatter);
+    }
+    throw new IllegalArgumentException("Cannot convert to LocalDateTime: " + value);
+  }
+
   public static Boolean parseBoolean(Object value) {
     if (value == null) return null;
     if (value instanceof Boolean b) {
@@ -185,5 +217,13 @@ public class FieldParse {
     }
     throw new IllegalArgumentException(
         "Cannot convert to " + enumType.getSimpleName() + ": " + value);
+  }
+
+  public static List<?> parseList(Object value) {
+    if (value == null) return null;
+    if (value instanceof List<?> list) {
+      return list;
+    }
+    throw new IllegalArgumentException("Cannot convert to List: " + value);
   }
 }

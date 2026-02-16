@@ -8,13 +8,13 @@ import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -91,6 +91,13 @@ public class ApplicationForm extends AbstractRBACModel {
 
   @Column(name = "raw_program_name", comment = "Raw program name as entered by the applicant")
   private String rawProgramName;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(
+      name = "custom_fields",
+      columnDefinition = "json",
+      comment = "JSON column to store custom fields for the application form")
+  private Map<String, Object> customFields;
 
   @ManyToOne
   @JoinColumn(

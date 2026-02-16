@@ -6,6 +6,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.Utils.GenderEnum;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +33,8 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
   @InternalFilterableField private String email;
 
   @InternalFilterableField private String phoneNumber;
+
+  @InternalFilterableField private LocalDateTime applicationDate;
 
   @InternalFilterableField private String rawProgramName;
 

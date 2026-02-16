@@ -125,12 +125,40 @@ public class StandardMessageDTO {
   WRITE API
   ========================= */
 
+  public void addErrorMessage(MessageCodes message) {
+    addMessage(MessageType.ERROR, message);
+  }
+
+  public void addErrorMessage(String code, MessageCodes message) {
+    addMessage(MessageType.ERROR, code, message);
+  }
+
+  public void addErrorMessage(String code, MessageCodes message, Object... args) {
+    addMessage(MessageType.ERROR, code, message, args);
+  }
+
+  public void addWarningMessage(MessageCodes message) {
+    addMessage(MessageType.WARNING, message);
+  }
+
+  public void addInfoMessage(MessageCodes message) {
+    addMessage(MessageType.INFO, message);
+  }
+
   public void addMessage(MessageType type, String message) {
     this.addMessage(type, null, message);
   }
 
   public void addMessage(MessageType type, MessageCodes message) {
     this.addMessage(type, null, CustomMessage.getMessageString(message));
+  }
+
+  public void addMessage(MessageType type, String code, MessageCodes message) {
+    this.addMessage(type, code, CustomMessage.getMessageString(message));
+  }
+
+  public void addMessage(MessageType type, String code, MessageCodes message, Object... args) {
+    this.addMessage(type, code, CustomMessage.getMessageString(message, args));
   }
 
   public void addMessage(MessageType type, String code, String message) {

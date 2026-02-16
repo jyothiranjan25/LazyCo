@@ -110,3 +110,16 @@ PROGRAM_SPECIALIZATION:
   PROGRAM_SPECIALIZATION_NAME_IS_REQUIRED : "Program specialization name is required."
   DUPLICATE_PROGRAM_SPECIALIZATION_NAME : "A program specialization with the name '%1$s' already exists."
 
+
+APPLICATION_FORM:
+    ADMISSION_OFFER_REQUIRED : "Admission offer is required for application form."
+    APPLICATION_NUMBER_REQUIRED : "Application number is required for application form."
+    FIRST_NAME_REQUIRED : "First name is required for application form."
+    EMAIL_REQUIRED: "Email is required for application form."
+    EMAIL_INVALID : "Invalid email format for application form."
+    PHONE_NUMBER_REQUIRED : "Phone number is required for application form."
+    PHONE_NUMBER_INVALID : "Invalid phone number format for application form."
+    CUSTOM_FIELD_REQUIRED : "The field '%1$s' is required for application form."
+    CUSTOM_FIELD_INVALID_VALUE : "The field '%1$s' has an invalid value for application form."
+
+

@@ -68,7 +68,7 @@ public class ExceptionWrapper extends RuntimeException {
   }
 
   public ExceptionWrapper(AbstractDTO<?> abstractDTO) {
-    this(HttpStatus.INTERNAL_SERVER_ERROR, abstractDTO);
+    this(HttpStatus.BAD_REQUEST, abstractDTO);
   }
 
   public ExceptionWrapper(HttpStatusCode httpStatusCode, AbstractDTO<?> abstractDTO) {
