@@ -38,8 +38,8 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
 
       // If there are messages with errors in the processed DTO, return bad request
       if (processed.getMessages() != null
-              && processed.getMessages().hasErrors()
-              && Boolean.TRUE.equals(processed.getHasError())) {
+          && processed.getMessages().hasErrors()
+          && Boolean.TRUE.equals(processed.getHasError())) {
         return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, processed);
       }
 
