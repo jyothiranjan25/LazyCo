@@ -92,6 +92,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
     if (this.messages == null) {
       this.messages = new StandardMessageDTO();
     }
+    this.hasError = true;
     this.messages.addMessage(type, code, message);
   }
 

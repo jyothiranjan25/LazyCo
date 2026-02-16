@@ -1,5 +1,6 @@
 package com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents;
 
+import com.example.lazyco.core.AbstractClasses.Controller.ControllerTemplate;
 import com.example.lazyco.core.AbstractClasses.Controller.ControllerTemplateParam;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.Service.ServiceComponents.DeleteServiceComponent;
@@ -20,7 +21,7 @@ public class DeleteControllerComponent<D extends AbstractDTO<D>> {
   public ResponseEntity<?> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
-          D execute(D requestDTO) {
+          public D execute(D requestDTO) {
             return deleteServiceComponent.delete(requestDTO);
           }
 

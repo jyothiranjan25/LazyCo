@@ -7,7 +7,7 @@ import org.mapstruct.*;
 public interface ApplicationFormMapper extends AbstractMapper<ApplicationFormDTO, ApplicationForm> {
 
   @Mapping(target = "admissionOfferId", source = "admissionOffer.id")
-    @Mapping(target = "programCurriculumId",source = "programCurriculum.id")
-    @Mapping( target = "startingProgramCycleId",source = "startingProgramCycle.id")
+  @Mapping(target = "programCurriculumId", source = "programCurriculum.id")
+  @Mapping(target = "startingProgramCycleId", source = "startingProgramCycle.id")
   ApplicationFormDTO map(ApplicationForm entity);
 }

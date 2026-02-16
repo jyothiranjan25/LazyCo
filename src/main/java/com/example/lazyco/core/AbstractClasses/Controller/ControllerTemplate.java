@@ -1,6 +1,5 @@
-package com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents;
+package com.example.lazyco.core.AbstractClasses.Controller;
 
-import com.example.lazyco.core.AbstractClasses.Controller.ControllerTemplateParam;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.Filter.FilterService;
 import com.example.lazyco.core.Utils.ResponseUtils;
@@ -30,6 +29,19 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
         return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, processed);
       }
 
+      // If there are messages with errors, return bad request
+      if (incomingRequestDTO.getMessages() != null
+          && incomingRequestDTO.getMessages().hasErrors()
+          && Boolean.TRUE.equals(incomingRequestDTO.getHasError())) {
+        return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, incomingRequestDTO);
+      }
+
+      if (processed.getMessages() != null
+              && processed.getMessages().hasErrors()
+              && Boolean.TRUE.equals(processed.getHasError())) {
+        return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, processed);
+      }
+
       // If GET request and metadata is requested, add it to the response
       if (isGetRequest() && Boolean.TRUE.equals(processed.getGetFilterMetadata())) {
         processed.setFilterFieldMetadata(
@@ -53,7 +65,7 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
     return controllerTemplateParam.resolveAction(incomingDTO.getApiAction(), incomingDTO);
   }
 
-  abstract D execute(D t);
+  protected abstract D execute(D t);
 
   protected boolean isSearchRequest() {
     return false;

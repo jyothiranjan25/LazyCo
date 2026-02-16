@@ -1,5 +1,6 @@
 package com.example.lazyco.core.AbstractClasses.Controller.ControllerComponents;
 
+import com.example.lazyco.core.AbstractClasses.Controller.ControllerTemplate;
 import com.example.lazyco.core.AbstractClasses.Controller.ControllerTemplateParam;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.Service.ServiceComponents.SearchServiceComponent;
@@ -21,7 +22,7 @@ public class SearchControllerComponent<D extends AbstractDTO<D>> {
   public ResponseEntity<?> execute(D incomingRequestDTO) {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
-          D execute(D t) {
+          public D execute(D t) {
             List<D> result = searchServiceComponent.search(t);
             t.setObjects(result);
             return t;

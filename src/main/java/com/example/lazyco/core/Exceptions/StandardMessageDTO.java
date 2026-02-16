@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.example.lazyco.core.Messages.CustomMessage;
+import com.example.lazyco.core.Messages.MessageCodes;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -122,6 +125,14 @@ public class StandardMessageDTO {
   /* =========================
   WRITE API
   ========================= */
+
+  public void addMessage(MessageType type, String message) {
+    this.addMessage(type, null, message);
+  }
+
+  public void addMessage(MessageType type, MessageCodes message) {
+    this.addMessage(type, null, CustomMessage.getMessageString(message));
+  }
 
   public void addMessage(MessageType type, String code, String message) {
     if (message == null || message.isBlank()) return;
