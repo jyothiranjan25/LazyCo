@@ -22,7 +22,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class RateLimitInterceptor implements HandlerInterceptor {
 
   private final Endpoints endpoints;
-  private RateLimiter rateLimiter;
+  private final RateLimiter rateLimiter;
   private final JwtUtil jwtUtil;
 
   public RateLimitInterceptor(Endpoints endpoints, JwtUtil jwtUtil, RateLimiter rateLimiter) {
