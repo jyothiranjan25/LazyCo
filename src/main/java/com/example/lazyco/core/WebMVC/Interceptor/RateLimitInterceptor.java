@@ -6,7 +6,7 @@ import com.example.lazyco.core.GosnConf.GsonSingleton;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.RateLimiter.RateLimiter;
 import com.example.lazyco.core.Utils.CommonConstants;
-import com.example.lazyco.core.WebMVC.Endpoints;
+import com.example.lazyco.core.WebMVC.EndpointRegistry;
 import com.example.lazyco.entities.User.JwtUtil;
 import com.example.lazyco.entities.User.UserMessage;
 import com.example.lazyco.entities.UserManagement.AppUser.AppUserDTO;
@@ -15,18 +15,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-  private final Endpoints endpoints;
+  private final EndpointRegistry endpointRegistry;
   private final RateLimiter rateLimiter;
   private final JwtUtil jwtUtil;
 
-  public RateLimitInterceptor(Endpoints endpoints, JwtUtil jwtUtil, RateLimiter rateLimiter) {
-    this.endpoints = endpoints;
+  public RateLimitInterceptor(
+      EndpointRegistry endpointRegistry, JwtUtil jwtUtil, RateLimiter rateLimiter) {
+    this.endpointRegistry = endpointRegistry;
     this.rateLimiter = rateLimiter;
     this.jwtUtil = jwtUtil;
   }
@@ -34,49 +34,59 @@ public class RateLimitInterceptor implements HandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+
+    EndpointRegistry.EndpointType type = endpointRegistry.resolve(request);
     String uri = request.getRequestURI();
-    // 1️⃣ PUBLIC ENDPOINTS → IP based rate limit
-    if (isPublicEndpoint(request)) {
+    switch (type) {
+      case AUTH -> {
+        String ip = getClientIp(request);
+        ConsumptionProbe probe = rateLimiter.tryConsumeLogin(ip);
 
-      ApplicationLogger.info("RateLimitInterceptor - Checking rate limit for PUB URI: " + uri);
-
-      String ip = getClientIp(request);
-
-      ConsumptionProbe probe = rateLimiter.tryConsumePublic(ip);
-
-      if (!probe.isConsumed()) {
-        return reject(response, probe, "PUBLIC", ip, uri);
+        if (!probe.isConsumed()) {
+          return reject(response, probe, "LOGIN", ip, uri);
+        }
       }
 
-      return true;
+      case SECURITY -> {
+        String ip = getClientIp(request);
+        ConsumptionProbe probe = rateLimiter.tryConsumeSecurity(ip);
+
+        if (!probe.isConsumed()) {
+          return reject(response, probe, "SECURITY", ip, uri);
+        }
+      }
+
+      case PUBLIC -> {
+        String ip = getClientIp(request);
+        ConsumptionProbe probe = rateLimiter.tryConsumePublic(ip);
+
+        if (!probe.isConsumed()) {
+          return reject(response, probe, "PUBLIC", ip, uri);
+        }
+      }
+
+      case INTERNAL -> {
+        if (jwtUtil.requestIsInvalid(request, CommonConstants.LOGGED_USER)) {
+          request.getSession().invalidate();
+          throw new ApplicationException(HttpStatus.UNAUTHORIZED, UserMessage.USER_NOT_AUTHORIZED);
+        }
+
+        AppUserDTO loggedUser = jwtUtil.getLoggedUser(request);
+        String userKey = String.valueOf(loggedUser.getId());
+
+        ConsumptionProbe probe = rateLimiter.tryConsumeInternal(userKey);
+
+        if (!probe.isConsumed()) {
+          return reject(response, probe, "INTERNAL", userKey, uri);
+        }
+
+        String currentAction =
+            request.getServletPath()
+                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+        request.getSession().setAttribute("CURRENT_ACTION_URL", currentAction);
+      }
     }
-
-    ApplicationLogger.info("RateLimitInterceptor - Checking rate limit for INT URI: " + uri);
-
-    // 2️⃣ AUTH CHECK FOR INTERNAL ENDPOINTS
-    if (jwtUtil.requestIsInvalid(request, CommonConstants.LOGGED_USER)) {
-      request.getSession().invalidate();
-      throw new ApplicationException(HttpStatus.UNAUTHORIZED, UserMessage.USER_NOT_AUTHORIZED);
-    }
-
-    AppUserDTO loggedUser = jwtUtil.getLoggedUser(request);
-
-    // 3️⃣ INTERNAL ENDPOINTS → USER based rate limit
-    String userKey = String.valueOf(loggedUser.getId());
-
-    ConsumptionProbe probe = rateLimiter.tryConsumeInternal(userKey);
-
-    if (!probe.isConsumed()) {
-      return reject(response, probe, "INTERNAL", userKey, uri);
-    }
-
-    // 4️⃣ Store current URL for bookmarking
-    String currentAction =
-        request.getServletPath()
-            + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
-
-    request.getSession().setAttribute("CURRENT_ACTION_URL", currentAction);
-
     return true;
   }
 
@@ -98,12 +108,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             + "s");
 
     response.setStatus(429);
-    response.setHeader("Retry-After", String.valueOf(waitSeconds));
+    //    response.setHeader("Retry-After", String.valueOf(waitSeconds));
     SimpleResponseDTO simpleResponseDTO = new SimpleResponseDTO();
-    simpleResponseDTO.setMessage(
-        "Too many requests. Please try again after " + waitSeconds + " seconds.");
+    simpleResponseDTO.setMessage("Too many requests. Please try again after some time.");
     response.getWriter().write(GsonSingleton.convertObjectToJSONString(simpleResponseDTO));
-
     return false;
   }
 
@@ -115,25 +123,5 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     return xfHeader.split(",")[0].trim();
-  }
-
-  private boolean isPublicEndpoint(HttpServletRequest request) {
-    try {
-      String uri = request.getRequestURI();
-      String contextPath = request.getContextPath();
-
-      // Strip the context path from the URI if present
-      if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
-        uri = uri.substring(contextPath.length());
-      }
-      AntPathMatcher matcher = new AntPathMatcher();
-
-      String finalUri = uri;
-      return endpoints.getPublicEndpoints().stream()
-          .anyMatch(pattern -> matcher.match(pattern, finalUri));
-    } catch (Exception e) {
-      ApplicationLogger.error(e);
-      return false;
-    }
   }
 }

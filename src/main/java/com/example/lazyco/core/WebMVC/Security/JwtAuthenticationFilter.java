@@ -1,7 +1,7 @@
 package com.example.lazyco.core.WebMVC.Security;
 
 import com.example.lazyco.core.Logger.ApplicationLogger;
-import com.example.lazyco.core.WebMVC.Endpoints;
+import com.example.lazyco.core.WebMVC.EndpointRegistry;
 import com.example.lazyco.entities.User.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
   private final UserDetailsService userDetailsService;
-  private final Endpoints endpoints;
+  private final EndpointRegistry endpointRegistry;
 
   @Override
   protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       AntPathMatcher matcher = new AntPathMatcher();
 
       String finalUri = uri;
-      return endpoints.getPublicEndpoints().stream()
+      return endpointRegistry.getPublicEndpoints().stream()
           .anyMatch(pattern -> matcher.match(pattern, finalUri));
     } catch (Exception e) {
       ApplicationLogger.error(e);

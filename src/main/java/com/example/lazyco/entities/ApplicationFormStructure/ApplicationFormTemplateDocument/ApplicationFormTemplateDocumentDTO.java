@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.entities.Document.DocumentTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,8 +13,6 @@ import lombok.Setter;
 @FilteredEntity(type = ApplicationFormTemplateDocument.class)
 public class ApplicationFormTemplateDocumentDTO
     extends AbstractDTO<ApplicationFormTemplateDocumentDTO> {
-
-  @InternalFilterableField private String key;
 
   @InternalFilterableField private Boolean isMandatory;
 
@@ -24,4 +23,16 @@ public class ApplicationFormTemplateDocumentDTO
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "document.id")
   private Long documentId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "document.name")
+  private String documentName;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "document.key")
+  private String documentKey;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "document.documentType")
+  private DocumentTypeEnum documentType;
 }

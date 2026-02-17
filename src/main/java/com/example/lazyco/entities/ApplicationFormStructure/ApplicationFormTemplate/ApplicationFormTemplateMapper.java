@@ -15,7 +15,7 @@ public interface ApplicationFormTemplateMapper
     extends AbstractMapper<ApplicationFormTemplateDTO, ApplicationFormTemplate> {
 
   @Named("ignoreDocument")
-  @Mapping(target = "applicationFormDocuments", ignore = true)
+  @Mapping(target = "applicationFormTemplateDocuments", ignore = true)
   ApplicationFormTemplateDTO ignoreDocument(ApplicationFormTemplate entity);
 
   @Named("ignorePage")
@@ -23,7 +23,7 @@ public interface ApplicationFormTemplateMapper
   ApplicationFormTemplateDTO ignorePage(ApplicationFormTemplate entity);
 
   @Named("ignoreDocAndPage")
-  @Mapping(target = "applicationFormDocuments", ignore = true)
+  @Mapping(target = "applicationFormTemplateDocuments", ignore = true)
   @Mapping(target = "applicationFormPages", ignore = true)
   ApplicationFormTemplateDTO ignoreDocAndPage(ApplicationFormTemplate entity);
 

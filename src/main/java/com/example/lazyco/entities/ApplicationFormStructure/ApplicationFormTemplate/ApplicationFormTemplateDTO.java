@@ -20,7 +20,7 @@ public class ApplicationFormTemplateDTO extends AbstractDTO<ApplicationFormTempl
   @InternalFilterableField private String name;
   private String description;
   @InternalFilterableField private Boolean isActive;
-  private List<ApplicationFormTemplateDocumentDTO> applicationFormDocuments;
+  private List<ApplicationFormTemplateDocumentDTO> applicationFormTemplateDocuments;
   private List<ApplicationFormPageDTO> applicationFormPages;
 
   private Boolean fetchDocuments;

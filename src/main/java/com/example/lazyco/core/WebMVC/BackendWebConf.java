@@ -53,7 +53,7 @@ public class BackendWebConf implements WebMvcConfigurer {
   private RestControllerInterceptor restControllerInterceptor;
   private LoginControllerInterceptor loginControllerInterceptor;
   private RoleControllerInterceptor roleControllerInterceptor;
-  private Endpoints endpoints;
+  private EndpointRegistry endpointRegistry;
 
   @Bean
   public StandardServletMultipartResolver multipartResolver() {
@@ -125,10 +125,10 @@ public class BackendWebConf implements WebMvcConfigurer {
     registry
         .addInterceptor(loginControllerInterceptor)
         .addPathPatterns("/**")
-        .excludePathPatterns(endpoints.getPublicEndpoints());
+        .excludePathPatterns(endpointRegistry.getPublicEndpoints());
     registry
         .addInterceptor(roleControllerInterceptor)
         .addPathPatterns("/**")
-        .excludePathPatterns(endpoints.getExcludedRoleCheckEndpoints());
+        .excludePathPatterns(endpointRegistry.getExcludedRoleCheckEndpoints());
   }
 }

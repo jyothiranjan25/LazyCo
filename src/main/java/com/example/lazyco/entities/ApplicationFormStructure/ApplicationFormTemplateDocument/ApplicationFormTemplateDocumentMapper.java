@@ -10,5 +10,8 @@ public interface ApplicationFormTemplateDocumentMapper
 
   @Mapping(target = "applicationFormTemplateId", source = "applicationFormTemplate.id")
   @Mapping(target = "documentId", source = "document.id")
+  @Mapping(target = "documentName", source = "document.name")
+  @Mapping(target = "documentKey", source = "document.key")
+  @Mapping(target = "documentType", source = "document.documentType")
   ApplicationFormTemplateDocumentDTO map(ApplicationFormTemplateDocument entity);
 }
