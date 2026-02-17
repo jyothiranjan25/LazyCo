@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
+package com.example.lazyco.entities.ApplicationForm.ApplicationFormDocument;
 
 import com.example.lazyco.core.AbstractClasses.Controller.AbstractController;
 import com.example.lazyco.core.AbstractClasses.Service.IAbstractService;

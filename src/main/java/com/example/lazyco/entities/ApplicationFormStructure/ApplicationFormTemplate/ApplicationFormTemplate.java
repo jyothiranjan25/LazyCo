@@ -2,8 +2,8 @@ package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemp
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
-import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocument;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPage.ApplicationFormPage;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplateDocument.ApplicationFormTemplateDocument;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -49,7 +49,7 @@ public class ApplicationFormTemplate extends AbstractRBACModel {
   private Boolean isActive;
 
   @OneToMany(mappedBy = "applicationFormTemplate")
-  private Set<ApplicationFormDocument> applicationFormDocuments;
+  private Set<ApplicationFormTemplateDocument> applicationFormTemplateDocuments;
 
   @OneToMany(mappedBy = "applicationFormTemplate")
   private Set<ApplicationFormPage> applicationFormPages;

@@ -25,9 +25,10 @@ import org.hibernate.envers.Audited;
     comment = "Table storing custom field details",
     indexes = {
       @Index(name = "idx_custom_field_name", columnList = "name"),
+      @Index(name = "idx_custom_field_key", columnList = "key"),
       @Index(name = "idx_custom_field_field_type", columnList = "field_type")
     },
-    uniqueConstraints = {@UniqueConstraint(name = "uk_custom_field_name", columnNames = "name")})
+    uniqueConstraints = {@UniqueConstraint(name = "uk_custom_field_key", columnNames = "key")})
 @EntityListeners(CustomFieldListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CustomField extends AbstractModel {

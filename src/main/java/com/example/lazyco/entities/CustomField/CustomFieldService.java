@@ -29,8 +29,8 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
     if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(CustomFieldMessage.CUSTOM_FIELD_NAME_REQUIRED);
     } else {
-      validateUniqueName(request, CustomFieldMessage.DUPLICATE_CUSTOM_FIELD_NAME);
-      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+      request.setKey(toKeySerialize(request.getName()));
+      validateUniqueCode(request, CustomFieldMessage.CUSTOM_FIELD_KEY_ALREADY_EXISTS);
     }
     if (request.getFieldType() == null) {
       throw new ApplicationException(CustomFieldMessage.CUSTOM_FIELD_TYPE_REQUIRED);
@@ -46,8 +46,8 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
   @Override
   protected void validateBeforeUpdate(CustomFieldDTO request) {
     if (!StringUtils.isEmpty(request.getName())) {
-      validateUniqueName(request, CustomFieldMessage.DUPLICATE_CUSTOM_FIELD_NAME);
-      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+      request.setKey(toKeySerialize(request.getName()));
+      validateUniqueCode(request, CustomFieldMessage.CUSTOM_FIELD_KEY_ALREADY_EXISTS);
     }
 
     if (request.getFieldType() != null) {
@@ -105,5 +105,17 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
     }
     request.setOptions(addedOption);
     return addedOption;
+  }
+
+  private String toKeySerialize(String input) {
+    if (input == null || input.isEmpty()) {
+      return input;
+    }
+    input = CommonUtils.toSnakeCase(input);
+
+    // add _cf suffix to avoid conflict with system fields
+    input = input.concat("_cf");
+
+    return input;
   }
 }

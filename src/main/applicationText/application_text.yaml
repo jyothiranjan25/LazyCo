@@ -147,14 +147,14 @@ PROGRAM_CYCLE:
 
 CUSTOM_FIELD:
   CUSTOM_FIELD_NAME_REQUIRED : "Custom field name is required."
-  DUPLICATE_CUSTOM_FIELD_NAME : "A custom field with the name '%1$s' already exists."
+  CUSTOM_FIELD_KEY_ALREADY_EXISTS : "The key '%1$s' is already in use. Please choose another name for the custom field."
   CUSTOM_FIELD_TYPE_REQUIRED : "Custom field type is required."
   UPDATE_CUSTOM_FIELD_TYPE_NOT_ALLOWED : "Updating the custom field type is not allowed once the custom field has been created."
 
 DOCUMENT:
   DOCUMENT_NAME_REQUIRED : "Document name is required."
   DOCUMENT_TYPE_REQUIRED : "Document type is required."
-  DUPLICATE_DOCUMENT_NAME : "A document with the name '%1$s' already exists."
+  DUPLICATE_DOCUMENT_KEY : "The document key '%1$s' is already in use. Please choose another name for the document."
 
 APPLICATION_FORM:
     ADMISSION_OFFER_REQUIRED : "Admission offer is required for application form."

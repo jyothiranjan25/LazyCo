@@ -1,8 +1,8 @@
 package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocumentMapper;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormPage.ApplicationFormPageMapper;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplateDocument.ApplicationFormTemplateDocumentMapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,7 @@ import org.mapstruct.Named;
 
 @Mapper(
     componentModel = "spring",
-    uses = {ApplicationFormPageMapper.class, ApplicationFormDocumentMapper.class})
+    uses = {ApplicationFormPageMapper.class, ApplicationFormTemplateDocumentMapper.class})
 public interface ApplicationFormTemplateMapper
     extends AbstractMapper<ApplicationFormTemplateDTO, ApplicationFormTemplate> {
 

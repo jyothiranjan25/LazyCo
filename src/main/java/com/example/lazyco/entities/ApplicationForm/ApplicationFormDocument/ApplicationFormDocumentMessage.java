@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
+package com.example.lazyco.entities.ApplicationForm.ApplicationFormDocument;
 
 import com.example.lazyco.core.Messages.MessageCodes;
 import lombok.Getter;

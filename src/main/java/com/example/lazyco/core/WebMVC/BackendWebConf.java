@@ -4,6 +4,7 @@ import static com.example.lazyco.core.Utils.CommonConstants.APPLICATION_PROPERTI
 import static com.example.lazyco.core.Utils.CommonConstants.BACKEND_PACKAGE;
 
 import com.example.lazyco.core.WebMVC.Interceptor.LoginControllerInterceptor;
+import com.example.lazyco.core.WebMVC.Interceptor.RateLimitInterceptor;
 import com.example.lazyco.core.WebMVC.Interceptor.RestControllerInterceptor;
 import com.example.lazyco.core.WebMVC.Interceptor.RoleControllerInterceptor;
 import com.example.lazyco.core.WebMVC.RequestHandling.CSVParams.CsvParamsResolver;
@@ -48,6 +49,7 @@ public class BackendWebConf implements WebMvcConfigurer {
   private QueryParamsResolver queryParamsResolver;
   private FileParamsResolver fileParamsResolver;
   private CsvParamsResolver csvParamsResolver;
+  private RateLimitInterceptor rateLimitInterceptor;
   private RestControllerInterceptor restControllerInterceptor;
   private LoginControllerInterceptor loginControllerInterceptor;
   private RoleControllerInterceptor roleControllerInterceptor;
@@ -118,6 +120,7 @@ public class BackendWebConf implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(rateLimitInterceptor);
     registry.addInterceptor(restControllerInterceptor);
     registry
         .addInterceptor(loginControllerInterceptor)

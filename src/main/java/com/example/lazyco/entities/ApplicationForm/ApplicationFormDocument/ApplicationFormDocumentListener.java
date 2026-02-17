@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
+package com.example.lazyco.entities.ApplicationForm.ApplicationFormDocument;
 
 import jakarta.persistence.*;
 
@@ -6,7 +6,9 @@ public class ApplicationFormDocumentListener {
 
   @PrePersist
   public void prePersist(ApplicationFormDocument applicationFormDocument) {
-    // Logic to execute before persisting entity
+    if (applicationFormDocument.getStatus() == null) {
+      applicationFormDocument.setStatus(DocumentStatusEnum.PENDING);
+    }
   }
 
   @PreUpdate

@@ -20,16 +20,16 @@ public class DocumentService extends CommonAbstractService<DocumentDTO, Document
     if (request.getName() == null) {
       throw new ApplicationException(DocumentMessage.DOCUMENT_NAME_REQUIRED);
     } else {
-      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
-      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+      request.setKey(CommonUtils.toSnakeCase(request.getName()));
+      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_KEY);
     }
   }
 
   @Override
   protected void validateBeforeUpdate(DocumentDTO request) {
     if (request.getName() != null) {
-      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
-      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+      request.setKey(CommonUtils.toSnakeCase(request.getName()));
+      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_KEY);
     }
   }
 

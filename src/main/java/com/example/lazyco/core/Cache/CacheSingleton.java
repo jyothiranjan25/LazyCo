@@ -43,13 +43,13 @@ public class CacheSingleton {
   }
 
   // Helper classes for cached collections
-  public abstract static class CachedList<T> extends ArrayList<T> {
+  private abstract static class CachedList<T> extends ArrayList<T> {
     public CachedList(Collection<? extends T> c) {
       super(List.copyOf(c));
     }
   }
 
-  public abstract static class CachedMap<T, V> extends HashMap<T, V> {
+  private abstract static class CachedMap<T, V> extends HashMap<T, V> {
     public CachedMap(Map<? extends T, ? extends V> entries) {
       super(Map.copyOf(entries));
     }

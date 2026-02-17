@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
+package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplateDocument;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
@@ -9,8 +9,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@FilteredEntity(type = ApplicationFormDocument.class)
-public class ApplicationFormDocumentDTO extends AbstractDTO<ApplicationFormDocumentDTO> {
+@FilteredEntity(type = ApplicationFormTemplateDocument.class)
+public class ApplicationFormTemplateDocumentDTO
+    extends AbstractDTO<ApplicationFormTemplateDocumentDTO> {
 
   @InternalFilterableField private String key;
 

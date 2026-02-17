@@ -38,25 +38,4 @@ public class CommonUtils {
 
     return result;
   }
-
-  public static String toKeySerialize(String input) {
-    if (input == null || input.isEmpty()) {
-      return input;
-    }
-    input = input.trim();
-
-    // Convert to lowercase
-    String result = input.toLowerCase();
-
-    // Replace all non-alphanumeric characters with underscore
-    result = result.replaceAll("[^a-z0-9]+", "_");
-
-    // Replace multiple underscores with single underscore
-    result = result.replaceAll("_+", "_");
-
-    // Remove leading and trailing underscores
-    result = result.replaceAll("^_+|_+$", "");
-
-    return result;
-  }
 }

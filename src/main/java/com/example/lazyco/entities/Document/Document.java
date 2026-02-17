@@ -1,7 +1,7 @@
 package com.example.lazyco.entities.Document;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
-import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument.ApplicationFormDocument;
+import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplateDocument.ApplicationFormTemplateDocument;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -22,10 +22,11 @@ import org.hibernate.envers.Audited;
     name = "document",
     comment = "Table storing document details",
     indexes = {
-      @Index(name = "idx_document_code", columnList = "code"),
+      @Index(name = "idx_document_name", columnList = "name"),
+      @Index(name = "idx_document_key", columnList = "key"),
       @Index(name = "idx_document_document_type", columnList = "document_type")
     },
-    uniqueConstraints = {@UniqueConstraint(name = "uk_document_code", columnNames = "code")})
+    uniqueConstraints = {@UniqueConstraint(name = "uk_document_key", columnNames = "key")})
 @EntityListeners(DocumentListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Document extends AbstractModel {
@@ -41,5 +42,5 @@ public class Document extends AbstractModel {
   private DocumentTypeEnum documentType;
 
   @OneToMany(mappedBy = "document")
-  private Set<ApplicationFormDocument> applicationFormDocuments;
+  private Set<ApplicationFormTemplateDocument> applicationFormTemplateDocuments;
 }

@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormDocument;
+package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplateDocument;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate.ApplicationFormTemplate;
@@ -17,7 +17,7 @@ import org.hibernate.envers.Audited;
 @DynamicUpdate
 @DynamicInsert
 @Table(
-    name = "application_form_document",
+    name = "application_form_template_document",
     comment = "Table storing documents associated with application form templates",
     indexes = {
       @Index(name = "idx_application_form_document_is_mandatory", columnList = "is_mandatory"),
@@ -31,9 +31,9 @@ import org.hibernate.envers.Audited;
           name = "uk_application_form_document_template_id_document_id",
           columnNames = {"application_form_template_id", "document_id"})
     })
-@EntityListeners(ApplicationFormDocumentListener.class)
+@EntityListeners(ApplicationFormTemplateDocumentListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class ApplicationFormDocument extends AbstractRBACModel {
+public class ApplicationFormTemplateDocument extends AbstractRBACModel {
 
   @Column(
       name = "is_mandatory",
