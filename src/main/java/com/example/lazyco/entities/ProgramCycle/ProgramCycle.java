@@ -3,6 +3,7 @@ package com.example.lazyco.entities.ProgramCycle;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermMaster.ProgramTermMaster;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
+import com.example.lazyco.entities.ApplicationForm.ApplicationForm;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.TermCycle.TermCycle;
 import jakarta.persistence.*;
@@ -142,6 +143,6 @@ public class ProgramCycle extends AbstractRBACModel {
   @OneToMany(mappedBy = "programCycle")
   private Set<AdmissionOfferProgram> admissionOfferPrograms;
 
-  //  @OneToMany(mappedBy = "startingProgramCycle")
-  //  private Set<ApplicationForm> applicationForms;
+  @OneToMany(mappedBy = "startingProgramCycle")
+  private Set<ApplicationForm> applicationForms;
 }

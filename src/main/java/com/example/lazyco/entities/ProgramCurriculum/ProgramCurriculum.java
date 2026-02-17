@@ -5,6 +5,7 @@ import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermSystem.ProgramTermSystem;
 import com.example.lazyco.entities.AcademicYear.AcademicYear;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
+import com.example.lazyco.entities.ApplicationForm.ApplicationForm;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import com.example.lazyco.entities.TermSystem.TermSystem;
 import jakarta.persistence.*;
@@ -119,6 +120,6 @@ public class ProgramCurriculum extends AbstractRBACModel {
   @OneToMany(mappedBy = "programCurriculum")
   private Set<AdmissionOfferProgram> admissionOfferPrograms;
 
-  //  @OneToMany(mappedBy = "programCurriculum")
-  //  private Set<ApplicationForm> applicationForms;
+  @OneToMany(mappedBy = "programCurriculum")
+  private Set<ApplicationForm> applicationForms;
 }

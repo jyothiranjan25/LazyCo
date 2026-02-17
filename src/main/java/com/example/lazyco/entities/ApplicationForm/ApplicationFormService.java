@@ -10,10 +10,7 @@ import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldDTO;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldService;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +31,6 @@ public class ApplicationFormService
     ApplicationFormDTO dto = new ApplicationFormDTO();
 
     Set<String> processedKeys = new HashSet<>();
-
     for (Map.Entry<String, Object> entry : body.entrySet()) {
 
       String key = entry.getKey();
@@ -48,96 +44,101 @@ public class ApplicationFormService
 
       try {
         switch (field) {
-          case APPLICATION_NUMBER -> {
-            dto.setApplicationNumber(FieldParse.parseString(value));
+          case ID -> {
             processedKeys.add(key);
+            dto.setId(FieldParse.parseLong(value));
+          }
+
+          case APPLICATION_NUMBER -> {
+            processedKeys.add(key);
+            dto.setApplicationNumber(FieldParse.parseString(value));
           }
 
           case FIRST_NAME -> {
-            dto.setFirstName(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setFirstName(FieldParse.parseString(value));
           }
 
           case MIDDLE_NAME -> {
-            dto.setMiddleName(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setMiddleName(FieldParse.parseString(value));
           }
 
           case LAST_NAME -> {
-            dto.setLastName(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setLastName(FieldParse.parseString(value));
           }
 
           case EMAIL -> {
-            dto.setEmail(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setEmail(FieldParse.parseString(value));
           }
 
           case PHONE_NUMBER -> {
-            dto.setPhoneNumber(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setPhoneNumber(FieldParse.parseString(value));
           }
 
           case APPLICATION_DATE -> {
-            dto.setApplicationDate(FieldParse.parseLocalDateTime(value));
             processedKeys.add(key);
+            dto.setApplicationDate(FieldParse.parseLocalDateTime(value));
           }
 
           case GENDER -> {
-            dto.setGender(FieldParse.parseEnum(value, GenderEnum.class));
             processedKeys.add(key);
+            dto.setGender(FieldParse.parseEnum(value, GenderEnum.class));
           }
 
           case DATE_OF_BIRTH -> {
-            dto.setDateOfBirth(FieldParse.parseLocalDate(value));
             processedKeys.add(key);
+            dto.setDateOfBirth(FieldParse.parseLocalDate(value));
           }
 
           case RAW_PROGRAM_NAME -> {
-            dto.setRawProgramName(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setRawProgramName(FieldParse.parseString(value));
           }
 
           case ADMISSION_OFFER_ID -> {
-            dto.setAdmissionOfferId(FieldParse.parseLong(value));
             processedKeys.add(key);
+            dto.setAdmissionOfferId(FieldParse.parseLong(value));
           }
 
           case ADMISSION_OFFER_CODE -> {
-            dto.setAdmissionOfferCode(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setAdmissionOfferCode(FieldParse.parseString(value));
           }
 
           case PROGRAM_CURRICULUM_ID -> {
-            dto.setProgramCurriculumId(FieldParse.parseLong(value));
             processedKeys.add(key);
+            dto.setProgramCurriculumId(FieldParse.parseLong(value));
           }
 
           case PROGRAM_CURRICULUM_CODE -> {
-            dto.setProgramCurriculumCode(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setProgramCurriculumCode(FieldParse.parseString(value));
           }
 
           case STARTING_PROGRAM_CYCLE_ID -> {
-            dto.setStartingProgramCycleId(FieldParse.parseLong(value));
             processedKeys.add(key);
+            dto.setStartingProgramCycleId(FieldParse.parseLong(value));
           }
 
           case STARTING_PROGRAM_CYCLE_CODE -> {
-            dto.setStartingProgramCycleCode(FieldParse.parseString(value));
             processedKeys.add(key);
+            dto.setStartingProgramCycleCode(FieldParse.parseString(value));
           }
 
           default -> {
             // leave custom fields untouched
           }
         }
-
       } catch (Exception e) {
         ApplicationLogger.error(e.getMessage());
       }
     }
 
+    // Remove all processed keys from the original map to isolate custom fields
     processedKeys.forEach(body::remove);
 
     return dto;
@@ -147,12 +148,15 @@ public class ApplicationFormService
     if (dto.getAdmissionOfferId() == null && dto.getAdmissionOfferCode() == null) {
       message.addErrorMessage(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
     }
+
     if (dto.getApplicationNumber() == null) {
       message.addErrorMessage(ApplicationFormMessage.APPLICATION_NUMBER_REQUIRED);
     }
+
     if (dto.getFirstName() == null) {
       message.addErrorMessage(ApplicationFormMessage.FIRST_NAME_REQUIRED);
     }
+
     if (dto.getEmail() == null) {
       message.addErrorMessage(ApplicationFormMessage.EMAIL_REQUIRED);
     } else {
@@ -170,8 +174,9 @@ public class ApplicationFormService
         message.addErrorMessage(ApplicationFormMessage.PHONE_NUMBER_INVALID);
       }
     }
+  }
 
-    // validate custom fields
+  private void validateCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
     if (dto.getAdmissionOfferId() != null && dto.getCustomFields() != null) {
       ApplicationFormSectionCustomFieldDTO sectionCustomFieldDTO =
           new ApplicationFormSectionCustomFieldDTO();
@@ -181,6 +186,7 @@ public class ApplicationFormService
 
       Map<String, Object> incomingCustomFields = dto.getCustomFields();
 
+      List<String> validFields = new ArrayList<>();
       for (ApplicationFormSectionCustomFieldDTO customField : afCustomFields) {
 
         String key = customField.getCustomFieldKey();
@@ -256,7 +262,7 @@ public class ApplicationFormService
               }
             }
           }
-
+          validFields.add(key);
         } catch (Exception e) {
 
           if (isRequired) {
@@ -268,6 +274,8 @@ public class ApplicationFormService
           incomingCustomFields.remove(key);
         }
       }
+      // Remove any incoming fields that are not defined in the system for this admission offer
+      incomingCustomFields.keySet().removeIf(key -> !validFields.contains(key));
     }
   }
 
@@ -275,7 +283,10 @@ public class ApplicationFormService
     ApplicationFormDTO dto = mapApplicationFormDTO(body);
     dto.setCustomFields(body);
     StandardMessageDTO message = new StandardMessageDTO();
+    // validate standard fields
     validateApplicationFormDTO(dto, message);
+    // validate custom fields
+    validateCustomFields(dto, message);
     if (!message.hasErrors()) {
       return create(dto);
     }
@@ -284,12 +295,55 @@ public class ApplicationFormService
   }
 
   @Override
-  protected void validateBeforeCreate(ApplicationFormDTO requestDTO) {
-    if (requestDTO.getAdmissionOfferId() == null) {
+  protected void validateBeforeCreate(ApplicationFormDTO request) {
+    if (request.getAdmissionOfferId() == null) {
       throw new ApplicationException(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
     }
-    if (requestDTO.getApplicationNumber() == null) {
+    if (request.getApplicationNumber() == null) {
       throw new ApplicationException(ApplicationFormMessage.APPLICATION_NUMBER_REQUIRED);
     }
+  }
+
+  public ApplicationFormDTO updateCustomForm(Map<String, Object> request) {
+    ApplicationFormDTO dto = mapApplicationFormDTO(request);
+    dto.setCustomFields(request);
+    return update(dto);
+  }
+
+  @Override
+  protected void afterMakeUpdates(
+      ApplicationFormDTO request, ApplicationForm beforeUpdates, ApplicationForm afterUpdates) {
+    // dont change admission offer once set
+    afterUpdates.setAdmissionOffer(beforeUpdates.getAdmissionOffer());
+
+    Map<String, Object> existingCustomFields =
+        Optional.ofNullable(beforeUpdates.getCustomFields())
+            .map(HashMap::new)
+            .orElseGet(HashMap::new);
+    if (request.getCustomFields() != null) {
+      // validate custom fields
+      StandardMessageDTO message = new StandardMessageDTO();
+      request.setAdmissionOfferId(beforeUpdates.getAdmissionOffer().getId());
+      validateCustomFields(request, message);
+      request.setMessages(message);
+      Map<String, Object> incomingCustomFields = request.getCustomFields();
+      for (Map.Entry<String, Object> entry : incomingCustomFields.entrySet()) {
+        String key = entry.getKey();
+        Object value = entry.getValue();
+        existingCustomFields.put(key, value);
+      }
+    }
+    afterUpdates.setCustomFields(existingCustomFields);
+  }
+
+  @Override
+  protected ApplicationFormDTO modifyUpdateResult(
+      ApplicationFormDTO request, ApplicationFormDTO updatedDTO) {
+    updatedDTO.setMessages(request.getMessages());
+    return updatedDTO;
+  }
+
+  public ApplicationFormDTO deleteCustomForm(ApplicationFormDTO request) {
+    return super.delete(request);
   }
 }

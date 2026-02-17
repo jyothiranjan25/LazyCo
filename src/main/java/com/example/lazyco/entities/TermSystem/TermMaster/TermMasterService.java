@@ -12,37 +12,37 @@ public class TermMasterService extends CommonAbstractService<TermMasterDTO, Term
   }
 
   @Override
-  protected void validateBeforeCreate(TermMasterDTO requestDTO) {
+  protected void validateBeforeCreate(TermMasterDTO request) {
 
-    if (requestDTO.getTermSystemId() == null) {
+    if (request.getTermSystemId() == null) {
       throw new ApplicationException(TermMasterMessage.TERM_MASTER_TERM_SYSTEM_ID_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(TermMasterMessage.TERM_MASTER_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(TermMasterMessage.TERM_MASTER_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, TermMasterMessage.DUPLICATE_TERM_MASTER_NAME);
+    validateUniqueName(request, TermMasterMessage.DUPLICATE_TERM_MASTER_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(TermMasterDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(TermMasterDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, TermMasterMessage.DUPLICATE_TERM_MASTER_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, TermMasterMessage.DUPLICATE_TERM_MASTER_NAME);
     }
   }
 
   @Override
-  protected void afterMapperUpdates(
-      TermMasterDTO requestDTO, TermMaster beforeUpdates, TermMaster afterUpdates) {
+  protected void afterMakeUpdates(
+      TermMasterDTO request, TermMaster beforeUpdates, TermMaster afterUpdates) {
     // don't update term system if term system id is not provided in the request
     if (beforeUpdates.getTermSystem() != null) {
       afterUpdates.setTermSystem(beforeUpdates.getTermSystem());

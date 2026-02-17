@@ -35,20 +35,20 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   @Override
-  protected void validateBeforeCreate(AppUserDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getUserId())) {
+  protected void validateBeforeCreate(AppUserDTO request) {
+    if (StringUtils.isEmpty(request.getUserId())) {
       throw new ApplicationException(AppUserMessage.USER_ID_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getEmail())) {
+    if (StringUtils.isEmpty(request.getEmail())) {
       throw new ApplicationException(AppUserMessage.EMAIL_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getFirstName())) {
+    if (StringUtils.isEmpty(request.getFirstName())) {
       throw new ApplicationException(AppUserMessage.FIRST_NAME_REQUIRED);
     }
 
-    duplicateCheck(requestDTO);
+    duplicateCheck(request);
   }
 
   @Override
@@ -61,8 +61,8 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
   }
 
   @Override
-  protected void validateBeforeUpdate(AppUserDTO requestDTO) {
-    duplicateCheck(requestDTO);
+  protected void validateBeforeUpdate(AppUserDTO request) {
+    duplicateCheck(request);
   }
 
   @Override
@@ -84,27 +84,27 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     mapAuthorities(entityToUpdate);
   }
 
-  private void duplicateCheck(AppUserDTO requestDTO) {
+  private void duplicateCheck(AppUserDTO request) {
     abstractAction.pushBypassRBAC(true);
     try {
       AppUserDTO filter = new AppUserDTO();
-      if (requestDTO.getId() != null) filter.setIdsNotIn(List.of(requestDTO.getId()));
+      if (request.getId() != null) filter.setIdsNotIn(List.of(request.getId()));
       // Check for duplicate userId
-      if (!StringUtils.isEmpty(requestDTO.getUserId())) {
-        filter.setUserId(requestDTO.getUserId());
+      if (!StringUtils.isEmpty(request.getUserId())) {
+        filter.setUserId(request.getUserId());
         if (getCount(filter) > 0) {
           throw new ApplicationException(
-              AppUserMessage.DUPLICATE_USER_ID, new Object[] {requestDTO.getUserId()});
+              AppUserMessage.DUPLICATE_USER_ID, new Object[] {request.getUserId()});
         }
       }
 
       // Check for duplicate email
-      if (!StringUtils.isEmpty(requestDTO.getEmail())) {
+      if (!StringUtils.isEmpty(request.getEmail())) {
         filter = new AppUserDTO();
-        filter.setEmail(requestDTO.getEmail().toLowerCase());
+        filter.setEmail(request.getEmail().toLowerCase());
         if (getCount(filter) > 0) {
           throw new ApplicationException(
-              AppUserMessage.EMAIL_IN_USE, new Object[] {requestDTO.getEmail()});
+              AppUserMessage.EMAIL_IN_USE, new Object[] {request.getEmail()});
         }
       }
     } finally {

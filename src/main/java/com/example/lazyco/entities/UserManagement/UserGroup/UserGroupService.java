@@ -39,22 +39,22 @@ public class UserGroupService extends CommonAbstractService<UserGroupDTO, UserGr
   }
 
   @Override
-  protected void validateBeforeCreate(UserGroupDTO requestDTO) {
+  protected void validateBeforeCreate(UserGroupDTO request) {
     // name is required
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(UserGroupMessage.USER_GROUP_NAME_REQUIRED);
     }
 
     // name should be unique
-    validateUniqueName(requestDTO, UserGroupMessage.DUPLICATE_USER_GROUP_NAME);
+    validateUniqueName(request, UserGroupMessage.DUPLICATE_USER_GROUP_NAME);
 
     // set fully qualified name
-    setFullyQualifiedName(requestDTO);
+    setFullyQualifiedName(request);
   }
 
-  private void setFullyQualifiedName(UserGroupDTO requestDTO) {
-    StringBuilder qualifiedName = new StringBuilder(requestDTO.getName());
-    Long parentId = requestDTO.getParentId();
+  private void setFullyQualifiedName(UserGroupDTO request) {
+    StringBuilder qualifiedName = new StringBuilder(request.getName());
+    Long parentId = request.getParentId();
     while (parentId != null) {
       UserGroup parentUserGroup = getEntityById(parentId);
       if (parentUserGroup == null) {
@@ -66,7 +66,7 @@ public class UserGroupService extends CommonAbstractService<UserGroupDTO, UserGr
               ? parentUserGroup.getParentUserGroup().getId()
               : null;
     }
-    requestDTO.setFullyQualifiedName(qualifiedName.toString());
+    request.setFullyQualifiedName(qualifiedName.toString());
   }
 
   @Override
@@ -77,7 +77,7 @@ public class UserGroupService extends CommonAbstractService<UserGroupDTO, UserGr
   }
 
   @Override
-  protected void preDelete(UserGroupDTO requestDTO, UserGroup entityToDelete) {
+  protected void preDelete(UserGroupDTO request, UserGroup entityToDelete) {
     throw new ApplicationException(
         UserGroupMessage.USER_GROUP_DELETE_NOT_ALLOWED, new Object[] {entityToDelete.getName()});
   }

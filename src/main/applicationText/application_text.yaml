@@ -1,12 +1,12 @@
 COMMON_MODULES:
   CUSTOM_MESSAGE : "%1$s"
-  APPLICATION_ERROR: "An error occurred while processing your request. Please try again later."
-  ATOMIC_OPERATION_ERROR: "Atomic operation failed. Rolled back %1$s successful operations. %2$s errors occurred."
-  NON_ATOMIC_OPERATION_ERROR: "Operation encountered %1$s errors. %2$s successful operations were completed."
-  OBJECT_REQUIRED: "The required object is missing."
-  OBJECT_NOT_FOUND: "The requested object was not found."
-  ID_REQUIRED: "The ID is required."
-  INTERNET_IS_SLOW: "The internet connection is slow. Please try again later."
+  APPLICATION_ERROR : "An error occurred while processing your request. Please try again later."
+  ATOMIC_OPERATION_ERROR : "Atomic operation failed. Rolled back %1$s successful operations. %2$s errors occurred."
+  NON_ATOMIC_OPERATION_ERROR : "Operation encountered %1$s errors. %2$s successful operations were completed."
+  OBJECT_REQUIRED : "The required object is missing."
+  OBJECT_NOT_FOUND : "The requested object was not found."
+  ID_REQUIRED : "The ID is required."
+  INTERNET_IS_SLOW : "The internet connection is slow. Please try again later."
   FIELD_MISSING : "The field '%1$s' is missing."
   REFERENCE_ERROR : "The record cannot be deleted because it is referenced by other records."
   DUPLICATE_RECORD : "A record with the same value already exists."
@@ -42,7 +42,7 @@ APP_USER:
   USER_ID_REQUIRED : "User ID is required."
   EMAIL_REQUIRED : "Email is required."
   FIRST_NAME_REQUIRED : "First name is required."
-  DUPLICATE_USER_ID: "A user with the ID '%1$s' already exists."
+  DUPLICATE_USER_ID : "A user with the ID '%1$s' already exists."
   EMAIL_IN_USE : "The email '%1$s' is already associated with another account."
 
 USER_ROLE:
@@ -52,22 +52,22 @@ USER_ROLE:
   USER_ROLE_ALREADY_EXISTS : "The role already exists for the user in the specified user group."
 
 USER_MODULES:
-  USER_NOT_FOUND: "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
+  USER_NOT_FOUND : "We couldn’t find an account with that user ID : '%1$s'. Please check and try again."
   ROLE_CANNOT_BE_NULL : "Role cannot be null. Please select a valid role for the user."
   ROLE_NOT_FOUND : "Please select a valid role for the user."
-  PASSWORD_CANNOT_BE_EMPTY: "Password cannot be empty. Please enter a valid password."
-  INCORRECT_PASSWORD: "The password you entered is incorrect. Please try again or reset your password."
-  USER_ID_OR_PASSWORD_INCORRECT: "Invalid user ID or password. Please check your credentials and try again."
+  PASSWORD_CANNOT_BE_EMPTY : "Password cannot be empty. Please enter a valid password."
+  INCORRECT_PASSWORD : "The password you entered is incorrect. Please try again or reset your password."
+  USER_ID_OR_PASSWORD_INCORRECT : "Invalid user ID or password. Please check your credentials and try again."
   ACCOUNT_DISABLED : "Your account has been disabled. Please contact administrator for assistance."
-  ACCOUNT_LOCKED: "Your account has been locked,Please contact administrator for assistance."
-  PASSWORD_EXPIRED: "Your password has expired. Please reset your password to continue."
+  ACCOUNT_LOCKED : "Your account has been locked,Please contact administrator for assistance."
+  PASSWORD_EXPIRED : "Your password has expired. Please reset your password to continue."
   USER_NOT_AUTHORIZED : "You do not have the necessary permissions to access this resource."
   ROLE_NOT_SELECTED : "No role has been selected for the user. Please select a role to proceed."
   LOGOUT_SUCCESS : "You have been successfully logged out."
   PASSWORD_RESET_INITIATED : "A password reset link has been sent to your registered email address."
-  INVALID_RESET_TOKEN: "The password reset token is invalid."
-  RESET_TOKEN_EXPIRED: "The password reset token has expired."
-  PASSWORD_RESET_SUCCESS: "Your password has been successfully reset. You can now log in with your new password."
+  INVALID_RESET_TOKEN : "The password reset token is invalid."
+  RESET_TOKEN_EXPIRED : "The password reset token has expired."
+  PASSWORD_RESET_SUCCESS : "Your password has been successfully reset. You can now log in with your new password."
 
 UNIVERSITY:
   UNIVERSITY_CODE_REQUIRED : "University code is required."
@@ -75,7 +75,7 @@ UNIVERSITY:
   DUPLICATE_UNIVERSITY_NAME : "A university with the name '%1$s' already exists."
 
 INSTITUTION:
-  UNIVERSITY_ID_REQUIRED: "University is required for institution."
+  UNIVERSITY_ID_REQUIRED : "University is required for institution."
   INSTITUTION_CODE_REQUIRED : "Institution code is required."
   INSTITUTION_NAME_REQUIRED : "Institution name is required."
   DUPLICATE_INSTITUTION_NAME : "An institution with the name '%1$s' already exists."
@@ -110,12 +110,57 @@ PROGRAM_SPECIALIZATION:
   PROGRAM_SPECIALIZATION_NAME_IS_REQUIRED : "Program specialization name is required."
   DUPLICATE_PROGRAM_SPECIALIZATION_NAME : "A program specialization with the name '%1$s' already exists."
 
+PROGRAM_TERM_SYSTEM:
+  PROGRAM_TERM_SYSTEM_PROGRAM_ID_IS_REQUIRED : "Academic program is required for program term system."
+  PROGRAM_TERM_SYSTEM_CODE_IS_REQUIRED : "Term system code is required for program term system."
+  PROGRAM_TERM_SYSTEM_NAME_IS_REQUIRED : "Term system name is required for program term system."
+  DUPLICATE_PROGRAM_TERM_SYSTEM_NAME : "A program term system with the name '%1$s' already exists."
+
+PROGRAM_TERM_MASTER:
+    PROGRAM_TERM_SYSTEM_ID_IS_REQUIRED: "Program term system is required for program term master."
+    PROGRAM_TERM_MASTER_INVALID_SEQUENCE_NUMBER : "Please check the sequence number for this term."
+    PROGRAM_TERM_MASTER_NAME_IS_REQUIRED : "Term master name is required for program term master."
+    DUPLICATE_PROGRAM_TERM_MASTER_NAME : "A program term master with the name '%1$s' already exists."
+    PROGRAM_TERM_MASTER_SEQUENCE_NUMBER_ALREADY_IN_USE : "The sequence number '%1$s' is already in use for another term master in the same program term system. Please choose a different sequence number."
+
+PROGRAM_CURRICULUM:
+  PROGRAM_CURRICULUM_CODE_REQUIRED : "Program curriculum code is required."
+  PROGRAM_CURRICULUM_NAME_REQUIRED : "Program curriculum name is required."
+  DUPLICATE_PROGRAM_CURRICULUM_NAME : "A program curriculum with the name '%1$s' already exists."
+  PROGRAM_CURRICULUM_START_DATE_REQUIRED : "Start date is required for program curriculum."
+  PROGRAM_CURRICULUM_END_DATE_REQUIRED : "End date is required for program curriculum."
+  PROGRAM_CURRICULUM_ADMISSION_CAPACITY_REQUIRED : "Admission capacity is required and must be a positive integer for program curriculum."
+  PROGRAM_CURRICULUM_MIN_CREDIT_REQUIRED : "Minimum credit is required and must be a positive number for program curriculum."
+  PROGRAM_CURRICULUM_MAX_CREDIT_REQUIRED : "Maximum credit is required and must be a positive number for program curriculum."
+  PROGRAM_CURRICULUM_CREDIT_VALIDATION : "Maximum credit must be greater than or equal to minimum credit for program curriculum."
+  PROGRAM_CURRICULUM_ACADEMIC_YEAR_REQUIRED : "Academic year is required for program curriculum."
+  PROGRAM_CURRICULUM_TERM_SYSTEM_REQUIRED : "Term system is required for program curriculum."
+  PROGRAM_CURRICULUM_PROGRAM_REQUIRED : "Academic program is required for program curriculum."
+  PROGRAM_CURRICULUM_TERM_CYCLE_REQUIRED : "Term cycle is required for program curriculum."
+  PROGRAM_CURRICULUM_INVALID_DATES : "Check the start and end dates for the program curriculum."
+  PROGRAM_CURRICULUM_INVALID_CONVICTION_DATE : "The conviction date must be after the end date for program curriculum."
+  PROGRAM_CURRICULUM_ACADEMIC_PROGRAM_NOT_FOUND: "The selected academic program was not found for program curriculum. Please select a valid academic program."
+  PROGRAM_CURRICULUM_PROGRAM_TERM_SYSTEM_NOT_ASSOCIATED_WITH_PROGRAM : "The selected term system is not associated with the academic program for program curriculum."
+
+PROGRAM_CYCLE:
+    PROGRAM_CYCLE_CODE_REQUIRED : "Program cycle code is required."
+
+CUSTOM_FIELD:
+  CUSTOM_FIELD_NAME_REQUIRED : "Custom field name is required."
+  DUPLICATE_CUSTOM_FIELD_NAME : "A custom field with the name '%1$s' already exists."
+  CUSTOM_FIELD_TYPE_REQUIRED : "Custom field type is required."
+  UPDATE_CUSTOM_FIELD_TYPE_NOT_ALLOWED : "Updating the custom field type is not allowed once the custom field has been created."
+
+DOCUMENT:
+  DOCUMENT_NAME_REQUIRED : "Document name is required."
+  DOCUMENT_TYPE_REQUIRED : "Document type is required."
+  DUPLICATE_DOCUMENT_NAME : "A document with the name '%1$s' already exists."
 
 APPLICATION_FORM:
     ADMISSION_OFFER_REQUIRED : "Admission offer is required for application form."
     APPLICATION_NUMBER_REQUIRED : "Application number is required for application form."
     FIRST_NAME_REQUIRED : "First name is required for application form."
-    EMAIL_REQUIRED: "Email is required for application form."
+    EMAIL_REQUIRED : "Email is required for application form."
     EMAIL_INVALID : "Invalid email format for application form."
     PHONE_NUMBER_REQUIRED : "Phone number is required for application form."
     PHONE_NUMBER_INVALID : "Invalid phone number format for application form."

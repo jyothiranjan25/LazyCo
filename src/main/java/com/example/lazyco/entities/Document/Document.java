@@ -30,8 +30,11 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Document extends AbstractModel {
 
-  @Column(name = "code", comment = "Code representing the document")
-  private String code;
+  @Column(name = "name", comment = "Code representing the document")
+  private String name;
+
+  @Column(name = "key", comment = "Unique key for the document")
+  private String key;
 
   @Column(name = "document_type", comment = "Type of the document")
   @Enumerated(EnumType.STRING)

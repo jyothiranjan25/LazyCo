@@ -12,31 +12,31 @@ public class InstitutionService extends CommonAbstractService<InstitutionDTO, In
   }
 
   @Override
-  protected void validateBeforeCreate(InstitutionDTO requestDTO) {
+  protected void validateBeforeCreate(InstitutionDTO request) {
 
-    if (requestDTO.getUniversityId() == null) {
+    if (request.getUniversityId() == null) {
       throw new ApplicationException(InstitutionMessage.UNIVERSITY_ID_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(InstitutionMessage.INSTITUTION_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(InstitutionMessage.INSTITUTION_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
+    validateUniqueName(request, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(InstitutionDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(InstitutionDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, InstitutionMessage.DUPLICATE_INSTITUTION_NAME);
     }
   }
 }

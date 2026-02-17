@@ -13,34 +13,33 @@ public class ProgramSpecializationService
   }
 
   @Override
-  protected void validateBeforeCreate(ProgramSpecializationDTO requestDTO) {
-    if (requestDTO.getAcademicProgramId() == null) {
+  protected void validateBeforeCreate(ProgramSpecializationDTO request) {
+    if (request.getAcademicProgramId() == null) {
       throw new ApplicationException(ProgramSpecializationMessage.ACADEMIC_PROGRAM_ID_IS_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(
           ProgramSpecializationMessage.PROGRAM_SPECIALIZATION_CODE_IS_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(
           ProgramSpecializationMessage.PROGRAM_SPECIALIZATION_NAME_IS_REQUIRED);
     }
-    validateUniqueName(
-        requestDTO, ProgramSpecializationMessage.DUPLICATE_PROGRAM_SPECIALIZATION_NAME);
+    validateUniqueName(request, ProgramSpecializationMessage.DUPLICATE_PROGRAM_SPECIALIZATION_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(ProgramSpecializationDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(ProgramSpecializationDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
+    if (!StringUtils.isEmpty(request.getName())) {
       validateUniqueName(
-          requestDTO, ProgramSpecializationMessage.DUPLICATE_PROGRAM_SPECIALIZATION_NAME);
+          request, ProgramSpecializationMessage.DUPLICATE_PROGRAM_SPECIALIZATION_NAME);
     }
   }
 }

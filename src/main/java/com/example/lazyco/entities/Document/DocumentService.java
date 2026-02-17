@@ -2,6 +2,7 @@ package com.example.lazyco.entities.Document;
 
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
+import com.example.lazyco.core.Utils.CommonUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,22 +12,24 @@ public class DocumentService extends CommonAbstractService<DocumentDTO, Document
   }
 
   @Override
-  protected void validateBeforeCreate(DocumentDTO requestDTO) {
-    if (requestDTO.getDocumentType() == null) {
+  protected void validateBeforeCreate(DocumentDTO request) {
+    if (request.getDocumentType() == null) {
       throw new ApplicationException(DocumentMessage.DOCUMENT_TYPE_REQUIRED);
     }
 
-    if (requestDTO.getCode() == null) {
+    if (request.getName() == null) {
       throw new ApplicationException(DocumentMessage.DOCUMENT_NAME_REQUIRED);
+    } else {
+      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
+      request.setKey(CommonUtils.toKeySerialize(request.getName()));
     }
-
-    validateUniqueCode(requestDTO, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(DocumentDTO requestDTO) {
-    if (requestDTO.getCode() != null) {
-      validateUniqueCode(requestDTO, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
+  protected void validateBeforeUpdate(DocumentDTO request) {
+    if (request.getName() != null) {
+      validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_NAME);
+      request.setKey(CommonUtils.toKeySerialize(request.getName()));
     }
   }
 

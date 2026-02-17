@@ -12,35 +12,35 @@ public class TermCycleService extends CommonAbstractService<TermCycleDTO, TermCy
   }
 
   @Override
-  protected void validateBeforeCreate(TermCycleDTO requestDTO) {
+  protected void validateBeforeCreate(TermCycleDTO request) {
 
-    if (requestDTO.getAcademicYearId() == null) {
+    if (request.getAcademicYearId() == null) {
       throw new ApplicationException(TermCycleMessage.TERM_CYCLE_ACADEMIC_YEAR_ID_REQUIRED);
     }
 
-    if (requestDTO.getTermMasterId() == null) {
+    if (request.getTermMasterId() == null) {
       throw new ApplicationException(TermCycleMessage.TERM_CYCLE_TERM_MASTER_ID_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(TermCycleMessage.TERM_CYCLE_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(TermCycleMessage.TERM_CYCLE_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, TermCycleMessage.DUPLICATE_TERM_CYCLE_NAME);
+    validateUniqueName(request, TermCycleMessage.DUPLICATE_TERM_CYCLE_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(TermCycleDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(TermCycleDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, TermCycleMessage.DUPLICATE_TERM_CYCLE_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, TermCycleMessage.DUPLICATE_TERM_CYCLE_NAME);
     }
   }
 }

@@ -13,31 +13,31 @@ public class ProgramTermSystemService
   }
 
   @Override
-  protected void validateBeforeCreate(ProgramTermSystemDTO requestDTO) {
-    if (requestDTO.getAcademicProgramId() == null) {
+  protected void validateBeforeCreate(ProgramTermSystemDTO request) {
+    if (request.getAcademicProgramId() == null) {
       throw new ApplicationException(
           ProgramTermSystemMessage.PROGRAM_TERM_SYSTEM_PROGRAM_ID_IS_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(ProgramTermSystemMessage.PROGRAM_TERM_SYSTEM_CODE_IS_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(ProgramTermSystemMessage.PROGRAM_TERM_SYSTEM_NAME_IS_REQUIRED);
     }
-    validateUniqueName(requestDTO, ProgramTermSystemMessage.DUPLICATE_PROGRAM_TERM_SYSTEM_NAME);
+    validateUniqueName(request, ProgramTermSystemMessage.DUPLICATE_PROGRAM_TERM_SYSTEM_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(ProgramTermSystemDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(ProgramTermSystemDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, ProgramTermSystemMessage.DUPLICATE_PROGRAM_TERM_SYSTEM_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, ProgramTermSystemMessage.DUPLICATE_PROGRAM_TERM_SYSTEM_NAME);
     }
   }
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum ProgramCycleMessage implements MessageCodes {
-  ;
+  PROGRAM_CYCLE_CODE_REQUIRED("PROGRAM_CYCLE.PROGRAM_CYCLE_CODE_REQUIRED");
 
   private final String value;
 

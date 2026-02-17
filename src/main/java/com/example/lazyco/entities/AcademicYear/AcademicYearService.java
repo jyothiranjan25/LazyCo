@@ -35,45 +35,45 @@ public class AcademicYearService extends CommonAbstractService<AcademicYearDTO, 
   }
 
   @Override
-  protected void validateBeforeCreate(AcademicYearDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+  protected void validateBeforeCreate(AcademicYearDTO request) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(AcademicYearMessage.ACADEMIC_YEAR_CODE_REQUIRED);
     }
     // code should be unique
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(AcademicYearMessage.ACADEMIC_YEAR_NAME_REQUIRED);
     }
     // name should be unique
-    validateUniqueName(requestDTO);
+    validateUniqueName(request);
 
     // start date and end date conflicts check
-    academicYearConflictCheck(requestDTO);
+    academicYearConflictCheck(request);
   }
 
   @Override
-  protected void validateBeforeUpdate(AcademicYearDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(AcademicYearDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request);
     }
 
     // start date and end date conflicts check
-    academicYearConflictCheck(requestDTO);
+    academicYearConflictCheck(request);
   }
 
-  private void academicYearConflictCheck(AcademicYearDTO requestDTO) {
-    if (requestDTO.getStartDate() != null && requestDTO.getEndDate() != null) {
+  private void academicYearConflictCheck(AcademicYearDTO request) {
+    if (request.getStartDate() != null && request.getEndDate() != null) {
       AcademicYearDTO filter = new AcademicYearDTO();
-      filter.setStartDateComparison(requestDTO.getStartDate());
-      filter.setEndDateComparison(requestDTO.getEndDate());
+      filter.setStartDateComparison(request.getStartDate());
+      filter.setEndDateComparison(request.getEndDate());
       filter.setDateComparison(DateComparisonEnum.CONFLICT_CHECK);
-      if (requestDTO.getId() != null) {
-        filter.setIdsNotIn(List.of(requestDTO.getId()));
+      if (request.getId() != null) {
+        filter.setIdsNotIn(List.of(request.getId()));
       }
       if (getCount(filter) > 0) {
         throw new ApplicationException(AcademicYearMessage.ACADEMIC_YEAR_DATE_CONFLICT);

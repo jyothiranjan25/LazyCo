@@ -30,19 +30,19 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
     this.abstractAction = abstractAction;
   }
 
-  public void validateUniqueCode(D incomingDto) {
-    this.validateUniqueCode(incomingDto, null);
+  public void validateUniqueCode(D incomingRequest) {
+    this.validateUniqueCode(incomingRequest, null);
   }
 
-  public void validateUniqueCode(D incomingDto, MessageCodes messageCodes) {
-    if (!HasCode.class.isAssignableFrom(incomingDto.getClass())) {
+  public void validateUniqueCode(D incomingRequest, MessageCodes messageCodes) {
+    if (!HasCode.class.isAssignableFrom(incomingRequest.getClass())) {
       throw new ApplicationException(CommonMessage.ERROR_VALIDATING_CODE);
     }
     abstractAction.pushBypassRBAC(true);
     try {
       D filter = getDtoClass().getDeclaredConstructor().newInstance();
       HasCode filterWithCode = (HasCode) filter;
-      String filterCode = ((HasCode) incomingDto).getCode();
+      String filterCode = ((HasCode) incomingRequest).getCode();
 
       if (filterCode == null || filterCode.trim().isEmpty()) {
         throw new ApplicationException(CommonMessage.CODE_REQUIRED);
@@ -50,8 +50,8 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
 
       filterWithCode.setCode(filterCode);
 
-      if (incomingDto.getId() != null) {
-        filter.setIdsNotIn(List.of(((HasCode) incomingDto).getId()));
+      if (incomingRequest.getId() != null) {
+        filter.setIdsNotIn(List.of(((HasCode) incomingRequest).getId()));
       }
 
       if (getCount(filter) > 0) {
@@ -69,18 +69,18 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
     }
   }
 
-  public void validateUniqueName(D incomingDto) {
-    this.validateUniqueName(incomingDto, null);
+  public void validateUniqueName(D incomingRequest) {
+    this.validateUniqueName(incomingRequest, null);
   }
 
-  public void validateUniqueName(D incomingDto, MessageCodes messageCodes) {
-    if (!HasName.class.isAssignableFrom(incomingDto.getClass())) {
+  public void validateUniqueName(D incomingRequest, MessageCodes messageCodes) {
+    if (!HasName.class.isAssignableFrom(incomingRequest.getClass())) {
       throw new ApplicationException(CommonMessage.ERROR_VALIDATING_NAME);
     }
     try {
       D filter = getDtoClass().getDeclaredConstructor().newInstance();
       HasName filterWithName = (HasName) filter;
-      String filterName = ((HasName) incomingDto).getName();
+      String filterName = ((HasName) incomingRequest).getName();
 
       if (filterName == null || filterName.trim().isEmpty()) {
         throw new ApplicationException(CommonMessage.NAME_REQUIRED);
@@ -88,8 +88,8 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
 
       filterWithName.setName(filterName);
 
-      if (incomingDto.getId() != null) {
-        filter.setIdsNotIn(List.of(((HasName) incomingDto).getId()));
+      if (incomingRequest.getId() != null) {
+        filter.setIdsNotIn(List.of(((HasName) incomingRequest).getId()));
       }
 
       if (getCount(filter) > 0) {
@@ -138,11 +138,11 @@ public abstract class CommonAbstractService<D extends AbstractDTO<D>, E extends 
       return;
     }
 
-    for (O incomingDTO : incomingCollection) {
-      if (incomingDTO.getId() == null) {
+    for (O incomingRequest : incomingCollection) {
+      if (incomingRequest.getId() == null) {
         continue; // Skip if incoming DTO doesn't have an ID
       }
-      existingCollection.removeIf(entity -> entity.getId().equals(incomingDTO.getId()));
+      existingCollection.removeIf(entity -> entity.getId().equals(incomingRequest.getId()));
     }
   }
 

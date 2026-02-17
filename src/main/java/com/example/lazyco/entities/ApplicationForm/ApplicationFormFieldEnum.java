@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public enum ApplicationFormFieldEnum {
+  ID("id"),
   APPLICATION_NUMBER("application_number", true, true),
   FIRST_NAME("first_name", true, true),
   MIDDLE_NAME("middle_name", false, true),

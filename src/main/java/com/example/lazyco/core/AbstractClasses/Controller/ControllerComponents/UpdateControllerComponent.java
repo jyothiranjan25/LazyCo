@@ -18,7 +18,7 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
     this.controllerTemplateParam = controllerTemplateParam;
   }
 
-  public ResponseEntity<?> execute(D incomingRequestDTO) {
+  public ResponseEntity<?> execute(D incomingRequest) {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
           public D execute(D t) {
@@ -30,6 +30,6 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
             return true;
           }
         })
-        .template(incomingRequestDTO);
+        .template(incomingRequest);
   }
 }

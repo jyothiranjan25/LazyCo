@@ -54,22 +54,22 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   }
 
   @Override
-  protected void validateBeforeCreate(ModuleDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+  protected void validateBeforeCreate(ModuleDTO request) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(ModuleMessage.MODULE_NAME_REQUIRED);
     }
 
     // name should be unique
-    validateUniqueName(requestDTO, ModuleMessage.DUPLICATE_MODULE_NAME);
+    validateUniqueName(request, ModuleMessage.DUPLICATE_MODULE_NAME);
   }
 
   @Override
-  protected void preCreate(ModuleDTO requestDTO, Module entityToCreate) {
-    mapAssociatedEntities(requestDTO, entityToCreate);
+  protected void preCreate(ModuleDTO request, Module entityToCreate) {
+    mapAssociatedEntities(request, entityToCreate);
   }
 
   @Override
-  protected ModuleDTO modifyCreateResult(ModuleDTO requestDTO, ModuleDTO createdDTO) {
+  protected ModuleDTO modifyCreateResult(ModuleDTO request, ModuleDTO createdDTO) {
     if (createdDTO.getResources() != null && !createdDTO.getResources().isEmpty()) {
       createdDTO.setResources(mapResourceTree(createdDTO.getResources()));
     }
@@ -77,9 +77,9 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   }
 
   @Override
-  protected void validateBeforeUpdate(ModuleDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, ModuleMessage.DUPLICATE_MODULE_NAME);
+  protected void validateBeforeUpdate(ModuleDTO request) {
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, ModuleMessage.DUPLICATE_MODULE_NAME);
     }
   }
 
@@ -103,7 +103,7 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   }
 
   @Override
-  protected ModuleDTO modifyUpdateResult(ModuleDTO requestDTO, ModuleDTO updatedDTO) {
+  protected ModuleDTO modifyUpdateResult(ModuleDTO request, ModuleDTO updatedDTO) {
     if (updatedDTO.getResources() != null && !updatedDTO.getResources().isEmpty()) {
       updatedDTO.setResources(mapResourceTree(updatedDTO.getResources()));
     }

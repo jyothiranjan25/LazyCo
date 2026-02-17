@@ -21,55 +21,55 @@ public class ProgramCurriculumService
   }
 
   @Override
-  protected void validateBeforeCreate(ProgramCurriculumDTO requestDTO) {
+  protected void validateBeforeCreate(ProgramCurriculumDTO request) {
 
-    if (requestDTO.getAcademicYearId() == null) {
+    if (request.getAcademicYearId() == null) {
       throw new ApplicationException(
           ProgramCurriculumMessage.PROGRAM_CURRICULUM_ACADEMIC_YEAR_REQUIRED);
     }
 
-    if (requestDTO.getTermSystemId() == null) {
+    if (request.getTermSystemId() == null) {
       throw new ApplicationException(
           ProgramCurriculumMessage.PROGRAM_CURRICULUM_TERM_SYSTEM_REQUIRED);
     }
 
-    if (requestDTO.getAcademicProgramId() == null) {
+    if (request.getAcademicProgramId() == null) {
       throw new ApplicationException(ProgramCurriculumMessage.PROGRAM_CURRICULUM_PROGRAM_REQUIRED);
     }
 
-    if (requestDTO.getProgramTermSystemId() == null) {
+    if (request.getProgramTermSystemId() == null) {
       throw new ApplicationException(
           ProgramCurriculumMessage.PROGRAM_CURRICULUM_TERM_CYCLE_REQUIRED);
     }
 
     validateAcademicProgramTermSystem(
-        requestDTO.getAcademicProgramId(), requestDTO.getProgramTermSystemId());
+        request.getAcademicProgramId(), request.getProgramTermSystemId());
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(ProgramCurriculumMessage.PROGRAM_CURRICULUM_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(ProgramCurriculumMessage.PROGRAM_CURRICULUM_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, ProgramCurriculumMessage.DUPLICATE_PROGRAM_CURRICULUM_NAME);
+    validateUniqueName(request, ProgramCurriculumMessage.DUPLICATE_PROGRAM_CURRICULUM_NAME);
   }
 
   @Override
-  protected void preCreate(ProgramCurriculumDTO requestDTO, ProgramCurriculum entityToCreate) {
+  protected void preCreate(ProgramCurriculumDTO request, ProgramCurriculum entityToCreate) {
     // program curriculum validation
     programCurriculumValidation(entityToCreate);
   }
 
   @Override
-  protected void validateBeforeUpdate(ProgramCurriculumDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(ProgramCurriculumDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, ProgramCurriculumMessage.DUPLICATE_PROGRAM_CURRICULUM_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, ProgramCurriculumMessage.DUPLICATE_PROGRAM_CURRICULUM_NAME);
     }
   }
 
@@ -100,7 +100,7 @@ public class ProgramCurriculumService
 
   @Override
   protected void preUpdate(
-      ProgramCurriculumDTO requestDTO,
+      ProgramCurriculumDTO request,
       ProgramCurriculumDTO entityBeforeUpdates,
       ProgramCurriculum entityToUpdate) {
     // program curriculum validation
@@ -138,8 +138,7 @@ public class ProgramCurriculumService
     if (entity.getMinCredit() != null
         && entity.getMaxCredit() != null
         && entity.getMaxCredit() < entity.getMinCredit()) {
-      throw new ApplicationException(
-          ProgramCurriculumMessage.PROGRAM_CURRICULUM_MAX_CREDIT_SHOULD_BE_GREATER_THAN_MIN_CREDIT);
+      throw new ApplicationException(ProgramCurriculumMessage.PROGRAM_CURRICULUM_CREDIT_VALIDATION);
     }
   }
 
@@ -147,7 +146,7 @@ public class ProgramCurriculumService
     AcademicProgram academicProgram = academicProgramService.getEntityById(academicProgramId);
     if (academicProgram == null) {
       throw new ApplicationException(
-          ProgramCurriculumMessage.PROGRAM_CURRICULUM_INVALID_ACADEMIC_PROGRAM);
+          ProgramCurriculumMessage.PROGRAM_CURRICULUM_ACADEMIC_PROGRAM_NOT_FOUND);
     }
     if (academicProgram.getProgramTermSystems().stream()
         .noneMatch(programTermSystem -> programTermSystem.getId().equals(programTermSystemId))) {

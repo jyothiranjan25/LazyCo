@@ -14,42 +14,42 @@ public class ProgramTermMasterService
   }
 
   @Override
-  protected void validateBeforeCreate(ProgramTermMasterDTO requestDTO) {
-    if (requestDTO.getProgramTermSystemId() == null) {
+  protected void validateBeforeCreate(ProgramTermMasterDTO request) {
+    if (request.getProgramTermSystemId() == null) {
       throw new ApplicationException(ProgramTermMasterMessage.PROGRAM_TERM_SYSTEM_ID_IS_REQUIRED);
     }
 
-    if (requestDTO.getTermSequence() == null || requestDTO.getTermSequence() < 0) {
+    if (request.getTermSequence() == null || request.getTermSequence() < 0) {
       throw new ApplicationException(
           ProgramTermMasterMessage.PROGRAM_TERM_MASTER_INVALID_SEQUENCE_NUMBER);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(ProgramTermMasterMessage.PROGRAM_TERM_MASTER_NAME_IS_REQUIRED);
     }
-    validateUniqueName(requestDTO, ProgramTermMasterMessage.DUPLICATE_PROGRAM_TERM_MASTER_NAME);
+    validateUniqueName(request, ProgramTermMasterMessage.DUPLICATE_PROGRAM_TERM_MASTER_NAME);
   }
 
   @Override
-  protected void preCreate(ProgramTermMasterDTO requestDTO, ProgramTermMaster entityToCreate) {
+  protected void preCreate(ProgramTermMasterDTO request, ProgramTermMaster entityToCreate) {
     validateSequenceNumber(entityToCreate);
   }
 
   @Override
-  protected void validateBeforeUpdate(ProgramTermMasterDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, ProgramTermMasterMessage.DUPLICATE_PROGRAM_TERM_MASTER_NAME);
+  protected void validateBeforeUpdate(ProgramTermMasterDTO request) {
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, ProgramTermMasterMessage.DUPLICATE_PROGRAM_TERM_MASTER_NAME);
     }
   }
 
   @Override
   protected void preUpdate(
-      ProgramTermMasterDTO requestDTO,
+      ProgramTermMasterDTO request,
       ProgramTermMasterDTO entityBeforeUpdates,
       ProgramTermMaster entityToUpdate) {
-    if (requestDTO.getTermSequence() != null
-        && !requestDTO.getTermSequence().equals(entityToUpdate.getTermSequence())) {
-      if (requestDTO.getTermSequence() < 0) {
+    if (request.getTermSequence() != null
+        && !request.getTermSequence().equals(entityToUpdate.getTermSequence())) {
+      if (request.getTermSequence() < 0) {
         throw new ApplicationException(
             ProgramTermMasterMessage.PROGRAM_TERM_MASTER_INVALID_SEQUENCE_NUMBER);
       }

@@ -17,15 +17,15 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
     this.service = service;
   }
 
-  public abstract D execute(D incomingDTO);
+  public abstract D execute(D incomingRequest);
 
-  public D template(D incomingDTO) {
+  public D template(D incomingRequest) {
     List<D> resultList = new ArrayList<>();
     List<D> successList = new ArrayList<>();
     List<D> errorList = new ArrayList<>();
-    if (incomingDTO.getObjects() != null && !incomingDTO.getObjects().isEmpty()) {
+    if (incomingRequest.getObjects() != null && !incomingRequest.getObjects().isEmpty()) {
       // Process all objects but track errors for atomic rollback
-      for (D object : incomingDTO.getObjects()) {
+      for (D object : incomingRequest.getObjects()) {
         // deep clone to avoid side effects
         @SuppressWarnings("unchecked")
         D objectToProcess = (D) object.clone();
@@ -34,43 +34,43 @@ public abstract class ServiceOperationTemplate<D extends AbstractDTO<D>> {
           successList.add(result);
         } catch (ExceptionWrapper e) {
           ApplicationLogger.error(e.getMessage(), e);
-          incomingDTO.setHasError(true);
+          incomingRequest.setHasError(true);
           objectToProcess.setMessage(e.getMessage());
           errorList.add(objectToProcess);
         } catch (Exception t) {
           ApplicationLogger.error(t.getMessage(), t);
-          incomingDTO.setHasError(true);
+          incomingRequest.setHasError(true);
           objectToProcess.setMessage(ResolveException.resolveExceptionMessage(t));
           errorList.add(objectToProcess);
         }
       }
       resultList.addAll(successList);
       resultList.addAll(errorList);
-      incomingDTO.setObjects(resultList);
+      incomingRequest.setObjects(resultList);
     } else {
       // Single object processing
-      incomingDTO = execute(incomingDTO);
+      incomingRequest = execute(incomingRequest);
     }
 
     // Rollback if atomic operation and errors occurred
-    if (Boolean.TRUE.equals(incomingDTO.getHasError())) {
-      if (Boolean.TRUE.equals(incomingDTO.getIsAtomicOperation())) {
-        incomingDTO.setMessage(
+    if (Boolean.TRUE.equals(incomingRequest.getHasError())) {
+      if (Boolean.TRUE.equals(incomingRequest.getIsAtomicOperation())) {
+        incomingRequest.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.ATOMIC_OPERATION_ERROR, successList.size(), errorList.size()));
-        service.markRollback(incomingDTO);
+        service.markRollback(incomingRequest);
       } else {
-        incomingDTO.setMessage(
+        incomingRequest.setMessage(
             CustomMessage.getMessageString(
                 CommonMessage.NON_ATOMIC_OPERATION_ERROR, errorList.size(), successList.size()));
       }
     }
 
-    return incomingDTO;
+    return incomingRequest;
   }
 
   public static <D extends AbstractDTO<D>> D executeServiceOperationTemplate(
-      ServiceOperationTemplate<D> serviceOperationTemplate, D incomingDTO) {
-    return serviceOperationTemplate.template(incomingDTO);
+      ServiceOperationTemplate<D> serviceOperationTemplate, D incomingRequest) {
+    return serviceOperationTemplate.template(incomingRequest);
   }
 }

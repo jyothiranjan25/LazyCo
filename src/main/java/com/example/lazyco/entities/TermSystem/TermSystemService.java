@@ -31,47 +31,47 @@ public class TermSystemService extends CommonAbstractService<TermSystemDTO, Term
   }
 
   @Override
-  protected void validateBeforeCreate(TermSystemDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+  protected void validateBeforeCreate(TermSystemDTO request) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(TermSystemMessage.TERM_SYSTEM_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(TermSystemMessage.TERM_SYSTEM_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
+    validateUniqueName(request, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
   }
 
   @Override
   protected void postCreate(
-      TermSystemDTO requestDTO, TermSystem createdEntity, TermSystemDTO createdDTO) {
+      TermSystemDTO request, TermSystem createdEntity, TermSystemDTO createdDTO) {
     // Create term masters associated with the term system
-    mapTermMasters(requestDTO, createdEntity);
+    mapTermMasters(request, createdEntity);
   }
 
   @Override
-  protected void validateBeforeUpdate(TermSystemDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(TermSystemDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, TermSystemMessage.DUPLICATE_TERM_SYSTEM_NAME);
     }
   }
 
   @Override
   protected void postUpdate(
-      TermSystemDTO requestDTO, TermSystemDTO entityBeforeUpdate, TermSystem updatedEntity) {
+      TermSystemDTO request, TermSystemDTO entityBeforeUpdate, TermSystem updatedEntity) {
     // update term masters associated with the term system
-    mapTermMasters(requestDTO, updatedEntity);
+    mapTermMasters(request, updatedEntity);
   }
 
-  private void mapTermMasters(TermSystemDTO requestDTO, TermSystem entity) {
+  private void mapTermMasters(TermSystemDTO request, TermSystem entity) {
     boolean hasError = false;
-    if (requestDTO.getTermMasters() != null && !requestDTO.getTermMasters().isEmpty()) {
-      List<TermMasterDTO> termMasterDTOs = requestDTO.getTermMasters();
+    if (request.getTermMasters() != null && !request.getTermMasters().isEmpty()) {
+      List<TermMasterDTO> termMasterDTOs = request.getTermMasters();
 
       List<TermMasterDTO> addTermMasterDTOs =
           termMasterDTOs.stream()
@@ -116,10 +116,10 @@ public class TermSystemService extends CommonAbstractService<TermSystemDTO, Term
       entity.setTermMasters(new HashSet<>(resultTermMasters));
 
       if (hasError) {
-        requestDTO.setTermMasters(resultTermMasterDTOs);
-        requestDTO.setMessage(
+        request.setTermMasters(resultTermMasterDTOs);
+        request.setMessage(
             CustomMessage.getMessageString(TermSystemMessage.ERROR_SAVING_TERM_MASTERS));
-        throw new BatchException(HttpStatus.BAD_REQUEST, requestDTO);
+        throw new BatchException(HttpStatus.BAD_REQUEST, request);
       }
     }
   }

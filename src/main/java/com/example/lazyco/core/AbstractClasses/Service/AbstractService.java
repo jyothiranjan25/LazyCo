@@ -147,19 +147,19 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before creation
-  protected void updateDtoBeforeCreate(D requestDTO) {}
+  protected void updateDtoBeforeCreate(D request) {}
 
   // Hook to validate DTO before create or update
-  protected void validateBeforeCreate(D requestDTO) {}
+  protected void validateBeforeCreate(D request) {}
 
   // Hook called before the entity is persisted
-  protected void preCreate(D requestDTO, E entityToCreate) {}
+  protected void preCreate(D request, E entityToCreate) {}
 
   // Hook called after the entity is persisted
-  protected void postCreate(D requestDTO, E createdEntity, D createdDTO) {}
+  protected void postCreate(D request, E createdEntity, D createdDTO) {}
 
   // Hook to modify the created DTO before returning to caller
-  protected D modifyCreateResult(D requestDTO, D createdDTO) {
+  protected D modifyCreateResult(D request, D createdDTO) {
     return createdDTO;
   }
 
@@ -227,7 +227,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // Apply updates from DTO to the cloned entity
     makeUpdates(dtoToUpdate, existingEntity);
 
-    afterMapperUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
+    afterMakeUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
 
     // Pre-update hook
     preUpdate(dtoToUpdate, entityClone, existingEntity);
@@ -255,7 +255,7 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   protected void updateDtoBeforeUpdate(D dtoToUpdate) {}
 
   // Hook to validate DTO before create or update
-  protected void validateBeforeUpdate(D requestDTO) {}
+  protected void validateBeforeUpdate(D request) {}
 
   // Hook to apply updates from DTO to the existing entity
   protected void makeUpdates(D source, E target) {
@@ -263,18 +263,18 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Overloaded hook to provide both the original entity and the cloned entity for updates
-  protected void afterMapperUpdates(D requestDTO, E beforeUpdates, E afterUpdates) {}
+  protected void afterMakeUpdates(D request, E beforeUpdates, E afterUpdates) {}
 
   // Hook called before the entity is updated
-  protected void preUpdate(D requestDTO, D entityBeforeUpdates, E entityToUpdate) {}
+  protected void preUpdate(D request, D entityBeforeUpdates, E entityToUpdate) {}
 
   // Hook called after the entity is updated
-  protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity) {}
+  protected void postUpdate(D request, D entityBeforeUpdate, E updatedEntity) {}
 
-  protected void postUpdate(D requestDTO, D entityBeforeUpdate, E updatedEntity, D updatedDTO) {}
+  protected void postUpdate(D request, D entityBeforeUpdate, E updatedEntity, D updatedDTO) {}
 
   // Hook to modify the updated DTO before returning to caller
-  protected D modifyUpdateResult(D requestDTO, D updatedDTO) {
+  protected D modifyUpdateResult(D request, D updatedDTO) {
     return updatedDTO;
   }
 
@@ -334,13 +334,13 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   }
 
   // Hooks called to modify the DTO before deletion
-  protected void updateDtoBeforeDelete(D requestDTO) {}
+  protected void updateDtoBeforeDelete(D request) {}
 
   // Hook called before the entity is deleted
-  protected void preDelete(D requestDTO, E entityToDelete) {}
+  protected void preDelete(D request, E entityToDelete) {}
 
   // Hook called after the entity is deleted
-  protected void postDelete(D requestDTO, E deletedEntity) {}
+  protected void postDelete(D request, E deletedEntity) {}
 
   // Get count of entity records matching the filter
   @Transactional(readOnly = true)

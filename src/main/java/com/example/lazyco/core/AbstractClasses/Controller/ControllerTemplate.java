@@ -14,14 +14,11 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
     this.controllerTemplateParam = controllerTemplateParam;
   }
 
-  public ResponseEntity<?> template(D incomingRequestDTO) {
-    @SuppressWarnings("unchecked")
-    D safetyClone = (D) incomingRequestDTO.clone();
-
-    if (incomingRequestDTO.getApiAction() != null && !incomingRequestDTO.getApiAction().isEmpty()) {
-      return resolveActionByMethod(incomingRequestDTO);
+  public ResponseEntity<?> template(D incomingRequest) {
+    if (incomingRequest.getApiAction() != null && !incomingRequest.getApiAction().isEmpty()) {
+      return resolveActionByMethod(incomingRequest);
     } else {
-      D processed = execute(incomingRequestDTO);
+      D processed = execute(incomingRequest);
 
       // common error handling
       if (Boolean.TRUE.equals(processed.getIsAtomicOperation())
@@ -30,10 +27,10 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
       }
 
       // If there are messages with errors in the incoming DTO, return bad request
-      if (incomingRequestDTO.getMessages() != null
-          && incomingRequestDTO.getMessages().hasErrors()
-          && Boolean.TRUE.equals(incomingRequestDTO.getHasError())) {
-        return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, incomingRequestDTO);
+      if (incomingRequest.getMessages() != null
+          && incomingRequest.getMessages().hasErrors()
+          && Boolean.TRUE.equals(incomingRequest.getHasError())) {
+        return ResponseUtils.sendResponse(HttpStatus.BAD_REQUEST, incomingRequest);
       }
 
       // If there are messages with errors in the processed DTO, return bad request
@@ -56,14 +53,17 @@ public abstract class ControllerTemplate<D extends AbstractDTO<D>> {
     }
   }
 
-  private ResponseEntity<?> resolveActionByMethod(D incomingDTO) {
+  private ResponseEntity<?> resolveActionByMethod(D incomingRequest) {
     if (isPostRequest())
-      return controllerTemplateParam.resolvePostAction(incomingDTO.getApiAction(), incomingDTO);
+      return controllerTemplateParam.resolvePostAction(
+          incomingRequest.getApiAction(), incomingRequest);
     if (isPatchRequest())
-      return controllerTemplateParam.resolvePatchAction(incomingDTO.getApiAction(), incomingDTO);
+      return controllerTemplateParam.resolvePatchAction(
+          incomingRequest.getApiAction(), incomingRequest);
     if (isDeleteRequest())
-      return controllerTemplateParam.resolveDeleteAction(incomingDTO.getApiAction(), incomingDTO);
-    return controllerTemplateParam.resolveAction(incomingDTO.getApiAction(), incomingDTO);
+      return controllerTemplateParam.resolveDeleteAction(
+          incomingRequest.getApiAction(), incomingRequest);
+    return controllerTemplateParam.resolveAction(incomingRequest.getApiAction(), incomingRequest);
   }
 
   protected abstract D execute(D t);

@@ -21,20 +21,20 @@ public class ResourceService extends CommonAbstractService<ResourceDTO, Resource
   }
 
   @Override
-  protected void validateBeforeCreate(ResourceDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+  protected void validateBeforeCreate(ResourceDTO request) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(ResourceMessage.RESOURCE_NAME_REQUIRED);
     }
     // name should be unique
-    validateUniqueName(requestDTO, ResourceMessage.DUPLICATE_RESOURCE_NAME);
+    validateUniqueName(request, ResourceMessage.DUPLICATE_RESOURCE_NAME);
 
     // validate that child should not have children
-    validateParentResource(requestDTO);
+    validateParentResource(request);
   }
 
-  private void validateParentResource(ResourceDTO requestDTO) {
-    if (requestDTO.getParentId() != null) {
-      ResourceDTO parentResource = getById(requestDTO.getParentId());
+  private void validateParentResource(ResourceDTO request) {
+    if (request.getParentId() != null) {
+      ResourceDTO parentResource = getById(request.getParentId());
       if (parentResource.getParentId() != null) {
         throw new ApplicationException(ResourceMessage.INVALID_PARENT_RESOURCE);
       }
@@ -42,9 +42,9 @@ public class ResourceService extends CommonAbstractService<ResourceDTO, Resource
   }
 
   @Override
-  protected void validateBeforeUpdate(ResourceDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, ResourceMessage.DUPLICATE_RESOURCE_NAME);
+  protected void validateBeforeUpdate(ResourceDTO request) {
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, ResourceMessage.DUPLICATE_RESOURCE_NAME);
     }
   }
 }

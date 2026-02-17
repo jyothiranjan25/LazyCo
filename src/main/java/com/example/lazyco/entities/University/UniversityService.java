@@ -12,26 +12,26 @@ public class UniversityService extends CommonAbstractService<UniversityDTO, Univ
   }
 
   @Override
-  protected void validateBeforeCreate(UniversityDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+  protected void validateBeforeCreate(UniversityDTO request) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(UniversityMessage.UNIVERSITY_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(UniversityMessage.UNIVERSITY_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, UniversityMessage.DUPLICATE_UNIVERSITY_NAME);
+    validateUniqueName(request, UniversityMessage.DUPLICATE_UNIVERSITY_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(UniversityDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(UniversityDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, UniversityMessage.DUPLICATE_UNIVERSITY_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, UniversityMessage.DUPLICATE_UNIVERSITY_NAME);
     }
   }
 }

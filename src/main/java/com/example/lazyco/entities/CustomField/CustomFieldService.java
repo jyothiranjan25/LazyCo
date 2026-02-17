@@ -2,6 +2,7 @@ package com.example.lazyco.entities.CustomField;
 
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
+import com.example.lazyco.core.Utils.CommonUtils;
 import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOption;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOptionDTO;
@@ -24,49 +25,67 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
   }
 
   @Override
-  protected void validateBeforeCreate(CustomFieldDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+  protected void validateBeforeCreate(CustomFieldDTO request) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(CustomFieldMessage.CUSTOM_FIELD_NAME_REQUIRED);
+    } else {
+      validateUniqueName(request, CustomFieldMessage.DUPLICATE_CUSTOM_FIELD_NAME);
+      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+    }
+    if (request.getFieldType() == null) {
+      throw new ApplicationException(CustomFieldMessage.CUSTOM_FIELD_TYPE_REQUIRED);
     }
   }
 
   @Override
   protected void postCreate(
-      CustomFieldDTO requestDTO, CustomField createdEntity, CustomFieldDTO createdDTO) {
-    createdDTO.setOptions(addCustomFieldOptions(requestDTO, createdEntity));
+      CustomFieldDTO request, CustomField createdEntity, CustomFieldDTO createdDTO) {
+    createdDTO.setOptions(addCustomFieldOptions(request, createdEntity));
+  }
+
+  @Override
+  protected void validateBeforeUpdate(CustomFieldDTO request) {
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, CustomFieldMessage.DUPLICATE_CUSTOM_FIELD_NAME);
+      request.setKey(CommonUtils.toKeySerialize(request.getName()));
+    }
+
+    if (request.getFieldType() != null) {
+      throw new ApplicationException(CustomFieldMessage.UPDATE_CUSTOM_FIELD_TYPE_NOT_ALLOWED);
+    }
   }
 
   @Override
   protected void preUpdate(
-      CustomFieldDTO requestDTO, CustomFieldDTO entityBeforeUpdates, CustomField entityToUpdate) {
-    if (FieldTypeEnum.SELECT.equals(requestDTO.getFieldType())
-        || FieldTypeEnum.MULTI_SELECT.equals(requestDTO.getFieldType())) {
-      removeAssociated(entityToUpdate.getCustomFieldOptions(), requestDTO.getRemoveOptions());
+      CustomFieldDTO request, CustomFieldDTO entityBeforeUpdates, CustomField entityToUpdate) {
+    if (FieldTypeEnum.SELECT.equals(request.getFieldType())
+        || FieldTypeEnum.MULTI_SELECT.equals(request.getFieldType())) {
+      removeAssociated(entityToUpdate.getCustomFieldOptions(), request.getRemoveOptions());
     }
   }
 
   @Override
   protected void postUpdate(
-      CustomFieldDTO requestDTO,
+      CustomFieldDTO request,
       CustomFieldDTO entityBeforeUpdate,
       CustomField updatedEntity,
       CustomFieldDTO updatedDTO) {
     List<CustomFieldOptionDTO> options = updatedDTO.getOptions();
-    options.addAll(addCustomFieldOptions(requestDTO, updatedEntity));
+    options.addAll(addCustomFieldOptions(request, updatedEntity));
   }
 
   private List<CustomFieldOptionDTO> addCustomFieldOptions(
-      CustomFieldDTO requestDTO, CustomField entity) {
-    if (!FieldTypeEnum.SELECT.equals(requestDTO.getFieldType())
-        && !FieldTypeEnum.MULTI_SELECT.equals(requestDTO.getFieldType())) {
+      CustomFieldDTO request, CustomField entity) {
+    if (!FieldTypeEnum.SELECT.equals(request.getFieldType())
+        && !FieldTypeEnum.MULTI_SELECT.equals(request.getFieldType())) {
       return new ArrayList<>();
     }
 
     Set<CustomFieldOption> existingOptions = entity.getCustomFieldOptions();
 
     List<CustomFieldOptionDTO> addedOption = new ArrayList<>();
-    if (requestDTO.getAddOptions() != null) {
-      for (String optionValue : requestDTO.getAddOptions()) {
+    if (request.getAddOptions() != null) {
+      for (String optionValue : request.getAddOptions()) {
         if (optionValue == null || optionValue.trim().isEmpty()) {
           continue;
         }
@@ -84,7 +103,7 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
         addedOption.add(newOption);
       }
     }
-    requestDTO.setOptions(addedOption);
+    request.setOptions(addedOption);
     return addedOption;
   }
 }

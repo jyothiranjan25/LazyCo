@@ -3,6 +3,7 @@ package com.example.lazyco.entities.AdmissionOffer;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicYear.AcademicYear;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
+import com.example.lazyco.entities.ApplicationForm.ApplicationForm;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTemplate.ApplicationFormTemplate;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -71,4 +72,7 @@ public class AdmissionOffer extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "admissionOffer", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<AdmissionOfferProgram> offerPrograms;
+
+  @OneToMany(mappedBy = "admissionOffer")
+  private Set<ApplicationForm> applicationForms;
 }

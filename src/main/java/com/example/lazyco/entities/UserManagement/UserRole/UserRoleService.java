@@ -11,20 +11,20 @@ public class UserRoleService extends AbstractService<UserRoleDTO, UserRole> {
   }
 
   @Override
-  protected void validateBeforeCreate(UserRoleDTO requestDTO) {
-    if (requestDTO.getRoleId() == null) {
+  protected void validateBeforeCreate(UserRoleDTO request) {
+    if (request.getRoleId() == null) {
       throw new ApplicationException(UserRoleMessage.ROLE_ID_REQUIRED);
     }
-    if (requestDTO.getAppUserId() == null) {
+    if (request.getAppUserId() == null) {
       throw new ApplicationException(UserRoleMessage.APP_USER_ID_REQUIRED);
     }
-    if (requestDTO.getUserGroupId() == null) {
+    if (request.getUserGroupId() == null) {
       throw new ApplicationException(UserRoleMessage.USER_GROUP_ID_REQUIRED);
     }
     UserRoleDTO filter = new UserRoleDTO();
-    filter.setRoleId(requestDTO.getRoleId());
-    filter.setAppUserId(requestDTO.getAppUserId());
-    filter.setUserGroupId(requestDTO.getUserGroupId());
+    filter.setRoleId(request.getRoleId());
+    filter.setAppUserId(request.getAppUserId());
+    filter.setUserGroupId(request.getUserGroupId());
     if (getCount(filter) > 0) {
       throw new ApplicationException(UserRoleMessage.USER_ROLE_ALREADY_EXISTS);
     }

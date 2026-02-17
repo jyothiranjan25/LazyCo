@@ -78,36 +78,35 @@ public class RoleService extends CommonAbstractService<RoleDTO, Role> {
   }
 
   @Override
-  protected void validateBeforeCreate(RoleDTO requestDTO) {
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+  protected void validateBeforeCreate(RoleDTO request) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(RoleMessage.ROLE_NAME_REQUIRED);
     }
 
     // name should be unique
-    validateUniqueName(requestDTO, RoleMessage.DUPLICATE_ROLE_NAME);
+    validateUniqueName(request, RoleMessage.DUPLICATE_ROLE_NAME);
   }
 
   @Override
-  protected void postCreate(RoleDTO requestDTO, Role createdEntity, RoleDTO createdDTO) {
-    mapRoleModuleResources(requestDTO, createdEntity);
+  protected void postCreate(RoleDTO request, Role createdEntity, RoleDTO createdDTO) {
+    mapRoleModuleResources(request, createdEntity);
   }
 
   @Override
-  protected void validateBeforeUpdate(RoleDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, RoleMessage.DUPLICATE_ROLE_NAME);
+  protected void validateBeforeUpdate(RoleDTO request) {
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, RoleMessage.DUPLICATE_ROLE_NAME);
     }
   }
 
   @Override
-  protected void postUpdate(RoleDTO requestDTO, RoleDTO entityBeforeUpdate, Role updatedEntity) {
-    mapRoleModuleResources(requestDTO, updatedEntity);
+  protected void postUpdate(RoleDTO request, RoleDTO entityBeforeUpdate, Role updatedEntity) {
+    mapRoleModuleResources(request, updatedEntity);
   }
 
-  public void mapRoleModuleResources(RoleDTO requestDTO, Role entity) {
-    if (requestDTO.getRoleModuleResources() != null
-        && !requestDTO.getRoleModuleResources().isEmpty()) {
-      for (RoleModuleResourceDTO roleModuleResourceDTO : requestDTO.getRoleModuleResources()) {
+  public void mapRoleModuleResources(RoleDTO request, Role entity) {
+    if (request.getRoleModuleResources() != null && !request.getRoleModuleResources().isEmpty()) {
+      for (RoleModuleResourceDTO roleModuleResourceDTO : request.getRoleModuleResources()) {
         roleModuleResourceDTO.setRoleId(entity.getId());
         if (roleModuleResourceDTO.getId() == null) {
           roleModuleResourceService.executeCreateTransactional(roleModuleResourceDTO);

@@ -28,22 +28,22 @@ public class ConfigurationMasterService
   }
 
   @Override
-  protected void preCreate(ConfigurationMasterDTO requestDTO, ConfigurationMaster entityToCreate) {
-    if (Boolean.TRUE.equals(requestDTO.getSensitive())) {
+  protected void preCreate(ConfigurationMasterDTO request, ConfigurationMaster entityToCreate) {
+    if (Boolean.TRUE.equals(request.getSensitive())) {
       entityToCreate.setConfigValue(MASKED_VALUE);
-      entityToCreate.setSensitiveConfigValue(CryptoUtil.encrypt(requestDTO.getConfigValue()));
+      entityToCreate.setSensitiveConfigValue(CryptoUtil.encrypt(request.getConfigValue()));
     }
   }
 
   @Override
   protected void preUpdate(
-      ConfigurationMasterDTO requestDTO,
+      ConfigurationMasterDTO request,
       ConfigurationMasterDTO entityBeforeUpdates,
       ConfigurationMaster entityAfterUpdates) {
-    if (Boolean.TRUE.equals(requestDTO.getSensitive())
-        && !requestDTO.getConfigValue().equals(MASKED_VALUE)) {
+    if (Boolean.TRUE.equals(request.getSensitive())
+        && !request.getConfigValue().equals(MASKED_VALUE)) {
       entityAfterUpdates.setConfigValue(MASKED_VALUE);
-      entityAfterUpdates.setSensitiveConfigValue(CryptoUtil.encrypt(requestDTO.getConfigValue()));
+      entityAfterUpdates.setSensitiveConfigValue(CryptoUtil.encrypt(request.getConfigValue()));
     }
   }
 

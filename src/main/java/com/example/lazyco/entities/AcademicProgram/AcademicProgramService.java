@@ -13,32 +13,32 @@ public class AcademicProgramService
   }
 
   @Override
-  protected void validateBeforeCreate(AcademicProgramDTO requestDTO) {
+  protected void validateBeforeCreate(AcademicProgramDTO request) {
 
-    if (requestDTO.getInstitutionId() == null) {
+    if (request.getInstitutionId() == null) {
       throw new ApplicationException(
           AcademicProgramMessage.ACADEMIC_PROGRAM_INSTITUTION_ID_REQUIRED);
     }
 
-    if (StringUtils.isEmpty(requestDTO.getCode())) {
+    if (StringUtils.isEmpty(request.getCode())) {
       throw new ApplicationException(AcademicProgramMessage.ACADEMIC_PROGRAM_CODE_REQUIRED);
     }
-    validateUniqueCode(requestDTO);
+    validateUniqueCode(request);
 
-    if (StringUtils.isEmpty(requestDTO.getName())) {
+    if (StringUtils.isEmpty(request.getName())) {
       throw new ApplicationException(AcademicProgramMessage.ACADEMIC_PROGRAM_NAME_REQUIRED);
     }
-    validateUniqueName(requestDTO, AcademicProgramMessage.DUPLICATE_ACADEMIC_PROGRAM_NAME);
+    validateUniqueName(request, AcademicProgramMessage.DUPLICATE_ACADEMIC_PROGRAM_NAME);
   }
 
   @Override
-  protected void validateBeforeUpdate(AcademicProgramDTO requestDTO) {
-    if (!StringUtils.isEmpty(requestDTO.getCode())) {
-      validateUniqueCode(requestDTO);
+  protected void validateBeforeUpdate(AcademicProgramDTO request) {
+    if (!StringUtils.isEmpty(request.getCode())) {
+      validateUniqueCode(request);
     }
 
-    if (!StringUtils.isEmpty(requestDTO.getName())) {
-      validateUniqueName(requestDTO, AcademicProgramMessage.DUPLICATE_ACADEMIC_PROGRAM_NAME);
+    if (!StringUtils.isEmpty(request.getName())) {
+      validateUniqueName(request, AcademicProgramMessage.DUPLICATE_ACADEMIC_PROGRAM_NAME);
     }
   }
 }
