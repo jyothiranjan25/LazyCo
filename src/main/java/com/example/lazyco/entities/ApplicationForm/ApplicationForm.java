@@ -2,6 +2,7 @@ package com.example.lazyco.entities.ApplicationForm;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
+import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
@@ -29,6 +30,7 @@ import org.hibernate.type.SqlTypes;
       @Index(name = "idx_application_form_application_number", columnList = "applicationNumber"),
       @Index(name = "idx_application_form_email", columnList = "email"),
       @Index(name = "idx_application_form_phone_number", columnList = "phoneNumber"),
+      @Index(name = "idx_application_form_source", columnList = "source"),
       @Index(name = "idx_application_form_admission_offer_id", columnList = "admission_offer_id"),
       @Index(
           name = "idx_application_form_program_curriculum_id",
@@ -80,17 +82,15 @@ public class ApplicationForm extends AbstractRBACModel {
   @Column(name = "application_date", comment = "date when the application was submitted")
   private LocalDateTime applicationDate;
 
-  @Column(
-      name = "is_enrolled",
-      columnDefinition = "boolean default false",
-      comment = "indicates if the applicant is enrolled")
-  private Boolean isEnrolled;
-
   @Column(name = "enrollment_date", comment = "date when the applicant enrolled")
   private LocalDate enrollmentDate;
 
   @Column(name = "raw_program_name", comment = "Raw program name as entered by the applicant")
   private String rawProgramName;
+
+  @Column(name = "source", comment = "Source of the application form")
+  @Enumerated(EnumType.STRING)
+  private ApplicationFormSourceEnum source;
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(
@@ -124,4 +124,7 @@ public class ApplicationForm extends AbstractRBACModel {
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);
   }
+
+  @OneToOne(mappedBy = "applicationForm")
+  private Admission admissions;
 }

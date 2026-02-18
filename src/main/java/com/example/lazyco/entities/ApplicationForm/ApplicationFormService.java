@@ -288,6 +288,7 @@ public class ApplicationFormService
     // validate custom fields
     validateCustomFields(dto, message);
     if (!message.hasErrors()) {
+      dto.setSource(ApplicationFormSourceEnum.DIRECT);
       return create(dto);
     }
     dto.setMessages(message);

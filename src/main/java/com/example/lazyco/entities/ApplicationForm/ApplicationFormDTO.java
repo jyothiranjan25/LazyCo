@@ -5,6 +5,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.In
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.Utils.GenderEnum;
+import com.google.gson.annotations.Expose;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -37,6 +38,10 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
   @InternalFilterableField private LocalDateTime applicationDate;
 
   @InternalFilterableField private String rawProgramName;
+
+  @InternalFilterableField
+  @Expose(deserialize = false)
+  private ApplicationFormSourceEnum source;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "admissionOffer.id")

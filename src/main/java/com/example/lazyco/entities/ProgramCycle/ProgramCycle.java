@@ -2,6 +2,7 @@ package com.example.lazyco.entities.ProgramCycle;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.ProgramTermMaster.ProgramTermMaster;
+import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
 import com.example.lazyco.entities.ApplicationForm.ApplicationForm;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
@@ -145,4 +146,10 @@ public class ProgramCycle extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "startingProgramCycle")
   private Set<ApplicationForm> applicationForms;
+
+  @OneToMany(mappedBy = "joiningProgramCycle")
+  private Set<Admission> joiningLevelAdmissions;
+
+  @OneToMany(mappedBy = "currentProgramCycle")
+  private Set<Admission> currentLevelAdmissions;
 }
