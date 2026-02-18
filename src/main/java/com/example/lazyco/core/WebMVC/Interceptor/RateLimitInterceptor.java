@@ -49,7 +49,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
       case SECURITY -> {
         String ip = getClientIp(request);
-        ConsumptionProbe probe = rateLimiter.tryConsumeSecurity(ip);
+        String endpointKey = request.getServletPath();
+        ConsumptionProbe probe = rateLimiter.tryConsumeSecurity(ip, endpointKey);
 
         if (!probe.isConsumed()) {
           return reject(response, probe, "SECURITY", ip, uri);

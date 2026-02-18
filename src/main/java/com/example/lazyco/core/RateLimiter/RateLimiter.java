@@ -46,8 +46,10 @@ public class RateLimiter {
         .build();
   }
 
-  public ConsumptionProbe tryConsumeSecurity(String ip) {
-    Bucket bucket = securityCache("SEC_" + ip, this::newSecurityBucket);
+  public ConsumptionProbe tryConsumeSecurity(String ip, String endpoint) {
+    String normalizedEndpoint = endpoint.replaceAll("[^a-zA-Z0-9]", "_");
+    String key = "SEC_" + ip + "_" + normalizedEndpoint;
+    Bucket bucket = securityCache(key, this::newSecurityBucket);
     return bucket.tryConsumeAndReturnRemaining(1);
   }
 
