@@ -74,28 +74,14 @@ public class ProgramCurriculumService
   }
 
   @Override
-  protected void makeUpdates(ProgramCurriculumDTO source, ProgramCurriculum target) {
-    if ((source.getAcademicProgramId() != null
-            && target.getAcademicProgram() != null
-            && !target.getAcademicProgram().getId().equals(source.getAcademicProgramId()))
-        || (source.getProgramTermSystemId() != null
-            && target.getProgramTermSystem() != null
-            && !target.getProgramTermSystem().getId().equals(source.getProgramTermSystemId()))) {
-
-      Long academicProgramId =
-          source.getAcademicProgramId() != null
-              ? source.getAcademicProgramId()
-              : target.getAcademicProgram().getId();
-
-      Long programTermSystemId =
-          source.getProgramTermSystemId() != null
-              ? source.getProgramTermSystemId()
-              : target.getProgramTermSystem().getId();
-
-      validateAcademicProgramTermSystem(academicProgramId, programTermSystemId);
+  protected void afterMakeUpdates(
+      ProgramCurriculumDTO request,
+      ProgramCurriculum beforeUpdates,
+      ProgramCurriculum afterUpdates) {
+    if (request.getAcademicProgramId() != null || request.getProgramTermSystemId() != null) {
+      validateAcademicProgramTermSystem(
+          afterUpdates.getAcademicProgram().getId(), afterUpdates.getProgramTermSystem().getId());
     }
-
-    super.makeUpdates(source, target);
   }
 
   @Override

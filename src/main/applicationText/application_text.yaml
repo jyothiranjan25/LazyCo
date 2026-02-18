@@ -158,6 +158,7 @@ PROGRAM_CYCLE:
     PROGRAM_CYCLE_TERM_CYCLE_REQUIRED : "Term cycle is required for program cycle."
     PROGRAM_CYCLE_PROGRAM_CURRICULUM_REQUIRED : "Program curriculum is required for program cycle."
     PROGRAM_CYCLE_PROGRAM_TERM_MASTER_REQUIRED : "Program term master is required for program cycle."
+    PROGRAM_CYCLE_PROGRAM_TERM_MASTER_INVALID : "The selected program term master is not associated with the term system of the program curriculum."
 
 CUSTOM_FIELD:
   CUSTOM_FIELD_NAME_REQUIRED : "Custom field name is required."

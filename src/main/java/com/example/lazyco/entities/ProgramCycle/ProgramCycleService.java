@@ -2,13 +2,20 @@ package com.example.lazyco.entities.ProgramCycle;
 
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
+import com.example.lazyco.entities.AcademicProgram.ProgramTermMaster.ProgramTermMasterDTO;
+import com.example.lazyco.entities.AcademicProgram.ProgramTermMaster.ProgramTermMasterService;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, ProgramCycle> {
-  protected ProgramCycleService(ProgramCycleMapper programCycleMapper) {
+  private final ProgramTermMasterService programTermMasterService;
+
+  protected ProgramCycleService(
+      ProgramCycleMapper programCycleMapper, ProgramTermMasterService programTermMasterService) {
     super(programCycleMapper);
+    this.programTermMasterService = programTermMasterService;
   }
 
   @Override
@@ -22,7 +29,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
       throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_DATES_REQUIRED);
     }
 
-    if (request.getStartDate().isAfter(request.getEndDate())) {
+    if (request.getEndDate().isBefore(request.getStartDate())) {
       throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_INVALID_DATES);
     }
 
@@ -42,7 +49,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
       throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_REGISTRATION_DATE_REQUIRED);
     }
 
-    if (request.getRegistrationStartDate().isAfter(request.getRegistrationEndDate())) {
+    if (request.getRegistrationEndDate().isBefore(request.getRegistrationStartDate())) {
       throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_INVALID_REGISTRATION_DATE);
     }
 
@@ -51,7 +58,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
           ProgramCycleMessage.PROGRAM_CYCLE_WITHDRAWN_DEADLINE_DATE_REQUIRED);
     }
 
-    if (request.getWithdrawalDeadline().isAfter(request.getRegistrationEndDate())) {
+    if (request.getRegistrationEndDate().isAfter(request.getWithdrawalDeadline())) {
       throw new ApplicationException(
           ProgramCycleMessage.PROGRAM_CYCLE_INVALID_WITHDRAWN_DEADLINE_DATE);
     }
@@ -61,7 +68,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
           ProgramCycleMessage.PROGRAM_CYCLE_GRADES_SUBMISSION_DEADLINE_DATE_REQUIRED);
     }
 
-    if (request.getGradeSubmissionDeadline().isAfter(request.getEndDate().atStartOfDay())) {
+    if (request.getEndDate().isAfter(request.getGradeSubmissionDeadline().toLocalDate())) {
       throw new ApplicationException(
           ProgramCycleMessage.PROGRAM_CYCLE_INVALID_GRADES_SUBMISSION_DEADLINE_DATE);
     }
@@ -78,6 +85,8 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
       throw new ApplicationException(
           ProgramCycleMessage.PROGRAM_CYCLE_PROGRAM_TERM_MASTER_REQUIRED);
     }
+    validateProgramCurriculumTermMaster(
+        request.getProgramCurriculumId(), request.getProgramTermMasterId());
   }
 
   @Override
@@ -89,7 +98,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
     }
 
     if (request.getStartDate() != null || request.getEndDate() != null) {
-      if (afterUpdates.getStartDate().isAfter(afterUpdates.getEndDate())) {
+      if (afterUpdates.getEndDate().isAfter(afterUpdates.getStartDate())) {
         throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_INVALID_DATES);
       }
     }
@@ -105,13 +114,13 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
     }
 
     if (request.getRegistrationStartDate() != null || request.getRegistrationEndDate() != null) {
-      if (afterUpdates.getRegistrationStartDate().isAfter(afterUpdates.getRegistrationEndDate())) {
+      if (afterUpdates.getRegistrationEndDate().isBefore(afterUpdates.getRegistrationStartDate())) {
         throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_INVALID_REGISTRATION_DATE);
       }
     }
 
     if (request.getWithdrawalDeadline() != null) {
-      if (afterUpdates.getWithdrawalDeadline().isAfter(afterUpdates.getRegistrationEndDate())) {
+      if (afterUpdates.getRegistrationEndDate().isBefore(afterUpdates.getWithdrawalDeadline())) {
         throw new ApplicationException(
             ProgramCycleMessage.PROGRAM_CYCLE_INVALID_WITHDRAWN_DEADLINE_DATE);
       }
@@ -119,11 +128,26 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
 
     if (request.getGradeSubmissionDeadline() != null) {
       if (afterUpdates
-          .getGradeSubmissionDeadline()
-          .isAfter(afterUpdates.getEndDate().atStartOfDay())) {
+          .getEndDate()
+          .isAfter(afterUpdates.getGradeSubmissionDeadline().toLocalDate())) {
         throw new ApplicationException(
             ProgramCycleMessage.PROGRAM_CYCLE_INVALID_GRADES_SUBMISSION_DEADLINE_DATE);
       }
+    }
+
+    if (request.getProgramCurriculumId() != null || request.getProgramTermMasterId() != null) {
+      validateProgramCurriculumTermMaster(
+          afterUpdates.getProgramCurriculum().getId(), afterUpdates.getProgramTermMaster().getId());
+    }
+  }
+
+  private void validateProgramCurriculumTermMaster(
+      Long programCurriculumId, Long programTermMasterId) {
+    ProgramTermMasterDTO filter = new ProgramTermMasterDTO();
+    filter.setProgramCurriculumId(programCurriculumId);
+    List<ProgramTermMasterDTO> programTermMasters = programTermMasterService.get(filter);
+    if (programTermMasters.stream().noneMatch(ptm -> ptm.getId().equals(programTermMasterId))) {
+      throw new ApplicationException(ProgramCycleMessage.PROGRAM_CYCLE_PROGRAM_TERM_MASTER_INVALID);
     }
   }
 }

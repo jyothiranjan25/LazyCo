@@ -19,4 +19,8 @@ public class ProgramTermMasterDTO extends AbstractDTO<ProgramTermMasterDTO> impl
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermSystem.id")
   private Long programTermSystemId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermSystem.programCurriculums.id")
+  private Long programCurriculumId;
 }
