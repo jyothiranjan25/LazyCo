@@ -4,7 +4,10 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.In
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.Utils.GenderEnum;
+import com.example.lazyco.entities.Admission.AdmissionDTO;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,4 +30,8 @@ public class StudentDTO extends AbstractDTO<StudentDTO> {
   @InternalFilterableField private String email;
 
   @InternalFilterableField private String phoneNumber;
+
+  private Map<String, Object> customFields;
+
+  private List<AdmissionDTO> admissions;
 }
