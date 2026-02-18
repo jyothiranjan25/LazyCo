@@ -118,19 +118,19 @@ public class ProgramCycle extends AbstractRBACModel {
 
   @ManyToOne
   @JoinColumn(
-      name = "program_curriculum_id",
-      foreignKey = @ForeignKey(name = "fk_program_cycle_program_curriculum"),
-      nullable = false,
-      comment = "Foreign key referencing the program curriculum")
-  private ProgramCurriculum programCurriculum;
-
-  @ManyToOne
-  @JoinColumn(
       name = "term_cycle_id",
       foreignKey = @ForeignKey(name = "fk_program_cycle_term_cycle"),
       nullable = false,
       comment = "Foreign key referencing the term cycle")
   private TermCycle termCycle;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "program_curriculum_id",
+      foreignKey = @ForeignKey(name = "fk_program_cycle_program_curriculum"),
+      nullable = false,
+      comment = "Foreign key referencing the program curriculum")
+  private ProgramCurriculum programCurriculum;
 
   @ManyToOne
   @JoinColumn(

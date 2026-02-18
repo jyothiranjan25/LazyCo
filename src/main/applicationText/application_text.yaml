@@ -144,6 +144,20 @@ PROGRAM_CURRICULUM:
 
 PROGRAM_CYCLE:
     PROGRAM_CYCLE_CODE_REQUIRED : "Program cycle code is required."
+    PROGRAM_CYCLE_DATES_REQUIRED : "Start date and end date are required for program cycle."
+    PROGRAM_CYCLE_INVALID_DATES : "Check the start and end dates for the program cycle."
+    PROGRAM_CYCLE_CREDITS_REQUIRED : "Min and max credits are required for program cycle."
+    PROGRAM_CYCLE_INVALID_CREDITS : "Min and max credits must be positive numbers for program cycle."
+    PROGRAM_CYCLE_CREDIT_VALIDATION : "Max credit must be greater than or equal to min credit for program cycle."
+    PROGRAM_CYCLE_REGISTRATION_DATE_REQUIRED : "Registration dates is required for program cycle."
+    PROGRAM_CYCLE_INVALID_REGISTRATION_DATE : "Check the registration start and end dates for the program cycle."
+    PROGRAM_CYCLE_WITHDRAWN_DEADLINE_DATE_REQUIRED : "Withdrawn deadline date is required for program cycle."
+    PROGRAM_CYCLE_INVALID_WITHDRAWN_DEADLINE_DATE : "Check the withdrawn deadline date for the program cycle. It must be after the registration end date."
+    PROGRAM_CYCLE_GRADES_SUBMISSION_DEADLINE_DATE_REQUIRED : "Grades submission deadline date is required for program cycle."
+    PROGRAM_CYCLE_INVALID_GRADES_SUBMISSION_DEADLINE_DATE : "Check the grades submission deadline date for the program cycle. It must be after the cycle end date."
+    PROGRAM_CYCLE_TERM_CYCLE_REQUIRED : "Term cycle is required for program cycle."
+    PROGRAM_CYCLE_PROGRAM_CURRICULUM_REQUIRED : "Program curriculum is required for program cycle."
+    PROGRAM_CYCLE_PROGRAM_TERM_MASTER_REQUIRED : "Program term master is required for program cycle."
 
 CUSTOM_FIELD:
   CUSTOM_FIELD_NAME_REQUIRED : "Custom field name is required."
