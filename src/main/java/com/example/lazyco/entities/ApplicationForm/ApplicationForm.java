@@ -127,4 +127,8 @@ public class ApplicationForm extends AbstractRBACModel {
 
   @OneToOne(mappedBy = "applicationForm")
   private Admission admissions;
+
+  private Boolean isEnrolled() {
+    return admissions != null;
+  }
 }

@@ -39,6 +39,8 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
 
   @InternalFilterableField private String rawProgramName;
 
+  private Boolean isEnrolled;
+
   @InternalFilterableField
   @Expose(deserialize = false)
   private ApplicationFormSourceEnum source;
