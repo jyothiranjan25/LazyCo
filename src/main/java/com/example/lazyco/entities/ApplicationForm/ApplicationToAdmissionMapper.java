@@ -2,8 +2,7 @@ package com.example.lazyco.entities.ApplicationForm;
 
 import com.example.lazyco.entities.Admission.AdmissionDTO;
 import com.example.lazyco.entities.Admission.AdmissionMapper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(
     componentModel = "spring",
@@ -17,6 +16,9 @@ public interface ApplicationToAdmissionMapper {
   AdmissionDTO map(ApplicationFormDTO applicationFormDTO);
 
   @Mapping(target = "id", source = "applicationFormId")
+  @Mapping(target = "admissionId", source = "id")
   @Mapping(target = "startingProgramCycleId", source = "joiningProgramCycleId")
-  ApplicationFormDTO map(AdmissionDTO admissionDTO);
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  ApplicationFormDTO map(
+      AdmissionDTO admissionDTO, @MappingTarget ApplicationFormDTO applicationFormDTO);
 }

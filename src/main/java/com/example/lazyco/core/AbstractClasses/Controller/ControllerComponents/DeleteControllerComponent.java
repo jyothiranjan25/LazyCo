@@ -21,8 +21,9 @@ public class DeleteControllerComponent<D extends AbstractDTO<D>> {
   public ResponseEntity<?> execute(D incomingRequest) {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
-          public D execute(D request) {
-            return deleteServiceComponent.delete(request);
+          public D execute(D t) {
+            t.setDirectMethodCall(false);
+            return deleteServiceComponent.delete(t);
           }
 
           @Override

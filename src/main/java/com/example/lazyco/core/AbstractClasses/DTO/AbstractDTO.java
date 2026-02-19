@@ -54,6 +54,9 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private String updatedBy;
 
+  @Expose(serialize = false, deserialize = false)
+  private boolean directMethodCall = true;
+
   // This field is used to indicate if the operation should be atomic or not
   private Boolean isAtomicOperation;
 

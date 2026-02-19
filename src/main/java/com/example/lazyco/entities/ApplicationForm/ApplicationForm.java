@@ -127,13 +127,13 @@ public class ApplicationForm extends AbstractRBACModel {
   }
 
   @OneToOne(mappedBy = "applicationForm", cascade = CascadeType.REMOVE)
-  private Admission admissions;
+  private Admission admission;
 
   public Boolean getIsEnrolled() {
-    return admissions != null;
+    return admission != null;
   }
 
   public LocalDateTime getEnrollmentDate() {
-    return admissions != null ? admissions.getAdmissionDate() : null;
+    return admission != null ? admission.getAdmissionDate() : null;
   }
 }

@@ -74,6 +74,14 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> implemen
 
   private Map<String, Object> customFields;
 
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "admission.id")
+  private Long admissionId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "admission.student.id")
+  private Long studentId;
+
   @Override
   public String getCode() {
     return applicationNumber;

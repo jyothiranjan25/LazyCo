@@ -15,11 +15,11 @@ import lombok.Setter;
 @Setter
 @FilteredEntity(type = Student.class)
 public class StudentDTO extends AbstractDTO<StudentDTO> {
-  private String firstName;
+  @InternalFilterableField private String firstName;
 
-  private String middleName;
+  @InternalFilterableField private String middleName;
 
-  private String lastName;
+  @InternalFilterableField private String lastName;
 
   private String fullName;
 

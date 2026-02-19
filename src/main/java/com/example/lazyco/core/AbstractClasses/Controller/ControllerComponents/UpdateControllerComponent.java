@@ -22,6 +22,7 @@ public class UpdateControllerComponent<D extends AbstractDTO<D>> {
     return (new ControllerTemplate<D>(controllerTemplateParam) {
           @Override
           public D execute(D t) {
+            t.setDirectMethodCall(false);
             return updateServiceComponent.update(t);
           }
 

@@ -428,7 +428,9 @@ public class ApplicationFormService
       throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_NOT_FOUND);
     }
     if (applicationForm.getIsEnrolled()) {
-      throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_ALREADY_ENROLLED);
+      throw new ApplicationException(
+          ApplicationFormMessage.APPLICATION_FORM_ALREADY_ENROLLED,
+          new Object[] {applicationForm.getApplicationNumber()});
     }
     StandardMessageDTO message = new StandardMessageDTO();
     validateApplicationFormDTO(applicationForm, message);
@@ -438,7 +440,7 @@ public class ApplicationFormService
       throw new BatchException(applicationForm);
     }
     AdmissionDTO admissionDTO = applicationToAdmissionMapper.map(applicationForm);
-    admissionDTO = admissionService.create(admissionDTO);
-    return applicationToAdmissionMapper.map(admissionDTO);
+    admissionDTO = admissionService.executeCreateTransactional(admissionDTO);
+    return applicationToAdmissionMapper.map(admissionDTO, applicationForm);
   }
 }

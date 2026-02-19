@@ -73,6 +73,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D create(D dto) {
+    if (dto.isDirectMethodCall()) {
+      throw new ApplicationException(
+          CommonMessage.CUSTOM_MESSAGE,
+          new Object[] {"Direct invocation of create methods is not allowed."});
+    }
     Function<D, D> atomicOperation = self::executeCreateNestedTransactional;
     Function<D, D> nonAtomicOperation = self::executeCreateNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
@@ -165,6 +170,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D update(D dto) {
+    if (dto.isDirectMethodCall()) {
+      throw new ApplicationException(
+          CommonMessage.CUSTOM_MESSAGE,
+          new Object[] {"Direct invocation of update methods is not allowed."});
+    }
     Function<D, D> atomicOperation = self::executeUpdateNestedTransactional;
     Function<D, D> nonAtomicOperation = self::executeUpdateNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);
@@ -280,6 +290,11 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Do not call this method directly, use the template method instead
   public D delete(D dto) {
+    if (dto.isDirectMethodCall()) {
+      throw new ApplicationException(
+          CommonMessage.CUSTOM_MESSAGE,
+          new Object[] {"Direct invocation of delete methods is not allowed."});
+    }
     Function<D, D> atomicOperation = self::executeDeleteNestedTransactional;
     Function<D, D> nonAtomicOperation = self::executeDeleteNewTransactional;
     Function<D, D> operation = chooseOperation(dto, atomicOperation, nonAtomicOperation);

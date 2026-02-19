@@ -1,6 +1,7 @@
 COMMON_MODULES:
   CUSTOM_MESSAGE : "%1$s"
   APPLICATION_ERROR : "An error occurred while processing your request. Please try again later."
+  DIRECT_METHOD_CALL_ERROR : "An error occurred while calling the method directly. Please check the method and try again."
   ATOMIC_OPERATION_ERROR : "Atomic operation failed. Rolled back %1$s successful operations. %2$s errors occurred."
   NON_ATOMIC_OPERATION_ERROR : "Operation encountered %1$s errors. %2$s successful operations were completed."
   OBJECT_REQUIRED : "The required object is missing."
@@ -186,7 +187,7 @@ APPLICATION_FORM:
     CUSTOM_FIELD_REQUIRED : "The field '%1$s' is required for application form."
     CUSTOM_FIELD_INVALID_VALUE : "The field '%1$s' has an invalid value for application form."
     APPLICATION_FORM_NOT_FOUND : "The application form with the specified application number was not found."
-    APPLICATION_FORM_ALREADY_ENROLLED : "The application form with the specified application number is already enrolled."
+    APPLICATION_FORM_ALREADY_ENROLLED : "The application form '%1$s' is already enrolled."
     APPLICATION_FORM_ALREADY_EXISTS : "An application form with phone number '%1$s' or email '%2$s' already exists in current admission offer."
 
 ADMISSION:
