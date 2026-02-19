@@ -49,6 +49,13 @@ public class LoginControllerInterceptor implements HandlerInterceptor {
           HttpStatus.UNAUTHORIZED, UserMessage.ACCOUNT_LOCKED); // Stop further processing
     }
 
+    // Case 4: Check if the user session is expired
+    if (Boolean.TRUE.equals(loggedUser.getIsSessionExpired())) {
+      request.getSession().invalidate();
+      throw new ApplicationException(
+          HttpStatus.UNAUTHORIZED, UserMessage.SESSION_EXPIRED); // Stop further processing
+    }
+
     /*
      * Push the request URL to session. It would be required for book marking pages.
      */

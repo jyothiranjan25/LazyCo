@@ -77,6 +77,12 @@ public class AppUser extends AbstractRBACModel {
       comment = "Indicates if the user account is locked")
   private Boolean isLocked;
 
+  @Column(
+      name = "is_session_expired",
+      columnDefinition = "boolean default false",
+      comment = "Indicates if the user's session is expired")
+  private Boolean isSessionExpired;
+
   @Column(name = "reset_password_token", comment = "Token used for resetting the user password")
   private String resetPasswordToken;
 

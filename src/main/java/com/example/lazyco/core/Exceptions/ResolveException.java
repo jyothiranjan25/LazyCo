@@ -49,11 +49,28 @@ public class ResolveException {
           defaultMessage = CustomMessage.getMessageString(CommonMessage.FIELD_MISSING, column);
           status = HttpStatus.BAD_REQUEST;
         } else if (PSQLState.FOREIGN_KEY_VIOLATION.getState().equals(sqlState)) {
-          defaultMessage = CustomMessage.getMessageString(CommonMessage.REFERENCE_ERROR);
-          status = HttpStatus.BAD_REQUEST;
-        } else {
-          defaultMessage = psqlEx.getMessage();
-          status = HttpStatus.BAD_REQUEST;
+          String message = psqlEx.getMessage();
+
+          String referencedTable = null;
+          if (detail != null) {
+            Matcher matcher = Pattern.compile("table \"(.*?)\"").matcher(detail);
+            if (matcher.find()) {
+              referencedTable = matcher.group(1);
+            }
+          }
+
+          if (message != null && message.contains("insert or update")) {
+            defaultMessage =
+                CustomMessage.getMessageString(CommonMessage.REFERENCE_NOT_FOUND, referencedTable);
+            status = HttpStatus.BAD_REQUEST;
+          } else if (message != null && message.contains("update or delete")) {
+            defaultMessage =
+                CustomMessage.getMessageString(CommonMessage.REFERENCE_IN_USE, referencedTable);
+            status = HttpStatus.BAD_REQUEST;
+          } else {
+            defaultMessage = CustomMessage.getMessageString(CommonMessage.REFERENCE_ERROR);
+            status = HttpStatus.BAD_REQUEST;
+          }
         }
       } else if (e instanceof PropertyValueException hibernateEx) {
         defaultMessage =

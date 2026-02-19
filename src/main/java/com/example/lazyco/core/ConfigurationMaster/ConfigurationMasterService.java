@@ -1,7 +1,7 @@
 package com.example.lazyco.core.ConfigurationMaster;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
-import com.example.lazyco.core.Utils.Crypto.CryptoUtil;
+import com.example.lazyco.core.Crypto.CryptoUtil;
 import java.util.List;
 import org.springframework.stereotype.Service;
 

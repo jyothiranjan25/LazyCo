@@ -90,13 +90,13 @@ public class RateLimiter {
   private Bucket newInternalBucket() {
     Bandwidth limit =
         Bandwidth.builder()
-            .capacity(300) // 200 requests
+            .capacity(300) // 300 requests
             .refillGreedy(300, Duration.ofMinutes(1)) // per minute
             .build();
 
     Bandwidth burstLimit =
         Bandwidth.builder()
-            .capacity(5000) // 2000 requests
+            .capacity(5000) // 5000 requests
             .refillGreedy(5000, Duration.ofHours(1)) // per hour
             .build();
 

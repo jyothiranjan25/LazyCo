@@ -50,6 +50,8 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
 
   @InternalFilterableField private Boolean isLocked;
 
+  @InternalFilterableField private Boolean isSessionExpired;
+
   private String resetPasswordToken;
 
   private Date resetPasswordTokenExpiry;

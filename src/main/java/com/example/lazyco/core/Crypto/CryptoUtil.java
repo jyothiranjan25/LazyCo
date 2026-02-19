@@ -1,4 +1,4 @@
-package com.example.lazyco.core.Utils.Crypto;
+package com.example.lazyco.core.Crypto;
 
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import java.nio.charset.StandardCharsets;
