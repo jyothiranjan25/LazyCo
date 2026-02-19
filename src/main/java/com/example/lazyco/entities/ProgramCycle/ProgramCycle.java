@@ -13,10 +13,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -123,6 +121,7 @@ public class ProgramCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_cycle_term_cycle"),
       nullable = false,
       comment = "Foreign key referencing the term cycle")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private TermCycle termCycle;
 
   @ManyToOne
@@ -131,6 +130,7 @@ public class ProgramCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_cycle_program_curriculum"),
       nullable = false,
       comment = "Foreign key referencing the program curriculum")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCurriculum programCurriculum;
 
   @ManyToOne
@@ -139,6 +139,7 @@ public class ProgramCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_cycle_program_term_master"),
       nullable = false,
       comment = "Foreign key referencing the program term master")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramTermMaster programTermMaster;
 
   @OneToMany(mappedBy = "programCycle")

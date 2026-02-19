@@ -224,6 +224,8 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     // Map the cloned entity back to an entity instance to be used in hooks
     E entityCloneEntity = abstractMapper.map(entityClone);
 
+    existingEntity = (E) entityCloneEntity.clone();
+
     // Apply updates from DTO to the cloned entity
     makeUpdates(dtoToUpdate, existingEntity);
 

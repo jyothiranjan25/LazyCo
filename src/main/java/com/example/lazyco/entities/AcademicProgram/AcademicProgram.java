@@ -69,6 +69,7 @@ public class AcademicProgram extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_academic_program_institution"),
       nullable = false,
       comment = "Reference to the institution offering this academic program")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private Institution institution;
 
   @OneToMany(mappedBy = "academicProgram")

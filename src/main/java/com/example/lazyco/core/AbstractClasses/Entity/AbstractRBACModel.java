@@ -11,12 +11,12 @@ import lombok.Setter;
 public abstract class AbstractRBACModel extends AbstractModel {
 
   // ✅ Global constant for the column name
-  public static final String RBAC_COLUMN = "userGroup";
+  public static final String RBAC_COLUMN = "assignedGroup";
 
   @Column(
       name = "user_group",
       nullable = false,
       length = 50,
       comment = "Role Based Access Control user group")
-  private String userGroup;
+  private String assignedGroup;
 }

@@ -43,6 +43,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_admission_offer"),
       nullable = false,
       comment = "Reference to the admission offer this mapping belongs to.")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private AdmissionOffer admissionOffer;
 
   @ManyToOne
@@ -51,6 +52,7 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_curriculum"),
       nullable = false,
       comment = "Reference to the program curriculum for this admission offer program.")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ProgramCurriculum programCurriculum;
 
   @ManyToOne
@@ -59,5 +61,6 @@ public class AdmissionOfferProgram extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_offer_program_program_cycle"),
       nullable = false,
       comment = "Reference to the program cycle for this admission offer program.")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ProgramCycle programCycle;
 }

@@ -3,6 +3,7 @@ package com.example.lazyco.core.AbstractClasses.DAO;
 import com.example.lazyco.core.AbstractAction;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldFilterUtils;
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrConditionDTO;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrderType;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
@@ -16,9 +17,7 @@ import com.example.lazyco.entities.UserManagement.UserGroup.UserGroupDTO;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
@@ -156,13 +155,17 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
   }
 
   protected void commonAbstractDTOFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    // @TODO: Don't know why i am using it. Need to verify if it is required or not.
     // Add filter for userGroup if the entity has userGroup field
-    String userGroupFilter =
-        criteriaBuilderWrapper.getFilter() != null
-            ? criteriaBuilderWrapper.getFilter().getUserModifiedGroup()
-            : null;
-    if (userGroupFilter != null && !userGroupFilter.isEmpty())
-      addRBSECFilters(criteriaBuilderWrapper, userGroupFilter);
+    //    String userGroupFilter =
+    //        criteriaBuilderWrapper.getFilter() != null
+    //            ? criteriaBuilderWrapper.getFilter().getUserModifiedGroup()
+    //            : null;
+    //    if (userGroupFilter != null && !userGroupFilter.isEmpty()) {
+    //      addRBSECFilters(criteriaBuilderWrapper, userGroupFilter);
+    //    }
+    // Add filter for userGroup if the entity has userGroup field
+
     addRBSECFilters(criteriaBuilderWrapper);
     commonAbstractDTOUnauditedFilters(criteriaBuilderWrapper);
     // DO NOT ADD ANY RESTRICTIONS AFTER THIS POINT!!!! As we are getting the count of response
@@ -174,6 +177,7 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
       addIdFilter(criteriaBuilderWrapper);
       addIdNotInFilter(criteriaBuilderWrapper);
       addIdInFilter(criteriaBuilderWrapper);
+      addOrConditionFilters(criteriaBuilderWrapper);
       applyDistinct(criteriaBuilderWrapper);
       applyOrderBy(criteriaBuilderWrapper);
     }
@@ -199,6 +203,13 @@ public class AbstractDAO<D extends AbstractDTO<D>, E extends AbstractModel>
     List inIdsList = criteriaBuilderWrapper.getFilter().getIdsIn();
     if (CollectionUtils.isNotEmpty(inIdsList)) {
       criteriaBuilderWrapper.in("id", inIdsList);
+    }
+  }
+
+  private void addOrConditionFilters(CriteriaBuilderWrapper criteriaBuilderWrapper) {
+    Set<OrConditionDTO> orConditions = criteriaBuilderWrapper.getFilter().getOrConditions();
+    if (orConditions != null && !orConditions.isEmpty()) {
+      criteriaBuilderWrapper.addOrCondition(orConditions);
     }
   }
 

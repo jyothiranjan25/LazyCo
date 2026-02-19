@@ -49,6 +49,7 @@ public class UserRole extends AbstractModel {
       foreignKey = @ForeignKey(name = "fk_user_role_role"),
       nullable = false,
       comment = "Reference to the role")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private Role role;
 
   @ManyToOne
@@ -57,5 +58,6 @@ public class UserRole extends AbstractModel {
       foreignKey = @ForeignKey(name = "fk_user_role_user_group"),
       nullable = false,
       comment = "Reference to the user group")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private UserGroup userGroup;
 }

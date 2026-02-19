@@ -6,10 +6,8 @@ import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormTempl
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -50,6 +48,7 @@ public class ApplicationFormDocument extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_application_form_document_application_form_id"),
       nullable = false,
       comment = "Reference to the application form this document belongs to")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ApplicationForm applicationForm;
 
   @ManyToOne
@@ -58,5 +57,6 @@ public class ApplicationFormDocument extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_application_form_document_template_document_id"),
       nullable = false,
       comment = "Reference to the application form template document this document is based on")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ApplicationFormTemplateDocument applicationFormTemplateDocument;
 }

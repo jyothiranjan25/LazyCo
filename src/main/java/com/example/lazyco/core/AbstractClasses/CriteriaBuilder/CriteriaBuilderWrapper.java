@@ -268,7 +268,7 @@ public class CriteriaBuilderWrapper {
     }
   }
 
-  public Predicate getInPredicate(String key, List value) {
+  public Predicate getInPredicate(String key, Collection<?> value) {
     return getInPredicate(getExpression(key), value);
   }
 
@@ -287,7 +287,7 @@ public class CriteriaBuilderWrapper {
     }
   }
 
-  public Predicate getNotInPredicate(String key, List value) {
+  public Predicate getNotInPredicate(String key, Collection<?> value) {
     return getNotInPredicate(getExpression(key), value);
   }
 
@@ -974,6 +974,61 @@ public class CriteriaBuilderWrapper {
       this.orGroup(startBetween, endBetween, fullOverlap);
     } catch (Exception e) {
       ApplicationLogger.error("Failed to add date range conflict criteria", e);
+    }
+  }
+
+  public void addOrCondition(Set<OrConditionDTO> orConditionDTO) {
+    List<Predicate> orPredicates = new ArrayList<>();
+    for (OrConditionDTO condition : orConditionDTO) {
+      String column = condition.getFullyQualifiedPath();
+      Object value = condition.getValue();
+      OrConditionDTO.conditionOperator operator = condition.getOperator();
+      switch (operator) {
+        case NOT_EQUALS:
+          orPredicates.add(this.getNotEqualPredicate(column, value));
+          break;
+        case IS_NULL:
+          orPredicates.add(this.getIsNullPredicate(column));
+          break;
+        case IS_NOT_NULL:
+          orPredicates.add(this.getIsNotNullPredicate(column));
+          break;
+        case GREATER_THAN:
+          orPredicates.add(this.getGtPredicate(column, value));
+          break;
+        case LESS_THAN:
+          orPredicates.add(this.getLtPredicate(column, value));
+          break;
+        case GREATER_THAN_OR_EQUALS:
+          orPredicates.add(this.getGePredicate(column, value));
+          break;
+        case LESS_THAN_OR_EQUALS:
+          orPredicates.add(this.getLePredicate(column, value));
+          break;
+        case LIKE:
+          orPredicates.add(this.getLikePredicate(column, value.toString()));
+          break;
+        case IN:
+          if (value instanceof Collection) {
+            orPredicates.add(this.getInPredicate(column, (Collection<?>) value));
+          } else {
+            ApplicationLogger.warn("IN operator requires a collection value for column: " + column);
+          }
+          break;
+        case NOT_IN:
+          if (value instanceof Collection) {
+            orPredicates.add(this.getNotInPredicate(column, (Collection<?>) value));
+          } else {
+            ApplicationLogger.warn(
+                "NOT IN operator requires a collection value for column: " + column);
+          }
+          break;
+        default:
+          orPredicates.add(this.getEqualPredicate(column, value));
+      }
+    }
+    if (!orPredicates.isEmpty()) {
+      this.orGroup(orPredicates.toArray(new Predicate[0]));
     }
   }
 

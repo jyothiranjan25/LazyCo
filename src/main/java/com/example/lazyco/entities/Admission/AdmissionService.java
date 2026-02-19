@@ -8,4 +8,9 @@ public class AdmissionService extends CommonAbstractService<AdmissionDTO, Admiss
   protected AdmissionService(AdmissionMapper admissionMapper) {
     super(admissionMapper);
   }
+
+  @Override
+  protected void preCreate(AdmissionDTO request, Admission entityToCreate) {
+    super.preCreate(request, entityToCreate);
+  }
 }

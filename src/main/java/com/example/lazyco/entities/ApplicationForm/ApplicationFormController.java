@@ -38,4 +38,9 @@ public class ApplicationFormController {
   public ResponseEntity<?> delete(@RequestBody ApplicationFormDTO request) {
     return ResponseUtils.sendResponse(applicationFormService.deleteCustomForm(request));
   }
+
+  @PatchMapping("/enroll")
+  public ResponseEntity<?> enroll(@RequestBody ApplicationFormDTO request) {
+    return ResponseUtils.sendResponse(applicationFormService.enrollApplication(request));
+  }
 }

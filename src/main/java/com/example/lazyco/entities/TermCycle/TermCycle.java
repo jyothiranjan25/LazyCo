@@ -8,10 +8,8 @@ import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -54,6 +52,7 @@ public class TermCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_term_cycle_academic_year"),
       nullable = false,
       comment = "Foreign key referencing the academic year")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private AcademicYear academicYear;
 
   @ManyToOne
@@ -62,6 +61,7 @@ public class TermCycle extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_term_cycle_term_master"),
       nullable = false,
       comment = "Foreign key referencing the term master")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private TermMaster termMaster;
 
   @OneToMany(mappedBy = "termCycle")

@@ -7,6 +7,7 @@ import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -82,9 +83,6 @@ public class ApplicationForm extends AbstractRBACModel {
   @Column(name = "application_date", comment = "date when the application was submitted")
   private LocalDateTime applicationDate;
 
-  @Column(name = "enrollment_date", comment = "date when the applicant enrolled")
-  private LocalDate enrollmentDate;
-
   @Column(name = "raw_program_name", comment = "Raw program name as entered by the applicant")
   private String rawProgramName;
 
@@ -105,6 +103,7 @@ public class ApplicationForm extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_application_form_admission_offer"),
       nullable = false,
       comment = "Foreign key referencing the admission offer")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private AdmissionOffer admissionOffer;
 
   @ManyToOne
@@ -112,6 +111,7 @@ public class ApplicationForm extends AbstractRBACModel {
       name = "program_curriculum_id",
       foreignKey = @ForeignKey(name = "fk_application_form_program_curriculum"),
       comment = "Foreign key referencing the program curriculum")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCurriculum programCurriculum;
 
   @ManyToOne
@@ -119,16 +119,21 @@ public class ApplicationForm extends AbstractRBACModel {
       name = "starting_program_cycle_id",
       foreignKey = @ForeignKey(name = "fk_application_form_program_cycle"),
       comment = "Foreign key referencing the program cycle")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCycle startingProgramCycle;
 
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);
   }
 
-  @OneToOne(mappedBy = "applicationForm")
+  @OneToOne(mappedBy = "applicationForm", cascade = CascadeType.REMOVE)
   private Admission admissions;
 
-  private Boolean isEnrolled() {
+  public Boolean getIsEnrolled() {
     return admissions != null;
+  }
+
+  public LocalDateTime getEnrollmentDate() {
+    return admissions != null ? admissions.getAdmissionDate() : null;
   }
 }

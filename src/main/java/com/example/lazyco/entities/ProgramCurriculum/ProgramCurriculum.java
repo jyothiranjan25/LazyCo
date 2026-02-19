@@ -14,10 +14,8 @@ import java.time.LocalDate;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -89,6 +87,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_curriculum_academic_year"),
       nullable = false,
       comment = "Foreign key referencing the academic year")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private AcademicYear academicYear;
 
   @ManyToOne
@@ -97,6 +96,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_curriculum_term_system"),
       nullable = false,
       comment = "Foreign key referencing the term system")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private TermSystem termSystem;
 
   @ManyToOne
@@ -105,6 +105,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_curriculum_academic_program"),
       nullable = false,
       comment = "Foreign key referencing the academic program")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private AcademicProgram academicProgram;
 
   @ManyToOne
@@ -113,6 +114,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_program_curriculum_program_term_system"),
       nullable = false,
       comment = "Foreign key referencing the program term system")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramTermSystem programTermSystem;
 
   @OneToMany(mappedBy = "programCurriculum")

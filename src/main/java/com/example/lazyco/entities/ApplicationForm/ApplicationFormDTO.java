@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.core.AbstractClasses.DTO.HasCode;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.google.gson.annotations.Expose;
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @FilteredEntity(type = ApplicationForm.class)
-public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
+public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> implements HasCode {
 
   @InternalFilterableField private String applicationNumber;
 
@@ -40,6 +41,8 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
   @InternalFilterableField private String rawProgramName;
 
   private Boolean isEnrolled;
+
+  private LocalDateTime enrollmentDate;
 
   @InternalFilterableField
   @Expose(deserialize = false)
@@ -70,4 +73,14 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> {
   private String startingProgramCycleCode;
 
   private Map<String, Object> customFields;
+
+  @Override
+  public String getCode() {
+    return applicationNumber;
+  }
+
+  @Override
+  public void setCode(String code) {
+    this.applicationNumber = code;
+  }
 }

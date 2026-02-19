@@ -4,14 +4,18 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
+import com.example.lazyco.core.AbstractClasses.DTO.HasCode;
+import com.example.lazyco.core.Utils.GenderEnum;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @FilteredEntity(type = Admission.class)
-public class AdmissionDTO extends AbstractDTO<AdmissionDTO> {
+public class AdmissionDTO extends AbstractDTO<AdmissionDTO> implements HasCode {
 
   @InternalFilterableField private String admissionNumber;
   @InternalFilterableField private String universityNumber;
@@ -38,4 +42,46 @@ public class AdmissionDTO extends AbstractDTO<AdmissionDTO> {
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "student.id")
   private Long studentId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.firstName")
+  private String firstName;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.middleName")
+  private String middleName;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.lastName")
+  private String lastName;
+
+  private String fullName;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.gender")
+  private GenderEnum gender;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.dateOfBirth")
+  private LocalDate dateOfBirth;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.email")
+  private String email;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "student.phoneNumber")
+  private String phoneNumber;
+
+  private Map<String, Object> customFields;
+
+  @Override
+  public String getCode() {
+    return admissionNumber;
+  }
+
+  @Override
+  public void setCode(String code) {
+    this.admissionNumber = code;
+  }
 }

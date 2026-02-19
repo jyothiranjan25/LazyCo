@@ -1,12 +1,19 @@
 package com.example.lazyco.entities.Admission;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 public class AdmissionListener {
 
   @PrePersist
   public void prePersist(Admission admission) {
     // Logic to execute before persisting entity
+    if (admission.getAdmissionDate() == null) {
+      admission.setAdmissionDate(LocalDateTime.now());
+    }
+    if (admission.getAdmissionStatus() == null) {
+      admission.setAdmissionStatus(AdmissionStatusEnum.ACTIVE);
+    }
   }
 
   @PreUpdate

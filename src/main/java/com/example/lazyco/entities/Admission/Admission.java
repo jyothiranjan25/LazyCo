@@ -9,10 +9,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -49,7 +47,7 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Admission extends AbstractRBACModel {
 
-  @Column(name = "admission_number", nullable = false, comment = "Unique admission number")
+  @Column(name = "admission_number", comment = "Unique admission number")
   private String admissionNumber;
 
   @Column(
@@ -72,6 +70,7 @@ public class Admission extends AbstractRBACModel {
       name = "application_form_id",
       foreignKey = @ForeignKey(name = "fk_admission_application_form_id"),
       comment = "reference to the application form associated with this admission")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ApplicationForm applicationForm;
 
   @ManyToOne
@@ -80,6 +79,7 @@ public class Admission extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_program_curriculum_id"),
       nullable = false,
       comment = "reference to the program curriculum for which the student is admitted")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCurriculum programCurriculum;
 
   @ManyToOne
@@ -88,6 +88,7 @@ public class Admission extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_joining_program_cycle_id"),
       nullable = false,
       comment = "reference to the program cycle in which the student is joining")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCycle joiningProgramCycle;
 
   @ManyToOne
@@ -96,6 +97,7 @@ public class Admission extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_current_program_cycle_id"),
       nullable = false,
       comment = "reference to the current program cycle of the student")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCycle currentProgramCycle;
 
   @ManyToOne
@@ -104,5 +106,10 @@ public class Admission extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_student_id"),
       nullable = false,
       comment = "reference to the admitted student")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private Student student;
+
+  public String getFullName() {
+    return student != null ? student.getFullName() : null;
+  }
 }

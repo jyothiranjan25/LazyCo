@@ -26,7 +26,7 @@ public class AbstractModelListener {
       if (userGroup == null || userGroup.isEmpty()) {
         throw new ExceptionWrapper("Cannot proceed: user group information is missing.");
       }
-      modelBase.setUserGroup(userGroup);
+      modelBase.setAssignedGroup(userGroup);
     }
     source.setCreatedBy(getUserId());
     source.setCreatedAt(DateTimeZoneUtils.getCurrentDate());

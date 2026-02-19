@@ -1,6 +1,7 @@
 package com.example.lazyco.core.AbstractClasses.DTO;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrConditionDTO;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrderByDTO;
 import com.example.lazyco.core.AbstractClasses.Filter.FilterFieldMetadata;
 import com.example.lazyco.core.Exceptions.ExceptionWrapper;
@@ -11,9 +12,7 @@ import com.example.lazyco.core.Messages.CustomMessage;
 import com.example.lazyco.core.Messages.MessageCodes;
 import com.google.gson.annotations.Expose;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
@@ -41,7 +40,7 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   // Audit fields
   @Expose(serialize = false, deserialize = false)
-  private String userModifiedGroup;
+  private String assignedGroup;
 
   @Expose(serialize = false, deserialize = false)
   private Date createdAt;
@@ -109,6 +108,9 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
 
   @Expose(serialize = false, deserialize = false)
   private List<Long> idsNotIn;
+
+  @Expose(serialize = false, deserialize = false)
+  private Set<OrConditionDTO> orConditions;
 
   private List<OrderByDTO> orderBy;
 

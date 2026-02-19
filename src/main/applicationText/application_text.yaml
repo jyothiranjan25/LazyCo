@@ -177,6 +177,7 @@ DOCUMENT:
 APPLICATION_FORM:
     ADMISSION_OFFER_REQUIRED : "Admission offer is required for application form."
     APPLICATION_NUMBER_REQUIRED : "Application number is required for application form."
+    APPLICATION_NUMBER_ALREADY_EXISTS : "An application form with the application number '%1$s' already exists."
     FIRST_NAME_REQUIRED : "First name is required for application form."
     EMAIL_REQUIRED : "Email is required for application form."
     EMAIL_INVALID : "Invalid email format for application form."
@@ -184,5 +185,13 @@ APPLICATION_FORM:
     PHONE_NUMBER_INVALID : "Invalid phone number format for application form."
     CUSTOM_FIELD_REQUIRED : "The field '%1$s' is required for application form."
     CUSTOM_FIELD_INVALID_VALUE : "The field '%1$s' has an invalid value for application form."
+    APPLICATION_FORM_NOT_FOUND : "The application form with the specified application number was not found."
+    APPLICATION_FORM_ALREADY_ENROLLED : "The application form with the specified application number is already enrolled."
+    APPLICATION_FORM_ALREADY_EXISTS : "An application form with phone number '%1$s' or email '%2$s' already exists in current admission offer."
 
+ADMISSION:
+    ADMISSION_OFFER_NAME_REQUIRED : "Admission offer name is required."
+    ADMISSION_OFFER_CODE_REQUIRED : "Admission offer code is required."
+    DUPLICATE_ADMISSION_OFFER_NAME : "An admission offer with the name '%1$s' already exists."
+    DUPLICATE_ADMISSION_OFFER_CODE : "An admission offer with the code '%1$s' already exists."
 

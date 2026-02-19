@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.ApplicationForm;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrConditionDTO;
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.BatchException;
@@ -8,9 +9,12 @@ import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.FieldParse;
 import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.core.Utils.GenderEnum;
+import com.example.lazyco.entities.Admission.AdmissionDTO;
+import com.example.lazyco.entities.Admission.AdmissionService;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldDTO;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldService;
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,12 +22,18 @@ public class ApplicationFormService
     extends CommonAbstractService<ApplicationFormDTO, ApplicationForm> {
 
   private final ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService;
+  private final AdmissionService admissionService;
+  private final ApplicationToAdmissionMapper applicationToAdmissionMapper;
 
   protected ApplicationFormService(
       ApplicationFormMapper applicationFormMapper,
-      ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService) {
+      ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService,
+      AdmissionService admissionService,
+      ApplicationToAdmissionMapper applicationToAdmissionMapper) {
     super(applicationFormMapper);
     this.applicationFormSectionCustomFieldService = applicationFormSectionCustomFieldService;
+    this.admissionService = admissionService;
+    this.applicationToAdmissionMapper = applicationToAdmissionMapper;
   }
 
   private ApplicationFormDTO mapApplicationFormDTO(Map<String, Object> body) {
@@ -300,8 +310,43 @@ public class ApplicationFormService
     if (request.getAdmissionOfferId() == null) {
       throw new ApplicationException(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
     }
-    if (request.getApplicationNumber() == null) {
+
+    if (StringUtils.isEmpty(request.getApplicationNumber())) {
       throw new ApplicationException(ApplicationFormMessage.APPLICATION_NUMBER_REQUIRED);
+    }
+    validateUniqueCode(request, ApplicationFormMessage.APPLICATION_NUMBER_ALREADY_EXISTS);
+
+    if (StringUtils.isEmpty(request.getFirstName())) {
+      throw new ApplicationException(ApplicationFormMessage.FIRST_NAME_REQUIRED);
+    }
+
+    if (StringUtils.isEmpty(request.getEmail())) {
+      throw new ApplicationException(ApplicationFormMessage.EMAIL_REQUIRED);
+    }
+
+    if (StringUtils.isEmpty(request.getPhoneNumber())) {
+      throw new ApplicationException(ApplicationFormMessage.PHONE_NUMBER_REQUIRED);
+    }
+
+    validateUniqueApplicationForm(request);
+  }
+
+  private void validateUniqueApplicationForm(ApplicationFormDTO dto) {
+    ApplicationFormDTO filter = new ApplicationFormDTO();
+    if (dto.getId() != null) filter.setId(dto.getId());
+    filter.setOrConditions(
+        Set.of(
+            new OrConditionDTO("email", dto.getEmail()),
+            new OrConditionDTO("phoneNumber", dto.getPhoneNumber())));
+    if (dto.getAdmissionOfferId() != null) {
+      filter.setAdmissionOfferId(dto.getAdmissionOfferId());
+    } else {
+      filter.setAdmissionOfferCode(dto.getAdmissionOfferCode());
+    }
+    if (getCount(filter) > 0) {
+      throw new ApplicationException(
+          ApplicationFormMessage.APPLICATION_FORM_ALREADY_EXISTS,
+          new Object[] {dto.getPhoneNumber(), dto.getEmail()});
     }
   }
 
@@ -312,10 +357,30 @@ public class ApplicationFormService
   }
 
   @Override
+  protected void validateBeforeUpdate(ApplicationFormDTO request) {
+    if (!StringUtils.isEmpty(request.getApplicationNumber())) {
+      validateUniqueCode(request, ApplicationFormMessage.APPLICATION_NUMBER_ALREADY_EXISTS);
+    }
+  }
+
+  @Override
   protected void afterMakeUpdates(
       ApplicationFormDTO request, ApplicationForm beforeUpdates, ApplicationForm afterUpdates) {
     // dont change admission offer once set
     afterUpdates.setAdmissionOffer(beforeUpdates.getAdmissionOffer());
+
+    // validate unique application number for an admission offer
+    if (!StringUtils.isEmpty(request.getEmail())
+        || !StringUtils.isEmpty(request.getPhoneNumber())) {
+      ApplicationFormDTO uniqueApplicationCheck = new ApplicationFormDTO();
+      uniqueApplicationCheck.setId(afterUpdates.getId());
+      uniqueApplicationCheck.setOrConditions(
+          Set.of(
+              new OrConditionDTO("email", request.getEmail()),
+              new OrConditionDTO("phoneNumber", request.getPhoneNumber())));
+      uniqueApplicationCheck.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
+      validateUniqueApplicationForm(uniqueApplicationCheck);
+    }
 
     Map<String, Object> existingCustomFields =
         Optional.ofNullable(beforeUpdates.getCustomFields())
@@ -346,5 +411,34 @@ public class ApplicationFormService
 
   public ApplicationFormDTO deleteCustomForm(ApplicationFormDTO request) {
     return super.delete(request);
+  }
+
+  public ApplicationFormDTO enrollApplication(ApplicationFormDTO request) {
+    if (request.getId() == null && request.getApplicationNumber() == null) {
+      throw new ApplicationException(ApplicationFormMessage.APPLICATION_NUMBER_REQUIRED);
+    }
+    ApplicationFormDTO applicationForm = new ApplicationFormDTO();
+    if (request.getId() != null) {
+      applicationForm.setId(request.getId());
+    } else {
+      applicationForm.setApplicationNumber(request.getApplicationNumber());
+    }
+    applicationForm = getSingle(applicationForm);
+    if (applicationForm.getAdmissionOfferId() == null) {
+      throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_NOT_FOUND);
+    }
+    if (applicationForm.getIsEnrolled()) {
+      throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_ALREADY_ENROLLED);
+    }
+    StandardMessageDTO message = new StandardMessageDTO();
+    validateApplicationFormDTO(applicationForm, message);
+    validateCustomFields(applicationForm, message);
+    if (message.hasErrors()) {
+      applicationForm.setMessages(message);
+      throw new BatchException(applicationForm);
+    }
+    AdmissionDTO admissionDTO = applicationToAdmissionMapper.map(applicationForm);
+    admissionDTO = admissionService.create(admissionDTO);
+    return applicationToAdmissionMapper.map(admissionDTO);
   }
 }

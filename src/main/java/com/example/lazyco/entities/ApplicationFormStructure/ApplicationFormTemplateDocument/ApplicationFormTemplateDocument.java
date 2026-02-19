@@ -56,5 +56,6 @@ public class ApplicationFormTemplateDocument extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_application_form_document_document_id"),
       nullable = false,
       comment = "Reference to the document this application form document represents")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private Document document;
 }

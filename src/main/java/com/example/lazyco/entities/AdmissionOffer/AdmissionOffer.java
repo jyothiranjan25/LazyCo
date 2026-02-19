@@ -59,6 +59,7 @@ public class AdmissionOffer extends AbstractRBACModel {
       foreignKey = @ForeignKey(name = "fk_admission_offer_academic_year"),
       nullable = false,
       comment = "Reference to the academic year this admission offer belongs to.")
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private AcademicYear academicYear;
 
   @ManyToOne
