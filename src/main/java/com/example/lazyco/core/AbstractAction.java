@@ -31,6 +31,7 @@ public class AbstractAction implements CommonConstants {
   private final ThreadLocal<Deque<Boolean>> BYPASS_STACK = ThreadLocal.withInitial(ArrayDeque::new);
 
   public void pushBypassRBAC(boolean bypass) {
+    ApplicationLogger.info("Setting BYPASS_RBAC to {} for current thread", bypass);
     BYPASS_STACK.get().push(bypass);
   }
 
@@ -44,6 +45,7 @@ public class AbstractAction implements CommonConstants {
     if (!stack.isEmpty()) {
       stack.pop();
     }
+    ApplicationLogger.info("Setting BYPASS_RBAC to {} for current thread", isBypassRBAC());
     if (stack.isEmpty()) {
       BYPASS_STACK.remove();
     }

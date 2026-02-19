@@ -32,12 +32,6 @@ public class BypassRBACAspect {
     // Determine new state
     boolean bypassValue = isBypassValue(joinPoint);
 
-    ApplicationLogger.info(
-        "Setting bypassRBAC to "
-            + bypassValue
-            + " for method: "
-            + joinPoint.getSignature().toShortString());
-
     abstractAction.pushBypassRBAC(bypassValue);
 
     try {

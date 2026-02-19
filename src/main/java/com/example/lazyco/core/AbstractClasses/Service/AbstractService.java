@@ -222,24 +222,22 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     D entityClone = abstractMapper.map(existingEntity);
 
     // Map the cloned entity back to an entity instance to be used in hooks
-    E entityCloneEntity = abstractMapper.map(entityClone);
-
-    existingEntity = (E) entityCloneEntity.clone();
+    E entityToUpdate = abstractMapper.map(entityClone);
 
     // Apply updates from DTO to the cloned entity
-    makeUpdates(dtoToUpdate, existingEntity);
+    makeUpdates(dtoToUpdate, entityToUpdate);
 
-    afterMakeUpdates(dtoToUpdate, entityCloneEntity, existingEntity);
+    afterMakeUpdates(dtoToUpdate, existingEntity, entityToUpdate);
 
     // Pre-update hook
-    preUpdate(dtoToUpdate, entityClone, existingEntity);
+    preUpdate(dtoToUpdate, entityClone, entityToUpdate);
 
     // Save the updated entity
     E updatedEntity;
     if (immediateFlush) {
-      updatedEntity = abstractDAO.updateAndFlush(existingEntity);
+      updatedEntity = abstractDAO.updateAndFlush(entityToUpdate);
     } else {
-      updatedEntity = abstractDAO.update(existingEntity);
+      updatedEntity = abstractDAO.update(entityToUpdate);
     }
 
     // Map back to DTO and return
