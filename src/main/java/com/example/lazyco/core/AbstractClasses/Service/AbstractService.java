@@ -303,19 +303,19 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
 
   // Execute delete in the current transaction
   public D executeDeleteTransactional(D dto) {
-    return executeWithTemplate(dto, true, this::executeDelete);
+    return executeWithTemplate(dto, false, this::executeDelete);
   }
 
   // Execute delete in a new transaction
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public D executeDeleteNewTransactional(D dto) {
-    return executeWithTemplate(dto, true, this::executeDelete);
+    return executeWithTemplate(dto, false, this::executeDelete);
   }
 
   // Execute delete in a nested transaction (saves a savepoint)
   @Transactional(propagation = Propagation.NESTED)
   public D executeDeleteNestedTransactional(D dto) {
-    return executeWithTemplate(dto, true, this::executeDelete);
+    return executeWithTemplate(dto, false, this::executeDelete);
   }
 
   // Core delete logic

@@ -15,6 +15,8 @@ import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSecti
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldService;
 import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldContainer;
 import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
+import com.example.lazyco.entities.Student.StudentDTO;
+import com.example.lazyco.entities.Student.StudentService;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,16 +30,19 @@ public class ApplicationFormService
   private final ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService;
   private final AdmissionService admissionService;
   private final ApplicationToAdmissionMapper applicationToAdmissionMapper;
+  private final StudentService studentService;
 
   protected ApplicationFormService(
       ApplicationFormMapper applicationFormMapper,
       ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService,
       AdmissionService admissionService,
-      ApplicationToAdmissionMapper applicationToAdmissionMapper) {
+      ApplicationToAdmissionMapper applicationToAdmissionMapper,
+      StudentService studentService) {
     super(applicationFormMapper);
     this.applicationFormSectionCustomFieldService = applicationFormSectionCustomFieldService;
     this.admissionService = admissionService;
     this.applicationToAdmissionMapper = applicationToAdmissionMapper;
+    this.studentService = studentService;
   }
 
   private ApplicationFormDTO mapApplicationFormDTO(Map<String, Object> body) {
@@ -255,6 +260,39 @@ public class ApplicationFormService
     }
 
     dto.setCustomFields(result);
+  }
+
+  private void validateEnrollCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
+
+    if (dto.getAdmissionOfferId() == null) {
+      throw new ApplicationException(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
+    }
+
+    List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
+        applicationFormSectionCustomFieldService.get(
+            new ApplicationFormSectionCustomFieldDTO() {
+              {
+                setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
+              }
+            });
+
+    Map<String, CustomFieldValueDTO> incomingValidated =
+        dto.getCustomFields().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey, entry -> (CustomFieldValueDTO) entry.getValue()));
+
+    CustomFieldContainer existingContainer = new CustomFieldContainer(incomingValidated);
+    for (ApplicationFormSectionCustomFieldDTO config : afCustomFields) {
+      String configIdStr = config.getCustomFieldId().toString();
+      CustomFieldValueDTO existingValue = existingContainer.getById(configIdStr);
+      if (existingValue == null) {
+        String key = config.getCustomFieldKey();
+        existingValue = existingContainer.getByKey(key);
+      }
+      Object value = existingValue != null ? existingValue.getValue() : null;
+      validateAndBuildField(config, config.getCustomFieldKey(), value, message);
+    }
   }
 
   private CustomFieldValueDTO validateAndBuildField(
@@ -484,7 +522,7 @@ public class ApplicationFormService
       applicationForm.setApplicationNumber(request.getApplicationNumber());
     }
     applicationForm = getSingle(applicationForm);
-    if (applicationForm.getAdmissionOfferId() == null) {
+    if (applicationForm == null) {
       throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_NOT_FOUND);
     }
     if (applicationForm.getIsEnrolled()) {
@@ -494,7 +532,7 @@ public class ApplicationFormService
     }
     StandardMessageDTO message = new StandardMessageDTO();
     validateApplicationFormDTO(applicationForm, message);
-    validateCreateCustomFields(applicationForm, message);
+    validateEnrollCustomFields(applicationForm, message);
     if (message.hasErrors()) {
       applicationForm.setMessages(message);
       throw new BatchException(applicationForm);
@@ -502,5 +540,48 @@ public class ApplicationFormService
     AdmissionDTO admissionDTO = applicationToAdmissionMapper.map(applicationForm);
     admissionDTO = admissionService.executeCreateTransactional(admissionDTO);
     return applicationToAdmissionMapper.map(admissionDTO, applicationForm);
+  }
+
+  public ApplicationFormDTO unEnrollApplication(ApplicationFormDTO request) {
+    if (request.getId() == null && request.getApplicationNumber() == null) {
+      throw new ApplicationException(ApplicationFormMessage.APPLICATION_NUMBER_REQUIRED);
+    }
+    ApplicationFormDTO applicationForm = new ApplicationFormDTO();
+    if (request.getId() != null) {
+      applicationForm.setId(request.getId());
+    } else {
+      applicationForm.setApplicationNumber(request.getApplicationNumber());
+    }
+    applicationForm = getSingle(applicationForm);
+    if (applicationForm == null) {
+      throw new ApplicationException(ApplicationFormMessage.APPLICATION_FORM_NOT_FOUND);
+    }
+    if (!applicationForm.getIsEnrolled()) {
+      throw new ApplicationException(
+          ApplicationFormMessage.APPLICATION_FORM_NOT_ENROLLED,
+          new Object[] {applicationForm.getApplicationNumber()});
+    }
+    try {
+      StudentDTO studentDTO = new StudentDTO();
+      studentDTO.setAdmissionId(applicationForm.getAdmissionId());
+      studentDTO = studentService.getSingle(studentDTO);
+      if (studentDTO != null) {
+        AdmissionDTO admissionDTO = new AdmissionDTO();
+        admissionDTO.setId(applicationForm.getAdmissionId());
+        List<AdmissionDTO> admissions = studentDTO.getAdmissions();
+        if (admissions != null && !admissions.isEmpty() && admissions.size() > 1) {
+          admissionService.executeDeleteTransactional(admissionDTO);
+        } else {
+          admissionService.executeDeleteTransactional(admissionDTO);
+          studentService.executeDeleteTransactional(studentDTO);
+        }
+      }
+    } catch (Exception e) {
+      ApplicationLogger.error(e.getMessage());
+      throw new ApplicationException(
+          ApplicationFormMessage.APPLICATION_FORM_HAS_LINKED_DATA,
+          new Object[] {applicationForm.getApplicationNumber()});
+    }
+    return applicationForm;
   }
 }

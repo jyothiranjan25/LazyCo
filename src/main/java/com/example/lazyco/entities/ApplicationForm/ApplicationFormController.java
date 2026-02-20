@@ -39,8 +39,13 @@ public class ApplicationFormController {
     return ResponseUtils.sendResponse(applicationFormService.deleteCustomForm(request));
   }
 
-  @PatchMapping("/enroll")
+  @PostMapping("/enroll")
   public ResponseEntity<?> enroll(@RequestBody ApplicationFormDTO request) {
     return ResponseUtils.sendResponse(applicationFormService.enrollApplication(request));
+  }
+
+  @PostMapping("/un_enroll")
+  public ResponseEntity<?> unEnroll(@RequestBody ApplicationFormDTO request) {
+    return ResponseUtils.sendResponse(applicationFormService.unEnrollApplication(request));
   }
 }

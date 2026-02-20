@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.Student;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
@@ -32,6 +33,10 @@ public class StudentDTO extends AbstractDTO<StudentDTO> {
   @InternalFilterableField private String phoneNumber;
 
   private Map<String, Object> customFields;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "admissions.id")
+  private Long admissionId;
 
   private List<AdmissionDTO> admissions;
 }

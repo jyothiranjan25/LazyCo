@@ -13,6 +13,8 @@ public interface ApplicationFormMapper extends AbstractMapper<ApplicationFormDTO
   @Mapping(target = "programCurriculumCode", source = "programCurriculum.code")
   @Mapping(target = "startingProgramCycleId", source = "startingProgramCycle.id")
   @Mapping(target = "startingProgramCycleCode", source = "startingProgramCycle.code")
+  @Mapping(target = "admissionId" , source = "admission.id")
+  @Mapping(target = "studentId" , source = "admission.student.id")
   ApplicationFormDTO map(ApplicationForm entity);
 
   default CustomFieldValueDTO mapToCustomFieldValueDTO(Object value) {
