@@ -156,9 +156,20 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   // Getter with logic to extract from annotation if not already set
   public Class<?> getFilterableEntityClass() {
     try {
+
+      Class<?> clazz = this.getClass();
+
+      // Handle proxy classes
+      while (clazz != null) {
+        if (clazz.isAnnotationPresent(FilteredEntity.class)) {
+          break;
+        }
+        clazz = clazz.getSuperclass();
+      }
+
       // ✅ Check if annotation is present first
-      if (this.getClass().isAnnotationPresent(FilteredEntity.class)) {
-        FilteredEntity annotation = this.getClass().getAnnotation(FilteredEntity.class);
+      if (clazz != null && clazz.isAnnotationPresent(FilteredEntity.class)) {
+        FilteredEntity annotation = clazz.getAnnotation(FilteredEntity.class);
         Class<?> currentEntityClass = annotation.type();
 
         if (currentEntityClass != null) {

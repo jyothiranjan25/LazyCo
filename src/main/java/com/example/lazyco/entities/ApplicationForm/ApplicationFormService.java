@@ -16,6 +16,7 @@ import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSecti
 import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldContainer;
 import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -189,115 +190,130 @@ public class ApplicationFormService
     }
   }
 
-  private void validateCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
-    if (dto.getAdmissionOfferId() != null && dto.getCustomFields() != null) {
-      ApplicationFormSectionCustomFieldDTO sectionCustomFieldDTO =
-          new ApplicationFormSectionCustomFieldDTO();
-      sectionCustomFieldDTO.setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
-      List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
-          applicationFormSectionCustomFieldService.get(sectionCustomFieldDTO);
+  private void validateCreateCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
 
-      Map<String, Object> incomingCustomFields = dto.getCustomFields();
+    if (dto.getAdmissionOfferId() == null) return;
 
-      Map<String, Object> finalResult = new HashMap<>();
-      for (ApplicationFormSectionCustomFieldDTO customField : afCustomFields) {
+    List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
+        applicationFormSectionCustomFieldService.get(
+            new ApplicationFormSectionCustomFieldDTO() {
+              {
+                setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
+              }
+            });
 
-        String key = customField.getCustomFieldKey();
-        Object value = incomingCustomFields.get(key);
+    Map<String, Object> incoming = dto.getCustomFields();
+    Map<String, Object> result = new HashMap<>();
 
-        boolean isRequired = Boolean.TRUE.equals(customField.getIsRequired());
+    for (ApplicationFormSectionCustomFieldDTO config : afCustomFields) {
 
-        // ------------------------------
-        // 1️⃣ Missing value
-        // ------------------------------
-        if (value == null) {
+      String key = config.getCustomFieldKey();
+      Object value = incoming != null ? incoming.get(key) : null;
 
-          if (isRequired) {
-            message.addErrorMessage(
-                "CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_REQUIRED, key);
-          }
+      CustomFieldValueDTO dtoValue = validateAndBuildField(config, key, value, message);
+      if (dtoValue != null) {
+        result.put(config.getCustomFieldId().toString(), dtoValue);
+      }
+    }
+    dto.setCustomFields(result);
+  }
 
-          // Remove null or missing key
-          incomingCustomFields.remove(key);
-          continue;
+  private void validateUpdateCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
+
+    if (dto.getAdmissionOfferId() == null || dto.getCustomFields() == null) return;
+
+    List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
+        applicationFormSectionCustomFieldService.get(
+            new ApplicationFormSectionCustomFieldDTO() {
+              {
+                setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
+              }
+            });
+
+    Map<String, ApplicationFormSectionCustomFieldDTO> configMap =
+        afCustomFields.stream()
+            .collect(
+                Collectors.toMap(
+                    ApplicationFormSectionCustomFieldDTO::getCustomFieldKey, Function.identity()));
+
+    Map<String, Object> incoming = dto.getCustomFields();
+    Map<String, Object> result = new HashMap<>();
+
+    for (Map.Entry<String, Object> entry : incoming.entrySet()) {
+
+      String key = entry.getKey();
+      Object value = entry.getValue();
+
+      ApplicationFormSectionCustomFieldDTO config = configMap.get(key);
+      if (config == null) continue;
+
+      CustomFieldValueDTO dtoValue = validateAndBuildField(config, key, value, message);
+
+      if (dtoValue != null) {
+        result.put(config.getCustomFieldId().toString(), dtoValue);
+      }
+    }
+
+    dto.setCustomFields(result);
+  }
+
+  private CustomFieldValueDTO validateAndBuildField(
+      ApplicationFormSectionCustomFieldDTO config,
+      String key,
+      Object value,
+      StandardMessageDTO message) {
+
+    boolean isRequired = Boolean.TRUE.equals(config.getIsRequired());
+    FieldTypeEnum fieldType = config.getCustomFieldFieldType();
+
+    if (value == null) {
+      if (isRequired) {
+        message.addErrorMessage("CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_REQUIRED, key);
+      }
+      return null;
+    }
+
+    try {
+      if (!fieldType.validateField(value)) {
+        message.addErrorMessage(
+            "CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_INVALID_VALUE, key);
+        return null;
+      }
+      switch (fieldType) {
+        case TEXT -> FieldParse.parseString(value);
+        case NUMBER -> FieldParse.parseLong(value);
+        case DATE -> FieldParse.parseLocalDate(value);
+        case DATETIME -> FieldParse.parseLocalDateTime(value);
+
+        case SELECT -> {
+          String str = FieldParse.parseString(value);
+          boolean valid =
+              config.getCustomFieldOptions().stream().anyMatch(o -> o.getOptionValue().equals(str));
+          if (!valid) throw new IllegalArgumentException();
         }
 
-        try {
-
-          FieldTypeEnum fieldType = customField.getCustomFieldFieldType();
-
-          // ------------------------------
-          // 2️⃣ Basic Type Validation
-          // ------------------------------
-          if (!fieldType.validateField(value)) {
-
-            if (isRequired) {
-              message.addErrorMessage(
-                  "CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_INVALID_VALUE, key);
-            }
-
-            incomingCustomFields.remove(key);
-            continue;
+        case MULTI_SELECT -> {
+          List<String> values = (List<String>) FieldParse.parseList(value);
+          for (String v : values) {
+            boolean valid =
+                config.getCustomFieldOptions().stream().anyMatch(o -> o.getOptionValue().equals(v));
+            if (!valid) throw new IllegalArgumentException();
           }
-
-          // ------------------------------
-          // 3️⃣ Type-Specific Parsing & Validation
-          // ------------------------------
-          switch (fieldType) {
-            case TEXT -> FieldParse.parseString(value);
-
-            case NUMBER -> FieldParse.parseLong(value);
-
-            case DATE -> FieldParse.parseLocalDate(value);
-
-            case DATETIME -> FieldParse.parseLocalDateTime(value);
-
-            case SELECT -> {
-              String strValue = FieldParse.parseString(value);
-
-              boolean valid =
-                  customField.getCustomFieldOptions().stream()
-                      .anyMatch(option -> option.getOptionValue().equals(strValue));
-
-              if (!valid) throw new IllegalArgumentException();
-            }
-
-            case MULTI_SELECT -> {
-              @SuppressWarnings("unchecked")
-              List<String> values = (List<String>) FieldParse.parseList(value);
-
-              for (String val : values) {
-                boolean valid =
-                    customField.getCustomFieldOptions().stream()
-                        .anyMatch(option -> option.getOptionValue().equals(val));
-
-                if (!valid) throw new IllegalArgumentException();
-              }
-            }
-          }
-
-          // if no errors put it to CustomFieldValueDTO
-          String customFieldId = customField.getCustomFieldId().toString();
-          CustomFieldValueDTO customFieldValueDTO = new CustomFieldValueDTO();
-          customFieldValueDTO.setKey(key);
-          customFieldValueDTO.setName(customField.getCustomFieldName());
-          customFieldValueDTO.setFieldType(fieldType);
-          customFieldValueDTO.setValue(value);
-
-          finalResult.put(customFieldId, customFieldValueDTO);
-        } catch (Exception e) {
-
-          if (isRequired) {
-            message.addErrorMessage(
-                "CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_INVALID_VALUE, key);
-          }
-
-          // Optional → silently remove
-          incomingCustomFields.remove(key);
         }
       }
-      // Remove any incoming fields that are not defined in the system for this admission offer
-      dto.setCustomFields(finalResult);
+
+      CustomFieldValueDTO dto = new CustomFieldValueDTO();
+      dto.setKey(key);
+      dto.setName(config.getCustomFieldName());
+      dto.setFieldType(fieldType);
+      dto.setValue(value);
+
+      return dto;
+
+    } catch (Exception e) {
+      message.addErrorMessage(
+          "CUSTOM_FIELD", ApplicationFormMessage.CUSTOM_FIELD_INVALID_VALUE, key);
+      return null;
     }
   }
 
@@ -308,7 +324,7 @@ public class ApplicationFormService
     // validate standard fields
     validateApplicationFormDTO(dto, message);
     // validate custom fields
-    validateCustomFields(dto, message);
+    validateCreateCustomFields(dto, message);
     if (!message.hasErrors()) {
       dto.setSource(ApplicationFormSourceEnum.DIRECT);
       return executeCreateTransactional(dto);
@@ -397,7 +413,7 @@ public class ApplicationFormService
     if (request.getCustomFields() != null) {
       request.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
       StandardMessageDTO message = new StandardMessageDTO();
-      validateCustomFields(request, message);
+      validateUpdateCustomFields(request, message);
       request.setMessages(message);
 
       if (request.getCustomFields() != null) {
@@ -478,7 +494,7 @@ public class ApplicationFormService
     }
     StandardMessageDTO message = new StandardMessageDTO();
     validateApplicationFormDTO(applicationForm, message);
-    validateCustomFields(applicationForm, message);
+    validateCreateCustomFields(applicationForm, message);
     if (message.hasErrors()) {
       applicationForm.setMessages(message);
       throw new BatchException(applicationForm);
