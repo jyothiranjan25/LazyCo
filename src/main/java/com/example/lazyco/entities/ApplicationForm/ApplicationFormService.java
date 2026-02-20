@@ -13,7 +13,10 @@ import com.example.lazyco.entities.Admission.AdmissionDTO;
 import com.example.lazyco.entities.Admission.AdmissionService;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldDTO;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldService;
+import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldContainer;
+import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -196,7 +199,7 @@ public class ApplicationFormService
 
       Map<String, Object> incomingCustomFields = dto.getCustomFields();
 
-      List<String> validFields = new ArrayList<>();
+      Map<String, Object> finalResult = new HashMap<>();
       for (ApplicationFormSectionCustomFieldDTO customField : afCustomFields) {
 
         String key = customField.getCustomFieldKey();
@@ -272,7 +275,16 @@ public class ApplicationFormService
               }
             }
           }
-          validFields.add(key);
+
+          // if no errors put it to CustomFieldValueDTO
+          String customFieldId = customField.getCustomFieldId().toString();
+          CustomFieldValueDTO customFieldValueDTO = new CustomFieldValueDTO();
+          customFieldValueDTO.setKey(key);
+          customFieldValueDTO.setName(customField.getCustomFieldName());
+          customFieldValueDTO.setFieldType(fieldType);
+          customFieldValueDTO.setValue(value);
+
+          finalResult.put(customFieldId, customFieldValueDTO);
         } catch (Exception e) {
 
           if (isRequired) {
@@ -285,7 +297,7 @@ public class ApplicationFormService
         }
       }
       // Remove any incoming fields that are not defined in the system for this admission offer
-      incomingCustomFields.keySet().removeIf(key -> !validFields.contains(key));
+      dto.setCustomFields(finalResult);
     }
   }
 
@@ -299,7 +311,7 @@ public class ApplicationFormService
     validateCustomFields(dto, message);
     if (!message.hasErrors()) {
       dto.setSource(ApplicationFormSourceEnum.DIRECT);
-      return create(dto);
+      return executeCreateTransactional(dto);
     }
     dto.setMessages(message);
     throw new BatchException(dto);
@@ -353,7 +365,7 @@ public class ApplicationFormService
   public ApplicationFormDTO updateCustomForm(Map<String, Object> request) {
     ApplicationFormDTO dto = mapApplicationFormDTO(request);
     dto.setCustomFields(request);
-    return update(dto);
+    return executeUpdateTransactional(dto);
   }
 
   @Override
@@ -382,24 +394,56 @@ public class ApplicationFormService
       validateUniqueApplicationForm(uniqueApplicationCheck);
     }
 
-    Map<String, Object> existingCustomFields =
-        Optional.ofNullable(beforeUpdates.getCustomFields())
-            .map(HashMap::new)
-            .orElseGet(HashMap::new);
     if (request.getCustomFields() != null) {
-      // validate custom fields
+      request.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
       StandardMessageDTO message = new StandardMessageDTO();
-      request.setAdmissionOfferId(beforeUpdates.getAdmissionOffer().getId());
       validateCustomFields(request, message);
       request.setMessages(message);
-      Map<String, Object> incomingCustomFields = request.getCustomFields();
-      for (Map.Entry<String, Object> entry : incomingCustomFields.entrySet()) {
-        String key = entry.getKey();
-        Object value = entry.getValue();
-        existingCustomFields.put(key, value);
+
+      if (request.getCustomFields() != null) {
+        // incoming customFields
+        Map<String, CustomFieldValueDTO> incomingValidated =
+            request.getCustomFields().entrySet().stream()
+                .collect(
+                    Collectors.toMap(
+                        Map.Entry::getKey, entry -> (CustomFieldValueDTO) entry.getValue()));
+
+        // existing Custom Fields before update
+        Map<String, CustomFieldValueDTO> existingCustomFields =
+            Optional.ofNullable(beforeUpdates.getCustomFields())
+                .map(HashMap::new)
+                .orElseGet(HashMap::new);
+
+        CustomFieldContainer existingContainer = new CustomFieldContainer(existingCustomFields);
+        // 🔥 Merge Logic
+        for (Map.Entry<String, CustomFieldValueDTO> entry : incomingValidated.entrySet()) {
+          String incomingId = entry.getKey();
+          CustomFieldValueDTO incomingValue = entry.getValue();
+
+          // 1️⃣ Try match by ID
+          if (existingContainer.getById(incomingId) != null) {
+            existingCustomFields.put(incomingId, incomingValue);
+            continue;
+          }
+
+          // 2️⃣ Try match by KEY
+          CustomFieldValueDTO existingByKey = existingContainer.getByKey(incomingValue.getKey());
+
+          if (existingByKey != null) {
+            // find the old ID for this key
+            existingCustomFields.entrySet().stream()
+                .filter(e -> e.getValue().getKey().equals(incomingValue.getKey()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .ifPresent(existingCustomFields::remove);
+          }
+
+          // 3️⃣ Add new (or replaced)
+          existingCustomFields.put(incomingId, incomingValue);
+        }
+        afterUpdates.setCustomFields(existingCustomFields);
       }
     }
-    afterUpdates.setCustomFields(existingCustomFields);
   }
 
   @Override

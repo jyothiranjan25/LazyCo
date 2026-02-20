@@ -79,7 +79,7 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
       batchJobDTO.setJobId(jobExecution.getId());
       batchJobDTO.setProcessedCount(0);
       batchJobDTO.setStatus(BatchJobStatus.RUNNING);
-      batchJobService.update(batchJobDTO);
+      batchJobService.executeUpdateNewTransactional(batchJobDTO);
     } catch (Exception e) {
       throw new ExceptionWrapper("Error in beforeJob of AbstractBatchJobListener", e);
     }
@@ -135,7 +135,7 @@ public class AbstractBatchJobListener<I, O> extends StepListenerSupport<@NonNull
       }
 
       batchJobDTO.setNotifyStatus(notifyStatus);
-      batchJobService.update(batchJobDTO);
+      batchJobService.executeUpdateNewTransactional(batchJobDTO);
       ApplicationLogger.info(
           "Spring Batch job completed: " + jobExecution.getJobInstance().getJobName());
     } catch (Exception e) {

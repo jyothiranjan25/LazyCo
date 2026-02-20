@@ -113,7 +113,7 @@ public class UserService implements UserDetailsService {
     appUserDTO.setId(userDTO.getId());
     appUserDTO.setLastLoginIpAddress(request.getRemoteAddr());
     appUserDTO.setLastLoginDate(DateTimeZoneUtils.getCurrentDate());
-    appUserService.update(appUserDTO);
+    appUserService.executeUpdateNewTransactional(appUserDTO);
 
     return userDTO;
   }
@@ -183,7 +183,7 @@ public class UserService implements UserDetailsService {
     Date expiryDate =
         DateTimeZoneUtils.getCurrentDatePlus(Duration.ofMinutes(10)); // Token valid for 5 minutes
     appUserDTO.setResetPasswordTokenExpiry(expiryDate);
-    AppUserDTO updated = appUserService.update(appUserDTO);
+    AppUserDTO updated = appUserService.executeUpdateNewTransactional(appUserDTO);
 
     // send reset token via email - skipped for now
     EmailDTO emailDTO = new EmailDTO();
@@ -222,7 +222,7 @@ public class UserService implements UserDetailsService {
     // Update password and clear reset token
     appUser.setPassword(userDTO.getPassword());
     appUser.setClearResetPasswordToken(true);
-    appUserService.update(appUser);
+    appUserService.executeUpdateNewTransactional(appUser);
 
     // Auto-login after password reset
     UserDTO user = new UserDTO();

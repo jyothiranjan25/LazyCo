@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
+import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
@@ -95,7 +96,7 @@ public class ApplicationForm extends AbstractRBACModel {
       name = "custom_fields",
       columnDefinition = "json",
       comment = "JSON column to store custom fields for the application form")
-  private Map<String, Object> customFields;
+  private Map<String, CustomFieldValueDTO> customFields;
 
   @ManyToOne
   @JoinColumn(

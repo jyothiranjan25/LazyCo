@@ -227,7 +227,7 @@ public abstract class AbstractBatchJob<I extends AbstractBatchDTO<I>, O extends 
     batchJobDTO.setProcessedCount(0);
     batchJobDTO.setFailedCount(0);
     batchJobDTO.setStatus(BatchJobStatus.FAILED);
-    batchJobService.update(batchJobDTO);
+    batchJobService.executeUpdateNewTransactional(batchJobDTO);
   }
 
   private static class CountingItemProcessor<I, O>

@@ -51,4 +51,6 @@ public class ApplicationFormSectionCustomFieldDTO
   private FieldTypeEnum customFieldFieldType;
 
   private List<CustomFieldOptionDTO> customFieldOptions;
+
+  private String customFieldValue;
 }

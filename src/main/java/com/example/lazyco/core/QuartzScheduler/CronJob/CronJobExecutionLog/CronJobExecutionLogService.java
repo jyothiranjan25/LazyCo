@@ -74,7 +74,7 @@ public class CronJobExecutionLogService
       cronJobScheduleDTO.setId(cronjobExecutionLogDTO.getCronJobScheduleId());
       cronJobScheduleDTO.setStatus(false);
       CronJobScheduleService cronJobScheduleService = getBean(CronJobScheduleService.class);
-      cronJobScheduleService.update(cronJobScheduleDTO);
+      cronJobScheduleService.executeUpdateNewTransactional(cronJobScheduleDTO);
     }
   }
 }
