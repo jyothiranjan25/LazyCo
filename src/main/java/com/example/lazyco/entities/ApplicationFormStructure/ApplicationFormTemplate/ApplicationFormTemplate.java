@@ -33,10 +33,13 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ApplicationFormTemplate extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the application form template")
+  @Column(
+      name = "code",
+      nullable = false,
+      comment = "Code representing the application form template")
   private String code;
 
-  @Column(name = "name", comment = "Name of the application form template")
+  @Column(name = "name", nullable = false, comment = "Name of the application form template")
   private String name;
 
   @Column(name = "description", comment = "Description of the application form template")

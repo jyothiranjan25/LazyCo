@@ -35,10 +35,10 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AcademicYear extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the academic year")
+  @Column(name = "code", nullable = false, comment = "Code representing the academic year")
   private String code;
 
-  @Column(name = "name", comment = "Name of the academic year")
+  @Column(name = "name", nullable = false, comment = "Name of the academic year")
   private String name;
 
   @Column(name = "description", comment = "Description of the academic year")

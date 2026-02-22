@@ -49,10 +49,10 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramCurriculum extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the program curriculum")
+  @Column(name = "code", nullable = false, comment = "Code representing the program curriculum")
   private String code;
 
-  @Column(name = "name", comment = "Name of the program curriculum")
+  @Column(name = "name", nullable = false, comment = "Name of the program curriculum")
   private String name;
 
   @Column(name = "description", comment = "Description of the program curriculum")

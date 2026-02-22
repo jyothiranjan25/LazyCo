@@ -188,6 +188,8 @@ APPLICATION_FORM:
     CUSTOM_FIELD_INVALID_VALUE : "The field '%1$s' has an invalid value for application form."
     APPLICATION_FORM_NOT_FOUND : "The application form with the specified application number was not found."
     APPLICATION_FORM_ALREADY_ENROLLED : "The application form '%1$s' is already enrolled."
+    APPLICATION_FORM_NOT_ENROLLED : "The application form '%1$s' is not enrolled."
+    APPLICATION_FORM_HAS_LINKED_DATA : "The application form '%1$s' has linked data and cannot be deleted."
     APPLICATION_FORM_ALREADY_EXISTS : "An application form with phone number '%1$s' or email '%2$s' already exists in current admission offer."
 
 ADMISSION:

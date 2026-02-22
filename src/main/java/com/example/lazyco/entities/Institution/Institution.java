@@ -2,6 +2,7 @@ package com.example.lazyco.entities.Institution;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
+import com.example.lazyco.entities.CourseMaster.Course;
 import com.example.lazyco.entities.University.University;
 import jakarta.persistence.*;
 import java.util.Set;
@@ -30,10 +31,10 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Institution extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the institution")
+  @Column(name = "code", nullable = false, comment = "Code representing the institution")
   private String code;
 
-  @Column(name = "name", comment = "Name of the institution")
+  @Column(name = "name", nullable = false, comment = "Name of the institution")
   private String name;
 
   @Column(name = "description", comment = "Description of the institution")
@@ -56,4 +57,7 @@ public class Institution extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "institution")
   private Set<AcademicProgram> academicPrograms;
+
+  @OneToMany(mappedBy = "institution")
+  private Set<Course> courses;
 }

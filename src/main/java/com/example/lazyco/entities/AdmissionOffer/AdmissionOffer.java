@@ -38,10 +38,10 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AdmissionOffer extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the admission offer")
+  @Column(name = "code", nullable = false, comment = "Code representing the admission offer")
   private String code;
 
-  @Column(name = "name", comment = "Name of the admission offer")
+  @Column(name = "name", nullable = false, comment = "Name of the admission offer")
   private String name;
 
   @Column(name = "description", comment = "Description of the admission offer")

@@ -31,10 +31,10 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class University extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the university")
+  @Column(name = "code", nullable = false, comment = "Code representing the university")
   private String code;
 
-  @Column(name = "name", comment = "Name of the university")
+  @Column(name = "name", nullable = false, comment = "Name of the university")
   private String name;
 
   @Column(name = "description", comment = "Description of the university")

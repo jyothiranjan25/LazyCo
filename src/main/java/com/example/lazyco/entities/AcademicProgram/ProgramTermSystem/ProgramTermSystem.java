@@ -36,10 +36,13 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramTermSystem extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code representing the academic program term system")
+  @Column(
+      name = "code",
+      nullable = false,
+      comment = "Code representing the academic program term system")
   private String code;
 
-  @Column(name = "name", comment = "Name of the academic program term system")
+  @Column(name = "name", nullable = false, comment = "Name of the academic program term system")
   private String name;
 
   @Column(name = "description", comment = "Description of the academic program term system")

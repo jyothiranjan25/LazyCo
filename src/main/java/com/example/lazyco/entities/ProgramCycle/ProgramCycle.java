@@ -63,7 +63,7 @@ import org.hibernate.envers.Audited;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProgramCycle extends AbstractRBACModel {
 
-  @Column(name = "code", comment = "Code of the program cycle")
+  @Column(name = "code", nullable = false, comment = "Code of the program cycle")
   private String code;
 
   @Column(name = "description", comment = "Description of the program cycle")

@@ -127,10 +127,6 @@ public class AbstractAction implements CommonConstants {
     return properties.getProperty(key, null);
   }
 
-  private void setProperties(Properties properties) {
-    this.properties = properties;
-  }
-
   /*  Environment Checkers */
   public boolean isTestEnvironment() {
     return TEST_MODE.equalsIgnoreCase(environment) || DEV_MODE.equalsIgnoreCase(environment);
@@ -201,7 +197,7 @@ public class AbstractAction implements CommonConstants {
     } catch (Exception e) {
       ApplicationLogger.error("Error loading Configuration Master properties: ", e);
     }
-    setProperties(properties);
+    this.properties = properties;
   }
 
   public AppUserDTO getLoggedInUser() {
