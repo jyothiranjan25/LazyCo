@@ -2,6 +2,7 @@ package com.example.lazyco.core.Exceptions;
 
 import com.example.lazyco.core.Messages.CustomMessage;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.hibernate.PropertyValueException;
@@ -76,6 +77,18 @@ public class ResolveException {
         defaultMessage =
             CustomMessage.getMessageString(
                 CommonMessage.FIELD_MISSING, hibernateEx.getPropertyName());
+        status = HttpStatus.BAD_REQUEST;
+      } else if (e instanceof ConstraintViolationException constraintEx) {
+        StringBuilder messageBuilder = new StringBuilder();
+        constraintEx
+            .getConstraintViolations()
+            .forEach(
+                violation -> {
+                  String propertyPath = violation.getPropertyPath().toString();
+                  String message = violation.getMessage();
+                  messageBuilder.append(propertyPath).append(": ").append(message).append("; ");
+                });
+        defaultMessage = messageBuilder.toString();
         status = HttpStatus.BAD_REQUEST;
       } else if (e instanceof OptimisticLockException
           || e instanceof ObjectOptimisticLockingFailureException) {

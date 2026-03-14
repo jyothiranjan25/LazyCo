@@ -6,6 +6,7 @@ import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOfferProgram.AdmissionOfferProgram;
 import com.example.lazyco.entities.ApplicationForm.ApplicationForm;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
+import com.example.lazyco.entities.SyllabusMaster.SyllabusMaster;
 import com.example.lazyco.entities.TermCycle.TermCycle;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -46,7 +47,8 @@ import org.hibernate.envers.Audited;
       @Index(name = "idx_program_cycle_term_cycle_id", columnList = "term_cycle_id"),
       @Index(
           name = "idx_program_cycle_program_term_master_id",
-          columnList = "program_term_master_id")
+          columnList = "program_term_master_id"),
+      @Index(name = "idx_program_cycle_syllabus_master_id", columnList = "syllabus_master_id")
     },
     uniqueConstraints = {
       @UniqueConstraint(name = "uk_program_cycle_code", columnNames = "code"),
@@ -141,6 +143,14 @@ public class ProgramCycle extends AbstractRBACModel {
       comment = "Foreign key referencing the program term master")
   @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramTermMaster programTermMaster;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "syllabus_master_id",
+      foreignKey = @ForeignKey(name = "fk_program_cycle_syllabus_master"),
+      nullable = false,
+      comment = "Foreign key referencing the syllabus master")
+  private SyllabusMaster syllabusMaster;
 
   @OneToMany(mappedBy = "programCycle")
   private Set<AdmissionOfferProgram> admissionOfferPrograms;

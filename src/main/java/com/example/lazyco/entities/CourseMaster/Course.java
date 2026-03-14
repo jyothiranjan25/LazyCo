@@ -2,14 +2,15 @@ package com.example.lazyco.entities.CourseMaster;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.entities.CourseMaster.CourseArea.CourseArea;
+import com.example.lazyco.entities.CourseMaster.CourseClassType.CourseClassType;
+import com.example.lazyco.entities.CourseMaster.CourseCredit.CourseCredit;
 import com.example.lazyco.entities.Institution.Institution;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 
 @Getter
@@ -39,22 +40,28 @@ public class Course extends AbstractRBACModel {
   @Column(name = "description", comment = "Detailed description of the course")
   private String description;
 
-  @Column(name = "course_aim", comment = "Aim or objective of the course")
+  @Column(name = "course_aim", length = 512, comment = "Aim or objective of the course")
   private String courseAim;
 
   @ManyToOne
   @JoinColumn(
       name = "course_area_id",
-      nullable = false,
       foreignKey = @ForeignKey(name = "fk_course_course_area"),
+      nullable = false,
       comment = "Reference to the course area this course belongs to")
   private CourseArea courseArea;
 
   @ManyToOne
   @JoinColumn(
       name = "institution_id",
-      nullable = false,
       foreignKey = @ForeignKey(name = "fk_course_institution"),
+      nullable = false,
       comment = "Reference to the institution offering this course")
   private Institution institution;
+
+  @OneToMany(mappedBy = "course")
+  private Set<CourseClassType> courseClassTypes;
+
+  @OneToMany(mappedBy = "course")
+  private Set<CourseCredit> courseCredits;
 }

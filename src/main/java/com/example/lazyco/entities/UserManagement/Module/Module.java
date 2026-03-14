@@ -55,11 +55,13 @@ public class Module extends AbstractModel {
           @JoinColumn(
               name = "module_id",
               foreignKey = @ForeignKey(name = "fk_module_resource_module"),
+              nullable = false,
               comment = "Reference to the module"),
       inverseJoinColumns =
           @JoinColumn(
               name = "resource_id",
               foreignKey = @ForeignKey(name = "fk_module_resource_resource"),
+              nullable = false,
               comment = "Reference to the resource"),
       indexes = {
         @Index(name = "idx_module_resource_module_id", columnList = "module_id"),

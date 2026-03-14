@@ -18,7 +18,7 @@ public class ConfigurationMasterDTO extends AbstractDTO<ConfigurationMasterDTO> 
 
   @InternalFilterableField private String description;
 
-  @InternalFilterableField private Boolean sensitive;
+  @InternalFilterableField private Boolean isSensitive;
 
   @Expose(serialize = false, deserialize = false)
   private String sensitiveConfigValue;

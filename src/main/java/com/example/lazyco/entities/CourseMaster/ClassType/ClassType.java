@@ -1,7 +1,9 @@
 package com.example.lazyco.entities.CourseMaster.ClassType;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
+import com.example.lazyco.entities.CourseMaster.CourseClassType.CourseClassType;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -29,4 +31,7 @@ public class ClassType extends AbstractModel {
 
   @Column(name = "description", comment = "description of the class type")
   private String description;
+
+  @OneToMany(mappedBy = "classType")
+  private Set<CourseClassType> courseClassTypes;
 }

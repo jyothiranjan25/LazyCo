@@ -187,7 +187,7 @@ public class AbstractAction implements CommonConstants {
       for (ConfigurationMasterDTO configMasterDTO : configMasterProperties) {
         String configKey = configMasterDTO.getConfigKey();
         String configValue;
-        if (Boolean.TRUE.equals(configMasterDTO.getSensitive())) {
+        if (Boolean.TRUE.equals(configMasterDTO.getIsSensitive())) {
           configValue = configMasterDTO.getSensitiveConfigValue();
         } else {
           configValue = configMasterDTO.getConfigValue();

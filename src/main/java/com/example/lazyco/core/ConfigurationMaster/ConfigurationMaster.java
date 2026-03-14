@@ -39,5 +39,5 @@ public class ConfigurationMaster extends AbstractRBACModel {
       name = "is_sensitive",
       columnDefinition = "boolean default false",
       comment = "Indicates if the configuration is sensitive")
-  private Boolean sensitive;
+  private Boolean isSensitive;
 }

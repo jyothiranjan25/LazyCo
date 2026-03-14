@@ -42,7 +42,6 @@ public class RequestCachingFilter extends OncePerRequestFilter {
 
       response.getWriter().write(GsonSingleton.convertObjectToJSONString(simpleResponseDTO));
       response.getWriter().flush();
-      return;
     } finally {
       ApplicationLogger.info(
           "Completed request processing Method: {}, URI: {}",

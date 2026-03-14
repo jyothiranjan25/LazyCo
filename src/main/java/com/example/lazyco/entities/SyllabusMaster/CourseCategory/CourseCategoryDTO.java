@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.CourseMaster.ClassType;
+package com.example.lazyco.entities.SyllabusMaster.CourseCategory;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
@@ -9,9 +9,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@FilteredEntity(type = ClassType.class)
-public class ClassTypeDTO extends AbstractDTO<ClassTypeDTO> implements HasName {
-
+@FilteredEntity(type = CourseCategory.class)
+public class CourseCategoryDTO extends AbstractDTO<CourseCategoryDTO> implements HasName {
   @InternalFilterableField private String name;
   private String description;
 }

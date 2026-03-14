@@ -29,7 +29,7 @@ public class ConfigurationMasterService
 
   @Override
   protected void preCreate(ConfigurationMasterDTO request, ConfigurationMaster entityToCreate) {
-    if (Boolean.TRUE.equals(request.getSensitive())) {
+    if (Boolean.TRUE.equals(request.getIsSensitive())) {
       entityToCreate.setConfigValue(MASKED_VALUE);
       entityToCreate.setSensitiveConfigValue(CryptoUtil.encrypt(request.getConfigValue()));
     }
@@ -40,7 +40,7 @@ public class ConfigurationMasterService
       ConfigurationMasterDTO request,
       ConfigurationMasterDTO entityBeforeUpdates,
       ConfigurationMaster entityAfterUpdates) {
-    if (Boolean.TRUE.equals(request.getSensitive())
+    if (Boolean.TRUE.equals(request.getIsSensitive())
         && !request.getConfigValue().equals(MASKED_VALUE)) {
       entityAfterUpdates.setConfigValue(MASKED_VALUE);
       entityAfterUpdates.setSensitiveConfigValue(CryptoUtil.encrypt(request.getConfigValue()));
@@ -54,6 +54,6 @@ public class ConfigurationMasterService
     if (filter == null) {
       return null;
     }
-    return filter.getSensitive() ? filter.getSensitiveConfigValue() : filter.getConfigValue();
+    return filter.getIsSensitive() ? filter.getSensitiveConfigValue() : filter.getConfigValue();
   }
 }
