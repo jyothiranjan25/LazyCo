@@ -23,9 +23,9 @@ import org.hibernate.envers.Audited;
     name = "admission",
     comment = "table to store admission information",
     indexes = {
-      @Index(name = "idx_admission_admission_number", columnList = "admissionNumber"),
-      @Index(name = "idx_admission_university_number", columnList = "universityNumber"),
-      @Index(name = "idx_admission_admission_status", columnList = "admissionStatus"),
+      @Index(name = "idx_admission_admission_number", columnList = "admission_number"),
+      @Index(name = "idx_admission_university_number", columnList = "university_number"),
+      @Index(name = "idx_admission_admission_status", columnList = "admission_status"),
       @Index(name = "idx_admission_application_form_id", columnList = "application_form_id"),
       @Index(name = "idx_admission_program_curriculum_id", columnList = "program_curriculum_id"),
       @Index(
@@ -37,8 +37,8 @@ import org.hibernate.envers.Audited;
       @Index(name = "idx_admission_student_id", columnList = "student_id")
     },
     uniqueConstraints = {
-      @UniqueConstraint(name = "uk_admission_admission_number", columnNames = "admissionNumber"),
-      @UniqueConstraint(name = "uk_admission_university_number", columnNames = "universityNumber"),
+      @UniqueConstraint(name = "uk_admission_admission_number", columnNames = "admission_number"),
+      @UniqueConstraint(name = "uk_admission_university_number", columnNames = "university_number"),
       @UniqueConstraint(
           name = "uk_admission_application_form_id",
           columnNames = "application_form_id")

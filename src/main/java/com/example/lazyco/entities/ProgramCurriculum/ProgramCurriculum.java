@@ -32,7 +32,6 @@ import org.hibernate.envers.Audited;
       @Index(name = "idx_program_curriculums_name", columnList = "name"),
       @Index(name = "idx_program_curriculums_start_date", columnList = "start_date"),
       @Index(name = "idx_program_curriculums_end_date", columnList = "end_date"),
-      @Index(name = "idx_program_curriculums_conviction_date", columnList = "conviction_date"),
       @Index(name = "idx_program_curriculums_academic_year_id", columnList = "academic_year_id"),
       @Index(name = "idx_program_curriculums_term_system_id", columnList = "term_system_id"),
       @Index(
@@ -63,9 +62,6 @@ public class ProgramCurriculum extends AbstractRBACModel {
 
   @Column(name = "end_date", comment = "End date of the program curriculum")
   private LocalDate endDate;
-
-  @Column(name = "conviction_date", comment = "Conviction date of the program curriculum")
-  private LocalDate convictionDate;
 
   @Column(name = "admission_capacity", comment = "Admission capacity for the program curriculum")
   private Integer admissionCapacity;

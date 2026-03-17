@@ -50,7 +50,7 @@ public class AppUser extends AbstractRBACModel {
   private String lastName;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "authorities", comment = "User authorities/roles")
+  @Column(name = "authorities", comment = "User authorities")
   private Set<AuthorityEnum> authorities;
 
   @Column(
@@ -80,7 +80,7 @@ public class AppUser extends AbstractRBACModel {
   @Column(
       name = "is_session_expired",
       columnDefinition = "boolean default false",
-      comment = "Indicates if the user's session is expired")
+      comment = "Indicates if the users session is expired")
   private Boolean isSessionExpired;
 
   @Column(name = "reset_password_token", comment = "Token used for resetting the user password")

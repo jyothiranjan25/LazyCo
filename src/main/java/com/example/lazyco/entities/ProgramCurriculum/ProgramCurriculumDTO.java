@@ -20,7 +20,6 @@ public class ProgramCurriculumDTO extends AbstractDTO<ProgramCurriculumDTO>
   private String description;
   @InternalFilterableField private LocalDate startDate;
   @InternalFilterableField private LocalDate endDate;
-  @InternalFilterableField private LocalDate convictionDate;
   @InternalFilterableField private Integer admissionCapacity;
 
   private Integer minCredit;

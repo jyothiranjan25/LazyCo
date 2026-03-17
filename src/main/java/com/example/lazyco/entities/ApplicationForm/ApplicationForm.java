@@ -29,9 +29,9 @@ import org.hibernate.type.SqlTypes;
     name = "application_form",
     comment = "Table storing application form details",
     indexes = {
-      @Index(name = "idx_application_form_application_number", columnList = "applicationNumber"),
+      @Index(name = "idx_application_form_application_number", columnList = "application_number"),
       @Index(name = "idx_application_form_email", columnList = "email"),
-      @Index(name = "idx_application_form_phone_number", columnList = "phoneNumber"),
+      @Index(name = "idx_application_form_phone_number", columnList = "phone_number"),
       @Index(name = "idx_application_form_source", columnList = "source"),
       @Index(name = "idx_application_form_admission_offer_id", columnList = "admission_offer_id"),
       @Index(
@@ -44,13 +44,13 @@ import org.hibernate.type.SqlTypes;
     uniqueConstraints = {
       @UniqueConstraint(
           name = "uk_application_form_application_number",
-          columnNames = "applicationNumber"),
+          columnNames = "application_number"),
       @UniqueConstraint(
           name = "uk_application_form_aoffer_id_email",
           columnNames = {"admission_offer_id", "email"}),
       @UniqueConstraint(
           name = "uk_application_form_aoffer_id_phone",
-          columnNames = {"admission_offer_id", "phoneNumber"})
+          columnNames = {"admission_offer_id", "phone_number"})
     })
 @EntityListeners(ApplicationFormListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

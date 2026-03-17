@@ -100,12 +100,6 @@ public class ProgramCurriculumService
       throw new ApplicationException(ProgramCurriculumMessage.PROGRAM_CURRICULUM_INVALID_DATES);
     }
 
-    if (entity.getConvictionDate() != null
-        && entity.getConvictionDate().isBefore(entity.getEndDate())) {
-      throw new ApplicationException(
-          ProgramCurriculumMessage.PROGRAM_CURRICULUM_INVALID_CONVICTION_DATE);
-    }
-
     if (entity.getAdmissionCapacity() != null && entity.getAdmissionCapacity() < 0) {
       throw new ApplicationException(
           ProgramCurriculumMessage.PROGRAM_CURRICULUM_ADMISSION_CAPACITY_REQUIRED);

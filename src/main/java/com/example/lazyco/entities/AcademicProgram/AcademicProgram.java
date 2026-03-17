@@ -26,7 +26,7 @@ import org.hibernate.envers.Audited;
       @Index(name = "idx_academic_program_code", columnList = "code"),
       @Index(name = "idx_academic_program_name", columnList = "name"),
       @Index(name = "idx_academic_program_program_study_mode", columnList = "program_study_mode"),
-      @Index(name = "idx_academic_program_program_level", columnList = "program_level"),
+      @Index(name = "idx_academic_program_program_level", columnList = "program_level_id"),
       @Index(name = "idx_academic_program_is_active", columnList = "is_active"),
       @Index(name = "idx_academic_program_institution_id", columnList = "institution_id")
     },
@@ -53,7 +53,7 @@ public class AcademicProgram extends AbstractRBACModel {
   @Enumerated(EnumType.STRING)
   private ProgramStudyModeEnum programStudyMode;
 
-  @Column(name = "program_level", comment = "Level of the academic program")
+  @Column(name = "program_level_id", comment = "Level of the academic program")
   @Enumerated(EnumType.STRING)
   private ProgramLevelEnum programLevel;
 
