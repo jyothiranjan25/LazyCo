@@ -55,13 +55,13 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     // IMPORTANT: Cannot use "*" when allowCredentials=true
     // Add all frontend origins that need to access the API
-    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+    configuration.setAllowedOrigins(List.of("*"));
 
     // Allow all standard HTTP methods
     configuration.setAllowedMethods(
         Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     // CRITICAL: Must be true to send cookies cross-origin
-    configuration.setAllowCredentials(true);
+    configuration.setAllowCredentials(false);
     // Allow all headers (or specify exact headers if needed)
     configuration.setAllowedHeaders(
         Arrays.asList(

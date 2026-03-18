@@ -16,6 +16,5 @@ public class SyllabusMasterDTO extends AbstractDTO<SyllabusMasterDTO> implements
   @InternalFilterableField private String name;
   private String description;
 
-  @InternalFilterableField
-  private Boolean isActive;
+  @InternalFilterableField private Boolean isActive;
 }

@@ -88,9 +88,9 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     abstractAction.pushBypassRBAC(true);
     try {
       AppUserDTO filter = new AppUserDTO();
-      if (request.getId() != null) filter.setIdsNotIn(List.of(request.getId()));
       // Check for duplicate userId
       if (!StringUtils.isEmpty(request.getUserId())) {
+        if (request.getId() != null) filter.setIdsNotIn(List.of(request.getId()));
         filter.setUserId(request.getUserId());
         if (getCount(filter) > 0) {
           throw new ApplicationException(
@@ -101,7 +101,8 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
       // Check for duplicate email
       if (!StringUtils.isEmpty(request.getEmail())) {
         filter = new AppUserDTO();
-        filter.setEmail(request.getEmail().toLowerCase());
+        if (request.getId() != null) filter.setIdsNotIn(List.of(request.getId()));
+        filter.setEmail(request.getEmail());
         if (getCount(filter) > 0) {
           throw new ApplicationException(
               AppUserMessage.EMAIL_IN_USE, new Object[] {request.getEmail()});

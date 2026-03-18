@@ -18,10 +18,16 @@ import org.hibernate.envers.Audited;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "syllabus_offered_course", comment = "Table to store syllabus offered course details",
+@Table(
+    name = "syllabus_offered_course",
+    comment = "Table to store syllabus offered course details",
     indexes = {
-        @Index(name = "idx_syllabus_offered_course_syllabus_course_id", columnList = "syllabus_course_id"),
-        @Index(name = "idx_syllabus_offered_course_course_class_type_id", columnList = "course_class_type_id")
+      @Index(
+          name = "idx_syllabus_offered_course_syllabus_course_id",
+          columnList = "syllabus_course_id"),
+      @Index(
+          name = "idx_syllabus_offered_course_course_class_type_id",
+          columnList = "course_class_type_id")
     })
 @EntityListeners(SyllabusOfferedCourseListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

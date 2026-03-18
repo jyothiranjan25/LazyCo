@@ -1,8 +1,8 @@
 # Application configuration
-app.name=LazyCo
-app.version=0.1.0
-app.environment=development
-cookie.safe=true
+APP_NAME=LazyCo
+APP_VERSION=0.1.0
+APP_ENVIRONMENT=development
+COOKIE_SAFE=true
 
 # Database configuration
 POSTGRES_HOST=localhost

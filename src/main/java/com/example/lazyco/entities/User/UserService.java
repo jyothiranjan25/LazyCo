@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class UserService implements UserDetailsService {
 
   // Get User by Username
   public UserDTO getUser(String userName) {
-    if (userName.isEmpty()) {
+    if (StringUtils.isEmpty(userName)) {
       return null;
     }
     AppUserDTO appUserDTO = appUserService.getUserByUserIdOrEmail(userName);

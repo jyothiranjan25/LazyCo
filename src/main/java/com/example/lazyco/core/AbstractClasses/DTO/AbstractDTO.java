@@ -42,16 +42,16 @@ public abstract class AbstractDTO<D> implements Serializable, Cloneable {
   @Expose(serialize = false, deserialize = false)
   private String assignedGroup;
 
-  @Expose(serialize = false, deserialize = false)
+  @Expose(deserialize = false)
   private Date createdAt;
 
-  @Expose(serialize = false, deserialize = false)
+  @Expose(deserialize = false)
   private String createdBy;
 
-  @Expose(serialize = false, deserialize = false)
+  @Expose(deserialize = false)
   private Date updatedAt;
 
-  @Expose(serialize = false, deserialize = false)
+  @Expose(deserialize = false)
   private String updatedBy;
 
   @Expose(serialize = false, deserialize = false)

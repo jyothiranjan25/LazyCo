@@ -4,8 +4,6 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.Fi
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
-import com.example.lazyco.entities.CourseMaster.CourseClassType.CourseClassType;
-import com.example.lazyco.entities.SyllabusMaster.SyllabusCourse.SyllabusCourse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,17 +12,15 @@ import lombok.Setter;
 @FilteredEntity(type = SyllabusOfferedCourse.class)
 public class SyllabusOfferedCourseDTO extends AbstractDTO<SyllabusOfferedCourseDTO> {
 
-    @InternalFilterableField
-    @FieldPath(fullyQualifiedPath = "syllabusCourse.id")
-    private Long syllabusCourseId;
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "syllabusCourse.id")
+  private Long syllabusCourseId;
 
-    @InternalFilterableField
-    @FieldPath(fullyQualifiedPath = "courseClassType.id")
-    private Long courseClassTypeId;
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseClassType.id")
+  private Long courseClassTypeId;
 
-    @InternalFilterableField
-    private Double credit;
+  @InternalFilterableField private Double credit;
 
-    @InternalFilterableField
-    private Boolean isMandatory;
+  @InternalFilterableField private Boolean isMandatory;
 }

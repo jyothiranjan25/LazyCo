@@ -1,6 +1,8 @@
 package com.example.lazyco.core.Enum;
 
 import com.example.lazyco.core.Utils.FieldTypeEnum;
+import com.example.lazyco.entities.AcademicProgram.ProgramLevelEnum;
+import com.example.lazyco.entities.AcademicProgram.ProgramStudyModeEnum;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
@@ -8,7 +10,8 @@ import lombok.Getter;
 @Getter
 public enum EnumClasses {
   FIELD_INPUT_TYPE("FIELD_INPUT_TYPE", FieldTypeEnum.class),
-  ;
+  PROGRAM_LEVEL_ENUM("PROGRAM_LEVEL_ENUM", ProgramLevelEnum.class),
+  PROGRAM_STUDY_MODE_ENUM("PROGRAM_STUDY_MODE_ENUM", ProgramStudyModeEnum.class);
   private final String key;
   private final Class<?> enumClass;
 

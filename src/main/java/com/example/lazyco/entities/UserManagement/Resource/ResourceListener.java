@@ -34,6 +34,10 @@ public class ResourceListener {
       resource.setAction(null);
     }
 
+    if (resource.getShowInMenu() == null) {
+      resource.setShowInMenu(true);
+    }
+
     if (resource.getParentResource() != null && StringUtils.isEmpty(resource.getAction())) {
       throw new ApplicationException(ResourceMessage.RESOURCE_ACTION_REQUIRED);
     }
