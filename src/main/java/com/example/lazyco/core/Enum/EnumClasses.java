@@ -5,11 +5,14 @@ import com.example.lazyco.entities.AcademicProgram.ProgramLevelEnum;
 import com.example.lazyco.entities.AcademicProgram.ProgramStudyModeEnum;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.example.lazyco.entities.UserManagement.Role.RoleTypeEnum;
 import lombok.Getter;
 
 @Getter
 public enum EnumClasses {
   FIELD_INPUT_TYPE("FIELD_INPUT_TYPE", FieldTypeEnum.class),
+  ROLE_TYPE_ENUM("ROLE_TYPE_ENUM", RoleTypeEnum.class),
   PROGRAM_LEVEL_ENUM("PROGRAM_LEVEL_ENUM", ProgramLevelEnum.class),
   PROGRAM_STUDY_MODE_ENUM("PROGRAM_STUDY_MODE_ENUM", ProgramStudyModeEnum.class);
   private final String key;

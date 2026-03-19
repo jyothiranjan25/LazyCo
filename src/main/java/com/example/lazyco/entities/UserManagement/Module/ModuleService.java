@@ -87,7 +87,21 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   @Override
   protected void makeUpdates(ModuleDTO source, Module target) {
     super.makeUpdates(source, target);
+
+    if(source.getAddResources() != null && !source.getAddResources().isEmpty()) {
+      target.setAction(null);
+    } else if (source.getAction() != null) {
+      target.setResources(null);
+    }
+
     mapAssociatedEntities(source, target);
+
+    if (StringUtils.isEmpty(target.getAction()) && (target.getResources() == null || target.getResources().isEmpty())) {
+      throw new ApplicationException(ModuleMessage.MODULE_ACTION_REQUIRED);
+    }
+    if (!StringUtils.isEmpty(target.getAction()) && target.getResources() != null && !target.getResources().isEmpty()) {
+      throw new ApplicationException(ModuleMessage.SELECT_ACTION_OR_RESOURCE);
+    }
   }
 
   private void mapAssociatedEntities(ModuleDTO source, Module target) {

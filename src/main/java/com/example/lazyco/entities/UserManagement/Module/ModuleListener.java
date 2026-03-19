@@ -11,26 +11,15 @@ public class ModuleListener {
   @PrePersist
   public void prePersist(Module module) {
     // Logic to execute before persisting entity
-    validationEntity(module);
   }
 
   @PreUpdate
   public void preUpdate(Module module) {
     // Logic to execute before persisting entity
-    validationEntity(module);
   }
 
   @PreRemove
   public void preRemove(Module module) {
     // Logic to execute before persisting entity
-  }
-
-  private void validationEntity(Module module) {
-    if (StringUtils.isEmpty(module.getAction()) && (module.getResources() == null || module.getResources().isEmpty())) {
-      throw new ApplicationException(ModuleMessage.MODULE_ACTION_REQUIRED);
-    }
-    if (!StringUtils.isEmpty(module.getAction()) && module.getResources() != null && !module.getResources().isEmpty()) {
-      throw new ApplicationException(ModuleMessage.SELECT_ACTION_OR_RESOURCE);
-    }
   }
 }
