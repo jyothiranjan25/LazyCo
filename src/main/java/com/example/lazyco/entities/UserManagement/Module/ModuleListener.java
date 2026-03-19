@@ -26,10 +26,10 @@ public class ModuleListener {
   }
 
   private void validationEntity(Module module) {
-    if (StringUtils.isEmpty(module.getAction()) && module.getResources() == null) {
+    if (StringUtils.isEmpty(module.getAction()) && (module.getResources() == null || module.getResources().isEmpty())) {
       throw new ApplicationException(ModuleMessage.MODULE_ACTION_REQUIRED);
     }
-    if (!StringUtils.isEmpty(module.getAction()) && module.getResources() != null) {
+    if (!StringUtils.isEmpty(module.getAction()) && module.getResources() != null && !module.getResources().isEmpty()) {
       throw new ApplicationException(ModuleMessage.SELECT_ACTION_OR_RESOURCE);
     }
   }

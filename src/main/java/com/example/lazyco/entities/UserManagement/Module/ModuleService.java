@@ -8,6 +8,7 @@ import com.example.lazyco.entities.UserManagement.Resource.ResourceMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -92,8 +93,8 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   private void mapAssociatedEntities(ModuleDTO source, Module target) {
     if (source.getAddResources() != null && !source.getAddResources().isEmpty()) {
       List<Resource> addResources = resourceMapper.mapDTOList(source.getAddResources());
-      target.setResources(
-          new HashSet<>(addAssociatedEntities(target.getResources(), addResources)));
+      Set<Resource> existingResources = target.getResources();
+      target.setResources(new HashSet<>(addAssociatedEntities(existingResources, addResources)));
     }
     if (source.getRemoveResources() != null && !source.getRemoveResources().isEmpty()) {
       List<Resource> removeResources = resourceMapper.mapDTOList(source.getRemoveResources());
