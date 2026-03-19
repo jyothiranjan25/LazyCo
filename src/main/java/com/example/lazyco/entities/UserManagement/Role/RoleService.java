@@ -105,14 +105,25 @@ public class RoleService extends CommonAbstractService<RoleDTO, Role> {
   }
 
   public void mapRoleModuleResources(RoleDTO request, Role entity) {
-    if (request.getRoleModuleResources() != null && !request.getRoleModuleResources().isEmpty()) {
-      for (RoleModuleResourceDTO roleModuleResourceDTO : request.getRoleModuleResources()) {
+    if (request.getAddRoleModuleResources() != null
+        && !request.getAddRoleModuleResources().isEmpty()) {
+      for (RoleModuleResourceDTO roleModuleResourceDTO : request.getAddRoleModuleResources()) {
         roleModuleResourceDTO.setRoleId(entity.getId());
-        if (roleModuleResourceDTO.getId() == null) {
-          roleModuleResourceService.executeCreateTransactional(roleModuleResourceDTO);
-        } else {
-          roleModuleResourceService.executeDeleteTransactional(roleModuleResourceDTO);
-        }
+        roleModuleResourceService.executeCreateTransactional(roleModuleResourceDTO);
+      }
+    }
+    if (request.getUpdateRoleModuleResources() != null
+        && !request.getUpdateRoleModuleResources().isEmpty()) {
+      for (RoleModuleResourceDTO roleModuleResourceDTO : request.getUpdateRoleModuleResources()) {
+        roleModuleResourceDTO.setRoleId(entity.getId());
+        roleModuleResourceService.directUpdate(roleModuleResourceDTO);
+      }
+    }
+    if (request.getDeleteRoleModuleResources() != null
+        && !request.getDeleteRoleModuleResources().isEmpty()) {
+      for (RoleModuleResourceDTO roleModuleResourceDTO : request.getDeleteRoleModuleResources()) {
+        roleModuleResourceDTO.setRoleId(entity.getId());
+        roleModuleResourceService.directDelete(roleModuleResourceDTO);
       }
     }
   }

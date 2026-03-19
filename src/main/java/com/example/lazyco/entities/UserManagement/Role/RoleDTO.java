@@ -18,5 +18,8 @@ public class RoleDTO extends AbstractDTO<RoleDTO> implements HasName {
   private String icon;
   private RoleTypeEnum roleType;
   private List<RoleModuleResourceDTO> roleModuleResources;
+  private List<RoleModuleResourceDTO> addRoleModuleResources;
+  private List<RoleModuleResourceDTO> updateRoleModuleResources;
+  private List<RoleModuleResourceDTO> deleteRoleModuleResources;
   private Boolean fetchModuleResources;
 }

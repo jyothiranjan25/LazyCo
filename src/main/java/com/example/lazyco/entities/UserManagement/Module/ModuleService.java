@@ -67,6 +67,7 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   @Override
   protected void preCreate(ModuleDTO request, Module entityToCreate) {
     mapAssociatedEntities(request, entityToCreate);
+    validateModuleRules(entityToCreate);
   }
 
   @Override
@@ -88,7 +89,7 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
   protected void makeUpdates(ModuleDTO source, Module target) {
     super.makeUpdates(source, target);
 
-    if(source.getAddResources() != null && !source.getAddResources().isEmpty()) {
+    if (source.getAddResources() != null && !source.getAddResources().isEmpty()) {
       target.setAction(null);
     } else if (source.getAction() != null) {
       target.setResources(null);
@@ -96,12 +97,7 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
 
     mapAssociatedEntities(source, target);
 
-    if (StringUtils.isEmpty(target.getAction()) && (target.getResources() == null || target.getResources().isEmpty())) {
-      throw new ApplicationException(ModuleMessage.MODULE_ACTION_REQUIRED);
-    }
-    if (!StringUtils.isEmpty(target.getAction()) && target.getResources() != null && !target.getResources().isEmpty()) {
-      throw new ApplicationException(ModuleMessage.SELECT_ACTION_OR_RESOURCE);
-    }
+    validateModuleRules(target);
   }
 
   private void mapAssociatedEntities(ModuleDTO source, Module target) {
@@ -123,5 +119,17 @@ public class ModuleService extends CommonAbstractService<ModuleDTO, Module> {
       updatedDTO.setResources(mapResourceTree(updatedDTO.getResources()));
     }
     return updatedDTO;
+  }
+
+  private void validateModuleRules(Module target) {
+    if (StringUtils.isEmpty(target.getAction())
+        && (target.getResources() == null || target.getResources().isEmpty())) {
+      throw new ApplicationException(ModuleMessage.MODULE_ACTION_REQUIRED);
+    }
+    if (!StringUtils.isEmpty(target.getAction())
+        && target.getResources() != null
+        && !target.getResources().isEmpty()) {
+      throw new ApplicationException(ModuleMessage.SELECT_ACTION_OR_RESOURCE);
+    }
   }
 }

@@ -15,9 +15,6 @@ public class RoleModuleResourceListener {
 
     if (roleModuleResource.getModule() == null)
       throw new ApplicationException(RoleModuleResourceMessage.MODULE_REQUIRED);
-
-    if (roleModuleResource.getResource() == null)
-      throw new ApplicationException(RoleModuleResourceMessage.RESOURCE_REQUIRED);
   }
 
   @PreUpdate

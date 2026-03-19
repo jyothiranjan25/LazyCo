@@ -3,10 +3,9 @@ package com.example.lazyco.core.Enum;
 import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.AcademicProgram.ProgramLevelEnum;
 import com.example.lazyco.entities.AcademicProgram.ProgramStudyModeEnum;
+import com.example.lazyco.entities.UserManagement.Role.RoleTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.example.lazyco.entities.UserManagement.Role.RoleTypeEnum;
 import lombok.Getter;
 
 @Getter

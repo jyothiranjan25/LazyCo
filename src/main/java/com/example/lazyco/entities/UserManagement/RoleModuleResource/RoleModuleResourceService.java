@@ -2,6 +2,7 @@ package com.example.lazyco.entities.UserManagement.RoleModuleResource;
 
 import com.example.lazyco.core.AbstractClasses.Service.AbstractService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RoleModuleResourceService
@@ -21,5 +22,23 @@ public class RoleModuleResourceService
       return super.executeCreateTransactional(dto);
     }
     return dto;
+  }
+
+  @Transactional
+  public void directUpdate(RoleModuleResourceDTO dto) {
+    RoleModuleResourceDTO filter = new RoleModuleResourceDTO();
+    filter.setRoleId(dto.getRoleId());
+    filter.setModuleId(dto.getModuleId());
+    filter.setResourceId(dto.getResourceId());
+    updateMethod(dto, filter);
+  }
+
+  @Transactional
+  public void directDelete(RoleModuleResourceDTO dto) {
+    RoleModuleResourceDTO filter = new RoleModuleResourceDTO();
+    filter.setRoleId(dto.getRoleId());
+    filter.setModuleId(dto.getModuleId());
+    filter.setResourceId(dto.getResourceId());
+    deleteMethod(filter);
   }
 }

@@ -11,6 +11,7 @@ import com.example.lazyco.core.Exceptions.ExceptionWrapper;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -212,6 +213,54 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
     return executeWithTemplate(dto, immediateFlush, this::executeUpdate);
   }
 
+  // Direct update method
+  public List<D> updateMethod(D dtoToUpdate, D filter) {
+    // Hook for subclasses to modify dto before update
+    updateDtoBeforeUpdate(dtoToUpdate);
+
+    // Validate that the DTO has an ID
+    if (Objects.isNull(filter)) {
+      throw new ApplicationException(CommonMessage.OBJECT_REQUIRED);
+    }
+
+    // validate before update
+    validateBeforeUpdate(dtoToUpdate);
+
+    List<D> resultList = new ArrayList<>();
+
+    // Retrieve existing entity
+    List<E> existingEntities = getEntities(filter);
+    for (E existingEntity : existingEntities) {
+      // Create a clone of the existing entity to apply updates
+      D entityClone = abstractMapper.map(existingEntity);
+
+      // Map the cloned entity back to an entity instance to be used in hooks
+      E entityToUpdate = abstractMapper.map(entityClone);
+
+      // Apply updates from DTO to the cloned entity
+      makeUpdates(dtoToUpdate, entityToUpdate);
+
+      afterMakeUpdates(dtoToUpdate, existingEntity, entityToUpdate);
+
+      // Pre-update hook
+      preUpdate(dtoToUpdate, entityClone, entityToUpdate);
+
+      // Save the updated entity
+      E updatedEntity = abstractDAO.update(entityToUpdate);
+
+      // Map back to DTO and return
+      D updatedDTO = abstractMapper.map(updatedEntity);
+
+      // Post-update hook
+      postUpdate(dtoToUpdate, entityClone, updatedEntity);
+
+      postUpdate(dtoToUpdate, entityClone, updatedEntity, updatedDTO);
+      D result = modifyUpdateResult(dtoToUpdate, updatedDTO);
+      resultList.add(result);
+    }
+    return resultList;
+  }
+
   // Core update logic
   private D executeUpdate(D dtoToUpdate, boolean immediateFlush) {
     // Hook for subclasses to modify dto before update
@@ -316,6 +365,39 @@ public abstract class AbstractService<D extends AbstractDTO<D>, E extends Abstra
   @Transactional(propagation = Propagation.NESTED)
   public D executeDeleteNestedTransactional(D dto) {
     return executeWithTemplate(dto, false, this::executeDelete);
+  }
+
+  // Core delete logic
+  public List<D> deleteMethod(D filter) {
+    // Hook for subclasses to modify dto before deletion
+    updateDtoBeforeDelete(filter);
+
+    // Validate that the DTO has an ID
+    if (Objects.isNull(filter)) {
+      throw new ApplicationException(CommonMessage.OBJECT_REQUIRED);
+    }
+
+    // result list
+    List<D> resultList = new ArrayList<>();
+
+    // Retrieve existing entity
+    List<E> existingEntities = getEntities(filter);
+
+    for (E existingEntity : existingEntities) {
+      // Pre-delete hook
+      preDelete(filter, existingEntity);
+
+      // Delete the entity
+      existingEntity = abstractDAO.delete(existingEntity);
+
+      // Post-delete hook
+      postDelete(filter, existingEntity);
+
+      // Return the original DTO
+      D result = abstractMapper.map(existingEntity);
+      resultList.add(result);
+    }
+    return resultList;
   }
 
   // Core delete logic

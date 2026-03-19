@@ -6,7 +6,6 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.entities.UserManagement.Module.ModuleDTO;
 import com.example.lazyco.entities.UserManagement.Resource.ResourceDTO;
-import com.example.lazyco.entities.UserManagement.Role.RoleDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,11 +26,9 @@ public class RoleModuleResourceDTO extends AbstractDTO<RoleModuleResourceDTO> {
   @FieldPath(fullyQualifiedPath = "resource.id")
   private Long resourceId;
 
-  private RoleDTO role;
+  private Integer displayOrder;
 
   private ModuleDTO module;
 
   private ResourceDTO resource;
-
-  private Integer displayOrder;
 }
