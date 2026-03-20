@@ -132,4 +132,9 @@ public class AppUserService extends AbstractService<AppUserDTO, AppUser>
     }
     return appUserDTO;
   }
+
+  @Override
+  protected void postCreate(AppUserDTO request, AppUser createdEntity, AppUserDTO createdDTO) {
+    // @TODO : send email notification
+  }
 }

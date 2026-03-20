@@ -61,4 +61,6 @@ public class AppUserDTO extends AbstractDTO<AppUserDTO> {
   private Date lastLoginDate;
 
   private String lastLoginIpAddress;
+
+  private Boolean sendUserCreationEmail;
 }
