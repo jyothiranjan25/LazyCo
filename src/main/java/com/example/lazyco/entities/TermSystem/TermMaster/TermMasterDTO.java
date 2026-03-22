@@ -19,4 +19,12 @@ public class TermMasterDTO extends AbstractDTO<TermMasterDTO> implements HasCode
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "termSystem.id")
   private Long termSystemId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termSystem.code")
+  private String termSystemCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termSystem.name")
+  private String termSystemName;
 }

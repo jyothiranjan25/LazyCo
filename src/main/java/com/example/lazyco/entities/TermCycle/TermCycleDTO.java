@@ -21,6 +21,22 @@ public class TermCycleDTO extends AbstractDTO<TermCycleDTO> implements HasCodeAn
   private Long academicYearId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicYear.code")
+  private String academicYearCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicYear.name")
+  private String academicYearName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "termMaster.id")
   private Long termMasterId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termMaster.code")
+  private String termMasterCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termMaster.name")
+  private String termMasterName;
 }
