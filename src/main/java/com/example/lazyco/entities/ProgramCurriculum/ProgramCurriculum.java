@@ -124,4 +124,9 @@ public class ProgramCurriculum extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "programCurriculum")
   private Set<Admission> admissions;
+
+  public Boolean getIsActive(){
+    LocalDate now = LocalDate.now();
+    return now.isBefore(this.endDate);
+  };
 }

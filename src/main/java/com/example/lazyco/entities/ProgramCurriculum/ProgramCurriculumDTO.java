@@ -30,14 +30,48 @@ public class ProgramCurriculumDTO extends AbstractDTO<ProgramCurriculumDTO>
   private Long academicYearId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicYear.code")
+  private String academicYearCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicYear.name")
+  private String academicYearName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "termSystem.id")
   private Long termSystemId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termSystem.code")
+  private String termSystemCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termSystem.name")
+  private String termSystemName;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "academicProgram.id")
   private Long academicProgramId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicProgram.code")
+  private String academicProgramCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicProgram.name")
+  private String academicProgramName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermSystem.id")
   private Long programTermSystemId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermSystem.code")
+  private String programTermSystemCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermSystem.name")
+  private String programTermSystemName;
+
+  private Boolean isActive;
 }

@@ -14,7 +14,6 @@ import lombok.Setter;
 public class TermMasterDTO extends AbstractDTO<TermMasterDTO> implements HasCodeAndName {
   @InternalFilterableField private String code;
   @InternalFilterableField private String name;
-  private String description;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "termSystem.id")

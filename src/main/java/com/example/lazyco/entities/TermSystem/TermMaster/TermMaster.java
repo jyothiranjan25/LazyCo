@@ -34,9 +34,6 @@ public class TermMaster extends AbstractRBACModel {
   @Column(name = "name", nullable = false, comment = "Name of the term system")
   private String name;
 
-  @Column(name = "description", comment = "Description of the term system")
-  private String description;
-
   @ManyToOne
   @JoinColumn(
       name = "term_system_id",
