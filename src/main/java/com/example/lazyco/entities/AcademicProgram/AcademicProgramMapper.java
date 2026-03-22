@@ -7,5 +7,7 @@ import org.mapstruct.*;
 public interface AcademicProgramMapper extends AbstractMapper<AcademicProgramDTO, AcademicProgram> {
 
   @Mapping(target = "institutionId", source = "institution.id")
+  @Mapping(target = "institutionCode", source = "institution.code")
+  @Mapping(target = "institutionName", source = "institution.name")
   AcademicProgramDTO map(AcademicProgram entity);
 }

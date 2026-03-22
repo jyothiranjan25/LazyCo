@@ -13,12 +13,19 @@ import lombok.Setter;
 @FilteredEntity(type = ProgramTermMaster.class)
 public class ProgramTermMasterDTO extends AbstractDTO<ProgramTermMasterDTO> implements HasName {
   @InternalFilterableField private String name;
-  private String description;
   @InternalFilterableField private Integer termSequence;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermSystem.id")
   private Long programTermSystemId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermSystem.code")
+  private String programTermSystemCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermSystem.name")
+  private String programTermSystemName;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermSystem.programCurriculums.id")

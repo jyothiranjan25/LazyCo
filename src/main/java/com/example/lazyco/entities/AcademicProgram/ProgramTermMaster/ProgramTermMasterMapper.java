@@ -9,5 +9,7 @@ public interface ProgramTermMasterMapper
     extends AbstractMapper<ProgramTermMasterDTO, ProgramTermMaster> {
 
   @Mapping(target = "programTermSystemId", source = "programTermSystem.id")
+  @Mapping(target = "programTermSystemCode", source = "programTermSystem.code")
+  @Mapping(target = "programTermSystemName", source = "programTermSystem.name")
   ProgramTermMasterDTO map(ProgramTermMaster entity);
 }

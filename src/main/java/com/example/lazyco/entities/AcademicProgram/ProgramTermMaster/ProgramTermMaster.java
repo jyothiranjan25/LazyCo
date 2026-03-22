@@ -34,9 +34,6 @@ public class ProgramTermMaster extends AbstractRBACModel {
   @Column(name = "name", comment = "Name of the a program term master")
   private String name;
 
-  @Column(name = "description", comment = "Description of the program term master")
-  private String description;
-
   @Column(name = "term_sequence", comment = "Sequence of the term in the program term system")
   private Integer termSequence;
 

@@ -21,4 +21,12 @@ public class ProgramSpecializationDTO extends AbstractDTO<ProgramSpecializationD
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "academicProgram.id")
   private Long academicProgramId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicProgram.code")
+  private String academicProgramCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "academicProgram.name")
+  private String academicProgramName;
 }

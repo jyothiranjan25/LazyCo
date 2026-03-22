@@ -9,5 +9,7 @@ public interface ProgramTermSystemMapper
     extends AbstractMapper<ProgramTermSystemDTO, ProgramTermSystem> {
 
   @Mapping(target = "academicProgramId", source = "academicProgram.id")
+  @Mapping(target = "academicProgramCode", source = "academicProgram.code")
+  @Mapping(target = "academicProgramName", source = "academicProgram.name")
   ProgramTermSystemDTO map(ProgramTermSystem entity);
 }

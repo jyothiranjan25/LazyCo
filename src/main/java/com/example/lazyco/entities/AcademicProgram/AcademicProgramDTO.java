@@ -26,6 +26,14 @@ public class AcademicProgramDTO extends AbstractDTO<AcademicProgramDTO> implemen
   @FieldPath(fullyQualifiedPath = "institution.id")
   private Long institutionId;
 
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "institution.code")
+  private String institutionCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "institution.name")
+  private String institutionName;
+
   private List<ProgramSpecializationDTO> programSpecializations;
 
   private List<ProgramTermSystemDTO> programTermSystems;

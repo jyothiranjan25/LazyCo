@@ -9,5 +9,7 @@ public interface ProgramSpecializationMapper
     extends AbstractMapper<ProgramSpecializationDTO, ProgramSpecialization> {
 
   @Mapping(target = "academicProgramId", source = "academicProgram.id")
+  @Mapping(target = "academicProgramCode", source = "academicProgram.code")
+  @Mapping(target = "academicProgramName", source = "academicProgram.name")
   ProgramSpecializationDTO map(ProgramSpecialization entity);
 }
