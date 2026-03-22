@@ -129,5 +129,4 @@ public class ProgramCurriculum extends AbstractRBACModel {
     LocalDate now = LocalDate.now();
     return now.isBefore(this.endDate);
   }
-  ;
 }
