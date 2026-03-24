@@ -1,9 +1,11 @@
 package com.example.lazyco.entities.ProgramCurriculum;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgramService;
+import java.time.LocalDate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,23 @@ public class ProgramCurriculumService
       AcademicProgramService academicProgramService) {
     super(programCurriculumMapper);
     this.academicProgramService = academicProgramService;
+  }
+
+  @Override
+  protected void addEntityFilters(CriteriaBuilderWrapper cbw, ProgramCurriculumDTO filter) {
+    if (filter.getStatus() != null) {
+      LocalDate localDate = LocalDate.now();
+      switch (filter.getStatus()) {
+        case ACTIVE:
+          cbw.between(localDate, "startDate", "endDate");
+          break;
+        case COMPLETED:
+          cbw.lt("endDate", localDate);
+          break;
+        case UPCOMING:
+          cbw.gt("startDate", localDate);
+      }
+    }
   }
 
   @Override

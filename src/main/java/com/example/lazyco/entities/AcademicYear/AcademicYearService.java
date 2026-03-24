@@ -19,9 +19,7 @@ public class AcademicYearService extends CommonAbstractService<AcademicYearDTO, 
     if (filter.getDateComparison() != null) {
       switch (filter.getDateComparison()) {
         case DATE_BETWEEN_START_AND_END_DATE -> {
-          cbw.and(
-              cbw.getGePredicate("endDate", filter.getComparisonDate()),
-              cbw.getLePredicate("startDate", filter.getComparisonDate()));
+          cbw.between(filter.getComparisonDate(), "startDate", "endDate");
         }
         case CONFLICT_CHECK -> addConflictRestrictions(cbw, filter);
       }
@@ -76,7 +74,8 @@ public class AcademicYearService extends CommonAbstractService<AcademicYearDTO, 
         filter.setIdsNotIn(List.of(request.getId()));
       }
       if (getCount(filter) > 0) {
-        throw new ApplicationException(AcademicYearMessage.ACADEMIC_YEAR_DATE_CONFLICT);
+        throw new ApplicationException(
+            AcademicYearMessage.ACADEMIC_YEAR_DATE_CONFLICT, new Object[] {request.getCode()});
       }
     }
   }

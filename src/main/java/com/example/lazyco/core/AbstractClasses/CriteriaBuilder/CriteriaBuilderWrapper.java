@@ -157,7 +157,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getGtPredicate(Path<?> path, Object value) {
-    return ComparisonPredicates.factory(value).getGtPredicate(criteriaBuilder, path, value);
+    return ComparisonPredicates.factory(path, value).getGtPredicate(criteriaBuilder, path, value);
   }
 
   public void propertyGt(String column1, String column2) {
@@ -166,8 +166,8 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getGtPredicate(column1Path, column2Path));
   }
 
-  public Predicate getGtPredicate(Path<?> path, Path<?> path2) {
-    return ComparisonPredicates.factory(path).getGtPredicate(criteriaBuilder, path, path2);
+  public Predicate getGtPredicate(Path<?> path1, Path<?> path2) {
+    return ComparisonPredicates.factory(path1, path2).getGtPredicate(criteriaBuilder, path1, path2);
   }
 
   /** Less than predicates */
@@ -186,7 +186,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getLtPredicate(Path<?> path, Object value) {
-    return ComparisonPredicates.factory(value).getLtPredicate(criteriaBuilder, path, value);
+    return ComparisonPredicates.factory(path, value).getLtPredicate(criteriaBuilder, path, value);
   }
 
   public void propertyLt(String column1, String column2) {
@@ -195,8 +195,8 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getLtPredicate(column1Path, column2Path));
   }
 
-  public Predicate getLtPredicate(Path<?> path, Path<?> path2) {
-    return ComparisonPredicates.factory(path).getLtPredicate(criteriaBuilder, path, path2);
+  public Predicate getLtPredicate(Path<?> path1, Path<?> path2) {
+    return ComparisonPredicates.factory(path1, path2).getLtPredicate(criteriaBuilder, path1, path2);
   }
 
   /** Greater than or equal predicates */
@@ -215,7 +215,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getGePredicate(Path<?> path, Object value) {
-    return ComparisonPredicates.factory(value).getGePredicate(criteriaBuilder, path, value);
+    return ComparisonPredicates.factory(path, value).getGePredicate(criteriaBuilder, path, value);
   }
 
   public void propertyGe(String column1, String column2) {
@@ -224,8 +224,8 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getGePredicate(column1Path, column2Path));
   }
 
-  public Predicate getGePredicate(Path<?> path, Path<?> path2) {
-    return ComparisonPredicates.factory(path).getGePredicate(criteriaBuilder, path, path2);
+  public Predicate getGePredicate(Path<?> path1, Path<?> path2) {
+    return ComparisonPredicates.factory(path1, path2).getGePredicate(criteriaBuilder, path1, path2);
   }
 
   /** Less than or equal predicates */
@@ -244,7 +244,7 @@ public class CriteriaBuilderWrapper {
   }
 
   public Predicate getLePredicate(Path<?> path, Object value) {
-    return ComparisonPredicates.factory(value).getLePredicate(criteriaBuilder, path, value);
+    return ComparisonPredicates.factory(path, value).getLePredicate(criteriaBuilder, path, value);
   }
 
   public void propertyLe(String column1, String column2) {
@@ -253,8 +253,8 @@ public class CriteriaBuilderWrapper {
     finalPredicate = criteriaBuilder.and(finalPredicate, getLePredicate(column1Path, column2Path));
   }
 
-  public Predicate getLePredicate(Path<?> path, Path<?> path2) {
-    return ComparisonPredicates.factory(path).getLePredicate(criteriaBuilder, path, path2);
+  public Predicate getLePredicate(Path<?> path1, Path<?> path2) {
+    return ComparisonPredicates.factory(path1, path2).getLePredicate(criteriaBuilder, path1, path2);
   }
 
   /** IN predicates */
@@ -501,12 +501,33 @@ public class CriteriaBuilderWrapper {
     }
   }
 
+  public void between(Object value, String path1, String path2) {
+    between(value, getExpression(path1), getExpression(path2));
+  }
+
+  public void between(Object value, Path<?> path1, Path<?> path2) {
+    if (validateValue(path1, value)) {
+      finalPredicate =
+          criteriaBuilder.and(finalPredicate, getBetweenPredicate(value, path1, path2));
+    }
+  }
+
   public Predicate getBetweenPredicate(String key, Object from, Object to) {
     return getBetweenPredicate(getExpression(key), from, to);
   }
 
   public Predicate getBetweenPredicate(Path<?> path, Object from, Object to) {
-    return ComparisonPredicates.factory(from).getBetweenPredicate(criteriaBuilder, path, from, to);
+    return ComparisonPredicates.factory(path, from, to)
+        .getBetweenPredicate(criteriaBuilder, path, from, to);
+  }
+
+  public Predicate getBetweenPredicate(Object value, String path1, String path2) {
+    return getBetweenPredicate(value, getExpression(path1), getExpression(path2));
+  }
+
+  public Predicate getBetweenPredicate(Object value, Path<?> path1, Path<?> path2) {
+    return ComparisonPredicates.factory(value, path1, path2)
+        .getBetweenPredicate(criteriaBuilder, value, path1, path2);
   }
 
   /** Not Between predicates */
@@ -519,6 +540,18 @@ public class CriteriaBuilderWrapper {
       finalPredicate =
           criteriaBuilder.and(
               finalPredicate, criteriaBuilder.not(getBetweenPredicate(key, from, to)));
+    }
+  }
+
+  public void notBetween(Object value, String path1, String path2) {
+    notBetween(value, getExpression(path1), getExpression(path2));
+  }
+
+  public void notBetween(Object value, Path<?> path1, Path<?> path2) {
+    if (validateValue(path1, value)) {
+      finalPredicate =
+          criteriaBuilder.and(
+              finalPredicate, criteriaBuilder.not(getBetweenPredicate(value, path1, path2)));
     }
   }
 

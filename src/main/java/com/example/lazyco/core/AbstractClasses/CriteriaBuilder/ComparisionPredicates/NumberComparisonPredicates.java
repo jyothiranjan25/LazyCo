@@ -34,6 +34,18 @@ public class NumberComparisonPredicates implements ComparisonPredicates {
         getLePredicate(criteriaBuilder, expression, to));
   }
 
+  public Predicate getBetweenPredicate(
+      HibernateCriteriaBuilder criteriaBuilder,
+      Object value,
+      Expression<?> expression1,
+      Expression<?> expression2) {
+    Expression<? extends Number> literal = criteriaBuilder.literal((Number) value);
+    Expression<? extends Number> lower = (Expression<? extends Number>) expression1;
+    Expression<? extends Number> upper = (Expression<? extends Number>) expression2;
+    return criteriaBuilder.and(
+        criteriaBuilder.ge(literal, lower), criteriaBuilder.le(literal, upper));
+  }
+
   /** below are for comparing the column with other column of the table. */
   public Predicate getGePredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {

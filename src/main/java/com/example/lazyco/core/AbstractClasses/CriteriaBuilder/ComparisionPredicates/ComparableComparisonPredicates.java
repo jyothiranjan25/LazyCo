@@ -32,6 +32,17 @@ public class ComparableComparisonPredicates implements ComparisonPredicates {
     return criteriaBuilder.between(expression, (Comparable) from, (Comparable) to);
   }
 
+  public Predicate getBetweenPredicate(
+      HibernateCriteriaBuilder criteriaBuilder,
+      Object value,
+      Expression<?> expression1,
+      Expression<?> expression2) {
+    return criteriaBuilder.between(
+        criteriaBuilder.literal((Comparable) value),
+        (Expression<? extends Comparable>) expression1,
+        (Expression<? extends Comparable>) expression2);
+  }
+
   public Predicate getGePredicate(
       HibernateCriteriaBuilder criteriaBuilder, Expression expression1, Expression expression2) {
     return criteriaBuilder.greaterThanOrEqualTo(

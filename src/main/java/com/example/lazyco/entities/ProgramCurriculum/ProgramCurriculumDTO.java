@@ -73,5 +73,5 @@ public class ProgramCurriculumDTO extends AbstractDTO<ProgramCurriculumDTO>
   @FieldPath(fullyQualifiedPath = "programTermSystem.name")
   private String programTermSystemName;
 
-  private Boolean isActive;
+  private ProgramCurriculumStatusEnum status;
 }
