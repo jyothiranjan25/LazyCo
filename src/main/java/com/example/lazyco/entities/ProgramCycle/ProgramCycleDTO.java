@@ -34,10 +34,42 @@ public class ProgramCycleDTO extends AbstractDTO<ProgramCycleDTO> implements Has
   private Long programCurriculumId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programCurriculum.code")
+  private String programCurriculumCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programCurriculum.name")
+  private String programCurriculumName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "termCycle.id")
   private Long termCycleId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termCycle.code")
+  private String termCycleCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "termCycle.name")
+  private String termCycleName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "programTermMaster.id")
   private Long programTermMasterId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programTermMaster.name")
+  private String programTermMasterName;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "syllabusMaster.id")
+  private Long SyllabusMasterId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "syllabusMaster.code")
+  private String SyllabusMasterCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "syllabusMaster.name")
+  private String SyllabusMasterName;
 }
