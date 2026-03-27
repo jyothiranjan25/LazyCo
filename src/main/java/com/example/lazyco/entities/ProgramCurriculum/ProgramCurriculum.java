@@ -131,7 +131,7 @@ public class ProgramCurriculum extends AbstractRBACModel {
     }
     LocalDate now = LocalDate.now();
     if (!now.isBefore(startDate) && !now.isAfter(endDate)) {
-      return ProgramCurriculumStatusEnum.ACTIVE;
+      return ProgramCurriculumStatusEnum.ONGOING;
     } else if (now.isAfter(endDate)) {
       return ProgramCurriculumStatusEnum.COMPLETED;
     } else {

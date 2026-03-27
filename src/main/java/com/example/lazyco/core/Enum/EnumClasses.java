@@ -3,6 +3,7 @@ package com.example.lazyco.core.Enum;
 import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.AcademicProgram.ProgramLevelEnum;
 import com.example.lazyco.entities.AcademicProgram.ProgramStudyModeEnum;
+import com.example.lazyco.entities.CourseMaster.CourseRequisite.CourseRequisiteTypeEnum;
 import com.example.lazyco.entities.UserManagement.Role.RoleTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,10 @@ public enum EnumClasses {
   FIELD_INPUT_TYPE("FIELD_INPUT_TYPE", FieldTypeEnum.class),
   ROLE_TYPE_ENUM("ROLE_TYPE_ENUM", RoleTypeEnum.class),
   PROGRAM_LEVEL_ENUM("PROGRAM_LEVEL_ENUM", ProgramLevelEnum.class),
-  PROGRAM_STUDY_MODE_ENUM("PROGRAM_STUDY_MODE_ENUM", ProgramStudyModeEnum.class);
+  PROGRAM_STUDY_MODE_ENUM("PROGRAM_STUDY_MODE_ENUM", ProgramStudyModeEnum.class),
+  COURSE_REQUISITE_TYPE("COURSE_REQUISITE_TYPE", CourseRequisiteTypeEnum.class),
+  ;
+
   private final String key;
   private final Class<?> enumClass;
 

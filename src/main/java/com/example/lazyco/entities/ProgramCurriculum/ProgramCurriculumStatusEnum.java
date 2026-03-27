@@ -4,4 +4,5 @@ public enum ProgramCurriculumStatusEnum {
   ACTIVE,
   COMPLETED,
   UPCOMING,
+  ONGOING
 }

@@ -5,6 +5,7 @@ import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgram;
 import com.example.lazyco.entities.AcademicProgram.AcademicProgramService;
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,18 @@ public class ProgramCurriculumService
       LocalDate localDate = LocalDate.now();
       switch (filter.getStatus()) {
         case ACTIVE:
-          cbw.between(localDate, "startDate", "endDate");
+          Predicate between = cbw.getBetweenPredicate(localDate, "startDate", "endDate");
+          Predicate greater = cbw.getGtPredicate("startDate", localDate);
+          cbw.orGroup(between, greater);
           break;
-        case COMPLETED:
-          cbw.lt("endDate", localDate);
+        case ONGOING:
+          cbw.between(localDate, "startDate", "endDate");
           break;
         case UPCOMING:
           cbw.gt("startDate", localDate);
+        case COMPLETED:
+          cbw.lt("endDate", localDate);
+          break;
       }
     }
   }

@@ -16,6 +16,14 @@ public class CourseCreditDTO extends AbstractDTO<CourseCreditDTO> {
   @FieldPath(fullyQualifiedPath = "course.id")
   private Long courseId;
 
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "course.code")
+  private String courseCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "course.name")
+  private String courseName;
+
   @InternalFilterableField private Double credit;
 
   @InternalFilterableField private Boolean allowRollOver;

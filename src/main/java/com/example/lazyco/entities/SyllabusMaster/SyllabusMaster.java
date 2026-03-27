@@ -41,7 +41,7 @@ public class SyllabusMaster extends AbstractRBACModel {
 
   @Column(
       name = "is_active",
-      columnDefinition = "boolean default false",
+      columnDefinition = "boolean default true",
       comment = "indicates if the syllabus master is active")
   private Boolean isActive;
 

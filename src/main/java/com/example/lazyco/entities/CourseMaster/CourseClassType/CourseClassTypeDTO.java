@@ -17,6 +17,18 @@ public class CourseClassTypeDTO extends AbstractDTO<CourseClassTypeDTO> {
   private Long courseId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "course.code")
+  private String courseCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "course.name")
+  private String courseName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "classType.id")
   private Long classTypeId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "classType.name")
+  private String classTypeName;
 }

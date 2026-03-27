@@ -8,6 +8,9 @@ import org.mapstruct.Mapping;
 public interface CourseClassTypeMapper extends AbstractMapper<CourseClassTypeDTO, CourseClassType> {
 
   @Mapping(target = "courseId", source = "course.id")
+  @Mapping(target = "courseCode", source = "course.code")
+  @Mapping(target = "courseName", source = "course.name")
   @Mapping(target = "classTypeId", source = "classType.id")
+  @Mapping(target = "classTypeName", source = "classType.name")
   CourseClassTypeDTO map(CourseClassType entity);
 }

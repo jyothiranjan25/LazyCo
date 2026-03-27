@@ -33,6 +33,7 @@ public class CourseRequisiteService
       bidirectionalRequisites.add(bidirectionalRequisite);
 
       dto.setObjects(bidirectionalRequisites);
+      dto.setIsAtomicOperation(true);
     }
     return super.create(dto);
   }
