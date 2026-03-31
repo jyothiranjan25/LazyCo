@@ -9,7 +9,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 @Component
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -29,8 +29,9 @@ public class FileParamsResolver implements HandlerMethodArgumentResolver {
       ModelAndViewContainer mavContainer,
       NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory) {
-    StandardMultipartHttpServletRequest multipartRequest =
-        (StandardMultipartHttpServletRequest) webRequest.getNativeRequest();
+    if (!(webRequest.getNativeRequest() instanceof MultipartHttpServletRequest multipartRequest)) {
+      throw new ExceptionWrapper("Request is not a multipart request");
+    }
     try {
       AbstractDTO dto = RequestHandlingHelper.populateDTOFromRequest(parameter, multipartRequest);
       dto.setFileMap(RequestHandlingHelper.extractFileFromRequest(multipartRequest));

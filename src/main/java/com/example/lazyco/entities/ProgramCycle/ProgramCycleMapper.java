@@ -10,5 +10,6 @@ public interface ProgramCycleMapper extends AbstractMapper<ProgramCycleDTO, Prog
   @Mapping(target = "programCurriculumId", source = "programCurriculum.id")
   @Mapping(target = "termCycleId", source = "termCycle.id")
   @Mapping(target = "programTermMasterId", source = "programTermMaster.id")
+  @Mapping(target = "syllabusMasterId", source = "syllabusMaster.id")
   ProgramCycleDTO map(ProgramCycle entity);
 }

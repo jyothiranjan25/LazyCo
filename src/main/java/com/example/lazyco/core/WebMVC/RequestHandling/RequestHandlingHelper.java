@@ -124,38 +124,30 @@ public class RequestHandlingHelper {
     String originalFileName = Path.of(file.getOriginalFilename()).getFileName().toString();
     String uniqueFileName = UUID.randomUUID().toString().concat("_").concat(originalFileName);
 
-    // Create a temp file in a safe location
+    // Create a temp file in a safe location (createDirectories is idempotent)
     Path tempDir = Path.of(CommonConstants.TOMCAT_TEMP);
     try {
-      if (!Files.exists(tempDir)) {
-        Files.createDirectories(tempDir);
-      }
+      Files.createDirectories(tempDir);
     } catch (IOException e) {
       ApplicationLogger.error("Failed to create temp directory: " + tempDir, e);
       return null;
     }
 
-    // Ensure unique file path
     Path tempFile = tempDir.resolve(uniqueFileName);
-
-    // Create the file
     File tempFileCheck = tempFile.toFile();
 
     try {
       // First try transferTo (fastest, platform-dependent)
-      // Move file immediately to target location
       file.transferTo(tempFileCheck);
     } catch (Exception e) {
-      ApplicationLogger.error("Failed to transfer fileto temp location: " + tempFileCheck, e);
+      ApplicationLogger.error("Failed to transfer file to temp location: " + tempFileCheck, e);
       // If transferTo fails, fallback to streaming copy (safe for large files)
       try (InputStream inputStream = file.getInputStream()) {
-        // Use streaming copy to avoid memory issues with large files
         Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException copyEx) {
         ApplicationLogger.error(
             "Failed to copy uploaded file to temp location: " + tempFileCheck, copyEx);
         try {
-          // Cleanup partially written file
           Files.deleteIfExists(tempFile);
         } catch (IOException deleteEx) {
           ApplicationLogger.error("Failed to delete partial temp file: " + tempFile, deleteEx);
@@ -164,6 +156,18 @@ public class RequestHandlingHelper {
       }
     }
 
-    return new FileDTO(tempFileCheck);
+    try {
+      return new FileDTO(tempFileCheck);
+    } catch (Exception e) {
+      // FileDTO constructor rejects unsupported types — delete the orphaned temp file
+      ApplicationLogger.error("FileDTO construction failed for: " + tempFileCheck, e);
+      try {
+        Files.deleteIfExists(tempFile);
+      } catch (IOException deleteEx) {
+        ApplicationLogger.error(
+            "Failed to delete temp file after FileDTO error: " + tempFile, deleteEx);
+      }
+      return null;
+    }
   }
 }

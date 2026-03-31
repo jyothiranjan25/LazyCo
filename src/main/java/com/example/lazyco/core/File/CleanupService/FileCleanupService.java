@@ -6,6 +6,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Stream;
 
 public class FileCleanupService {
 
@@ -45,11 +46,26 @@ public class FileCleanupService {
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                throws IOException {
-              // Optionally delete empty directories older than threshold
-              if (!dir.equals(directory) && Files.list(dir).findAny().isEmpty()) {
-                Files.delete(dir);
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+              if (exc != null) {
+                ApplicationLogger.error("Error visiting directory: " + dir, exc);
+                return FileVisitResult.CONTINUE;
+              }
+              if (dir.equals(directory)) return FileVisitResult.CONTINUE;
+              boolean isEmpty;
+              try (Stream<Path> entries = Files.list(dir)) {
+                isEmpty = entries.findAny().isEmpty();
+              } catch (IOException e) {
+                ApplicationLogger.error("Failed to list directory: " + dir, e);
+                return FileVisitResult.CONTINUE;
+              }
+              if (isEmpty) {
+                try {
+                  Files.delete(dir);
+                } catch (IOException e) {
+                  // Race condition: another process may have added a file — skip silently
+                  ApplicationLogger.debug("Could not delete directory (may not be empty): " + dir);
+                }
               }
               return FileVisitResult.CONTINUE;
             }

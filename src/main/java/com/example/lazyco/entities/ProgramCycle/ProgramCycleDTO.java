@@ -63,13 +63,13 @@ public class ProgramCycleDTO extends AbstractDTO<ProgramCycleDTO> implements Has
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "syllabusMaster.id")
-  private Long SyllabusMasterId;
+  private Long syllabusMasterId;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "syllabusMaster.code")
-  private String SyllabusMasterCode;
+  private String syllabusMasterCode;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "syllabusMaster.name")
-  private String SyllabusMasterName;
+  private String syllabusMasterName;
 }

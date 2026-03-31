@@ -63,7 +63,8 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
     if (file == null || file.getFile() == null || file.getFile().length() == 0) {
       throw new ExceptionWrapper("Uploaded file is empty or invalid");
     }
-    if (!Objects.equals(file.getExtension(), FileTypeEnum.CSV.name().toLowerCase())) {
+    if (!FileTypeEnum.CSV.name().equalsIgnoreCase(file.getExtension())) {
+      file.deleteSafe();
       throw new ExceptionWrapper("Uploaded file is not a CSV file");
     }
     try {
@@ -73,6 +74,7 @@ public class CsvParamsResolver implements HandlerMethodArgumentResolver {
       dtoInstance.setObjects(generateCsvToList(file, dtoInstance.getClass()));
       return dtoInstance;
     } catch (Exception e) {
+      file.deleteSafe();
       throw new ExceptionWrapper("Failed to parse CSV", e);
     }
   }

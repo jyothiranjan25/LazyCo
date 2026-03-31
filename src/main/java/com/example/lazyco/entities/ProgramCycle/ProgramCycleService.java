@@ -68,7 +68,7 @@ public class ProgramCycleService extends CommonAbstractService<ProgramCycleDTO, 
           ProgramCycleMessage.PROGRAM_CYCLE_GRADES_SUBMISSION_DEADLINE_DATE_REQUIRED);
     }
 
-    if (request.getEndDate().isAfter(request.getGradeSubmissionDeadline().toLocalDate())) {
+    if (!request.getGradeSubmissionDeadline().toLocalDate().isAfter(request.getEndDate())) {
       throw new ApplicationException(
           ProgramCycleMessage.PROGRAM_CYCLE_INVALID_GRADES_SUBMISSION_DEADLINE_DATE);
     }
