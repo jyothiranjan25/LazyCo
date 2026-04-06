@@ -4,5 +4,4 @@ public enum DocumentTypeEnum {
   GENERAL,
   STUDENT,
   EMPLOYEE,
-  OTHER,
 }

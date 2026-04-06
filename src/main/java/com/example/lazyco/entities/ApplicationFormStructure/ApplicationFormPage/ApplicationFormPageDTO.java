@@ -18,6 +18,7 @@ public class ApplicationFormPageDTO extends AbstractDTO<ApplicationFormPageDTO> 
   @InternalFilterableField private String name;
   @InternalFilterableField private String key;
   private String description;
+  private Integer order;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "applicationFormTemplate.id")

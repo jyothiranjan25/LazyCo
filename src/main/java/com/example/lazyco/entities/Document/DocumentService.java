@@ -32,11 +32,4 @@ public class DocumentService extends CommonAbstractService<DocumentDTO, Document
       validateUniqueCode(request, DocumentMessage.DUPLICATE_DOCUMENT_KEY);
     }
   }
-
-  @Override
-  protected void makeUpdates(DocumentDTO source, Document target) {
-    if (source.getDocumentType() != null) {
-      target.setDocumentType(source.getDocumentType());
-    }
-  }
 }

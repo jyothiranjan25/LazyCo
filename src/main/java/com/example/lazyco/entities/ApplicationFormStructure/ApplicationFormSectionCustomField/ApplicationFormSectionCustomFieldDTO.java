@@ -18,6 +18,8 @@ public class ApplicationFormSectionCustomFieldDTO
 
   @InternalFilterableField private Boolean isRequired;
 
+  private Integer order;
+
   @InternalFilterableField
   @FieldPath(
       fullyQualifiedPath =

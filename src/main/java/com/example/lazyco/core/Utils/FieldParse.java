@@ -1,8 +1,6 @@
 package com.example.lazyco.core.Utils;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
@@ -101,89 +99,125 @@ public class FieldParse {
 
   public static LocalDate parseLocalDate(Object value) {
     if (value == null) return null;
-    if (value instanceof LocalDate ld) {
-      return ld;
-    }
+
+    if (value instanceof LocalDate ld) return ld;
+
     if (value instanceof String s) {
-      DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
-      DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+      // 1. yyyy-MM-dd
       try {
-        return LocalDate.parse(s, DATE_FORMATTER);
-      } catch (Exception e) {
-        return LocalDate.parse(s, DATE_TIME_FORMATTER);
+        return LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE);
+      } catch (Exception ignored) {
+      }
+
+      // 2. ISO Instant (with Z)
+      try {
+        return Instant.parse(s).atZone(ZoneOffset.UTC).toLocalDate();
+      } catch (Exception ignored) {
+      }
+
+      // 3. ISO datetime without zone
+      try {
+        return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate();
+      } catch (Exception ignored) {
       }
     }
+
     throw new IllegalArgumentException("Cannot convert to LocalDate: " + value);
   }
 
-  public static LocalDate parseLocalDate(Object value, String formatter) {
+  public static LocalDate parseLocalDate(Object value, String pattern) {
     if (value == null) return null;
-    if (value instanceof LocalDate ld) {
-      return ld;
-    }
+
+    if (value instanceof LocalDate ld) return ld;
+
     if (value instanceof String s) {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(formatter);
-      return LocalDate.parse(s, dateFormatter);
+      return LocalDate.parse(s, DateTimeFormatter.ofPattern(pattern));
     }
+
     throw new IllegalArgumentException("Cannot convert to LocalDate: " + value);
   }
+
+  // ================= LOCAL TIME =================
 
   public static LocalTime parseLocalTime(Object value) {
     if (value == null) return null;
-    if (value instanceof LocalTime lt) {
-      return lt;
-    }
+
+    if (value instanceof LocalTime lt) return lt;
+
     if (value instanceof String s) {
-      DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-      DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+      // 1. HH:mm:ss
       try {
-        return LocalTime.parse(s, DATE_TIME_FORMATTER);
-      } catch (Exception e) {
-        return LocalTime.parse(s, DATE_FORMATTER);
+        return LocalTime.parse(s, DateTimeFormatter.ISO_LOCAL_TIME);
+      } catch (Exception ignored) {
+      }
+
+      // 2. ISO datetime
+      try {
+        return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalTime();
+      } catch (Exception ignored) {
+      }
+
+      // 3. Instant (Z)
+      try {
+        return Instant.parse(s).atZone(ZoneOffset.UTC).toLocalTime();
+      } catch (Exception ignored) {
       }
     }
+
     throw new IllegalArgumentException("Cannot convert to LocalTime: " + value);
   }
 
-  public static LocalTime parseLocalTime(Object value, String formater) {
+  public static LocalTime parseLocalTime(Object value, String pattern) {
     if (value == null) return null;
-    if (value instanceof LocalTime lt) {
-      return lt;
-    }
+
+    if (value instanceof LocalTime lt) return lt;
+
     if (value instanceof String s) {
-      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formater);
-      return LocalTime.parse(s, dateTimeFormatter);
+      return LocalTime.parse(s, DateTimeFormatter.ofPattern(pattern));
     }
-    throw new IllegalArgumentException("Cannot convert to String: " + value);
+
+    throw new IllegalArgumentException("Cannot convert to LocalTime: " + value);
   }
+
+  // ================= LOCAL DATETIME =================
 
   public static LocalDateTime parseLocalDateTime(Object value) {
     if (value == null) return null;
-    if (value instanceof LocalDateTime ldt) {
-      return ldt;
-    }
+
+    if (value instanceof LocalDateTime ldt) return ldt;
+
     if (value instanceof String s) {
-      DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-      DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+      // 1. ISO local datetime
       try {
-        return LocalDateTime.parse(s, DATE_TIME_FORMATTER);
-      } catch (Exception e) {
-        LocalDate date = LocalDate.parse(s, DATE_FORMATTER);
-        return date.atStartOfDay();
+        return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+      } catch (Exception ignored) {
+      }
+
+      // 2. Instant (Z)
+      try {
+        return Instant.parse(s).atZone(ZoneOffset.UTC).toLocalDateTime();
+      } catch (Exception ignored) {
+      }
+
+      // 3. Only date
+      try {
+        return LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+      } catch (Exception ignored) {
       }
     }
+
     throw new IllegalArgumentException("Cannot convert to LocalDateTime: " + value);
   }
 
-  public static LocalDateTime parseLocalDateTime(Object value, String formatter) {
+  public static LocalDateTime parseLocalDateTime(Object value, String pattern) {
     if (value == null) return null;
-    if (value instanceof LocalDateTime ldt) {
-      return ldt;
-    }
+
+    if (value instanceof LocalDateTime ldt) return ldt;
+
     if (value instanceof String s) {
-      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter);
-      return LocalDateTime.parse(s, dateTimeFormatter);
+      return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(pattern));
     }
+
     throw new IllegalArgumentException("Cannot convert to LocalDateTime: " + value);
   }
 

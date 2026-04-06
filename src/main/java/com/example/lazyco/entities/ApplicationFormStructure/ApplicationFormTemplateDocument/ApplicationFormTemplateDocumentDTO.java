@@ -16,6 +16,8 @@ public class ApplicationFormTemplateDocumentDTO
 
   @InternalFilterableField private Boolean isMandatory;
 
+  private Integer order;
+
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "applicationFormTemplate.id")
   private Long applicationFormTemplateId;

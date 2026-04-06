@@ -41,6 +41,12 @@ public class ApplicationFormTemplateDocument extends AbstractRBACModel {
       comment = "Whether this document is mandatory for the application form")
   private Boolean isMandatory;
 
+  @Column(
+      name = "display_order",
+      columnDefinition = "integer default 0",
+      comment = "Order of the document within the application form template")
+  private Integer order;
+
   @ManyToOne
   @JoinColumn(
       name = "application_form_template_id",

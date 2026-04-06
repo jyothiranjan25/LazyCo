@@ -37,6 +37,12 @@ public class ApplicationFormSectionCustomField extends AbstractRBACModel {
       comment = "Indicates whether the custom field is required")
   private Boolean isRequired;
 
+  @Column(
+      name = "display_order",
+      columnDefinition = "integer default 0",
+      comment = "Order of the custom field within the application form section")
+  private Integer order;
+
   @ManyToOne
   @JoinColumn(
       name = "application_form_page_section_id",

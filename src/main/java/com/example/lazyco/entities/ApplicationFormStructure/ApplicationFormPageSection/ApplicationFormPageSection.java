@@ -40,6 +40,12 @@ public class ApplicationFormPageSection extends AbstractRBACModel {
   @Column(name = "description", comment = "Description of the application form section")
   private String description;
 
+  @Column(
+      name = "display_order",
+      columnDefinition = "integer default 0",
+      comment = "Order of the section within the application form page")
+  private Integer order;
+
   @ManyToOne
   @JoinColumn(
       name = "application_form_page_id",

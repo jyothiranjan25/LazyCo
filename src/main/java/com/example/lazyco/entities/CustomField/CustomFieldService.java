@@ -70,8 +70,10 @@ public class CustomFieldService extends CommonAbstractService<CustomFieldDTO, Cu
       CustomFieldDTO entityBeforeUpdate,
       CustomField updatedEntity,
       CustomFieldDTO updatedDTO) {
-    List<CustomFieldOptionDTO> options = updatedDTO.getOptions();
-    options.addAll(addCustomFieldOptions(request, updatedEntity));
+    if (updatedDTO.getOptions() != null) {
+      List<CustomFieldOptionDTO> options = updatedDTO.getOptions();
+      options.addAll(addCustomFieldOptions(request, updatedEntity));
+    }
   }
 
   private List<CustomFieldOptionDTO> addCustomFieldOptions(

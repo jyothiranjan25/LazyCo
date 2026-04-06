@@ -6,10 +6,11 @@ import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FilteredEntity;
 import com.example.lazyco.core.AbstractClasses.DTO.AbstractDTO;
 import com.example.lazyco.core.AbstractClasses.DTO.HasCode;
 import com.example.lazyco.core.Utils.GenderEnum;
+import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomFieldDTO;
 import com.google.gson.annotations.Expose;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -72,7 +73,7 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> implemen
   @FieldPath(fullyQualifiedPath = "startingProgramCycle.code")
   private String startingProgramCycleCode;
 
-  private Map<String, Object> customFields;
+  private List<ApplicationFormCustomFieldDTO> applicationFormCustomFields;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "admission.id")

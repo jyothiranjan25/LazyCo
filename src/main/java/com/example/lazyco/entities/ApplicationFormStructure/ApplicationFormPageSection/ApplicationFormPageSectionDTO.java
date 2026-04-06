@@ -19,6 +19,7 @@ public class ApplicationFormPageSectionDTO extends AbstractDTO<ApplicationFormPa
   @InternalFilterableField private String name;
   @InternalFilterableField private String key;
   private String description;
+  private Integer order;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "applicationFormPage.id")

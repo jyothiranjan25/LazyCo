@@ -4,20 +4,17 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
-import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.envers.Audited;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -90,13 +87,6 @@ public class ApplicationForm extends AbstractRBACModel {
   @Column(name = "source", comment = "Source of the application form")
   @Enumerated(EnumType.STRING)
   private ApplicationFormSourceEnum source;
-
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(
-      name = "custom_fields",
-      columnDefinition = "json",
-      comment = "JSON column to store custom fields for the application form")
-  private Map<String, CustomFieldValueDTO> customFields;
 
   @ManyToOne
   @JoinColumn(

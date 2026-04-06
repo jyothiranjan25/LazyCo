@@ -2,6 +2,7 @@ package com.example.lazyco.entities.CustomField;
 
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractModel;
 import com.example.lazyco.core.Utils.FieldTypeEnum;
+import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomField;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomField;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOption;
 import jakarta.persistence.*;
@@ -43,9 +44,12 @@ public class CustomField extends AbstractModel {
   @Enumerated(EnumType.STRING)
   private FieldTypeEnum fieldType;
 
+  @OneToMany(mappedBy = "customField", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<CustomFieldOption> customFieldOptions;
+
   @OneToMany(mappedBy = "customField")
   private Set<ApplicationFormSectionCustomField> applicationFormSectionCustomFields;
 
-  @OneToMany(mappedBy = "customField", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<CustomFieldOption> customFieldOptions;
+  @OneToMany(mappedBy = "customField")
+  private Set<ApplicationFormCustomField> applicationFormCustomFields;
 }

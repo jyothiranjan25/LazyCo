@@ -43,7 +43,7 @@ INSERT INTO app_user (
 SELECT
     1,
     'admin',
-    '$2a$10$SDeY4VLgoLAP7jyff5fIbeUS1.TBa8j03ezX81J./eZKAAOSiT.L6',
+    '$2a$10$tHCBgeIjb9a.uKsdSVJpkuW3/b8dEglii4n2cF7BI.K5h68WNNIwu',
     'admin@gmail.com',
     'System',
     'Administrator',
