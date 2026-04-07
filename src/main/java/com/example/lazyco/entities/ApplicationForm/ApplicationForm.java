@@ -7,7 +7,6 @@ import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
-import jakarta.persistence.CascadeType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -116,7 +115,7 @@ public class ApplicationForm extends AbstractRBACModel {
   @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCycle startingProgramCycle;
 
-  @OneToOne(mappedBy = "applicationForm", cascade = CascadeType.REMOVE)
+  @OneToOne(mappedBy = "applicationForm")
   private Admission admission;
 
   public String getFullName() {

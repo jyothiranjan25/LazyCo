@@ -70,7 +70,7 @@ public class Admission extends AbstractRBACModel {
       name = "application_form_id",
       foreignKey = @ForeignKey(name = "fk_admission_application_form_id"),
       comment = "reference to the application form associated with this admission")
-  @OnDelete(action = OnDeleteAction.CASCADE)
+  @OnDelete(action = OnDeleteAction.RESTRICT)
   private ApplicationForm applicationForm;
 
   @ManyToOne

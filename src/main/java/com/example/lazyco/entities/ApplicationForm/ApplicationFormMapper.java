@@ -18,6 +18,11 @@ public interface ApplicationFormMapper extends AbstractMapper<ApplicationFormDTO
   @Mapping(target = "studentId", source = "admission.student.id")
   ApplicationFormDTO map(ApplicationForm entity);
 
+  @Override
+  @InheritInverseConfiguration(name = "map")
+  @Mapping(target = "admission", ignore = true)
+  ApplicationForm map(ApplicationFormDTO dto);
+
   default CustomFieldValueDTO mapToCustomFieldValueDTO(Object value) {
     if (value == null) return null;
     if (value instanceof CustomFieldValueDTO) {
