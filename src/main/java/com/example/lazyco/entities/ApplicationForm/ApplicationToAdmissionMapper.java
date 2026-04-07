@@ -13,6 +13,7 @@ public interface ApplicationToAdmissionMapper {
   @Mapping(target = "applicationFormId", source = "id")
   @Mapping(target = "joiningProgramCycleId", source = "startingProgramCycleId")
   @Mapping(target = "currentProgramCycleId", source = "startingProgramCycleId")
+  @Mapping(target = "admissionNumber", source = "applicationNumber")
   AdmissionDTO map(ApplicationFormDTO applicationFormDTO);
 
   @Mapping(target = "id", source = "applicationFormId")

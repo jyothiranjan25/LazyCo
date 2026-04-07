@@ -51,9 +51,9 @@ public class ApplicationFormService
   @Override
   protected void addEntityFilters(CriteriaBuilderWrapper cbw, ApplicationFormDTO filter) {
     if (Boolean.TRUE.equals(filter.getIsEnrolled())) {
-      cbw.isNull("admission");
-    } else if (Boolean.FALSE.equals(filter.getIsEnrolled())) {
       cbw.isNotNull("admission");
+    } else if (Boolean.FALSE.equals(filter.getIsEnrolled())) {
+      cbw.isNull("admission");
     }
   }
 
