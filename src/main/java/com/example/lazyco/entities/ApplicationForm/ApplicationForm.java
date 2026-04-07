@@ -78,7 +78,10 @@ public class ApplicationForm extends AbstractRBACModel {
   @Column(name = "phone_number", nullable = false, comment = "phone number of the applicant")
   private String phoneNumber;
 
-  @Column(name = "application_date", comment = "date when the application was submitted")
+  @Column(
+      name = "application_date",
+      nullable = false,
+      comment = "date when the application was submitted")
   private LocalDateTime applicationDate;
 
   @Column(name = "raw_program_name", comment = "Raw program name as entered by the applicant")

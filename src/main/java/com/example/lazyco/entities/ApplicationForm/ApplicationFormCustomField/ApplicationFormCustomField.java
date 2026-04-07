@@ -29,7 +29,7 @@ import org.hibernate.envers.Audited;
     },
     uniqueConstraints = {
       @UniqueConstraint(
-          name = "uk_application_form_custom_field_application_form_id_custom_field_id",
+          name = "uk_application_form_custom_field_aform_id_cfield_id",
           columnNames = {"application_form_id", "custom_field_id"})
     })
 @EntityListeners(ApplicationFormCustomFieldListener.class)
@@ -39,7 +39,7 @@ public class ApplicationFormCustomField extends AbstractRBACModel {
   @ManyToOne
   @JoinColumn(
       name = "application_form_id",
-      foreignKey = @ForeignKey(name = "fk_application_form_custom_field_application_form_id"),
+      foreignKey = @ForeignKey(name = "fk_application_form_cfield_aform_id"),
       nullable = false,
       comment = "Reference to the application form this custom field belongs to")
   @OnDelete(action = OnDeleteAction.CASCADE)
@@ -48,7 +48,7 @@ public class ApplicationFormCustomField extends AbstractRBACModel {
   @ManyToOne
   @JoinColumn(
       name = "custom_field_id",
-      foreignKey = @ForeignKey(name = "fk_application_form_custom_field_custom_field_id"),
+      foreignKey = @ForeignKey(name = "fk_application_form_cfield_cfield_id"),
       nullable = false,
       comment = "Reference to the custom field definition")
   @OnDelete(action = OnDeleteAction.RESTRICT)
