@@ -113,12 +113,12 @@ public class ApplicationForm extends AbstractRBACModel {
   @OnDelete(action = OnDeleteAction.RESTRICT)
   private ProgramCycle startingProgramCycle;
 
+  @OneToOne(mappedBy = "applicationForm", cascade = CascadeType.REMOVE)
+  private Admission admission;
+
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);
   }
-
-  @OneToOne(mappedBy = "applicationForm", cascade = CascadeType.REMOVE)
-  private Admission admission;
 
   public Boolean getIsEnrolled() {
     return admission != null;

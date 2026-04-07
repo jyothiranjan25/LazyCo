@@ -80,6 +80,10 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> implemen
   private Long admissionId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "admission.admissionNumber")
+  private String admissionNumber;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "admission.student.id")
   private Long studentId;
 

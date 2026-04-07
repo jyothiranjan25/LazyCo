@@ -1,5 +1,6 @@
 package com.example.lazyco.entities.ApplicationForm;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrConditionDTO;
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
@@ -45,6 +46,15 @@ public class ApplicationFormService
     this.applicationToAdmissionMapper = applicationToAdmissionMapper;
     this.studentService = studentService;
     this.applicationFormCustomFieldService = applicationFormCustomFieldService;
+  }
+
+  @Override
+  protected void addEntityFilters(CriteriaBuilderWrapper cbw, ApplicationFormDTO filter) {
+    if (Boolean.TRUE.equals(filter.getIsEnrolled())) {
+      cbw.isNull("admission");
+    } else if (Boolean.FALSE.equals(filter.getIsEnrolled())) {
+      cbw.isNotNull("admission");
+    }
   }
 
   private ApplicationFormDTO mapApplicationFormDTO(Map<String, Object> body) {
@@ -226,79 +236,6 @@ public class ApplicationFormService
     dto.setApplicationFormCustomFields(newCustomFields);
   }
 
-  //  private void validateUpdateCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
-  //
-  //    if (dto.getAdmissionOfferId() == null || dto.getCustomFields() == null) return;
-  //
-  //    List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
-  //        applicationFormSectionCustomFieldService.get(
-  //            new ApplicationFormSectionCustomFieldDTO() {
-  //              {
-  //                setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
-  //              }
-  //            });
-  //
-  //    Map<String, ApplicationFormSectionCustomFieldDTO> configMap =
-  //        afCustomFields.stream()
-  //            .collect(
-  //                Collectors.toMap(
-  //                    ApplicationFormSectionCustomFieldDTO::getCustomFieldKey,
-  // Function.identity()));
-  //
-  //    Map<String, Object> incoming = dto.getCustomFields();
-  //    Map<String, Object> result = new HashMap<>();
-  //
-  //    for (Map.Entry<String, Object> entry : incoming.entrySet()) {
-  //
-  //      String key = entry.getKey();
-  //      Object value = entry.getValue();
-  //
-  //      ApplicationFormSectionCustomFieldDTO config = configMap.get(key);
-  //      if (config == null) continue;
-  //
-  //      CustomFieldValueDTO dtoValue = validateAndBuildField(config, key, value, message);
-  //
-  //      if (dtoValue != null) {
-  //        result.put(config.getCustomFieldId().toString(), dtoValue);
-  //      }
-  //    }
-  //
-  //    dto.setCustomFields(result);
-  //  }
-
-  //  private void validateEnrollCustomFields(ApplicationFormDTO dto, StandardMessageDTO message) {
-  //
-  //    if (dto.getAdmissionOfferId() == null) {
-  //      throw new ApplicationException(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
-  //    }
-  //
-  //    List<ApplicationFormSectionCustomFieldDTO> afCustomFields =
-  //        applicationFormSectionCustomFieldService.get(
-  //            new ApplicationFormSectionCustomFieldDTO() {
-  //              {
-  //                setAdmissionOfferId(List.of(dto.getAdmissionOfferId()));
-  //              }
-  //            });
-  //
-  //    Map<String, CustomFieldValueDTO> incomingValidated =
-  //        dto.getCustomFields().entrySet().stream()
-  //            .collect(
-  //                Collectors.toMap(
-  //                    Map.Entry::getKey, entry -> (CustomFieldValueDTO) entry.getValue()));
-  //
-  //    CustomFieldContainer existingContainer = new CustomFieldContainer(incomingValidated);
-  //    for (ApplicationFormSectionCustomFieldDTO config : afCustomFields) {
-  //      String configIdStr = config.getCustomFieldId().toString();
-  //      CustomFieldValueDTO existingValue = existingContainer.getById(configIdStr);
-  //      if (existingValue == null) {
-  //        String key = config.getCustomFieldKey();
-  //        existingValue = existingContainer.getByKey(key);
-  //      }
-  //      Object value = existingValue != null ? existingValue.getValue() : null;
-  //      validateAndBuildField(config, config.getCustomFieldKey(), value, message);
-  //    }
-  //  }
-
   private CustomFieldValueDTO validateAndBuildField(
       ApplicationFormSectionCustomFieldDTO config,
       String key,
@@ -461,13 +398,6 @@ public class ApplicationFormService
       uniqueApplicationCheck.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
       validateUniqueApplicationForm(uniqueApplicationCheck);
     }
-
-    //    if (request.getCustomFields() != null) {
-    //      request.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
-    //      StandardMessageDTO message = new StandardMessageDTO();
-    //      validateUpdateCustomFields(request, message);
-    //      request.setMessages(message);
-    //    }
   }
 
   @Override
