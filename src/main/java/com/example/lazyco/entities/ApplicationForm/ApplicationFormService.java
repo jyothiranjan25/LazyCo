@@ -3,6 +3,7 @@ package com.example.lazyco.entities.ApplicationForm;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.OrConditionDTO;
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
+import com.example.lazyco.core.AbstractClasses.Service.ServiceOperationTemplate;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.BatchException;
 import com.example.lazyco.core.Exceptions.StandardMessageDTO;
@@ -383,6 +384,14 @@ public class ApplicationFormService
   }
 
   @Override
+  protected void makeUpdates(ApplicationFormDTO source, ApplicationForm target) {
+    if (Boolean.TRUE.equals(source.getIsEnrolled())) {
+      throw new ApplicationException(ApplicationFormMessage.UPDATES_NOT_ALLOWED);
+    }
+    super.makeUpdates(source, target);
+  }
+
+  @Override
   protected void afterMakeUpdates(
       ApplicationFormDTO request, ApplicationForm beforeUpdates, ApplicationForm afterUpdates) {
     // dont change admission offer once set
@@ -409,6 +418,17 @@ public class ApplicationFormService
 
   public ApplicationFormDTO deleteCustomForm(ApplicationFormDTO request) {
     return super.executeDeleteTransactional(request);
+  }
+
+  public ApplicationFormDTO bulkEnrollApplicationForm(ApplicationFormDTO request) {
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
+        new ServiceOperationTemplate<ApplicationFormDTO>(this) {
+          @Override
+          public ApplicationFormDTO execute(ApplicationFormDTO dtoInput) {
+            return enrollApplication(dtoInput);
+          }
+        },
+        request);
   }
 
   public ApplicationFormDTO enrollApplication(ApplicationFormDTO request) {
@@ -439,6 +459,17 @@ public class ApplicationFormService
     AdmissionDTO admissionDTO = applicationToAdmissionMapper.map(applicationForm);
     admissionDTO = admissionService.executeCreateTransactional(admissionDTO);
     return applicationToAdmissionMapper.map(admissionDTO, applicationForm);
+  }
+
+  public ApplicationFormDTO bulkUnenrollApplicationForm(ApplicationFormDTO request) {
+    return ServiceOperationTemplate.executeServiceOperationTemplate(
+        new ServiceOperationTemplate<ApplicationFormDTO>(this) {
+          @Override
+          public ApplicationFormDTO execute(ApplicationFormDTO dtoInput) {
+            return unEnrollApplication(dtoInput);
+          }
+        },
+        request);
   }
 
   public ApplicationFormDTO unEnrollApplication(ApplicationFormDTO request) {

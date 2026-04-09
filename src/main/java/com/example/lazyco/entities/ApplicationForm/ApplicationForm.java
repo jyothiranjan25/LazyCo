@@ -4,11 +4,13 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
+import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomField;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
@@ -117,6 +119,9 @@ public class ApplicationForm extends AbstractRBACModel {
 
   @OneToOne(mappedBy = "applicationForm")
   private Admission admission;
+
+  @OneToMany(mappedBy = "applicationForm")
+  private Set<ApplicationFormCustomField> applicationFormCustomField;
 
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);

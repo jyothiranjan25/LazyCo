@@ -191,6 +191,7 @@ APPLICATION_FORM:
     APPLICATION_FORM_NOT_ENROLLED : "The application form '%1$s' is not enrolled."
     APPLICATION_FORM_HAS_LINKED_DATA : "The application form '%1$s' has linked data and cannot be deleted."
     APPLICATION_FORM_ALREADY_EXISTS : "An application form with phone number '%1$s' or email '%2$s' already exists in current admission offer."
+    UPDATES_NOT_ALLOWED : "Updates to the application form are not allowed once it has been enrolled."
 
 ADMISSION:
     ADMISSION_OFFER_NAME_REQUIRED : "Admission offer name is required."

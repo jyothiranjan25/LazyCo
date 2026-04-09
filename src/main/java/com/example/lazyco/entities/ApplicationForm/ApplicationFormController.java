@@ -39,12 +39,22 @@ public class ApplicationFormController {
     return ResponseUtils.sendResponse(applicationFormService.deleteCustomForm(request));
   }
 
+  @PostMapping("/bulk_enroll")
+  public ResponseEntity<?> bulkEnroll(@RequestBody ApplicationFormDTO request) {
+    return ResponseUtils.sendResponse(applicationFormService.bulkEnrollApplicationForm(request));
+  }
+
   @PostMapping("/enroll")
   public ResponseEntity<?> enroll(@RequestBody ApplicationFormDTO request) {
     return ResponseUtils.sendResponse(applicationFormService.enrollApplication(request));
   }
 
-  @PostMapping("/un_enroll")
+  @PostMapping("/bulk_unenroll")
+  public ResponseEntity<?> bulkUnenroll(@RequestBody ApplicationFormDTO request) {
+    return ResponseUtils.sendResponse(applicationFormService.bulkUnenrollApplicationForm(request));
+  }
+
+  @PostMapping("/unenroll")
   public ResponseEntity<?> unEnroll(@RequestBody ApplicationFormDTO request) {
     return ResponseUtils.sendResponse(applicationFormService.unEnrollApplication(request));
   }
