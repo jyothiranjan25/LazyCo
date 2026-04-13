@@ -46,3 +46,4 @@ logs/*
 
 ### JRebel ###
 rebel.xml
+.worktrees/
