@@ -6,6 +6,7 @@ import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.AbstractClasses.Service.ServiceOperationTemplate;
 import com.example.lazyco.core.Exceptions.ApplicationException;
 import com.example.lazyco.core.Exceptions.BatchException;
+import com.example.lazyco.core.Exceptions.CommonMessage;
 import com.example.lazyco.core.Exceptions.StandardMessageDTO;
 import com.example.lazyco.core.Logger.ApplicationLogger;
 import com.example.lazyco.core.Utils.FieldParse;
@@ -13,6 +14,9 @@ import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.AdmissionDTO;
 import com.example.lazyco.entities.Admission.AdmissionService;
+import com.example.lazyco.entities.ApplicationForm.Applicant.ApplicantDTO;
+import com.example.lazyco.entities.ApplicationForm.Applicant.ApplicantMapper;
+import com.example.lazyco.entities.ApplicationForm.Applicant.ApplicantService;
 import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomFieldDTO;
 import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomFieldService;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomFieldDTO;
@@ -28,6 +32,9 @@ import org.springframework.stereotype.Service;
 public class ApplicationFormService
     extends CommonAbstractService<ApplicationFormDTO, ApplicationForm> {
 
+  private final ApplicationFormMapper applicationFormMapper;
+  private final ApplicantService applicantService;
+  private final ApplicantMapper applicantMapper;
   private final ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService;
   private final AdmissionService admissionService;
   private final ApplicationToAdmissionMapper applicationToAdmissionMapper;
@@ -36,12 +43,17 @@ public class ApplicationFormService
 
   protected ApplicationFormService(
       ApplicationFormMapper applicationFormMapper,
+      ApplicantService applicantService,
+      ApplicantMapper applicantMapper,
       ApplicationFormSectionCustomFieldService applicationFormSectionCustomFieldService,
       AdmissionService admissionService,
       ApplicationToAdmissionMapper applicationToAdmissionMapper,
       StudentService studentService,
       ApplicationFormCustomFieldService applicationFormCustomFieldService) {
     super(applicationFormMapper);
+    this.applicationFormMapper = applicationFormMapper;
+    this.applicantService = applicantService;
+    this.applicantMapper = applicantMapper;
     this.applicationFormSectionCustomFieldService = applicationFormSectionCustomFieldService;
     this.admissionService = admissionService;
     this.applicationToAdmissionMapper = applicationToAdmissionMapper;
@@ -313,20 +325,6 @@ public class ApplicationFormService
   }
 
   @Override
-  protected void postCreate(
-      ApplicationFormDTO request, ApplicationForm createdEntity, ApplicationFormDTO createdDTO) {
-    // create custom fields
-    if (request.getApplicationFormCustomFields() != null
-        && !request.getApplicationFormCustomFields().isEmpty()) {
-      List<ApplicationFormCustomFieldDTO> customFields = request.getApplicationFormCustomFields();
-      for (ApplicationFormCustomFieldDTO customField : customFields) {
-        customField.setApplicationFormId(createdEntity.getId());
-        applicationFormCustomFieldService.executeCreateTransactional(customField);
-      }
-    }
-  }
-
-  @Override
   protected void validateBeforeCreate(ApplicationFormDTO request) {
     if (request.getAdmissionOfferId() == null) {
       throw new ApplicationException(ApplicationFormMessage.ADMISSION_OFFER_REQUIRED);
@@ -348,26 +346,32 @@ public class ApplicationFormService
     if (StringUtils.isEmpty(request.getPhoneNumber())) {
       throw new ApplicationException(ApplicationFormMessage.PHONE_NUMBER_REQUIRED);
     }
-
-    validateUniqueApplicationForm(request);
   }
 
-  private void validateUniqueApplicationForm(ApplicationFormDTO dto) {
-    ApplicationFormDTO filter = new ApplicationFormDTO();
-    if (dto.getId() != null) filter.setId(dto.getId());
-    filter.setOrConditions(
-        Set.of(
-            new OrConditionDTO("email", dto.getEmail()),
-            new OrConditionDTO("phoneNumber", dto.getPhoneNumber())));
-    if (dto.getAdmissionOfferId() != null) {
-      filter.setAdmissionOfferId(dto.getAdmissionOfferId());
-    } else {
-      filter.setAdmissionOfferCode(dto.getAdmissionOfferCode());
-    }
-    if (getCount(filter) > 0) {
-      throw new ApplicationException(
-          ApplicationFormMessage.APPLICATION_FORM_ALREADY_EXISTS,
-          new Object[] {dto.getPhoneNumber(), dto.getEmail()});
+  @Override
+  protected void preCreate(ApplicationFormDTO request, ApplicationForm entityToCreate) {
+    ApplicantDTO applicantDTO = new ApplicantDTO();
+    applicantDTO.setEmail(request.getEmail());
+    applicantDTO.setPhoneNumber(request.getPhoneNumber());
+    applicantDTO = applicantService.createOrGetApplicant(applicantDTO);
+    entityToCreate.setApplicant(applicantMapper.map(applicantDTO));
+
+    // validate unique application form
+    request.setApplicantId(applicantDTO.getId());
+    validateUniqueApplication(request);
+  }
+
+  @Override
+  protected void postCreate(
+      ApplicationFormDTO request, ApplicationForm createdEntity, ApplicationFormDTO createdDTO) {
+    // create custom fields
+    if (request.getApplicationFormCustomFields() != null
+        && !request.getApplicationFormCustomFields().isEmpty()) {
+      List<ApplicationFormCustomFieldDTO> customFields = request.getApplicationFormCustomFields();
+      for (ApplicationFormCustomFieldDTO customField : customFields) {
+        customField.setApplicationFormId(createdEntity.getId());
+        applicationFormCustomFieldService.executeCreateTransactional(customField);
+      }
     }
   }
 
@@ -394,18 +398,30 @@ public class ApplicationFormService
   @Override
   protected void afterMakeUpdates(
       ApplicationFormDTO request, ApplicationForm beforeUpdates, ApplicationForm afterUpdates) {
-    // dont change admission offer once set
+    // don't change admission offer once set
     afterUpdates.setAdmissionOffer(beforeUpdates.getAdmissionOffer());
-
-    // validate unique application number for an admission offer
     if (!StringUtils.isEmpty(request.getEmail())
         || !StringUtils.isEmpty(request.getPhoneNumber())) {
-      ApplicationFormDTO uniqueApplicationCheck = new ApplicationFormDTO();
-      uniqueApplicationCheck.setId(afterUpdates.getId());
-      uniqueApplicationCheck.setEmail(request.getEmail());
-      uniqueApplicationCheck.setPhoneNumber(request.getPhoneNumber());
-      uniqueApplicationCheck.setAdmissionOfferId(afterUpdates.getAdmissionOffer().getId());
-      validateUniqueApplicationForm(uniqueApplicationCheck);
+      ApplicantDTO applicantDTO = new ApplicantDTO();
+      applicantDTO.setEmail(request.getEmail());
+      applicantDTO.setPhoneNumber(request.getPhoneNumber());
+      applicantDTO = applicantService.createOrGetApplicant(applicantDTO);
+      afterUpdates.setApplicant(applicantMapper.map(applicantDTO));
+      // validate unique application form with new applicant info
+      validateUniqueApplication(applicationFormMapper.map(afterUpdates));
+    }
+  }
+
+  @Override
+  protected void postUpdate(
+      ApplicationFormDTO request,
+      ApplicationFormDTO entityBeforeUpdate,
+      ApplicationForm updatedEntity,
+      ApplicationFormDTO updatedDTO) {
+    if (!entityBeforeUpdate.getApplicantId().equals(updatedDTO.getApplicantId())) {
+      ApplicantDTO applicantDTO = new ApplicantDTO();
+      applicantDTO.setId(entityBeforeUpdate.getApplicantId());
+      applicantService.deleteApplicant(applicantDTO);
     }
   }
 
@@ -414,6 +430,50 @@ public class ApplicationFormService
       ApplicationFormDTO request, ApplicationFormDTO updatedDTO) {
     updatedDTO.setMessages(request.getMessages());
     return updatedDTO;
+  }
+
+  // validate unique application number for an admission offer
+  private void validateUniqueApplication(ApplicationFormDTO dto) {
+    if (dto == null
+        || StringUtils.isEmpty(dto.getEmail())
+        || StringUtils.isEmpty(dto.getPhoneNumber())) {
+      throw new ApplicationException(
+          CommonMessage.CUSTOM_MESSAGE, new Object[] {"email and phone number required"});
+    }
+    ApplicationFormDTO uniqueApplicationCheck = new ApplicationFormDTO();
+    uniqueApplicationCheck.setApplicantId(dto.getApplicantId());
+    uniqueApplicationCheck.setEmail(dto.getEmail());
+    uniqueApplicationCheck.setPhoneNumber(dto.getPhoneNumber());
+    uniqueApplicationCheck.setAdmissionOfferId(dto.getAdmissionOfferId());
+    uniqueApplicationCheck.setAdmissionOfferCode(dto.getAdmissionOfferCode());
+    if (dto.getId() != null) uniqueApplicationCheck.setId(dto.getId());
+    validateUniqueApplicationForm(uniqueApplicationCheck);
+  }
+
+  private void validateUniqueApplicationForm(ApplicationFormDTO dto) {
+    ApplicationFormDTO filter = new ApplicationFormDTO();
+    if (dto.getId() != null) filter.setIdsNotIn(List.of(dto.getId()));
+    if (dto.getAdmissionOfferId() != null) {
+      filter.setAdmissionOfferId(dto.getAdmissionOfferId());
+    } else {
+      filter.setAdmissionOfferCode(dto.getAdmissionOfferCode());
+    }
+    if (dto.getApplicantId() == null) {
+      ApplicantDTO applicantDTO = new ApplicantDTO();
+      applicantDTO.setOrConditions(
+          Set.of(
+              new OrConditionDTO("email", dto.getEmail()),
+              new OrConditionDTO("phoneNumber", dto.getPhoneNumber())));
+      applicantDTO = applicantService.getSingle(applicantDTO);
+      if (applicantDTO == null) return;
+      dto.setApplicantId(applicantDTO.getId());
+    }
+    filter.setApplicantId(dto.getApplicantId());
+    if (getCount(filter) > 0) {
+      throw new ApplicationException(
+          ApplicationFormMessage.APPLICATION_FORM_ALREADY_EXISTS,
+          new Object[] {dto.getPhoneNumber(), dto.getEmail()});
+    }
   }
 
   public ApplicationFormDTO deleteCustomForm(ApplicationFormDTO request) {

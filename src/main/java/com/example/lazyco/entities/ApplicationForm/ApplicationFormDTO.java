@@ -33,9 +33,17 @@ public class ApplicationFormDTO extends AbstractDTO<ApplicationFormDTO> implemen
 
   @InternalFilterableField private LocalDate dateOfBirth;
 
-  @InternalFilterableField private String email;
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "applicant.id")
+  private Long applicantId;
 
-  @InternalFilterableField private String phoneNumber;
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "applicant.email")
+  private String email;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "applicant.phoneNumber")
+  private String phoneNumber;
 
   @InternalFilterableField private LocalDateTime applicationDate;
 

@@ -9,8 +9,12 @@ public interface AdmissionMapper extends AbstractMapper<AdmissionDTO, Admission>
 
   @Mapping(target = "applicationFormId", source = "applicationForm.id")
   @Mapping(target = "programCurriculumId", source = "programCurriculum.id")
+  @Mapping(target = "programCurriculumCode", source = "programCurriculum.code")
+  @Mapping(target = "programCurriculumName", source = "programCurriculum.name")
   @Mapping(target = "joiningProgramCycleId", source = "joiningProgramCycle.id")
+  @Mapping(target = "joiningProgramCycleCode", source = "joiningProgramCycle.code")
   @Mapping(target = "currentProgramCycleId", source = "currentProgramCycle.id")
+  @Mapping(target = "currentProgramCycleCode", source = "currentProgramCycle.code")
   @Mapping(target = "studentId", source = "student.id")
   @Mapping(target = "firstName", source = "student.firstName")
   @Mapping(target = "middleName", source = "student.middleName")

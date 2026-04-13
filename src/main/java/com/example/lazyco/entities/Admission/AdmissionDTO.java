@@ -8,7 +8,6 @@ import com.example.lazyco.core.AbstractClasses.DTO.HasCode;
 import com.example.lazyco.core.Utils.GenderEnum;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,12 +31,28 @@ public class AdmissionDTO extends AbstractDTO<AdmissionDTO> implements HasCode {
   private Long programCurriculumId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programCurriculum.code")
+  private String programCurriculumCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "programCurriculum.name")
+  private String programCurriculumName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "joiningProgramCycle.id")
   private Long joiningProgramCycleId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "joiningProgramCycle.code")
+  private String joiningProgramCycleCode;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "currentProgramCycle.id")
   private Long currentProgramCycleId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "currentProgramCycle.code")
+  private String currentProgramCycleCode;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "student.id")
@@ -72,8 +87,6 @@ public class AdmissionDTO extends AbstractDTO<AdmissionDTO> implements HasCode {
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "student.phoneNumber")
   private String phoneNumber;
-
-  private Map<String, Object> customFields;
 
   @Override
   public String getCode() {

@@ -4,6 +4,7 @@ import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
+import com.example.lazyco.entities.ApplicationForm.Applicant.Applicant;
 import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomField;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
@@ -28,8 +29,6 @@ import org.hibernate.envers.Audited;
     comment = "Table storing application form details",
     indexes = {
       @Index(name = "idx_application_form_application_number", columnList = "application_number"),
-      @Index(name = "idx_application_form_email", columnList = "email"),
-      @Index(name = "idx_application_form_phone_number", columnList = "phone_number"),
       @Index(name = "idx_application_form_source", columnList = "source"),
       @Index(name = "idx_application_form_admission_offer_id", columnList = "admission_offer_id"),
       @Index(
@@ -44,15 +43,20 @@ import org.hibernate.envers.Audited;
           name = "uk_application_form_application_number",
           columnNames = "application_number"),
       @UniqueConstraint(
-          name = "uk_application_form_aoffer_id_email",
-          columnNames = {"admission_offer_id", "email"}),
-      @UniqueConstraint(
-          name = "uk_application_form_aoffer_id_phone",
-          columnNames = {"admission_offer_id", "phone_number"})
+          name = "uk_application_form_applicant_admission_offer",
+          columnNames = {"applicant_id", "admission_offer_id"})
     })
 @EntityListeners(ApplicationFormListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ApplicationForm extends AbstractRBACModel {
+
+  @ManyToOne
+  @JoinColumn(
+      name = "applicant_id",
+      foreignKey = @ForeignKey(name = "fk_application_form_applicant"),
+      nullable = false)
+  @OnDelete(action = OnDeleteAction.RESTRICT)
+  private Applicant applicant;
 
   @Column(name = "application_number", nullable = false, comment = "Unique application number")
   private String applicationNumber;
@@ -72,12 +76,6 @@ public class ApplicationForm extends AbstractRBACModel {
 
   @Column(name = "date_of_birth", comment = "date of birth of the applicant")
   private LocalDate dateOfBirth;
-
-  @Column(name = "email", nullable = false, comment = "email address of the applicant")
-  private String email;
-
-  @Column(name = "phone_number", nullable = false, comment = "phone number of the applicant")
-  private String phoneNumber;
 
   @Column(
       name = "application_date",

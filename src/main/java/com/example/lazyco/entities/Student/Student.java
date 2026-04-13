@@ -5,14 +5,12 @@ import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.envers.Audited;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -54,13 +52,6 @@ public class Student extends AbstractRBACModel {
 
   @Column(name = "phone_number", nullable = false, comment = "phone number of the student")
   private String phoneNumber;
-
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(
-      name = "custom_fields",
-      columnDefinition = "json",
-      comment = "JSON column to store custom fields for the application form")
-  private Map<String, Object> customFields;
 
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);
