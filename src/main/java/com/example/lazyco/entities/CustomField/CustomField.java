@@ -5,6 +5,8 @@ import com.example.lazyco.core.Utils.FieldTypeEnum;
 import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomField;
 import com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField.ApplicationFormSectionCustomField;
 import com.example.lazyco.entities.CustomField.CustomFieldOption.CustomFieldOption;
+import com.example.lazyco.entities.Student.StudentCustomField.StudentCustomField;
+import com.example.lazyco.entities.StudentFormStructure.StudentFormSectionCustomField.StudentFormSectionCustomField;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.Getter;
@@ -52,4 +54,10 @@ public class CustomField extends AbstractModel {
 
   @OneToMany(mappedBy = "customField")
   private Set<ApplicationFormCustomField> applicationFormCustomFields;
+
+  @OneToMany(mappedBy = "customField")
+  private Set<StudentFormSectionCustomField> studentFormSectionCustomFields;
+
+  @OneToMany(mappedBy = "customField")
+  private Set<StudentCustomField> studentCustomFields;
 }

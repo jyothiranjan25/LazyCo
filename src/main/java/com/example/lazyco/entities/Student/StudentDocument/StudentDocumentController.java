@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/application_form_document")
+@RequestMapping("/student_document")
 public class StudentDocumentController extends AbstractController<StudentDocumentDTO> {
   public StudentDocumentController(IAbstractService<StudentDocumentDTO, ?> abstractService) {
     super(abstractService);

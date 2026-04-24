@@ -18,7 +18,7 @@ import org.hibernate.envers.Audited;
 @DynamicInsert
 @Table(
     name = "student_document",
-    comment = "Table representing documents associated with student",
+    comment = "Table representing documents associated with students",
     indexes = {
       @Index(name = "idx_student_document_student_id", columnList = "student_id"),
       @Index(
@@ -27,7 +27,7 @@ import org.hibernate.envers.Audited;
     },
     uniqueConstraints = {
       @UniqueConstraint(
-          name = "uk_afd_template_document_id_student_form_id",
+          name = "uk_student_document_student_form_document_id_student_id",
           columnNames = {"student_form_document_id", "student_id"})
     })
 @EntityListeners(StudentDocumentListener.class)
@@ -52,9 +52,9 @@ public class StudentDocument extends AbstractRBACModel {
   @ManyToOne
   @JoinColumn(
       name = "student_form_document_id",
-      foreignKey = @ForeignKey(name = "fk_student_form_document_template_document_id"),
+      foreignKey = @ForeignKey(name = "fk_student_document_student_form_document_id"),
       nullable = false,
-      comment = "Reference to the student form template document this document is based on")
+      comment = "Reference to the student form document this document is based on")
   @OnDelete(action = OnDeleteAction.RESTRICT)
   private StudentFormDocument studentFormDocument;
 }

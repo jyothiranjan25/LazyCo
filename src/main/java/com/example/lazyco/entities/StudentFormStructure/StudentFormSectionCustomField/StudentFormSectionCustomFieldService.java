@@ -18,7 +18,6 @@ public class StudentFormSectionCustomFieldService
       StudentFormSectionCustomFieldDTO request, StudentFormSectionCustomField entityToCreate) {
 
     StudentFormSectionCustomFieldDTO filter = new StudentFormSectionCustomFieldDTO();
-    filter.setApplicationFormTemplateId(request.getApplicationFormTemplateId());
     filter.setCustomFieldId(request.getCustomFieldId());
     if (getCount(filter) > 0) {
       throw new ApplicationException(

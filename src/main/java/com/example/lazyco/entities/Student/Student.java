@@ -3,6 +3,8 @@ package com.example.lazyco.entities.Student;
 import com.example.lazyco.core.AbstractClasses.Entity.AbstractRBACModel;
 import com.example.lazyco.core.Utils.GenderEnum;
 import com.example.lazyco.entities.Admission.Admission;
+import com.example.lazyco.entities.Student.StudentCustomField.StudentCustomField;
+import com.example.lazyco.entities.Student.StudentDocument.StudentDocument;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Set;
@@ -59,4 +61,10 @@ public class Student extends AbstractRBACModel {
 
   @OneToMany(mappedBy = "student")
   private Set<Admission> admissions;
+
+  @OneToMany(mappedBy = "student")
+  private Set<StudentDocument> studentDocuments;
+
+  @OneToMany(mappedBy = "student")
+  private Set<StudentCustomField> studentCustomFields;
 }

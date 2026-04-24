@@ -16,11 +16,10 @@ public class StudentFormDocumentService
   protected void validateBeforeCreate(StudentFormDocumentDTO request) {
     StudentFormDocumentDTO filter = new StudentFormDocumentDTO();
     filter.setDocumentId(request.getDocumentId());
-    filter.setApplicationFormTemplateId(request.getApplicationFormTemplateId());
     if (getCount(filter) > 0) {
       throw new ApplicationException(
           CommonMessage.CUSTOM_MESSAGE,
-          new String[] {"Document already exists for this student form template"});
+          new String[] {"Document already exists for this student template"});
     }
   }
 }

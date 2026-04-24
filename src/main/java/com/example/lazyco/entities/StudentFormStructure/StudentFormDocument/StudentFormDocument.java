@@ -17,7 +17,7 @@ import org.hibernate.envers.Audited;
 @DynamicInsert
 @Table(
     name = "student_form_document",
-    comment = "Table storing documents associated with student form templates",
+    comment = "Table storing documents associated with student forms",
     indexes = {@Index(name = "idx_student_form_document_document_id", columnList = "document_id")})
 @EntityListeners(StudentFormDocumentListener.class)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -26,7 +26,7 @@ public class StudentFormDocument extends AbstractRBACModel {
   @Column(
       name = "display_order",
       columnDefinition = "integer default 0",
-      comment = "Order of the document within the student form template")
+      comment = "Order of the document within the student form")
   private Integer order;
 
   @ManyToOne

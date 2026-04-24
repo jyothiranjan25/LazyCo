@@ -18,14 +18,14 @@ import org.hibernate.envers.Audited;
 @DynamicInsert
 @Table(
     name = "student_custom_field",
-    comment = "Table storing custom fields for student",
+    comment = "Table storing custom fields for students",
     indexes = {
-      @Index(name = "idx_student_form_custom_field_student_form_id", columnList = "student_id"),
-      @Index(name = "idx_student_form_custom_field_custom_field_id", columnList = "custom_field_id")
+      @Index(name = "idx_student_custom_field_student_id", columnList = "student_id"),
+      @Index(name = "idx_student_custom_field_custom_field_id", columnList = "custom_field_id")
     },
     uniqueConstraints = {
       @UniqueConstraint(
-          name = "uk_student_form_custom_field_aform_id_cfield_id",
+          name = "uk_student_custom_field_student_id_custom_field_id",
           columnNames = {"student_id", "custom_field_id"})
     })
 @EntityListeners(StudentCustomFieldListener.class)
@@ -35,16 +35,16 @@ public class StudentCustomField extends AbstractRBACModel {
   @ManyToOne
   @JoinColumn(
       name = "student_id",
-      foreignKey = @ForeignKey(name = "fk_student_form_cfield_aform_id"),
+      foreignKey = @ForeignKey(name = "fk_student_custom_field_student_id"),
       nullable = false,
-      comment = "Reference to the student form this custom field belongs to")
+      comment = "Reference to the student this custom field belongs to")
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Student student;
 
   @ManyToOne
   @JoinColumn(
       name = "custom_field_id",
-      foreignKey = @ForeignKey(name = "fk_student_form_cfield_cfield_id"),
+      foreignKey = @ForeignKey(name = "fk_student_custom_field_custom_field_id"),
       nullable = false,
       comment = "Reference to the custom field definition")
   @OnDelete(action = OnDeleteAction.RESTRICT)

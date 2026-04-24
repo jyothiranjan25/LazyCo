@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 public interface StudentFormDocumentMapper
     extends AbstractMapper<StudentFormDocumentDTO, StudentFormDocument> {
 
-  @Mapping(target = "applicationFormTemplateId", source = "applicationFormTemplate.id")
   @Mapping(target = "documentId", source = "document.id")
   @Mapping(target = "documentName", source = "document.name")
   @Mapping(target = "documentKey", source = "document.key")

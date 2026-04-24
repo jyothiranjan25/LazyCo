@@ -39,6 +39,4 @@ public class StudentFormSectionCustomFieldDTO
   private FieldTypeEnum customFieldFieldType;
 
   private List<CustomFieldOptionDTO> customFieldOptions;
-
-  private String customFieldValue;
 }

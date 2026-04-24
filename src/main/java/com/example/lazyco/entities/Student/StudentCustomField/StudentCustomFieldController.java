@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/application_form_custom_field")
+@RequestMapping("/student_custom_field")
 public class StudentCustomFieldController extends AbstractController<StudentCustomFieldDTO> {
   public StudentCustomFieldController(IAbstractService<StudentCustomFieldDTO, ?> abstractService) {
     super(abstractService);
