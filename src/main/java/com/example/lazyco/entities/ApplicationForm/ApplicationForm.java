@@ -6,6 +6,7 @@ import com.example.lazyco.entities.Admission.Admission;
 import com.example.lazyco.entities.AdmissionOffer.AdmissionOffer;
 import com.example.lazyco.entities.ApplicationForm.Applicant.Applicant;
 import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomField;
+import com.example.lazyco.entities.ApplicationForm.ApplicationFormDocument.ApplicationFormDocument;
 import com.example.lazyco.entities.ProgramCurriculum.ProgramCurriculum;
 import com.example.lazyco.entities.ProgramCycle.ProgramCycle;
 import jakarta.persistence.*;
@@ -119,7 +120,10 @@ public class ApplicationForm extends AbstractRBACModel {
   private Admission admission;
 
   @OneToMany(mappedBy = "applicationForm")
-  private Set<ApplicationFormCustomField> applicationFormCustomField;
+  private Set<ApplicationFormCustomField> applicationFormCustomFields;
+
+  @OneToMany(mappedBy = "applicationForm")
+  private Set<ApplicationFormDocument> applicationFormDocuments;
 
   public String getFullName() {
     return mergeObject(firstName, middleName, lastName);

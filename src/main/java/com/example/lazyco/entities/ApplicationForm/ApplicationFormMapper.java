@@ -1,10 +1,12 @@
 package com.example.lazyco.entities.ApplicationForm;
 
 import com.example.lazyco.core.AbstractClasses.Mapper.AbstractMapper;
-import com.example.lazyco.entities.CustomField.CustomFieldMap.CustomFieldValueDTO;
+import com.example.lazyco.entities.ApplicationForm.ApplicationFormCustomField.ApplicationFormCustomFieldMapper;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = {ApplicationFormCustomFieldMapper.class})
 public interface ApplicationFormMapper extends AbstractMapper<ApplicationFormDTO, ApplicationForm> {
 
   @Mapping(target = "admissionOfferId", source = "admissionOffer.id")
@@ -20,12 +22,4 @@ public interface ApplicationFormMapper extends AbstractMapper<ApplicationFormDTO
   @Mapping(target = "email", source = "applicant.email")
   @Mapping(target = "phoneNumber", source = "applicant.phoneNumber")
   ApplicationFormDTO map(ApplicationForm entity);
-
-  default CustomFieldValueDTO mapToCustomFieldValueDTO(Object value) {
-    if (value == null) return null;
-    if (value instanceof CustomFieldValueDTO) {
-      return (CustomFieldValueDTO) value;
-    }
-    return null;
-  }
 }
