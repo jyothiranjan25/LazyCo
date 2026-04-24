@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 public interface StudentCustomFieldMapper
     extends AbstractMapper<StudentCustomFieldDTO, StudentCustomField> {
 
-  @Mapping(target = "applicationFormId", source = "applicationForm.id")
+  @Mapping(target = "studentId", source = "student.id")
   @Mapping(target = "customFieldId", source = "customField.id")
   StudentCustomFieldDTO map(StudentCustomField entity);
 
