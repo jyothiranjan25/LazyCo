@@ -1,4 +1,4 @@
-package com.example.lazyco.entities.ApplicationFormStructure.ApplicationFormSectionCustomField;
+package com.example.lazyco.entities.StudentFormStructure.StudentFormSectionCustomField;
 
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.FieldPath;
 import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.FieldFiltering.InternalFilterableField;
@@ -12,29 +12,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@FilteredEntity(type = ApplicationFormSectionCustomField.class)
-public class ApplicationFormSectionCustomFieldDTO
-    extends AbstractDTO<ApplicationFormSectionCustomFieldDTO> {
-
-  @InternalFilterableField private Boolean isRequired;
+@FilteredEntity(type = StudentFormSectionCustomField.class)
+public class StudentFormSectionCustomFieldDTO
+    extends AbstractDTO<StudentFormSectionCustomFieldDTO> {
 
   private Integer order;
 
   @InternalFilterableField
-  @FieldPath(
-      fullyQualifiedPath =
-          "applicationFormPageSection.applicationFormPage.applicationFormTemplate.id")
-  private Long applicationFormTemplateId;
-
-  @InternalFilterableField
-  @FieldPath(
-      fullyQualifiedPath =
-          "applicationFormPageSection.applicationFormPage.applicationFormTemplate.admissionOffers.id")
-  private List<Long> admissionOfferId;
-
-  @InternalFilterableField
-  @FieldPath(fullyQualifiedPath = "applicationFormPageSection.id")
-  private Long applicationFormPageSectionId;
+  @FieldPath(fullyQualifiedPath = "studentFormPageSection.id")
+  private Long studentFormPageSectionId;
 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "customField.id")
@@ -53,4 +39,6 @@ public class ApplicationFormSectionCustomFieldDTO
   private FieldTypeEnum customFieldFieldType;
 
   private List<CustomFieldOptionDTO> customFieldOptions;
+
+  private String customFieldValue;
 }
