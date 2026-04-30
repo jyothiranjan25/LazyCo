@@ -20,6 +20,10 @@ public class SyllabusOfferedCourseDTO extends AbstractDTO<SyllabusOfferedCourseD
   @FieldPath(fullyQualifiedPath = "courseClassType.id")
   private Long courseClassTypeId;
 
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseClassType.classType.name")
+  private String courseClassTypeName;
+
   @InternalFilterableField private Double credit;
 
   @InternalFilterableField private Boolean isMandatory;

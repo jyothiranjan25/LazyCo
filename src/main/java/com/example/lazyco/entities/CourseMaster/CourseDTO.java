@@ -39,4 +39,6 @@ public class CourseDTO extends AbstractDTO<CourseDTO> implements HasCodeAndName 
   @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "institution.name")
   private String institutionName;
+
+  private Long excludeCourseId;
 }

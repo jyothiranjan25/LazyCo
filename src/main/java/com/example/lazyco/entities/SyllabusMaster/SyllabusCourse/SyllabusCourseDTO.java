@@ -21,6 +21,26 @@ public class SyllabusCourseDTO extends AbstractDTO<SyllabusCourseDTO> {
   private Long courseCategoryId;
 
   @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseCategory.name")
+  private String courseCategoryName;
+
+  @InternalFilterableField
   @FieldPath(fullyQualifiedPath = "courseCredit.id")
   private Long courseCreditId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseCredit.credit")
+  private Double courseCredit;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseCredit.course.id")
+  private Long courseId;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseCredit.course.code")
+  private String courseCode;
+
+  @InternalFilterableField
+  @FieldPath(fullyQualifiedPath = "courseCredit.course.name")
+  private String courseName;
 }

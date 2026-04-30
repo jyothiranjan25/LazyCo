@@ -10,5 +10,6 @@ public interface SyllabusOfferedCourseMapper
 
   @Mapping(target = "syllabusCourseId", source = "syllabusCourse.id")
   @Mapping(target = "courseClassTypeId", source = "courseClassType.id")
+  @Mapping(target = "courseClassTypeName", source = "courseClassType.classType.name")
   SyllabusOfferedCourseDTO map(SyllabusOfferedCourse entity);
 }

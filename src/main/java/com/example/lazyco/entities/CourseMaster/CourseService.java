@@ -1,7 +1,9 @@
 package com.example.lazyco.entities.CourseMaster;
 
+import com.example.lazyco.core.AbstractClasses.CriteriaBuilder.CriteriaBuilderWrapper;
 import com.example.lazyco.core.AbstractClasses.Service.CommonAbstractService;
 import com.example.lazyco.core.Exceptions.ApplicationException;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,13 @@ import org.springframework.stereotype.Service;
 public class CourseService extends CommonAbstractService<CourseDTO, Course> {
   protected CourseService(CourseMapper courseMapper) {
     super(courseMapper);
+  }
+
+  @Override
+  protected void addEntityFilters(CriteriaBuilderWrapper cbw, CourseDTO filter) {
+    if (filter.getExcludeCourseId() != null) {
+      filter.setIdsNotIn(List.of(filter.getExcludeCourseId()));
+    }
   }
 
   @Override
